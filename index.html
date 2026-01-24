@@ -35,9 +35,15 @@
                 <div class="bg-white p-6 rounded-3xl shadow-xl border-b-8 border-green-500">
                     <h2 class="font-black mb-4 uppercase text-lg text-green-700">Lançar Validade</h2>
                     <div class="space-y-4">
-                        <div>
-                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Código de Barras (Obrigatório)</label>
-                            <input type="number" id="prod-ean" placeholder="DIGITE OS 13 NÚMEROS" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold outline-none focus:border-green-500 border-orange-200">
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="col-span-2">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Cód. Barras</label>
+                                <input type="number" id="prod-ean" placeholder="13 DÍGITOS" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold outline-none focus:border-green-500 border-orange-200">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Qtd</label>
+                                <input type="number" id="prod-qtd" placeholder="0" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold outline-none focus:border-green-500 border-blue-200">
+                            </div>
                         </div>
 
                         <div>
@@ -72,14 +78,14 @@
                         <p id="count-critico" class="text-3xl">0</p>
                     </div>
                     <div class="bg-white p-4 rounded-3xl border-2 border-blue-100 text-blue-600 shadow-sm">
-                        <p class="text-[10px] uppercase">Total Geral</p>
+                        <p class="text-[10px] uppercase">Total Itens</p>
                         <p id="count-total" class="text-3xl">0</p>
                     </div>
                 </div>
 
                 <div class="sticky top-[72px] bg-slate-100 pt-2 pb-4 z-40 space-y-2">
                     <input type="text" id="input-busca" onkeyup="filtrarProdutos()" placeholder="🔍 Buscar por nome ou código..." class="w-full p-4 border-none rounded-2xl bg-white shadow-md font-bold outline-none">
-                    <button id="btn-whatsapp" class="w-full bg-emerald-500 text-white font-black py-4 rounded-2xl text-xs uppercase shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all">
+                    <button id="btn-whatsapp" class="w-full bg-emerald-500 text-white font-black py-4 rounded-2xl text-[10px] uppercase shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all">
                         Enviar Relatório WhatsApp 📊
                     </button>
                 </div>
@@ -108,12 +114,9 @@
         const db = getFirestore(app);
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
 
-        // LOGIN
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            try { await signInWithEmailAndPassword(auth, email, pass); } 
+            try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
             catch (err) { alert("Credenciais incorretas!"); }
         };
 
@@ -124,7 +127,6 @@
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-panel').classList.remove('hidden');
                 document.getElementById('user-display').innerText = user.email.split('@')[0].toUpperCase();
-                
                 if (gerentes.includes(user.email)) {
                     document.getElementById('gerente-view').classList.remove('hidden');
                     document.getElementById('repositor-view').classList.add('hidden');
@@ -139,30 +141,28 @@
             }
         });
 
-        // SALVAR COM VALIDAÇÃO OBRIGATÓRIA
         document.getElementById('btn-salvar').onclick = async () => {
             const ean = document.getElementById('prod-ean').value;
+            const qtd = document.getElementById('prod-qtd').value;
             const nome = document.getElementById('prod-nome').value;
             const setor = document.getElementById('prod-setor').value;
             const data = document.getElementById('prod-data').value;
 
-            // VALIDAÇÃO: Código, Nome e Data são agora todos obrigatórios
-            if(!ean) return alert("ERRO: O Código de Barras é obrigatório!");
-            if(!nome) return alert("ERRO: O Nome do Produto é obrigatório!");
-            if(!data) return alert("ERRO: A Data de Vencimento é obrigatória!");
+            if(!ean || !qtd || !nome || !data) return alert("ERRO: Todos os campos são obrigatórios!");
 
             try {
                 await addDoc(collection(db, "validades"), {
                     produto: nome, 
                     codigo: ean, 
+                    quantidade: qtd,
                     setor: setor, 
                     vencimento: data, 
                     criadoEm: new Date()
                 });
                 alert("✅ Registrado com sucesso!");
-                // Limpa campos
                 document.getElementById('prod-nome').value = "";
                 document.getElementById('prod-ean').value = "";
+                document.getElementById('prod-qtd').value = "";
                 document.getElementById('prod-data').value = "";
             } catch (e) { alert("Erro ao salvar."); }
         };
@@ -178,18 +178,21 @@
                     const diff = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
                     if(diff <= 3) criticos++;
                     const card = document.createElement('div');
-                    card.className = `flex flex-col p-4 rounded-2xl bg-white shadow-sm border-l-8 ${diff <= 3 ? 'border-red-500 card-vencido' : 'border-blue-500'}`;
+                    card.className = `flex flex-col p-4 rounded-2xl bg-white shadow-sm border-l-8 ${diff <= 3 ? 'border-red-500' : 'border-blue-500'}`;
                     card.innerHTML = `
                         <div class="flex justify-between items-start mb-1">
                             <span class="text-[8px] font-black bg-slate-100 px-2 py-0.5 rounded uppercase text-slate-500">${item.setor}</span>
                             <span class="text-[11px] font-black ${diff <= 3 ? 'text-red-600' : 'text-slate-400'} uppercase">${diff} dias</span>
                         </div>
-                        <h3 class="font-black text-slate-800 uppercase text-sm mb-1">${item.produto}</h3>
+                        <div class="flex justify-between items-end mb-2">
+                            <h3 class="font-black text-slate-800 uppercase text-sm flex-1 mr-2">${item.produto}</h3>
+                            <span class="bg-blue-600 text-white text-[10px] px-2 py-1 rounded-lg font-black">QTD: ${item.quantidade}</span>
+                        </div>
                         <div class="bg-slate-50 p-2 rounded-lg border border-slate-100 mb-2 text-center">
                             <p class="text-[13px] font-mono font-bold text-blue-600 tracking-wider">${item.codigo}</p>
                         </div>
                         <div class="flex justify-between items-center">
-                            <p class="text-[11px] font-bold text-slate-400 uppercase">Vence: ${item.vencimento.split('-').reverse().join('/')}</p>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase italic">Vence: ${item.vencimento.split('-').reverse().join('/')}</p>
                             <button onclick="window.darBaixaItem('${d.id}')" class="bg-slate-900 text-white text-[9px] px-4 py-1.5 rounded-lg font-black uppercase shadow-md">Baixa</button>
                         </div>`;
                     lista.appendChild(card);
@@ -215,7 +218,18 @@
             let cont = 0;
             document.querySelectorAll('#lista-vencimento > div').forEach(c => {
                 if(c.style.display !== "none") {
-                    msg += "📌 " + c.innerText.replace("Baixa", "").trim().split('\n').join(' | ') + "\n\n";
+                    // Extraímos as informações de forma limpa para o zap
+                    const setor = c.querySelector('span:nth-child(1)').innerText;
+                    const dias = c.querySelector('span:nth-child(2)').innerText;
+                    const produto = c.querySelector('h3').innerText;
+                    const qtd = c.querySelector('.bg-blue-600').innerText;
+                    const cod = c.querySelector('p').innerText;
+                    const venc = c.querySelector('p:last-of-type').innerText;
+
+                    msg += `📦 *${produto}*\n`;
+                    msg += `🔹 ${qtd} | ${setor}\n`;
+                    msg += `⚠️ ${dias} (${venc})\n`;
+                    msg += `🔢 ${cod}\n\n`;
                     cont++;
                 }
             });
