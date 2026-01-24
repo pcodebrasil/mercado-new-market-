@@ -14,35 +14,34 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
 
-const gerentesEmails = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
-
-// --- AUTENTICAÇÃO ---
-
-document.getElementById('login-form').onsubmit = async (e) => {
+// LOGIN
+document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
+    const pass = document.getElementById('password').value;
     try {
-        await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-        alert("Erro no login: Verifique seu e-mail e senha.");
+        await signInWithEmailAndPassword(auth, email, pass);
+    } catch (err) {
+        alert("E-mail ou senha incorretos.");
     }
-};
+});
 
+// LOGOUT
 document.getElementById('btn-logout').onclick = () => signOut(auth);
 
+// ESTADO DO UTILIZADOR
 onAuthStateChanged(auth, (user) => {
     if (user) {
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('main-panel').classList.remove('hidden');
-        document.getElementById('user-display').innerText = user.email.split('@')[0];
-
-        if (gerentesEmails.includes(user.email)) {
+        document.getElementById('user-display').innerText = user.email.split('@')[0].toUpperCase();
+        
+        if (gerentes.includes(user.email)) {
             document.getElementById('gerente-view').classList.remove('hidden');
             document.getElementById('repositor-view').classList.add('hidden');
-            carregarMonitor();
+            carregarDados();
         } else {
             document.getElementById('repositor-view').classList.remove('hidden');
             document.getElementById('gerente-view').classList.add('hidden');
@@ -53,40 +52,25 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// --- FUNÇÕES DE DADOS ---
-
-window.salvarProduto = async () => {
+// SALVAR (REPOSITOR)
+document.getElementById('btn-salvar').onclick = async () => {
     const nome = document.getElementById('prod-nome').value;
     const setor = document.getElementById('prod-setor').value;
     const data = document.getElementById('prod-data').value;
 
-    if(!nome || !data) return alert("Preencha todos os campos.");
+    if(!nome || !data) return alert("Preencha tudo!");
 
     try {
         await addDoc(collection(db, "validades"), {
-            produto: nome,
-            setor: setor,
-            vencimento: data,
-            lancadoPor: auth.currentUser.email,
-            timestamp: new Date()
+            produto: nome, setor: setor, vencimento: data, lancadoPor: auth.currentUser.email, criadoEm: new Date()
         });
-        alert("✅ Lançamento realizado!");
-        document.getElementById('prod-nome').value = '';
-    } catch (e) { alert("Erro ao salvar."); }
+        alert("✅ Enviado!");
+        document.getElementById('prod-nome').value = "";
+    } catch (e) { alert("Erro ao gravar."); }
 };
 
-window.darBaixa = async (id) => {
-    if(confirm("Confirmar baixa do item?")) await deleteDoc(doc(db, "validades", id));
-};
-
-window.filtrarProdutos = () => {
-    const termo = document.getElementById('input-busca').value.toLowerCase();
-    document.querySelectorAll('#lista-vencimento > div').forEach(card => {
-        card.style.display = card.innerText.toLowerCase().includes(termo) ? "flex" : "none";
-    });
-};
-
-function carregarMonitor() {
+// MONITOR (GERENTE)
+function carregarDados() {
     const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
     onSnapshot(q, (snap) => {
         const lista = document.getElementById('lista-vencimento');
@@ -97,20 +81,19 @@ function carregarMonitor() {
             const item = d.data();
             const diff = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
             if(diff <= 3) criticos++;
-            
+
             const card = document.createElement('div');
-            card.className = `flex justify-between items-center p-5 rounded-3xl bg-white shadow-sm border-l-[12px] ${diff <= 3 ? 'border-red-500 card-vencido' : 'border-blue-400'}`;
+            card.className = `flex justify-between items-center p-4 rounded-3xl bg-white shadow-sm border-l-[10px] ${diff <= 3 ? 'border-red-500 card-vencido' : 'border-blue-400'}`;
             card.innerHTML = `
                 <div class="flex-1">
-                    <span class="text-[9px] font-black bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md uppercase">${item.setor}</span>
-                    <h3 class="font-black text-slate-800 text-lg leading-tight mt-1 uppercase">${item.produto}</h3>
-                    <p class="text-xs font-bold text-slate-400">Vencimento: ${item.vencimento.split('-').reverse().join('/')}</p>
+                    <span class="text-[8px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md uppercase">${item.setor}</span>
+                    <h3 class="font-black text-slate-800 text-md leading-tight mt-1 uppercase">${item.produto}</h3>
+                    <p class="text-[10px] font-bold text-slate-400 italic">${item.vencimento.split('-').reverse().join('/')}</p>
                 </div>
                 <div class="text-right ml-4">
-                    <p class="text-[10px] font-black ${diff <= 3 ? 'text-red-600' : 'text-slate-400'} uppercase">${diff} dias</p>
-                    <button onclick="darBaixa('${d.id}')" class="mt-2 bg-slate-900 text-white text-[9px] font-black px-4 py-2 rounded-xl uppercase shadow-md">Baixa</button>
-                </div>
-            `;
+                    <p class="text-[10px] font-black ${diff <= 3 ? 'text-red-600' : 'text-slate-500'}">${diff}d</p>
+                    <button onclick="window.darBaixa('${d.id}')" class="mt-2 bg-slate-900 text-white text-[8px] font-black px-3 py-1 rounded-xl uppercase">Baixa</button>
+                </div>`;
             lista.appendChild(card);
         });
         document.getElementById('count-total').innerText = snap.size;
@@ -118,10 +101,23 @@ function carregarMonitor() {
     });
 }
 
-window.exportarRelatorio = () => {
-    let msg = "*⚠️ RELATÓRIO NEW MARKET*\n\n";
+window.darBaixa = async (id) => {
+    if(confirm("Confirmar baixa?")) await deleteDoc(doc(db, "validades", id));
+};
+
+// BUSCA
+window.filtrarProdutos = () => {
+    const termo = document.getElementById('input-busca').value.toLowerCase();
     document.querySelectorAll('#lista-vencimento > div').forEach(c => {
-        if(c.style.display !== "none") msg += "• " + c.innerText.replace("Baixa", "").split('\n').join(' ') + "\n\n";
+        c.style.display = c.innerText.toLowerCase().includes(termo) ? "flex" : "none";
+    });
+};
+
+// WHATSAPP
+document.getElementById('btn-whatsapp').onclick = () => {
+    let msg = "*NEW MARKET - RELATÓRIO*\n\n";
+    document.querySelectorAll('#lista-vencimento > div').forEach(c => {
+        if(c.style.display !== "none") msg += "• " + c.innerText.replace("Baixa", "").split('\n').join(' ') + "\n";
     });
     window.open("https://wa.me/?text=" + encodeURIComponent(msg));
 };
