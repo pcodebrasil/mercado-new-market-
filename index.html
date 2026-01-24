@@ -6,6 +6,7 @@
     <title>New Market - Gestão</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body class="bg-slate-100 font-sans antialiased text-slate-900">
 
@@ -35,7 +36,16 @@
                     <h2 class="font-black mb-4 uppercase text-lg text-green-700">Lançar Validade</h2>
                     <div class="space-y-3">
                         <input type="text" id="prod-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold uppercase outline-none focus:border-green-500">
-                        <input type="number" id="prod-ean" placeholder="CÓDIGO DE BARRAS" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold outline-none focus:border-green-500">
+                        
+                        <div class="flex gap-2">
+                            <input type="number" id="prod-ean" placeholder="CÓDIGO DE BARRAS" class="flex-1 p-4 border rounded-2xl bg-slate-50 font-bold outline-none focus:border-green-500">
+                            <button id="btn-scan" class="bg-blue-600 text-white p-4 rounded-2xl shadow-lg active:scale-95">
+                                📷
+                            </button>
+                        </div>
+                        
+                        <div id="reader" class="hidden w-full overflow-hidden rounded-2xl border-2 border-blue-500"></div>
+
                         <select id="prod-setor" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold outline-none focus:border-green-500">
                             <option value="Corredor do Paulo">Corredor do Paulo</option>
                             <option value="Corredor do Leandro">Corredor do Leandro</option>
@@ -91,7 +101,37 @@
         const db = getFirestore(app);
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
 
-        // LOGIN
+        // --- SCANNER DE CÓDIGO DE BARRAS ---
+        const html5QrCode = new Html5Qrcode("reader");
+        let isScanning = false;
+
+        document.getElementById('btn-scan').onclick = () => {
+            const readerDiv = document.getElementById('reader');
+            if (!isScanning) {
+                readerDiv.classList.remove('hidden');
+                html5QrCode.start(
+                    { facingMode: "environment" }, 
+                    { fps: 10, qrbox: { width: 250, height: 150 } }, // Formato retangular para código de barras
+                    (decodedText) => {
+                        document.getElementById('prod-ean').value = decodedText;
+                        pararScanner();
+                    },
+                    (errorMessage) => { /* Silenciar erros de busca */ }
+                );
+                isScanning = true;
+            } else {
+                pararScanner();
+            }
+        };
+
+        function pararScanner() {
+            html5QrCode.stop().then(() => {
+                document.getElementById('reader').classList.add('hidden');
+                isScanning = false;
+            });
+        }
+
+        // --- RESTANTE DAS FUNÇÕES (LOGIN, SALVAR, LISTAR) ---
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -102,7 +142,6 @@
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
-        // CONTROLE DE ACESSO
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').classList.add('hidden');
@@ -122,7 +161,6 @@
             }
         });
 
-        // SALVAR PRODUTO
         document.getElementById('btn-salvar').onclick = async () => {
             const nome = document.getElementById('prod-nome').value;
             const ean = document.getElementById('prod-ean').value || "S/ CÓDIGO";
@@ -139,7 +177,6 @@
             } catch (e) { alert("Erro ao salvar."); }
         };
 
-        // CARREGAR DADOS REALTIME
         function carregarDados() {
             const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
             onSnapshot(q, (snap) => {
@@ -173,12 +210,10 @@
             });
         }
 
-        // BAIXA
         window.darBaixaItem = async (id) => {
-            if(confirm("Confirmar baixa deste item?")) await deleteDoc(doc(db, "validades", id));
+            if(confirm("Confirmar baixa?")) await deleteDoc(doc(db, "validades", id));
         };
 
-        // FILTRO DE BUSCA
         window.filtrarProdutos = () => {
             const termo = document.getElementById('input-busca').value.toLowerCase();
             document.querySelectorAll('#lista-vencimento > div').forEach(c => {
@@ -186,22 +221,14 @@
             });
         };
 
-        // FUNÇÃO WHATSAPP VOLTOU
         document.getElementById('btn-whatsapp').onclick = () => {
             let msg = "*RELATÓRIO DE VALIDADES - NEW MARKET*\n\n";
-            let itens = 0;
             document.querySelectorAll('#lista-vencimento > div').forEach(c => {
                 if(c.style.display !== "none") {
-                    const textoCard = c.innerText.replace("Baixa", "").trim();
-                    msg += "📌 " + textoCard.split('\n').join(' | ') + "\n\n";
-                    itens++;
+                    msg += "📌 " + c.innerText.replace("Baixa", "").trim().split('\n').join(' | ') + "\n\n";
                 }
             });
-            
-            if(itens === 0) return alert("Nenhum item na lista para enviar!");
-            
-            const link = "https://wa.me/?text=" + encodeURIComponent(msg);
-            window.open(link, '_blank');
+            window.open("https://wa.me/?text=" + encodeURIComponent(msg), '_blank');
         };
     </script>
 </body>
