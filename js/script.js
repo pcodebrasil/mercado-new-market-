@@ -1,4 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -11,58 +12,73 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
-const gerentes = ['Adriano', 'Adrielle'];
-let usuarioLogado = "";
 
-// Lógica de Login
-document.getElementById('login-form').onsubmit = (e) => {
+const gerentesEmails = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
+
+// --- AUTENTICAÇÃO ---
+
+document.getElementById('login-form').onsubmit = async (e) => {
     e.preventDefault();
-    usuarioLogado = document.getElementById('username').value;
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('main-panel').classList.remove('hidden');
-    document.getElementById('user-display').innerText = `Olá, ${usuarioLogado}`;
-    
-    if(gerentes.includes(usuarioLogado)) {
-        document.getElementById('gerente-view').classList.remove('hidden');
-        carregarMonitor();
-    } else {
-        document.getElementById('repositor-view').classList.remove('hidden');
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+        alert("Erro no login: Verifique seu e-mail e senha.");
     }
 };
 
-// Salvar Produto (Repositor)
+document.getElementById('btn-logout').onclick = () => signOut(auth);
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('main-panel').classList.remove('hidden');
+        document.getElementById('user-display').innerText = user.email.split('@')[0];
+
+        if (gerentesEmails.includes(user.email)) {
+            document.getElementById('gerente-view').classList.remove('hidden');
+            document.getElementById('repositor-view').classList.add('hidden');
+            carregarMonitor();
+        } else {
+            document.getElementById('repositor-view').classList.remove('hidden');
+            document.getElementById('gerente-view').classList.add('hidden');
+        }
+    } else {
+        document.getElementById('login-screen').classList.remove('hidden');
+        document.getElementById('main-panel').classList.add('hidden');
+    }
+});
+
+// --- FUNÇÕES DE DADOS ---
+
 window.salvarProduto = async () => {
     const nome = document.getElementById('prod-nome').value;
     const setor = document.getElementById('prod-setor').value;
     const data = document.getElementById('prod-data').value;
 
-    if(!nome || !data) return alert("Por favor, preencha o nome e a data de vencimento!");
+    if(!nome || !data) return alert("Preencha todos os campos.");
 
     try {
         await addDoc(collection(db, "validades"), {
             produto: nome,
             setor: setor,
             vencimento: data,
-            lancadoPor: usuarioLogado,
+            lancadoPor: auth.currentUser.email,
             timestamp: new Date()
         });
-        alert("✅ " + nome + " enviado para o " + setor);
+        alert("✅ Lançamento realizado!");
         document.getElementById('prod-nome').value = '';
-        document.getElementById('prod-data').value = '';
-    } catch (e) { alert("Erro ao salvar: verifique a conexão."); }
+    } catch (e) { alert("Erro ao salvar."); }
 };
 
-// Dar Baixa (Gerente)
 window.darBaixa = async (id) => {
-    if(confirm("Deseja confirmar a baixa deste item do sistema?")) {
-        try {
-            await deleteDoc(doc(db, "validades", id));
-        } catch (e) { alert("Erro ao deletar."); }
-    }
+    if(confirm("Confirmar baixa do item?")) await deleteDoc(doc(db, "validades", id));
 };
 
-// Filtro de Busca
 window.filtrarProdutos = () => {
     const termo = document.getElementById('input-busca').value.toLowerCase();
     document.querySelectorAll('#lista-vencimento > div').forEach(card => {
@@ -70,7 +86,6 @@ window.filtrarProdutos = () => {
     });
 };
 
-// Monitor em Tempo Real (Gerente)
 function carregarMonitor() {
     const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
     onSnapshot(q, (snap) => {
@@ -80,10 +95,7 @@ function carregarMonitor() {
         
         snap.forEach(d => {
             const item = d.data();
-            const hoje = new Date();
-            const venci = new Date(item.vencimento);
-            const diff = Math.ceil((venci - hoje) / (1000 * 60 * 60 * 24));
-            
+            const diff = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
             if(diff <= 3) criticos++;
             
             const card = document.createElement('div');
@@ -92,11 +104,11 @@ function carregarMonitor() {
                 <div class="flex-1">
                     <span class="text-[9px] font-black bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md uppercase">${item.setor}</span>
                     <h3 class="font-black text-slate-800 text-lg leading-tight mt-1 uppercase">${item.produto}</h3>
-                    <p class="text-xs font-bold text-slate-400 italic">Vencimento: ${item.vencimento.split('-').reverse().join('/')}</p>
+                    <p class="text-xs font-bold text-slate-400">Vencimento: ${item.vencimento.split('-').reverse().join('/')}</p>
                 </div>
                 <div class="text-right ml-4">
                     <p class="text-[10px] font-black ${diff <= 3 ? 'text-red-600' : 'text-slate-400'} uppercase">${diff} dias</p>
-                    <button onclick="darBaixa('${d.id}')" class="mt-2 bg-slate-900 text-white text-[9px] font-black px-4 py-2 rounded-xl active:bg-black uppercase shadow-md">Baixa</button>
+                    <button onclick="darBaixa('${d.id}')" class="mt-2 bg-slate-900 text-white text-[9px] font-black px-4 py-2 rounded-xl uppercase shadow-md">Baixa</button>
                 </div>
             `;
             lista.appendChild(card);
@@ -106,18 +118,10 @@ function carregarMonitor() {
     });
 }
 
-// Relatório WhatsApp
 window.exportarRelatorio = () => {
-    let msg = "*⚠️ RELATÓRIO DE VALIDADES - NEW MARKET*\n\n";
-    let cont = 0;
+    let msg = "*⚠️ RELATÓRIO NEW MARKET*\n\n";
     document.querySelectorAll('#lista-vencimento > div').forEach(c => {
-        if(c.style.display !== "none") {
-            const info = c.innerText.replace("Baixa", "").split('\n').filter(t => t.trim() !== "").join(' ');
-            msg += "• " + info + "\n\n";
-            cont++;
-        }
+        if(c.style.display !== "none") msg += "• " + c.innerText.replace("Baixa", "").split('\n').join(' ') + "\n\n";
     });
-    if(cont === 0) return alert("Nada para exportar.");
     window.open("https://wa.me/?text=" + encodeURIComponent(msg));
 };
-  
