@@ -36,13 +36,13 @@
                     <h2 class="font-black mb-4 uppercase text-lg text-green-700">Lançar Validade</h2>
                     <div class="space-y-4">
                         <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Código de Barras (Obrigatório)</label>
+                            <input type="number" id="prod-ean" placeholder="DIGITE OS 13 NÚMEROS" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold outline-none focus:border-green-500 border-orange-200">
+                        </div>
+
+                        <div>
                             <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Nome do Produto</label>
                             <input type="text" id="prod-nome" placeholder="EX: ARROZ TIO JOÃO 5KG" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold uppercase outline-none focus:border-green-500">
-                        </div>
-                        
-                        <div>
-                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Código de Barras (Opcional)</label>
-                            <input type="number" id="prod-ean" placeholder="789..." class="w-full p-4 border rounded-2xl bg-slate-50 font-bold outline-none focus:border-green-500">
                         </div>
 
                         <div>
@@ -67,11 +67,11 @@
 
             <div id="gerente-view" class="hidden space-y-4">
                 <div class="grid grid-cols-2 gap-3 mb-4 text-center font-black">
-                    <div class="bg-white p-4 rounded-3xl border-2 border-red-100 text-red-600">
+                    <div class="bg-white p-4 rounded-3xl border-2 border-red-100 text-red-600 shadow-sm">
                         <p class="text-[10px] uppercase">Vencendo (3d)</p>
                         <p id="count-critico" class="text-3xl">0</p>
                     </div>
-                    <div class="bg-white p-4 rounded-3xl border-2 border-blue-100 text-blue-600">
+                    <div class="bg-white p-4 rounded-3xl border-2 border-blue-100 text-blue-600 shadow-sm">
                         <p class="text-[10px] uppercase">Total Geral</p>
                         <p id="count-total" class="text-3xl">0</p>
                     </div>
@@ -119,7 +119,6 @@
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
-        // ESTADO USUÁRIO
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').classList.add('hidden');
@@ -140,24 +139,34 @@
             }
         });
 
-        // SALVAR
+        // SALVAR COM VALIDAÇÃO OBRIGATÓRIA
         document.getElementById('btn-salvar').onclick = async () => {
+            const ean = document.getElementById('prod-ean').value;
             const nome = document.getElementById('prod-nome').value;
-            const ean = document.getElementById('prod-ean').value || "S/ COD";
             const setor = document.getElementById('prod-setor').value;
             const data = document.getElementById('prod-data').value;
-            if(!nome || !data) return alert("Preencha o Nome e a Data!");
+
+            // VALIDAÇÃO: Código, Nome e Data são agora todos obrigatórios
+            if(!ean) return alert("ERRO: O Código de Barras é obrigatório!");
+            if(!nome) return alert("ERRO: O Nome do Produto é obrigatório!");
+            if(!data) return alert("ERRO: A Data de Vencimento é obrigatória!");
+
             try {
                 await addDoc(collection(db, "validades"), {
-                    produto: nome, codigo: ean, setor: setor, vencimento: data, criadoEm: new Date()
+                    produto: nome, 
+                    codigo: ean, 
+                    setor: setor, 
+                    vencimento: data, 
+                    criadoEm: new Date()
                 });
                 alert("✅ Registrado com sucesso!");
+                // Limpa campos
                 document.getElementById('prod-nome').value = "";
                 document.getElementById('prod-ean').value = "";
+                document.getElementById('prod-data').value = "";
             } catch (e) { alert("Erro ao salvar."); }
         };
 
-        // LISTAGEM
         function carregarDados() {
             const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
             onSnapshot(q, (snap) => {
@@ -180,7 +189,7 @@
                             <p class="text-[13px] font-mono font-bold text-blue-600 tracking-wider">${item.codigo}</p>
                         </div>
                         <div class="flex justify-between items-center">
-                            <p class="text-[11px] font-bold text-slate-400">Vence: ${item.vencimento.split('-').reverse().join('/')}</p>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase">Vence: ${item.vencimento.split('-').reverse().join('/')}</p>
                             <button onclick="window.darBaixaItem('${d.id}')" class="bg-slate-900 text-white text-[9px] px-4 py-1.5 rounded-lg font-black uppercase shadow-md">Baixa</button>
                         </div>`;
                     lista.appendChild(card);
