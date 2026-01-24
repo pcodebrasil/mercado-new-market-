@@ -13,9 +13,9 @@
         .card-normal { border-left: 8px solid #10b981; }
     </style>
 </head>
-<body class="bg-slate-100 font-sans text-slate-900">
+<body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
 
-    <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+    <div id="login-screen" class="flex-grow flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border-t-8 border-blue-600">
             <h1 class="text-3xl font-black text-blue-900 text-center uppercase italic">New Market</h1>
             <form id="login-form" class="mt-8 space-y-4">
@@ -26,13 +26,13 @@
         </div>
     </div>
 
-    <div id="main-panel" class="hidden min-h-screen">
-        <nav class="bg-blue-900 text-white p-4 flex justify-between items-center sticky top-0 z-50">
+    <div id="main-panel" class="hidden flex-grow flex flex-col">
+        <nav class="bg-blue-900 text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
             <span class="font-black italic uppercase">New Market</span>
             <button id="btn-logout" class="text-[10px] bg-white/10 px-3 py-1 rounded-full uppercase">Sair</button>
         </nav>
 
-        <main class="p-4 max-w-xl mx-auto">
+        <main class="p-4 max-w-xl mx-auto w-full flex-grow">
             
             <div id="repositor-view" class="hidden bg-white p-6 rounded-3xl shadow-lg border-b-8 border-green-500 space-y-4">
                 <h2 class="font-black uppercase text-green-700">Lançar Produto</h2>
@@ -66,9 +66,12 @@
                 <input type="text" id="busca" onkeyup="filtrar()" placeholder="🔍 Pesquisar..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none">
                 <div id="lista" class="space-y-3 pt-2"></div>
             </div>
-
         </main>
     </div>
+
+    <footer class="w-full p-4 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+        Desenvolvido por <span class="text-blue-600">"Paulo Souza"</span> 2026
+    </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -90,7 +93,6 @@
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         let filtroAtual = 'todos';
 
-        // AUTH
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
@@ -112,7 +114,6 @@
             }
         });
 
-        // GRAVAR
         document.getElementById('btn-salvar').onclick = async () => {
             const data = {
                 produto: document.getElementById('p-nome').value.toUpperCase(),
@@ -122,7 +123,7 @@
                 vencimento: document.getElementById('p-data').value,
                 criadoEm: serverTimestamp()
             };
-            if(!data.produto || !data.vencimento) return alert("Preencha o Nome e Data!");
+            if(!data.produto || !data.vencimento) return alert("Preencha Nome e Data!");
             try {
                 await addDoc(collection(db, "validades"), data);
                 alert("Salvo!");
@@ -130,7 +131,6 @@
             } catch { alert("Erro ao salvar."); }
         };
 
-        // FILTROS
         window.setFiltro = (t) => {
             filtroAtual = t;
             ['f-critico', 'f-atencao', 'f-todos'].forEach(id => {
