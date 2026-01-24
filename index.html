@@ -12,10 +12,9 @@
     <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border-t-8 border-blue-600">
             <h1 class="text-4xl font-black text-blue-900 italic text-center uppercase tracking-tighter">New Market</h1>
-            <p class="text-center text-slate-400 text-[10px] font-bold uppercase mt-2 mb-8 italic">Acesso Restrito</p>
-            <form id="login-form" class="space-y-4">
+            <form id="login-form" class="space-y-4 mt-8">
                 <input type="email" id="email" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 bg-slate-50" placeholder="usuario@newmarket.com" required>
-                <input type="password" id="password" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 bg-slate-50" placeholder="Sua senha" required>
+                <input type="password" id="password" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 bg-slate-50" placeholder="Senha" required>
                 <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black text-lg shadow-lg active:scale-95">ENTRAR</button>
             </form>
         </div>
@@ -33,41 +32,32 @@
         <main class="p-4 max-w-xl mx-auto w-full">
             <div id="repositor-view" class="hidden space-y-4">
                 <div class="bg-white p-6 rounded-3xl shadow-xl border-b-8 border-green-500">
-                    <h2 class="font-black mb-4 uppercase">Lançar Validade</h2>
-                    
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Produto</label>
+                    <h2 class="font-black mb-4 uppercase text-lg">Lançar Validade</h2>
                     <input type="text" id="prod-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl mb-3 bg-slate-50 font-bold uppercase outline-none focus:border-green-500">
-                    
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Código de Barras</label>
-                    <input type="number" id="prod-ean" placeholder="789..." class="w-full p-4 border rounded-2xl mb-3 bg-slate-50 font-bold text-lg outline-none focus:border-green-500">
-
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Corredor</label>
+                    <input type="number" id="prod-ean" placeholder="CÓDIGO DE BARRAS (13 DÍGITOS)" class="w-full p-4 border rounded-2xl mb-3 bg-slate-50 font-bold outline-none focus:border-green-500">
                     <select id="prod-setor" class="w-full p-4 border rounded-2xl mb-3 bg-slate-50 font-bold outline-none focus:border-green-500">
                         <option value="Corredor do Paulo">Corredor do Paulo</option>
                         <option value="Corredor do Leandro">Corredor do Leandro</option>
                         <option value="Corredor do Pedro">Corredor do Pedro</option>
                         <option value="Corredor do Edmar">Corredor do Edmar</option>
                     </select>
-
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Vencimento</label>
                     <input type="date" id="prod-data" class="w-full p-4 border rounded-2xl mb-6 bg-slate-50 font-bold outline-none focus:border-green-500">
-                    
-                    <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl shadow-lg active:scale-95 uppercase">Enviar Agora</button>
+                    <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl shadow-lg active:scale-95 uppercase">Enviar</button>
                 </div>
             </div>
 
             <div id="gerente-view" class="hidden space-y-4">
-                <div class="grid grid-cols-2 gap-3 mb-4 text-center font-black">
-                    <div class="bg-white p-4 rounded-3xl border-2 border-red-50 text-red-600">
-                        <p class="text-[9px] uppercase">Críticos</p>
+                <div class="grid grid-cols-2 gap-3 mb-4 text-center">
+                    <div class="bg-white p-4 rounded-3xl border-2 border-red-50 text-red-600 font-black italic">
+                        <p class="text-[9px] uppercase">Vencendo</p>
                         <p id="count-critico" class="text-2xl">0</p>
                     </div>
-                    <div class="bg-white p-4 rounded-3xl border-2 border-blue-50 text-blue-600">
+                    <div class="bg-white p-4 rounded-3xl border-2 border-blue-50 text-blue-600 font-black italic">
                         <p class="text-[9px] uppercase">Total</p>
                         <p id="count-total" class="text-2xl">0</p>
                     </div>
                 </div>
-                <input type="text" id="input-busca" onkeyup="filtrarProdutos()" placeholder="🔍 Buscar produto ou código..." class="w-full p-4 border-none rounded-2xl bg-white shadow-md font-bold outline-none">
+                <input type="text" id="input-busca" onkeyup="filtrarProdutos()" placeholder="🔍 Buscar..." class="w-full p-4 border-none rounded-2xl bg-white shadow-md font-bold outline-none">
                 <div id="lista-vencimento" class="space-y-3 mt-4 pb-10"></div>
             </div>
         </main>
@@ -97,91 +87,8 @@
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
             try { await signInWithEmailAndPassword(auth, email, pass); } 
-            catch (err) { alert("Erro ao entrar!"); }
+            catch (err) { alert("Login incorreto!"); }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-panel').classList.remove('hidden');
-                document.getElementById('user-display').innerText = user.email.split('@')[0].toUpperCase();
-                if (gerentes.includes(user.email)) {
-                    document.getElementById('gerente-view').classList.remove('hidden');
-                    document.getElementById('repositor-view').classList.add('hidden');
-                    carregarDados();
-                } else {
-                    document.getElementById('repositor-view').classList.remove('hidden');
-                    document.getElementById('gerente-view').classList.add('hidden');
-                }
-            } else {
-                document.getElementById('login-screen').classList.remove('hidden');
-                document.getElementById('main-panel').classList.add('hidden');
-            }
-        });
-
-        document.getElementById('btn-salvar').onclick = async () => {
-            const nome = document.getElementById('prod-nome').value;
-            const ean = document.getElementById('prod-ean').value || "SEM CÓDIGO";
-            const setor = document.getElementById('prod-setor').value;
-            const data = document.getElementById('prod-data').value;
-            if(!nome || !data) return alert("Preencha Nome e Data!");
-            try {
-                await addDoc(collection(db, "validades"), {
-                    produto: nome, codigo: ean, setor: setor, vencimento: data, criadoEm: new Date()
-                });
-                alert("✅ Lançado!");
-                document.getElementById('prod-nome').value = "";
-                document.getElementById('prod-ean').value = "";
-            } catch (e) { alert("Erro ao salvar."); }
-        };
-
-        function carregarDados() {
-            const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
-            onSnapshot(q, (snap) => {
-                const lista = document.getElementById('lista-vencimento');
-                let criticos = 0;
-                lista.innerHTML = "";
-                snap.forEach(d => {
-                    const item = d.data();
-                    const diff = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
-                    if(diff <= 3) criticos++;
-                    const card = document.createElement('div');
-                    card.className = `flex flex-col p-5 rounded-3xl bg-white shadow-md border-l-[12px] ${diff <= 3 ? 'border-red-500 card-vencido' : 'border-blue-500'}`;
-                    card.innerHTML = `
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-[9px] font-black bg-slate-100 px-2 py-1 rounded-lg uppercase">${item.setor}</span>
-                            <span class="text-xs font-black ${diff <= 3 ? 'text-red-600' : 'text-slate-400'} uppercase">${diff} dias</span>
-                        </div>
-                        <h3 class="font-black text-slate-800 uppercase text-lg leading-tight mb-1">${item.produto}</h3>
-                        
-                        <div class="bg-slate-50 p-2 rounded-xl border border-dashed border-slate-200 my-2">
-                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Código de Barras:</p>
-                            <p class="text-2xl font-black text-blue-700 tracking-[0.2em] font-mono">${item.codigo}</p>
-                        </div>
-
-                        <div class="flex justify-between items-center mt-2">
-                            <p class="text-sm font-bold text-slate-500 italic">Vence: ${item.vencimento.split('-').reverse().join('/')}</p>
-                            <button onclick="window.darBaixaItem('${d.id}')" class="bg-slate-900 text-white text-[10px] px-6 py-2 rounded-xl font-black uppercase">Baixa</button>
-                        </div>`;
-                    lista.appendChild(card);
-                });
-                document.getElementById('count-total').innerText = snap.size;
-                document.getElementById('count-critico').innerText = criticos;
-            });
-        }
-
-        window.darBaixaItem = async (id) => {
-            if(confirm("Confirmar baixa?")) await deleteDoc(doc(db, "validades", id));
-        };
-
-        window.filtrarProdutos = () => {
-            const termo = document.getElementById('input-busca').value.toLowerCase();
-            document.querySelectorAll('#lista-vencimento > div').forEach(c => {
-                c.style.display = c.innerText.toLowerCase().includes(termo) ? "flex" : "none";
-            });
-        };
-    </script>
-</body>
-</html>
+            
