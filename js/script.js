@@ -3,12 +3,12 @@ import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from
 import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
-    authDomain: "mercado-c3e95.firebaseapp.com",
-    projectId: "mercado-c3e95",
-    storageBucket: "mercado-c3e95.firebasestorage.app",
-    messagingSenderId: "883539091925",
-    appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c"
+  apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
+  authDomain: "mercado-c3e95.firebaseapp.com",
+  projectId: "mercado-c3e95",
+  storageBucket: "mercado-c3e95.firebasestorage.app",
+  messagingSenderId: "883539091925",
+  appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -17,7 +17,7 @@ const db = getFirestore(app);
 
 const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
 
-// LOGIN
+// --- SISTEMA DE LOGIN ---
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value;
@@ -25,14 +25,12 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     try {
         await signInWithEmailAndPassword(auth, email, pass);
     } catch (err) {
-        alert("E-mail ou senha inválidos. Verifique se criou o usuário no Firebase.");
+        alert("E-mail ou senha incorretos. Verifique se o usuário foi criado no Firebase.");
     }
 });
 
-// LOGOUT
 document.getElementById('btn-logout').onclick = () => signOut(auth);
 
-// CONTROLE DE ACESSO
 onAuthStateChanged(auth, (user) => {
     if (user) {
         document.getElementById('login-screen').classList.add('hidden');
@@ -53,32 +51,42 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// SALVAR
+// --- LANÇAMENTO (REPOSITOR) ---
 document.getElementById('btn-salvar').onclick = async () => {
     const nome = document.getElementById('prod-nome').value;
     const setor = document.getElementById('prod-setor').value;
     const data = document.getElementById('prod-data').value;
-    if(!nome || !data) return alert("Preencha o nome e a data!");
+
+    if(!nome || !data) return alert("Preencha o nome do produto e a data!");
+
     try {
         await addDoc(collection(db, "validades"), {
-            produto: nome, setor: setor, vencimento: data, lancadoPor: auth.currentUser.email, criadoEm: new Date()
+            produto: nome,
+            setor: setor,
+            vencimento: data,
+            lancadoPor: auth.currentUser.email,
+            criadoEm: new Date()
         });
-        alert("✅ Lançado!");
+        alert("✅ Enviado com sucesso!");
         document.getElementById('prod-nome').value = "";
-    } catch (e) { alert("Erro ao gravar. Verifique as regras do Firestore."); }
+    } catch (e) {
+        alert("Erro ao salvar. Verifique as Regras do Firestore.");
+    }
 };
 
-// MONITOR
+// --- MONITORAMENTO (GERENTE) ---
 function carregarDados() {
     const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
     onSnapshot(q, (snap) => {
         const lista = document.getElementById('lista-vencimento');
         let criticos = 0;
         lista.innerHTML = "";
+        
         snap.forEach(d => {
             const item = d.data();
             const diff = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
             if(diff <= 3) criticos++;
+
             const card = document.createElement('div');
             card.className = `flex justify-between items-center p-4 rounded-3xl bg-white shadow-sm border-l-[10px] ${diff <= 3 ? 'border-red-500 card-vencido' : 'border-blue-400'}`;
             card.innerHTML = `
@@ -88,7 +96,7 @@ function carregarDados() {
                     <p class="text-[10px] font-bold text-slate-400 italic">${item.vencimento.split('-').reverse().join('/')}</p>
                 </div>
                 <div class="text-right ml-4">
-                    <p class="text-[10px] font-black ${diff <= 3 ? 'text-red-600' : 'text-slate-500'}">${diff} Dias</p>
+                    <p class="text-[10px] font-black ${diff <= 3 ? 'text-red-600' : 'text-slate-500'} uppercase">${diff} Dias</p>
                     <button onclick="window.darBaixa('${d.id}')" class="mt-2 bg-slate-900 text-white text-[8px] font-black px-3 py-1 rounded-xl uppercase">Baixa</button>
                 </div>`;
             lista.appendChild(card);
@@ -99,7 +107,9 @@ function carregarDados() {
 }
 
 window.darBaixa = async (id) => {
-    if(confirm("Confirmar baixa?")) await deleteDoc(doc(db, "validades", id));
+    if(confirm("Confirmar baixa deste produto?")) {
+        await deleteDoc(doc(db, "validades", id));
+    }
 };
 
 window.filtrarProdutos = () => {
@@ -110,9 +120,11 @@ window.filtrarProdutos = () => {
 };
 
 document.getElementById('btn-whatsapp').onclick = () => {
-    let msg = "*NEW MARKET - RELATÓRIO*\n\n";
+    let msg = "*NEW MARKET - RELATÓRIO DE VALIDADES*\n\n";
     document.querySelectorAll('#lista-vencimento > div').forEach(c => {
-        if(c.style.display !== "none") msg += "• " + c.innerText.replace("Baixa", "").split('\n').join(' ') + "\n";
+        if(c.style.display !== "none") {
+            msg += "• " + c.innerText.replace("Baixa", "").split('\n').join(' ') + "\n";
+        }
     });
     window.open("https://wa.me/?text=" + encodeURIComponent(msg));
 };
