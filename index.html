@@ -19,7 +19,7 @@
         .welcome-hide { animation: fadeOutUp 0.8s ease-in forwards; }
     </style>
 </head>
-<body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen" onclick="ativarAudio()">
+<body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
 
     <div id="modal-senha" class="modal">
         <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center">
@@ -126,21 +126,7 @@
         const db = getFirestore(app);
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         let filtroAtual = 'todos';
-        let audioAtivado = false;
         let listaRelatorio = [];
-
-        window.ativarAudio = () => { audioAtivado = true; };
-
-        function dispararAlerta() {
-            if(!audioAtivado) return;
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
-            osc.type = "sine"; osc.frequency.value = 880; gain.gain.value = 0.1;
-            osc.start(); setTimeout(() => osc.stop(), 200);
-            if ("vibrate" in navigator) navigator.vibrate([200, 50, 200]);
-        }
 
         function mostrarSaudacao(email) {
             const nomeStr = email.split('@')[0].toLowerCase();
@@ -196,7 +182,7 @@
                 criadoEm: serverTimestamp()
             };
             if(!data.produto || !data.vencimento) return alert("Preencha Nome e Data!");
-            try { await addDoc(collection(db, "validades"), data); alert("Salvo com sucesso!"); document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = ""; } catch { alert("Erro ao salvar."); }
+            try { await addDoc(collection(db, "validades"), data); alert("Salvo!"); document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = ""; } catch { alert("Erro ao salvar."); }
         };
 
         function carregar(podeApagar) {
@@ -204,19 +190,15 @@
                 const lista = document.getElementById('lista');
                 let c1 = 0, c2 = 0; lista.innerHTML = "";
                 listaRelatorio = [];
-                
                 snap.forEach(d => {
                     const item = d.data();
                     const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
                     let cat = "normal", estilo = "card-normal", txt = "text-green-600";
-                    
                     if(diff <= 5) { estilo = "card-critico"; txt = "text-red-600 font-black animate-pulse"; c1++; cat = "critico"; }
                     else if(diff <= 15) { estilo = "card-atencao"; txt = "text-yellow-600 font-bold"; c2++; cat = "atencao"; }
-                    
                     if(cat !== "normal") listaRelatorio.push({ ...item, dias: diff, cat });
-
                     const div = document.createElement('div');
-                    div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 transition-all`;
+                    div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3`;
                     div.dataset.cat = cat;
                     div.innerHTML = `
                         <div class="flex justify-between text-[8px] font-black uppercase text-slate-400"><span>${item.setor}</span><span class="${txt}">${diff} DIAS</span></div>
@@ -225,8 +207,6 @@
                         ${podeApagar ? `<button onclick="apagar('${d.id}')" class="text-slate-300 font-bold text-[9px] uppercase">Remover</button>` : ''}</div>`;
                     lista.appendChild(div);
                 });
-                
-                if(c1 > 0) dispararAlerta();
                 document.getElementById('c-total').innerText = snap.size;
                 document.getElementById('c-critico').innerText = c1;
                 document.getElementById('c-atencao').innerText = c2;
@@ -234,37 +214,21 @@
             });
         }
 
-        // RELATÓRIO ESTILIZADO PARA WHATSAPP
         window.gerarRelatorioZap = () => {
-            if(listaRelatorio.length === 0) return alert("Nenhum item crítico ou em atenção encontrado!");
-            
+            if(listaRelatorio.length === 0) return alert("Nada crítico encontrado!");
             const dataHoje = new Date().toLocaleDateString('pt-BR');
-            let msg = `*📊 RELATÓRIO DE RISCO - NEW MARKET*\n`;
-            msg += `📅 _Data: ${dataHoje}_ \n`;
-            msg += `------------------------------------------\n\n`;
-
+            let msg = `*📊 RELATÓRIO DE RISCO - NEW MARKET*\n📅 _Data: ${dataHoje}_\n------------------------------------------\n\n`;
             const criticos = listaRelatorio.filter(p => p.cat === 'critico');
             const atencao = listaRelatorio.filter(p => p.cat === 'atencao');
-
             if(criticos.length > 0) {
                 msg += `🚨 *ITENS CRÍTICOS (Até 5 dias)*\n`;
-                criticos.forEach(p => {
-                    msg += `• *${p.produto}*\n`;
-                    msg += `  └ 🕒 ${p.dias} dias | 📍 ${p.setor}\n\n`;
-                });
+                criticos.forEach(p => msg += `• *${p.produto}*\n  └ 🕒 ${p.dias} dias | 📍 ${p.setor}\n\n`);
             }
-
             if(atencao.length > 0) {
                 msg += `⚠️ *ITENS EM ATENÇÃO (6 a 15 dias)*\n`;
-                atencao.forEach(p => {
-                    msg += `• *${p.produto}*\n`;
-                    msg += `  └ 🕒 ${p.dias} dias | 📍 ${p.setor}\n\n`;
-                });
+                atencao.forEach(p => msg += `• *${p.produto}*\n  └ 🕒 ${p.dias} dias | 📍 ${p.setor}\n\n`);
             }
-
-            msg += `------------------------------------------\n`;
-            msg += `_⚠️ Favor providenciar a retirada ou promoção destes itens._`;
-
+            msg += `------------------------------------------\n_⚠️ Favor providenciar a retirada ou promoção destes itens._`;
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
         };
 
@@ -286,7 +250,7 @@
             });
         };
 
-        window.apagar = async (id) => { if(confirm("Remover item do sistema?")) await deleteDoc(doc(db, "validades", id)); };
+        window.apagar = async (id) => { if(confirm("Remover item?")) await deleteDoc(doc(db, "validades", id)); };
     </script>
 </body>
 </html>
