@@ -9,13 +9,15 @@
     <style>
         .modal-active { display: flex !important; }
         .nav-active { color: #2563eb; border-top: 4px solid #2563eb; }
+        .filter-active { transform: scale(1.05); border-width: 4px !important; opacity: 1 !important; }
+        .filter-inactive { opacity: 0.5; border-width: 2px !important; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans antialiased text-slate-900 pb-20">
 
     <div id="modal-baixa" class="hidden fixed inset-0 z-[100] bg-black/60 items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl scale-95 transition-transform">
-            <h3 class="text-xl font-black text-slate-800 text-center mb-6 uppercase tracking-tighter">Baixa de Produto</h3>
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl scale-95 transition-transform text-center">
+            <h3 class="text-xl font-black text-slate-800 mb-6 uppercase tracking-tighter">Baixa de Produto</h3>
             <div class="grid grid-cols-1 gap-3">
                 <button onclick="confirmarBaixa('Venda')" class="bg-green-600 text-white p-5 rounded-2xl font-black text-lg shadow-lg active:scale-95 uppercase">💰 Vendido</button>
                 <button onclick="confirmarBaixa('Descarte')" class="bg-red-600 text-white p-5 rounded-2xl font-black text-lg shadow-lg active:scale-95 uppercase">🗑️ Descarte / Perda</button>
@@ -38,8 +40,8 @@
 
     <div id="main-panel" class="hidden min-h-screen">
         <nav class="bg-blue-900 text-white p-4 shadow-xl sticky top-0 z-50 flex justify-between items-center">
-            <h1 class="font-black italic text-xl uppercase">New Market</h1>
-            <button id="btn-logout" class="text-[9px] font-bold bg-white/10 px-3 py-1 rounded-full">SAIR</button>
+            <h1 class="font-black italic text-xl uppercase tracking-tighter">New Market</h1>
+            <button id="btn-logout" class="text-[9px] font-bold bg-white/10 px-3 py-1 rounded-full uppercase">Sair</button>
         </nav>
 
         <main class="p-4 max-w-xl mx-auto w-full">
@@ -74,13 +76,23 @@
             <div id="gerente-view" class="hidden">
                 <div id="tab-lista" class="space-y-4">
                     <div class="grid grid-cols-3 gap-2 mb-4 text-center font-black">
-                        <div class="bg-white p-3 rounded-2xl border-b-4 border-red-500 text-red-600 shadow-sm"><p class="text-[8px] uppercase">Crítico</p><p id="count-critico" class="text-xl">0</p></div>
-                        <div class="bg-white p-3 rounded-2xl border-b-4 border-yellow-500 text-yellow-600 shadow-sm"><p class="text-[8px] uppercase">Atenção</p><p id="count-atencao" class="text-xl">0</p></div>
-                        <div class="bg-white p-3 rounded-2xl border-b-4 border-blue-500 text-blue-600 shadow-sm"><p class="text-[8px] uppercase">Total</p><p id="count-total" class="text-xl">0</p></div>
+                        <button onclick="setFiltro('critico')" id="filter-btn-critico" class="bg-white p-3 rounded-2xl border-2 border-red-500 text-red-600 shadow-sm transition-all">
+                            <p class="text-[8px] uppercase">Crítico</p>
+                            <p id="count-critico" class="text-xl">0</p>
+                        </button>
+                        <button onclick="setFiltro('atencao')" id="filter-btn-atencao" class="bg-white p-3 rounded-2xl border-2 border-yellow-500 text-yellow-600 shadow-sm transition-all">
+                            <p class="text-[8px] uppercase">Atenção</p>
+                            <p id="count-atencao" class="text-xl">0</p>
+                        </button>
+                        <button onclick="setFiltro('todos')" id="filter-btn-todos" class="bg-white p-3 rounded-2xl border-2 border-blue-500 text-blue-600 shadow-sm transition-all filter-active">
+                            <p class="text-[8px] uppercase">Total</p>
+                            <p id="count-total" class="text-xl">0</p>
+                        </button>
                     </div>
-                    <input type="text" id="input-busca" onkeyup="filtrarProdutos()" placeholder="🔍 Buscar por nome..." class="w-full p-4 border-none rounded-2xl bg-white shadow-md font-bold outline-none">
-                    <button id="btn-whatsapp" class="w-full bg-emerald-500 text-white font-black py-4 rounded-2xl text-[10px] uppercase shadow-md mb-4 active:scale-95">Enviar Relatório WhatsApp 📊</button>
-                    <div id="lista-vencimento" class="space-y-3"></div>
+
+                    <input type="text" id="input-busca" onkeyup="filtrarProdutos()" placeholder="🔍 Buscar por nome ou código..." class="w-full p-4 border-none rounded-2xl bg-white shadow-md font-bold outline-none mb-2">
+                    
+                    <div id="lista-vencimento" class="space-y-3 pb-10"></div>
                 </div>
 
                 <div id="tab-perdas" class="hidden space-y-4">
@@ -90,7 +102,7 @@
                             <div><p class="text-[10px] uppercase text-red-300 font-bold">Total Descartado</p><p id="loss-count" class="text-3xl font-black">0</p></div>
                         </div>
                     </div>
-                    <div id="lista-perdas" class="space-y-2"></div>
+                    <div id="lista-perdas" class="space-y-2 pb-10"></div>
                 </div>
 
                 <nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center z-50 shadow-2xl h-16">
@@ -106,7 +118,6 @@
     </div>
 
     <script type="module">
-        // [IMPORTES DO FIREBASE E CONFIGURAÇÃO PERMANECEM IGUAIS]
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, getDoc, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -125,12 +136,13 @@
         const db = getFirestore(app);
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         let itemParaBaixa = null;
+        let filtroAtual = 'todos';
 
         // LOGIN / LOGOUT
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
-            catch (err) { alert("Acesso Negado!"); }
+            catch (err) { alert("Erro ao entrar!"); }
         };
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
@@ -154,38 +166,53 @@
             }
         });
 
-        // SALVAR LANÇAMENTO
+        // SALVAR
         document.getElementById('btn-salvar').onclick = async () => {
             const ean = document.getElementById('prod-ean').value;
             const qtd = document.getElementById('prod-qtd').value;
             const nome = document.getElementById('prod-nome').value;
             const setor = document.getElementById('prod-setor').value;
             const data = document.getElementById('prod-data').value;
-            if(!ean || !qtd || !nome || !data) return alert("Preencha todos os campos!");
+            if(!ean || !qtd || !nome || !data) return alert("Preencha tudo!");
             try {
                 await addDoc(collection(db, "validades"), {
                     produto: nome.toUpperCase(), codigo: ean, quantidade: qtd, setor: setor, vencimento: data, criadoEm: new Date()
                 });
-                alert("✅ Salvo!");
+                alert("✅ Registrado!");
                 document.getElementById('prod-nome').value = ""; document.getElementById('prod-ean').value = ""; document.getElementById('prod-qtd').value = "";
             } catch (e) { alert("Erro ao salvar."); }
         };
 
-        // CARREGAR LISTA ATIVA
+        // FILTROS DE CATEGORIA
+        window.setFiltro = (tipo) => {
+            filtroAtual = tipo;
+            // Atualiza botões
+            document.querySelectorAll('[id^="filter-btn-"]').forEach(btn => {
+                btn.classList.remove('filter-active');
+                btn.classList.add('filter-inactive');
+            });
+            document.getElementById(`filter-btn-${tipo}`).classList.add('filter-active');
+            document.getElementById(`filter-btn-${tipo}`).classList.remove('filter-inactive');
+            filtrarProdutos();
+        };
+
+        // CARREGAR LISTA
         function carregarDados() {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista-vencimento');
-                let criticos = 0, atencao = 0;
+                let cCount = 0, aCount = 0;
                 lista.innerHTML = "";
                 snap.forEach(d => {
                     const item = d.data();
                     const diff = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
-                    let cor = "border-green-500", txt = "text-green-600";
-                    if(diff <= 5) { cor = "border-red-500"; txt = "text-red-600 font-black animate-pulse"; criticos++; }
-                    else if(diff <= 15) { cor = "border-yellow-500"; txt = "text-yellow-600 font-bold"; atencao++; }
+                    let categoria = "normal", cor = "border-green-500", txt = "text-green-600";
+                    
+                    if(diff <= 5) { cor = "border-red-500"; txt = "text-red-600 font-black animate-pulse"; cCount++; categoria = "critico"; }
+                    else if(diff <= 15) { cor = "border-yellow-500"; txt = "text-yellow-600 font-bold"; aCount++; categoria = "atencao"; }
                     
                     const card = document.createElement('div');
-                    card.className = `p-4 rounded-2xl bg-white shadow-sm border-l-8 ${cor} flex flex-col gap-2`;
+                    card.dataset.categoria = categoria;
+                    card.className = `p-4 rounded-2xl bg-white shadow-sm border-l-8 ${cor} flex flex-col gap-2 product-card`;
                     card.innerHTML = `
                         <div class="flex justify-between text-[8px] font-black uppercase text-slate-400"><span>${item.setor}</span><span class="${txt}">${diff} DIAS</span></div>
                         <div class="flex justify-between items-center"><h3 class="font-black text-sm uppercase">${item.produto}</h3><span class="bg-blue-600 text-white text-[9px] px-2 py-1 rounded-lg">QTD: ${item.quantidade}</span></div>
@@ -194,46 +221,22 @@
                     lista.appendChild(card);
                 });
                 document.getElementById('count-total').innerText = snap.size;
-                document.getElementById('count-critico').innerText = criticos;
-                document.getElementById('count-atencao').innerText = atencao;
+                document.getElementById('count-critico').innerText = cCount;
+                document.getElementById('count-atencao').innerText = aCount;
+                filtrarProdutos();
             });
         }
 
-        // FUNÇÃO DE WHATSAPP ATUALIZADA
-        document.getElementById('btn-whatsapp').onclick = () => {
-            let msg = "*📊 RELATÓRIO NEW MARKET*\n";
-            msg += "---------------------------------\n\n";
-            
-            let criticos = "";
-            let atencao = "";
-            
-            document.querySelectorAll('#lista-vencimento > div').forEach(c => {
-                if(c.style.display !== "none") {
-                    const produto = c.querySelector('h3').innerText;
-                    const qtd = c.querySelector('.bg-blue-600').innerText;
-                    const dias = c.querySelector('span:nth-child(2)').innerText;
-                    const venc = c.querySelector('p:last-of-type').innerText.replace("VENCE: ", "");
-                    const setor = c.querySelector('span:nth-child(1)').innerText;
-
-                    let itemStr = `📦 *${produto}*\n└ ${qtd} | ${setor}\n└ 🗓️ ${venc} (${dias})\n\n`;
-
-                    if(c.classList.contains('border-red-500')) criticos += "🔴 " + itemStr;
-                    else if(c.classList.contains('border-yellow-500')) atencao += "🟡 " + itemStr;
-                }
+        window.filtrarProdutos = () => {
+            const busca = document.getElementById('input-busca').value.toLowerCase();
+            document.querySelectorAll('.product-card').forEach(card => {
+                const catMatch = (filtroAtual === 'todos' || card.dataset.categoria === filtroAtual);
+                const buscaMatch = card.innerText.toLowerCase().includes(busca);
+                card.style.display = (catMatch && buscaMatch) ? "flex" : "none";
             });
-
-            if(criticos) msg += "*🚨 ITENS CRÍTICOS (Até 5 dias)*\n" + criticos;
-            if(atencao) msg += "*⚠️ ATENÇÃO (Até 15 dias)*\n" + atencao;
-
-            if(!criticos && !atencao) return alert("Nada para relatar!");
-            
-            msg += "---------------------------------\n";
-            msg += "_Enviado via Painel New Market_";
-
-            window.open("https://wa.me/?text=" + encodeURIComponent(msg), '_blank');
         };
 
-        // [LOGICA DE BAIXA E NAVEGAÇÃO PERMANECE IGUAL]
+        // CARREGAR PERDAS
         function carregarPerdas() {
             onSnapshot(query(collection(db, "perdas"), orderBy("dataBaixa", "desc"), limit(50)), (snap) => {
                 const lista = document.getElementById('lista-perdas');
@@ -245,7 +248,7 @@
                     const card = document.createElement('div');
                     card.className = "bg-white p-3 rounded-xl border-l-4 border-red-900 flex justify-between items-center shadow-sm";
                     card.innerHTML = `
-                        <div><p class="font-black text-[11px] uppercase">${item.produto}</p><p class="text-[8px] text-slate-400 uppercase">${item.setor} | Cód: ${item.codigo}</p></div>
+                        <div><p class="font-black text-[11px] uppercase">${item.produto}</p><p class="text-[8px] text-slate-400 uppercase">${item.setor}</p></div>
                         <div class="text-right"><p class="text-red-600 font-black text-sm">-${item.quantidade}</p><p class="text-[8px] text-slate-300">${item.dataBaixa.toDate().toLocaleDateString()}</p></div>`;
                     lista.appendChild(card);
                 });
@@ -253,19 +256,18 @@
             });
         }
 
+        // MODAL E TABS
         window.switchTab = (tab) => {
-            const nl = document.getElementById('nav-lista');
-            const np = document.getElementById('nav-perdas');
             if(tab === 'lista') {
                 document.getElementById('tab-lista').classList.remove('hidden');
                 document.getElementById('tab-perdas').classList.add('hidden');
-                nl.classList.add('nav-active'); nl.classList.remove('text-slate-400');
-                np.classList.remove('nav-active'); np.classList.add('text-slate-400');
+                document.getElementById('nav-lista').classList.add('nav-active');
+                document.getElementById('nav-perdas').classList.remove('nav-active');
             } else {
                 document.getElementById('tab-lista').classList.add('hidden');
                 document.getElementById('tab-perdas').classList.remove('hidden');
-                np.classList.add('nav-active'); np.classList.remove('text-slate-400');
-                nl.classList.remove('nav-active'); nl.classList.add('text-slate-400');
+                document.getElementById('nav-perdas').classList.add('nav-active');
+                document.getElementById('nav-lista').classList.remove('nav-active');
             }
         };
 
@@ -279,13 +281,6 @@
                 await addDoc(collection(db, "perdas"), { ...docSnap.data(), dataBaixa: new Date() });
             }
             await deleteDoc(docRef); fecharModal();
-        };
-
-        window.filtrarProdutos = () => {
-            const termo = document.getElementById('input-busca').value.toLowerCase();
-            document.querySelectorAll('#lista-vencimento > div').forEach(c => {
-                c.style.display = c.innerText.toLowerCase().includes(termo) ? "flex" : "none";
-            });
         };
     </script>
 </body>
