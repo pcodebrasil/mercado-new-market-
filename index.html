@@ -66,7 +66,7 @@
                 <h2 class="font-black uppercase text-green-700 text-[10px] tracking-widest">Novo Lançamento</h2>
                 <input type="text" id="p-nome" placeholder="PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50">
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="number" id="p-ean" placeholder="CÓDIGO" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
+                    <input type="number" id="p-ean" placeholder="CÓDIGO (EAN)" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
                     <input type="number" id="p-qtd" placeholder="QTD" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
                 </div>
                 <select id="p-setor" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50 outline-none text-sm">
@@ -124,10 +124,12 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         let filtroAtual = 'todos';
         let listaRelatorio = [];
 
+        // FUNÇÃO SAUDAÇÃO
         function mostrarSaudacao(email) {
             const nomeStr = email.split('@')[0].toLowerCase();
             let saudacao = (nomeStr === 'adrielle' || nomeStr.endsWith('a')) ? "Bem-vinda" : "Bem-vindo";
@@ -137,6 +139,7 @@
             setTimeout(() => { card.classList.add('welcome-hide'); setTimeout(() => card.classList.add('hidden'), 800); }, 4000);
         }
 
+        // GERENCIAMENTO DE MODAL E SENHA
         window.abrirModalSenha = () => document.getElementById('modal-senha').classList.add('active');
         window.fecharModalSenha = () => document.getElementById('modal-senha').classList.remove('active');
         window.processarTrocaSenha = async () => {
@@ -147,23 +150,31 @@
                 const cred = EmailAuthProvider.credential(user.email, sA);
                 await reauthenticateWithCredential(user, cred);
                 await updatePassword(user, sN);
-                alert("✅ Senha atualizada!"); fecharModalSenha();
+                alert("✅ Senha atualizada!"); 
+                fecharModalSenha();
             } catch { alert("❌ Senha atual incorreta."); }
         };
 
+        // LOGIN / LOGOUT
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
-            try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
-            catch { alert("Acesso negado."); }
+            try { 
+                await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); 
+            } catch { alert("Acesso negado. Verifique e-mail e senha."); }
         };
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
+        // MONITOR DE ESTADO DE LOGIN
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-panel').classList.remove('hidden');
                 const isG = gerentes.includes(user.email);
                 document.getElementById('repositor-form').classList.toggle('hidden', isG);
+                
+                // Melhoria 3: Bloquear datas retroativas no calendário
+                document.getElementById('p-data').min = new Date().toISOString().split("T")[0];
+                
                 mostrarSaudacao(user.email);
                 carregar(isG);
             } else {
@@ -172,58 +183,79 @@
             }
         });
 
-        // SALVAR E LIMPAR CAMPOS
+        // SALVAR COM MELHORIA DE SEGURANÇA (OPÇÃO 2)
         document.getElementById('btn-salvar').onclick = async () => {
+            const btn = document.getElementById('btn-salvar');
             const elNome = document.getElementById('p-nome');
             const elEan = document.getElementById('p-ean');
             const elQtd = document.getElementById('p-qtd');
             const elData = document.getElementById('p-data');
             const elSetor = document.getElementById('p-setor');
 
+            if(!elNome.value || !elData.value) return alert("Preencha Nome e Data!");
+
+            // Bloqueio de clique duplo
+            btn.disabled = true;
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ SALVANDO...";
+            btn.style.opacity = "0.6";
+
             const data = {
                 produto: elNome.value.toUpperCase(),
-                codigo: elEan.value,
-                quantidade: elQtd.value,
+                codigo: elEan.value || "S/N",
+                quantidade: elQtd.value || "1",
                 setor: elSetor.value,
                 vencimento: elData.value,
                 criadoEm: serverTimestamp()
             };
 
-            if(!data.produto || !data.vencimento) return alert("Preencha Nome e Data!");
-
             try { 
                 await addDoc(collection(db, "validades"), data); 
-                alert("Salvo!"); 
-                // LIMPEZA DOS CAMPOS
-                elNome.value = ""; 
-                elEan.value = ""; 
-                elQtd.value = ""; 
-                elData.value = "";
+                alert("✅ Salvo com sucesso!"); 
+                elNome.value = ""; elEan.value = ""; elQtd.value = ""; elData.value = "";
             } catch { 
-                alert("Erro ao salvar."); 
+                alert("❌ Erro ao salvar."); 
+            } finally {
+                btn.disabled = false;
+                btn.innerText = originalText;
+                btn.style.opacity = "1";
             }
         };
 
+        // CARREGAR DADOS DO FIRESTORE
         function carregar(podeApagar) {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista');
-                let c1 = 0, c2 = 0; lista.innerHTML = "";
+                let c1 = 0, c2 = 0; 
+                lista.innerHTML = "";
                 listaRelatorio = [];
+
                 snap.forEach(d => {
                     const item = d.data();
                     const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
+                    
                     let cat = "normal", estilo = "card-normal", txt = "text-green-600";
                     if(diff <= 5) { estilo = "card-critico"; txt = "text-red-600 font-black animate-pulse"; c1++; cat = "critico"; }
                     else if(diff <= 15) { estilo = "card-atencao"; txt = "text-yellow-600 font-bold"; c2++; cat = "atencao"; }
+                    
                     if(cat !== "normal") listaRelatorio.push({ ...item, dias: diff, cat });
+
                     const div = document.createElement('div');
                     div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3`;
                     div.dataset.cat = cat;
                     div.innerHTML = `
-                        <div class="flex justify-between text-[8px] font-black uppercase text-slate-400"><span>${item.setor}</span><span class="${txt}">${diff} DIAS</span></div>
-                        <div class="flex justify-between items-center mt-1"><h3 class="font-black text-sm uppercase">${item.produto}</h3><span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-lg">QTD: ${item.quantidade}</span></div>
-                        <div class="flex justify-between items-center mt-3"><p class="text-[9px] font-bold text-slate-400">VENCE: ${item.vencimento.split('-').reverse().join('/')}</p>
-                        ${podeApagar ? `<button onclick="apagar('${d.id}')" class="text-slate-300 font-bold text-[9px] uppercase">Remover</button>` : ''}</div>`;
+                        <div class="flex justify-between text-[8px] font-black uppercase text-slate-400">
+                            <span>${item.setor}</span>
+                            <span class="${txt}">${diff <= 0 ? 'VENCIDO' : diff + ' DIAS'}</span>
+                        </div>
+                        <div class="flex justify-between items-center mt-1">
+                            <h3 class="font-black text-sm uppercase">${item.produto}</h3>
+                            <span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-lg">QTD: ${item.quantidade}</span>
+                        </div>
+                        <div class="flex justify-between items-center mt-3">
+                            <p class="text-[9px] font-bold text-slate-400">VENCE: ${item.vencimento.split('-').reverse().join('/')}</p>
+                            ${podeApagar ? `<button onclick="apagar('${d.id}')" class="text-slate-300 font-bold text-[9px] uppercase">Remover</button>` : ''}
+                        </div>`;
                     lista.appendChild(div);
                 });
                 document.getElementById('c-total').innerText = snap.size;
@@ -233,12 +265,15 @@
             });
         }
 
+        // RELATÓRIO WHATSAPP
         window.gerarRelatorioZap = () => {
             if(listaRelatorio.length === 0) return alert("Nada crítico encontrado!");
             const dataHoje = new Date().toLocaleDateString('pt-BR');
             let msg = `*📊 RELATÓRIO DE RISCO - NEW MARKET*\n📅 _Data: ${dataHoje}_\n------------------------------------------\n\n`;
+            
             const criticos = listaRelatorio.filter(p => p.cat === 'critico');
             const atencao = listaRelatorio.filter(p => p.cat === 'atencao');
+
             if(criticos.length > 0) {
                 msg += `🚨 *ITENS CRÍTICOS (Até 5 dias)*\n`;
                 criticos.forEach(p => msg += `• *${p.produto}*\n  └ 🕒 ${p.dias} dias | 📍 ${p.setor}\n\n`);
@@ -251,6 +286,7 @@
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
         };
 
+        // SISTEMA DE FILTROS
         window.setFiltro = (t) => {
             filtroAtual = t;
             ['f-critico', 'f-atencao', 'f-todos'].forEach(id => {
@@ -269,7 +305,12 @@
             });
         };
 
-        window.apagar = async (id) => { if(confirm("Remover item?")) await deleteDoc(doc(db, "validades", id)); };
+        // APAGAR DOCUMENTO
+        window.apagar = async (id) => { 
+            if(confirm("Deseja realmente remover este item da lista?")) {
+                await deleteDoc(doc(db, "validades", id)); 
+            }
+        };
     </script>
 </body>
 </html>
