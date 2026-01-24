@@ -12,13 +12,19 @@
     <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border-t-8 border-blue-600">
             <div class="text-center mb-8">
-                <h1 class="text-4xl font-black text-blue-900 italic tracking-tighter">NEW MARKET</h1>
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2">Controle de Estoque</p>
+                <h1 class="text-4xl font-black text-blue-900 italic tracking-tighter uppercase">New Market</h1>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2 text-center">Acesso Restrito</p>
             </div>
             <form id="login-form" class="space-y-4">
-                <input type="text" id="username" class="w-full p-4 border-2 border-slate-100 rounded-2xl focus:border-blue-500 outline-none transition bg-slate-50" placeholder="Usuário (Ex: Adriano)" required>
-                <input type="password" id="password" class="w-full p-4 border-2 border-slate-100 rounded-2xl focus:border-blue-500 outline-none transition bg-slate-50" placeholder="Senha" required>
-                <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black text-lg hover:bg-blue-700 shadow-lg transition-all active:scale-95">ENTRAR</button>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase ml-1 mb-1 italic">E-mail Corporativo</label>
+                    <input type="email" id="email" class="w-full p-4 border-2 border-slate-100 rounded-2xl focus:border-blue-500 outline-none transition bg-slate-50" placeholder="usuario@newmarket.com" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase ml-1 mb-1 italic">Senha</label>
+                    <input type="password" id="password" class="w-full p-4 border-2 border-slate-100 rounded-2xl focus:border-blue-500 outline-none transition bg-slate-50" placeholder="••••••••" required>
+                </div>
+                <button type="submit" id="btn-login" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black text-lg hover:bg-blue-700 shadow-lg transition-all active:scale-95">ENTRAR</button>
             </form>
         </div>
     </div>
@@ -26,9 +32,9 @@
     <div id="main-panel" class="hidden min-h-screen flex flex-col">
         <nav class="bg-blue-900 text-white p-4 shadow-xl sticky top-0 z-50 flex justify-between items-center">
             <h1 class="font-black italic text-xl tracking-tighter">NEW MARKET</h1>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-3">
                 <span id="user-display" class="text-[10px] font-bold bg-blue-800 px-3 py-1 rounded-full border border-blue-500 uppercase"></span>
-                <button onclick="location.reload()" class="text-xs opacity-70 hover:underline">Sair</button>
+                <button id="btn-logout" class="text-xs text-red-300 font-bold hover:text-white transition">Sair</button>
             </div>
         </nav>
 
@@ -36,12 +42,12 @@
             
             <div id="repositor-view" class="hidden space-y-6">
                 <div class="bg-white p-6 rounded-3xl shadow-xl border-b-8 border-green-500">
-                    <h2 class="text-xl font-black mb-6 uppercase flex items-center gap-2">📝 Novo Lançamento</h2>
+                    <h2 class="text-xl font-black mb-6 uppercase flex items-center gap-2">📝 Lançar Validade</h2>
                     <div class="space-y-4">
-                        <label class="block text-xs font-bold text-slate-500 uppercase ml-1">Nome do Produto</label>
-                        <input type="text" id="prod-nome" placeholder="Ex: Arroz Tio João 5kg" class="w-full p-4 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 bg-slate-50 font-medium">
+                        <label class="block text-xs font-bold text-slate-500 uppercase ml-1">Produto</label>
+                        <input type="text" id="prod-nome" placeholder="Nome do Produto" class="w-full p-4 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 bg-slate-50 font-medium">
                         
-                        <label class="block text-xs font-bold text-slate-500 uppercase ml-1">Responsável pelo Corredor</label>
+                        <label class="block text-xs font-bold text-slate-500 uppercase ml-1">Corredor Responsável</label>
                         <select id="prod-setor" class="w-full p-4 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 bg-slate-50 font-bold text-slate-700">
                             <option value="Corredor do Paulo">Corredor do Paulo</option>
                             <option value="Corredor do Leandro">Corredor do Leandro</option>
@@ -49,8 +55,8 @@
                             <option value="Corredor do Edmar">Corredor do Edmar</option>
                         </select>
 
-                        <label class="block text-xs font-bold text-slate-500 uppercase ml-1">Data de Vencimento</label>
-                        <input type="date" id="prod-data" class="w-full p-4 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 bg-slate-50 font-medium">
+                        <label class="block text-xs font-bold text-slate-500 uppercase ml-1">Vencimento</label>
+                        <input type="date" id="prod-data" class="w-full p-4 border-2 border-slate-100 rounded-2xl outline-none focus:border-green-500 bg-slate-50">
                         
                         <button onclick="salvarProduto()" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl shadow-lg active:scale-95 transition-all mt-4">ENVIAR AGORA</button>
                     </div>
@@ -60,23 +66,19 @@
             <div id="gerente-view" class="hidden space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-white p-4 rounded-3xl shadow-sm border-2 border-red-100 text-center">
-                        <p class="text-[10px] font-black text-red-500 uppercase">Atenção (3 dias)</p>
+                        <p class="text-[10px] font-black text-red-500 uppercase">⚠️ Críticos</p>
                         <p id="count-critico" class="text-3xl font-black text-slate-800">0</p>
                     </div>
                     <div class="bg-white p-4 rounded-3xl shadow-sm border-2 border-blue-100 text-center">
-                        <p class="text-[10px] font-black text-blue-500 uppercase">Total Itens</p>
+                        <p class="text-[10px] font-black text-blue-500 uppercase">📊 Total</p>
                         <p id="count-total" class="text-3xl font-black text-slate-800">0</p>
                     </div>
                 </div>
 
                 <div class="bg-white p-3 rounded-2xl shadow-sm space-y-2 sticky top-20 z-40">
-                    <input type="text" id="input-busca" onkeyup="filtrarProdutos()" placeholder="🔍 Buscar por produto ou corredor..." 
-                           class="w-full p-4 border-none rounded-xl bg-slate-100 outline-none focus:ring-2 focus:ring-blue-500">
-                    <button onclick="exportarRelatorio()" class="w-full bg-emerald-500 text-white font-black py-3 rounded-xl text-xs flex items-center justify-center gap-2 hover:bg-emerald-600 transition">
-                        ENVIAR PARA WHATSAPP 📊
-                    </button>
+                    <input type="text" id="input-busca" onkeyup="filtrarProdutos()" placeholder="🔍 Buscar..." class="w-full p-4 border-none rounded-xl bg-slate-100 outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="exportarRelatorio()" class="w-full bg-emerald-500 text-white font-black py-3 rounded-xl text-xs flex items-center justify-center gap-2 hover:bg-emerald-600 transition">ENVIAR LISTA WHATSAPP</button>
                 </div>
-
                 <div id="lista-vencimento" class="space-y-3 pb-10"></div>
             </div>
         </main>
