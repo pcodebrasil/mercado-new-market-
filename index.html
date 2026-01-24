@@ -17,7 +17,6 @@
         @keyframes fadeOutUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); height: 0; margin-bottom: 0; padding: 0; overflow: hidden; } }
         .welcome-anim { animation: fadeInDown 0.5s ease-out forwards; }
         .welcome-hide { animation: fadeOutUp 0.8s ease-in forwards; }
-        /* Checkbox estilizado */
         .check-item { width: 22px; height: 22px; cursor: pointer; accent-color: #2563eb; }
     </style>
 </head>
@@ -35,7 +34,7 @@
 
     <div id="login-screen" class="flex-grow flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border-t-8 border-blue-600 text-center">
-            <h1 class="text-3xl font-black text-blue-900 uppercase italic italic leading-none">New Market</h1>
+            <h1 class="text-3xl font-black text-blue-900 uppercase italic leading-none">New Market</h1>
             <p class="text-[9px] text-slate-400 font-bold uppercase mt-2 mb-8 tracking-widest">Gestão de Perdas 2026</p>
             <form id="login-form" class="space-y-4">
                 <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm" placeholder="E-mail" required>
@@ -68,7 +67,7 @@
                 <h2 class="font-black uppercase text-green-700 text-[10px]">Novo Lançamento</h2>
                 <input type="text" id="p-nome" placeholder="PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50">
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="number" id="p-ean" placeholder="CÓDIGO" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
+                    <input type="number" id="p-ean" placeholder="CÓDIGO DE BARRAS" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
                     <input type="number" id="p-qtd" placeholder="QTD" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
                 </div>
                 <select id="p-setor" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50 outline-none text-sm">
@@ -186,13 +185,12 @@
             } catch { alert("Erro ao salvar."); }
         };
 
-        // LÓGICA DE SELEÇÃO DE ITENS
-        window.toggleSelecao = (produto, setor, dias, id) => {
+        window.toggleSelecao = (info, id) => {
             const index = itensSelecionados.findIndex(i => i.id === id);
             if (index > -1) {
                 itensSelecionados.splice(index, 1);
             } else {
-                itensSelecionados.push({ produto, setor, dias, id });
+                itensSelecionados.push({ ...info, id });
             }
             const btnText = document.getElementById('zap-text');
             btnText.innerText = itensSelecionados.length > 0 ? `Enviar ${itensSelecionados.length} itens (WhatsApp)` : "Selecionar para Relatório";
@@ -209,17 +207,31 @@
                     if(diff <= 5) { estilo = "card-critico"; txt = "text-red-600 font-black animate-pulse"; c1++; cat = "critico"; }
                     else if(diff <= 15) { estilo = "card-atencao"; txt = "text-yellow-600 font-bold"; c2++; cat = "atencao"; }
                     
+                    const infoParaRelatorio = {
+                        produto: item.produto,
+                        ean: item.codigo || 'N/A',
+                        qtd: item.quantidade || '0',
+                        setor: item.setor,
+                        dias: diff
+                    };
+
                     const div = document.createElement('div');
                     div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 relative`;
                     div.dataset.cat = cat;
                     div.innerHTML = `
                         <div class="flex justify-between items-start">
                             <div class="text-[8px] font-black uppercase text-slate-400"><span>${item.setor}</span><span class="ml-2 ${txt}">${diff} DIAS</span></div>
-                            <input type="checkbox" onchange="toggleSelecao('${item.produto}', '${item.setor}', ${diff}, '${d.id}')" class="check-item">
+                            <input type="checkbox" onchange='toggleSelecao(${JSON.stringify(infoParaRelatorio)}, "${d.id}")' class="check-item">
                         </div>
-                        <div class="flex justify-between items-center mt-1"><h3 class="font-black text-sm uppercase">${item.produto}</h3><span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-lg">QTD: ${item.quantidade}</span></div>
-                        <div class="flex justify-between items-center mt-3"><p class="text-[9px] font-bold text-slate-400">VENCE: ${item.vencimento.split('-').reverse().join('/')}</p>
-                        ${podeApagar ? `<button onclick="apagar('${d.id}')" class="text-slate-300 font-bold text-[9px] uppercase">Remover</button>` : ''}</div>`;
+                        <div class="flex justify-between items-center mt-1">
+                            <h3 class="font-black text-sm uppercase">${item.produto}</h3>
+                            <span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-lg">QTD: ${item.quantidade}</span>
+                        </div>
+                        <p class="text-[10px] font-bold text-slate-500 mt-1">EAN: ${item.codigo || '---'}</p>
+                        <div class="flex justify-between items-center mt-3">
+                            <p class="text-[9px] font-bold text-slate-400">VENCE: ${item.vencimento.split('-').reverse().join('/')}</p>
+                            ${podeApagar ? `<button onclick="apagar('${d.id}')" class="text-slate-300 font-bold text-[9px] uppercase">Remover</button>` : ''}
+                        </div>`;
                     lista.appendChild(div);
                 });
                 document.getElementById('c-total').innerText = snap.size;
@@ -230,14 +242,17 @@
         }
 
         window.gerarRelatorioZap = () => {
-            if(itensSelecionados.length === 0) return alert("Selecione ao menos um produto marcando o quadradinho!");
+            if(itensSelecionados.length === 0) return alert("Selecione os produtos primeiro!");
             
             const dataHoje = new Date().toLocaleDateString('pt-BR');
             let msg = `*📊 RELATÓRIO DE RISCO - NEW MARKET*\n📅 _Data: ${dataHoje}_\n------------------------------------------\n\n`;
             
             itensSelecionados.forEach(p => {
                 const emoji = p.dias <= 5 ? '🚨' : '⚠️';
-                msg += `${emoji} *${p.produto}*\n  └ 🕒 ${p.dias} dias | 📍 ${p.setor}\n\n`;
+                msg += `${emoji} *${p.produto}*\n`;
+                msg += `  ├ 🔢 Qtd: ${p.qtd}\n`;
+                msg += `  ├ 🏷️ EAN: ${p.ean}\n`;
+                msg += `  └ 🕒 ${p.dias} dias | 📍 ${p.setor}\n\n`;
             });
 
             msg += `------------------------------------------\n_⚠️ Favor providenciar a retirada ou promoção destes itens._`;
