@@ -1,42 +1,7 @@
-/* Efeito de alerta pulsante para itens críticos */
-.card-vencido {
-    animation: pulse-red 2s infinite;
-}
-
+.card-vencido { animation: pulse-red 2s infinite; }
 @keyframes pulse-red {
     0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
     70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
     100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
 }
-
-/* Ajuste para inputs no mobile */
-input, select {
-    font-size: 16px !important; /* Evita zoom automático no iOS ao clicar */
-}
-
-/* Scrollbar personalizada */
-::-webkit-scrollbar {
-    width: 6px;
-}
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 10px;
-}
-.card-vencido {
-    animation: pulse-red 2s infinite;
-}
-
-@keyframes pulse-red {
-    0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
-}
-
-input, select { font-size: 16px !important; }
-
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
+input, select, button { font-size: 16px !important; }
