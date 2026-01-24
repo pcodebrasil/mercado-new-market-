@@ -17,29 +17,28 @@
         @keyframes fadeOutUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); height: 0; margin-bottom: 0; padding: 0; overflow: hidden; } }
         .welcome-anim { animation: fadeInDown 0.5s ease-out forwards; }
         .welcome-hide { animation: fadeOutUp 0.8s ease-in forwards; }
-        .check-item { width: 22px; height: 22px; cursor: pointer; accent-color: #2563eb; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
 
     <div id="modal-senha" class="modal">
         <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center">
-            <h3 class="font-black text-slate-800 uppercase mb-4 text-sm">Segurança</h3>
+            <h3 class="font-black text-slate-800 uppercase mb-4 text-sm">Acesso Seguro</h3>
             <input type="password" id="pass-atual" placeholder="Senha Atual" class="w-full p-4 mb-2 border rounded-2xl bg-slate-50 outline-none text-sm">
             <input type="password" id="pass-nova" placeholder="Nova Senha" class="w-full p-4 mb-4 border rounded-2xl bg-slate-50 outline-none text-sm">
-            <button onclick="processarTrocaSenha()" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase">Atualizar</button>
-            <button onclick="fecharModalSenha()" class="w-full text-slate-400 font-bold text-[10px] uppercase p-4">Fechar</button>
+            <button onclick="processarTrocaSenha()" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Atualizar Senha</button>
+            <button onclick="fecharModalSenha()" class="w-full text-slate-400 font-bold text-[10px] uppercase p-4 tracking-widest">Fechar</button>
         </div>
     </div>
 
     <div id="login-screen" class="flex-grow flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border-t-8 border-blue-600 text-center">
-            <h1 class="text-3xl font-black text-blue-900 uppercase italic leading-none">New Market</h1>
-            <p class="text-[9px] text-slate-400 font-bold uppercase mt-2 mb-8 tracking-widest">Gestão de Perdas 2026</p>
+        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border-t-8 border-blue-600">
+            <h1 class="text-3xl font-black text-blue-900 text-center uppercase italic leading-none">New Market</h1>
+            <p class="text-[9px] text-center text-slate-400 font-bold uppercase mt-2 mb-8 tracking-tighter italic">Gestão de Perdas 2026</p>
             <form id="login-form" class="space-y-4">
-                <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm" placeholder="E-mail" required>
-                <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm" placeholder="Senha" required>
-                <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Entrar</button>
+                <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm" placeholder="E-mail corporativo" required>
+                <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm" placeholder="Sua senha" required>
+                <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-all">Acessar Painel</button>
             </form>
         </div>
     </div>
@@ -59,15 +58,15 @@
                 <div class="bg-blue-100 p-2 rounded-full text-xl">🚀</div>
                 <div>
                     <p id="welcome-text" class="font-black text-blue-900 uppercase text-xs leading-none"></p>
-                    <p class="text-[9px] text-slate-400 font-bold uppercase mt-1">Conectado ao sistema</p>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase mt-1">Conectado ao New Market</p>
                 </div>
             </div>
 
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-lg border-b-8 border-green-500 space-y-4">
-                <h2 class="font-black uppercase text-green-700 text-[10px]">Novo Lançamento</h2>
+                <h2 class="font-black uppercase text-green-700 text-[10px] tracking-widest">Novo Lançamento</h2>
                 <input type="text" id="p-nome" placeholder="PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50">
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="number" id="p-ean" placeholder="CÓDIGO DE BARRAS" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
+                    <input type="number" id="p-ean" placeholder="CÓDIGO" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
                     <input type="number" id="p-qtd" placeholder="QTD" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
                 </div>
                 <select id="p-setor" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50 outline-none text-sm">
@@ -77,7 +76,7 @@
                     <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
                 <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
-                <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl uppercase shadow-lg active:scale-95">Salvar</button>
+                <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl uppercase shadow-lg active:scale-95 transition-transform">Salvar Agora</button>
             </div>
 
             <div class="space-y-4">
@@ -93,8 +92,8 @@
                     </button>
                 </div>
 
-                <button id="btn-zap" onclick="gerarRelatorioZap()" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-3 shadow-md active:scale-95 transition-all">
-                    <span class="text-lg">📊</span> <span id="zap-text">Selecionar para Relatório</span>
+                <button onclick="gerarRelatorioZap()" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-3 shadow-md active:scale-95 transition-all">
+                    <span class="text-lg">📊</span> Enviar Relatório de Riscos (WhatsApp)
                 </button>
 
                 <input type="text" id="busca" onkeyup="filtrar()" placeholder="🔍 Pesquisar na lista..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none border-none text-sm">
@@ -127,7 +126,7 @@
         const db = getFirestore(app);
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         let filtroAtual = 'todos';
-        let itensSelecionados = [];
+        let listaRelatorio = [];
 
         function mostrarSaudacao(email) {
             const nomeStr = email.split('@')[0].toLowerCase();
@@ -149,13 +148,13 @@
                 await reauthenticateWithCredential(user, cred);
                 await updatePassword(user, sN);
                 alert("✅ Senha atualizada!"); fecharModalSenha();
-            } catch { alert("❌ Senha incorreta."); }
+            } catch { alert("❌ Senha atual incorreta."); }
         };
 
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
-            catch { alert("Erro no acesso."); }
+            catch { alert("Acesso negado."); }
         };
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
@@ -173,65 +172,58 @@
             }
         });
 
+        // SALVAR E LIMPAR CAMPOS
         document.getElementById('btn-salvar').onclick = async () => {
-            const elNome = document.getElementById('p-nome'), elEan = document.getElementById('p-ean');
-            const elQtd = document.getElementById('p-qtd'), elData = document.getElementById('p-data'), elSetor = document.getElementById('p-setor');
-            const data = { produto: elNome.value.toUpperCase(), codigo: elEan.value, quantidade: elQtd.value, setor: elSetor.value, vencimento: elData.value, criadoEm: serverTimestamp() };
+            const elNome = document.getElementById('p-nome');
+            const elEan = document.getElementById('p-ean');
+            const elQtd = document.getElementById('p-qtd');
+            const elData = document.getElementById('p-data');
+            const elSetor = document.getElementById('p-setor');
+
+            const data = {
+                produto: elNome.value.toUpperCase(),
+                codigo: elEan.value,
+                quantidade: elQtd.value,
+                setor: elSetor.value,
+                vencimento: elData.value,
+                criadoEm: serverTimestamp()
+            };
+
             if(!data.produto || !data.vencimento) return alert("Preencha Nome e Data!");
+
             try { 
                 await addDoc(collection(db, "validades"), data); 
                 alert("Salvo!"); 
-                elNome.value = elEan.value = elQtd.value = elData.value = "";
-            } catch { alert("Erro ao salvar."); }
-        };
-
-        window.toggleSelecao = (info, id) => {
-            const index = itensSelecionados.findIndex(i => i.id === id);
-            if (index > -1) {
-                itensSelecionados.splice(index, 1);
-            } else {
-                itensSelecionados.push({ ...info, id });
+                // LIMPEZA DOS CAMPOS
+                elNome.value = ""; 
+                elEan.value = ""; 
+                elQtd.value = ""; 
+                elData.value = "";
+            } catch { 
+                alert("Erro ao salvar."); 
             }
-            const btnText = document.getElementById('zap-text');
-            btnText.innerText = itensSelecionados.length > 0 ? `Enviar ${itensSelecionados.length} itens (WhatsApp)` : "Selecionar para Relatório";
         };
 
         function carregar(podeApagar) {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista');
                 let c1 = 0, c2 = 0; lista.innerHTML = "";
+                listaRelatorio = [];
                 snap.forEach(d => {
                     const item = d.data();
                     const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
                     let cat = "normal", estilo = "card-normal", txt = "text-green-600";
                     if(diff <= 5) { estilo = "card-critico"; txt = "text-red-600 font-black animate-pulse"; c1++; cat = "critico"; }
                     else if(diff <= 15) { estilo = "card-atencao"; txt = "text-yellow-600 font-bold"; c2++; cat = "atencao"; }
-                    
-                    const infoParaRelatorio = {
-                        produto: item.produto,
-                        ean: item.codigo || 'N/A',
-                        qtd: item.quantidade || '0',
-                        setor: item.setor,
-                        dias: diff
-                    };
-
+                    if(cat !== "normal") listaRelatorio.push({ ...item, dias: diff, cat });
                     const div = document.createElement('div');
-                    div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 relative`;
+                    div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3`;
                     div.dataset.cat = cat;
                     div.innerHTML = `
-                        <div class="flex justify-between items-start">
-                            <div class="text-[8px] font-black uppercase text-slate-400"><span>${item.setor}</span><span class="ml-2 ${txt}">${diff} DIAS</span></div>
-                            <input type="checkbox" onchange='toggleSelecao(${JSON.stringify(infoParaRelatorio)}, "${d.id}")' class="check-item">
-                        </div>
-                        <div class="flex justify-between items-center mt-1">
-                            <h3 class="font-black text-sm uppercase">${item.produto}</h3>
-                            <span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-lg">QTD: ${item.quantidade}</span>
-                        </div>
-                        <p class="text-[10px] font-bold text-slate-500 mt-1">EAN: ${item.codigo || '---'}</p>
-                        <div class="flex justify-between items-center mt-3">
-                            <p class="text-[9px] font-bold text-slate-400">VENCE: ${item.vencimento.split('-').reverse().join('/')}</p>
-                            ${podeApagar ? `<button onclick="apagar('${d.id}')" class="text-slate-300 font-bold text-[9px] uppercase">Remover</button>` : ''}
-                        </div>`;
+                        <div class="flex justify-between text-[8px] font-black uppercase text-slate-400"><span>${item.setor}</span><span class="${txt}">${diff} DIAS</span></div>
+                        <div class="flex justify-between items-center mt-1"><h3 class="font-black text-sm uppercase">${item.produto}</h3><span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-lg">QTD: ${item.quantidade}</span></div>
+                        <div class="flex justify-between items-center mt-3"><p class="text-[9px] font-bold text-slate-400">VENCE: ${item.vencimento.split('-').reverse().join('/')}</p>
+                        ${podeApagar ? `<button onclick="apagar('${d.id}')" class="text-slate-300 font-bold text-[9px] uppercase">Remover</button>` : ''}</div>`;
                     lista.appendChild(div);
                 });
                 document.getElementById('c-total').innerText = snap.size;
@@ -242,19 +234,19 @@
         }
 
         window.gerarRelatorioZap = () => {
-            if(itensSelecionados.length === 0) return alert("Selecione os produtos primeiro!");
-            
+            if(listaRelatorio.length === 0) return alert("Nada crítico encontrado!");
             const dataHoje = new Date().toLocaleDateString('pt-BR');
             let msg = `*📊 RELATÓRIO DE RISCO - NEW MARKET*\n📅 _Data: ${dataHoje}_\n------------------------------------------\n\n`;
-            
-            itensSelecionados.forEach(p => {
-                const emoji = p.dias <= 5 ? '🚨' : '⚠️';
-                msg += `${emoji} *${p.produto}*\n`;
-                msg += `  ├ 🔢 Qtd: ${p.qtd}\n`;
-                msg += `  ├ 🏷️ EAN: ${p.ean}\n`;
-                msg += `  └ 🕒 ${p.dias} dias | 📍 ${p.setor}\n\n`;
-            });
-
+            const criticos = listaRelatorio.filter(p => p.cat === 'critico');
+            const atencao = listaRelatorio.filter(p => p.cat === 'atencao');
+            if(criticos.length > 0) {
+                msg += `🚨 *ITENS CRÍTICOS (Até 5 dias)*\n`;
+                criticos.forEach(p => msg += `• *${p.produto}*\n  └ 🕒 ${p.dias} dias | 📍 ${p.setor}\n\n`);
+            }
+            if(atencao.length > 0) {
+                msg += `⚠️ *ITENS EM ATENÇÃO (6 a 15 dias)*\n`;
+                atencao.forEach(p => msg += `• *${p.produto}*\n  └ 🕒 ${p.dias} dias | 📍 ${p.setor}\n\n`);
+            }
             msg += `------------------------------------------\n_⚠️ Favor providenciar a retirada ou promoção destes itens._`;
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
         };
