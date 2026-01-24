@@ -11,9 +11,23 @@
         .card-critico { border-left: 8px solid #ef4444; }
         .card-atencao { border-left: 8px solid #f59e0b; }
         .card-normal { border-left: 8px solid #10b981; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-center: center; padding: 20px; }
+        .modal.active { display: flex; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
+
+    <div id="modal-senha" class="modal">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+            <h3 class="font-black text-slate-800 uppercase mb-4 text-center">Alterar Senha</h3>
+            <div class="space-y-3">
+                <input type="password" id="pass-atual" placeholder="Senha Atual" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none">
+                <input type="password" id="pass-nova" placeholder="Nova Senha" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none">
+                <button onclick="processarTrocaSenha()" id="btn-confirmar-senha" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase">Confirmar Troca</button>
+                <button onclick="fecharModalSenha()" class="w-full text-slate-400 font-bold text-xs uppercase p-2">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
     <div id="login-screen" class="flex-grow flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border-t-8 border-blue-600">
@@ -28,12 +42,14 @@
 
     <div id="main-panel" class="hidden flex-grow flex flex-col">
         <nav class="bg-blue-900 text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
-            <span class="font-black italic uppercase">New Market</span>
+            <div class="flex flex-col">
+                <span class="font-black italic uppercase leading-none">New Market</span>
+                <button onclick="abrirModalSenha()" class="text-[8px] text-blue-300 font-bold uppercase mt-1 text-left">Alterar Senha ⚙️</button>
+            </div>
             <button id="btn-logout" class="text-[10px] bg-white/10 px-3 py-1 rounded-full uppercase">Sair</button>
         </nav>
 
         <main class="p-4 max-w-xl mx-auto w-full flex-grow">
-            
             <div id="repositor-view" class="hidden bg-white p-6 rounded-3xl shadow-lg border-b-8 border-green-500 space-y-4">
                 <h2 class="font-black uppercase text-green-700">Lançar Produto</h2>
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none">
@@ -75,7 +91,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -93,6 +109,34 @@
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         let filtroAtual = 'todos';
 
+        // ALTERAR SENHA LÓGICA
+        window.abrirModalSenha = () => document.getElementById('modal-senha').classList.add('active');
+        window.fecharModalSenha = () => document.getElementById('modal-senha').classList.remove('active');
+
+        window.processarTrocaSenha = async () => {
+            const user = auth.currentUser;
+            const senhaAtual = document.getElementById('pass-atual').value;
+            const novaSenha = document.getElementById('pass-nova').value;
+            const btn = document.getElementById('btn-confirmar-senha');
+
+            if(!senhaAtual || !novaSenha) return alert("Preencha as senhas!");
+            if(novaSenha.length < 6) return alert("A nova senha deve ter no mínimo 6 dígitos!");
+
+            btn.disabled = true; btn.innerText = "PROCESSANDO...";
+            
+            try {
+                const credential = EmailAuthProvider.credential(user.email, senhaAtual);
+                await reauthenticateWithCredential(user, credential);
+                await updatePassword(user, novaSenha);
+                alert("✅ Senha alterada com sucesso!");
+                fecharModalSenha();
+            } catch (error) {
+                alert("❌ Erro: Verifique se a senha atual está correta.");
+            }
+            btn.disabled = false; btn.innerText = "Confirmar Troca";
+        };
+
+        // ... RESTANTE DO CÓDIGO (LOGIN, GRAVAR, CARREGAR, FILTRAR, APAGAR) ...
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
@@ -151,9 +195,8 @@
                     let cat = "normal", estilo = "card-normal", txt = "text-green-600";
                     if(diff <= 5) { estilo = "card-critico"; txt = "text-red-600 font-black animate-pulse"; c1++; cat = "critico"; }
                     else if(diff <= 15) { estilo = "card-atencao"; txt = "text-yellow-600 font-bold"; c2++; cat = "atencao"; }
-                    
                     const div = document.createElement('div');
-                    div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo}`;
+                    div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3`;
                     div.dataset.cat = cat;
                     div.innerHTML = `
                         <div class="flex justify-between text-[8px] font-black uppercase text-slate-400"><span>${item.setor}</span><span class="${txt}">${diff} DIAS</span></div>
