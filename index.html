@@ -172,17 +172,36 @@
             }
         });
 
+        // SALVAR E LIMPAR CAMPOS
         document.getElementById('btn-salvar').onclick = async () => {
+            const elNome = document.getElementById('p-nome');
+            const elEan = document.getElementById('p-ean');
+            const elQtd = document.getElementById('p-qtd');
+            const elData = document.getElementById('p-data');
+            const elSetor = document.getElementById('p-setor');
+
             const data = {
-                produto: document.getElementById('p-nome').value.toUpperCase(),
-                codigo: document.getElementById('p-ean').value,
-                quantidade: document.getElementById('p-qtd').value,
-                setor: document.getElementById('p-setor').value,
-                vencimento: document.getElementById('p-data').value,
+                produto: elNome.value.toUpperCase(),
+                codigo: elEan.value,
+                quantidade: elQtd.value,
+                setor: elSetor.value,
+                vencimento: elData.value,
                 criadoEm: serverTimestamp()
             };
+
             if(!data.produto || !data.vencimento) return alert("Preencha Nome e Data!");
-            try { await addDoc(collection(db, "validades"), data); alert("Salvo!"); document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = ""; } catch { alert("Erro ao salvar."); }
+
+            try { 
+                await addDoc(collection(db, "validades"), data); 
+                alert("Salvo!"); 
+                // LIMPEZA DOS CAMPOS
+                elNome.value = ""; 
+                elEan.value = ""; 
+                elQtd.value = ""; 
+                elData.value = "";
+            } catch { 
+                alert("Erro ao salvar."); 
+            }
         };
 
         function carregar(podeApagar) {
