@@ -38,7 +38,9 @@
                 <span class="text-blue-800">New</span> <span class="text-red-600">Market</span>
             </h1>
             <p class="text-[12px] text-center text-slate-500 font-bold uppercase mt-1 tracking-widest">Nazaré Paulista</p>
-            <p class="text-[9px] text-center text-slate-400 font-bold uppercase mt-4 mb-8 tracking-tighter italic">Gestão de Perdas 2026</p>
+            <p class="text-[8px] text-center text-slate-400 font-bold uppercase mt-1 mb-1">Desenvolvido por Paulo Souza</p>
+            
+            <p class="text-[9px] text-center text-slate-300 font-bold uppercase mt-2 mb-8 tracking-tighter italic">Gestão de Perdas 2026</p>
             
             <form id="login-form" class="space-y-4">
                 <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm focus:border-blue-500" placeholder="E-mail" required>
@@ -53,6 +55,8 @@
             <div class="flex flex-col">
                 <span class="font-black italic uppercase text-lg leading-none">New Market</span>
                 <span class="text-[9px] font-bold uppercase tracking-wider opacity-90">Nazaré Paulista</span>
+                <span class="text-[7px] font-bold uppercase opacity-75 mt-0.5">Dev: Paulo Souza</span>
+                
                 <button onclick="abrirModalSenha()" class="text-[8px] text-blue-200 font-bold uppercase mt-1 text-left w-fit hover:text-white">Ajustes ⚙️</button>
             </div>
             <button id="btn-logout" class="text-[10px] bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full uppercase font-bold transition-all">Sair</button>
@@ -234,7 +238,6 @@
             if(selecionados.length === 0) return alert("Selecione ao menos um item no quadradinho para enviar!");
 
             const itens = dadosAtuais.filter(d => selecionados.includes(d.id));
-            // Adicionado localização no relatório
             let msg = `*📊 RELATÓRIO DE VALIDADES - NEW MARKET (Nazaré Paulista)*\n\n`;
             
             itens.forEach(p => {
