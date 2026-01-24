@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - Gestão Integrada</title>
+    <title>New Market - Estoque João</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .filter-active { border-width: 4px !important; opacity: 1 !important; transform: scale(1.05); }
-        .filter-inactive { opacity: 0.5; }
         .card-critico { border-left: 8px solid #ef4444; }
-        .card-atencao { border-left: 8px solid #f59e0b; }
         .card-normal { border-left: 8px solid #10b981; }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
@@ -32,13 +29,13 @@
             <form id="login-form" class="space-y-4 mt-6">
                 <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="E-mail" required>
                 <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="Senha" required>
-                <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Entrar</button>
+                <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase">Entrar</button>
             </form>
         </div>
     </div>
 
     <div id="main-panel" class="hidden flex-grow flex flex-col">
-        <nav class="bg-blue-900 text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
+        <nav class="bg-blue-900 text-white p-4 flex justify-between items-center sticky top-0 z-50">
             <span class="font-black italic uppercase text-lg">New Market</span>
             <button id="btn-logout" class="text-[10px] bg-white/10 px-3 py-1 rounded-full uppercase font-bold">Sair</button>
         </nav>
@@ -63,10 +60,12 @@
             </div>
 
             <div class="space-y-4">
-                <button id="btn-zap-geral" onclick="abrirModalContatos()" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-3 shadow-md active:scale-95">
+                <button id="btn-zap-geral" onclick="abrirModalContatos()" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-3 shadow-md">
                     <span class="text-lg">📤</span> <span id="zap-text">Selecionar para Enviar</span>
                 </button>
 
+                <div id="status-view" class="text-[10px] font-bold text-slate-400 uppercase text-center hidden">Exibindo apenas itens do Depósito</div>
+                
                 <input type="text" id="busca" onkeyup="filtrar()" placeholder="🔍 Pesquisar produtos..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none border-none text-sm">
                 
                 <div id="lista" class="space-y-3 pt-2 pb-10"></div>
@@ -116,8 +115,12 @@
                 usuarioAtualEmail = user.email;
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-panel').classList.remove('hidden');
+                
+                const isJoao = user.email === emaiLJoao;
+                document.getElementById('status-view').classList.toggle('hidden', !isJoao);
                 document.getElementById('repositor-form').classList.toggle('hidden', gerentes.includes(user.email));
-                carregar(gerentes.includes(user.email));
+                
+                carregar(gerentes.includes(user.email), isJoao);
                 renderizarContatos();
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
@@ -143,12 +146,16 @@
             document.getElementById('zap-text').innerText = itensSelecionados.length > 0 ? `Enviar ${itensSelecionados.length} itens` : "Selecionar para Enviar";
         };
 
-        function carregar(podeApagar) {
+        function carregar(podeApagar, apenasDeposito) {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista');
                 lista.innerHTML = "";
                 snap.forEach(d => {
                     const item = d.data();
+                    
+                    // LÓGICA DE FILTRO DO JOÃO:
+                    if(apenasDeposito && item.setor !== "Depósito") return;
+
                     const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
                     const info = { produto: item.produto, ean: item.codigo, qtd: item.quantidade, venc: item.vencimento, setor: item.setor };
                     const div = document.createElement('div');
@@ -187,10 +194,8 @@
         }
 
         function enviarZap(telefone, nomeDest) {
-            // DIFERENCIAL DO JOÃO NO RELATÓRIO
             const isJoao = usuarioAtualEmail === emaiLJoao;
             const cabecalho = isJoao ? "*📦 AVISO DO DEPÓSITO (JOÃO)*" : "*📊 RELATÓRIO DE VALIDADES*";
-            
             let msg = `${cabecalho}\n_Para: ${nomeDest}_\n\n`;
             itensSelecionados.forEach(p => {
                 msg += `🔹 *${p.produto}*\n   └ Vence: ${p.venc.split('-').reverse().join('/')}\n   └ Qtd: ${p.qtd} | Setor: ${p.setor}\n\n`;
