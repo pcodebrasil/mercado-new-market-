@@ -15,7 +15,7 @@
             <form id="login-form" class="space-y-4 mt-8">
                 <input type="email" id="email" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 bg-slate-50" placeholder="usuario@newmarket.com" required>
                 <input type="password" id="password" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 bg-slate-50" placeholder="Senha" required>
-                <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black text-lg shadow-lg active:scale-95">ENTRAR</button>
+                <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black text-lg shadow-lg active:scale-95 transition-all">ENTRAR</button>
             </form>
         </div>
     </div>
@@ -32,33 +32,42 @@
         <main class="p-4 max-w-xl mx-auto w-full">
             <div id="repositor-view" class="hidden space-y-4">
                 <div class="bg-white p-6 rounded-3xl shadow-xl border-b-8 border-green-500">
-                    <h2 class="font-black mb-4 uppercase text-lg">Lançar Validade</h2>
-                    <input type="text" id="prod-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl mb-3 bg-slate-50 font-bold uppercase outline-none focus:border-green-500">
-                    <input type="number" id="prod-ean" placeholder="CÓDIGO DE BARRAS (13 DÍGITOS)" class="w-full p-4 border rounded-2xl mb-3 bg-slate-50 font-bold outline-none focus:border-green-500">
-                    <select id="prod-setor" class="w-full p-4 border rounded-2xl mb-3 bg-slate-50 font-bold outline-none focus:border-green-500">
-                        <option value="Corredor do Paulo">Corredor do Paulo</option>
-                        <option value="Corredor do Leandro">Corredor do Leandro</option>
-                        <option value="Corredor do Pedro">Corredor do Pedro</option>
-                        <option value="Corredor do Edmar">Corredor do Edmar</option>
-                    </select>
-                    <input type="date" id="prod-data" class="w-full p-4 border rounded-2xl mb-6 bg-slate-50 font-bold outline-none focus:border-green-500">
-                    <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl shadow-lg active:scale-95 uppercase">Enviar</button>
+                    <h2 class="font-black mb-4 uppercase text-lg text-green-700">Lançar Validade</h2>
+                    <div class="space-y-3">
+                        <input type="text" id="prod-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold uppercase outline-none focus:border-green-500">
+                        <input type="number" id="prod-ean" placeholder="CÓDIGO DE BARRAS" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold outline-none focus:border-green-500">
+                        <select id="prod-setor" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold outline-none focus:border-green-500">
+                            <option value="Corredor do Paulo">Corredor do Paulo</option>
+                            <option value="Corredor do Leandro">Corredor do Leandro</option>
+                            <option value="Corredor do Pedro">Corredor do Pedro</option>
+                            <option value="Corredor do Edmar">Corredor do Edmar</option>
+                        </select>
+                        <input type="date" id="prod-data" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold outline-none focus:border-green-500">
+                        <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl shadow-lg active:scale-95 uppercase">Enviar Lançamento</button>
+                    </div>
                 </div>
             </div>
 
             <div id="gerente-view" class="hidden space-y-4">
                 <div class="grid grid-cols-2 gap-3 mb-4 text-center">
-                    <div class="bg-white p-4 rounded-3xl border-2 border-red-50 text-red-600 font-black italic">
-                        <p class="text-[9px] uppercase">Vencendo</p>
-                        <p id="count-critico" class="text-2xl">0</p>
+                    <div class="bg-white p-4 rounded-3xl border-2 border-red-100 text-red-600 font-black">
+                        <p class="text-[10px] uppercase">Críticos</p>
+                        <p id="count-critico" class="text-3xl">0</p>
                     </div>
-                    <div class="bg-white p-4 rounded-3xl border-2 border-blue-50 text-blue-600 font-black italic">
-                        <p class="text-[9px] uppercase">Total</p>
-                        <p id="count-total" class="text-2xl">0</p>
+                    <div class="bg-white p-4 rounded-3xl border-2 border-blue-100 text-blue-600 font-black">
+                        <p class="text-[10px] uppercase">Total</p>
+                        <p id="count-total" class="text-3xl">0</p>
                     </div>
                 </div>
-                <input type="text" id="input-busca" onkeyup="filtrarProdutos()" placeholder="🔍 Buscar..." class="w-full p-4 border-none rounded-2xl bg-white shadow-md font-bold outline-none">
-                <div id="lista-vencimento" class="space-y-3 mt-4 pb-10"></div>
+
+                <div class="sticky top-[72px] bg-slate-100 pt-2 pb-4 z-40 space-y-2">
+                    <input type="text" id="input-busca" onkeyup="filtrarProdutos()" placeholder="🔍 Buscar produto ou código..." class="w-full p-4 border-none rounded-2xl bg-white shadow-md font-bold outline-none focus:ring-2 focus:ring-blue-500">
+                    <button id="btn-whatsapp" class="w-full bg-emerald-500 text-white font-black py-4 rounded-2xl text-xs uppercase shadow-lg active:scale-95 flex items-center justify-center gap-2">
+                        <span>Relatório WhatsApp 📊</span>
+                    </button>
+                </div>
+
+                <div id="lista-vencimento" class="space-y-3 pb-10"></div>
             </div>
         </main>
     </div>
@@ -82,6 +91,7 @@
         const db = getFirestore(app);
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
 
+        // LOGIN
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -91,4 +101,108 @@
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
+
+        // CONTROLE DE ACESSO
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-panel').classList.remove('hidden');
+                document.getElementById('user-display').innerText = user.email.split('@')[0].toUpperCase();
+                if (gerentes.includes(user.email)) {
+                    document.getElementById('gerente-view').classList.remove('hidden');
+                    document.getElementById('repositor-view').classList.add('hidden');
+                    carregarDados();
+                } else {
+                    document.getElementById('repositor-view').classList.remove('hidden');
+                    document.getElementById('gerente-view').classList.add('hidden');
+                }
+            } else {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('main-panel').classList.add('hidden');
+            }
+        });
+
+        // SALVAR PRODUTO
+        document.getElementById('btn-salvar').onclick = async () => {
+            const nome = document.getElementById('prod-nome').value;
+            const ean = document.getElementById('prod-ean').value || "S/ CÓDIGO";
+            const setor = document.getElementById('prod-setor').value;
+            const data = document.getElementById('prod-data').value;
+            if(!nome || !data) return alert("Preencha Nome e Data!");
+            try {
+                await addDoc(collection(db, "validades"), {
+                    produto: nome, codigo: ean, setor: setor, vencimento: data, criadoEm: new Date()
+                });
+                alert("✅ Registrado!");
+                document.getElementById('prod-nome').value = "";
+                document.getElementById('prod-ean').value = "";
+            } catch (e) { alert("Erro ao salvar."); }
+        };
+
+        // CARREGAR DADOS REALTIME
+        function carregarDados() {
+            const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
+            onSnapshot(q, (snap) => {
+                const lista = document.getElementById('lista-vencimento');
+                let criticos = 0;
+                lista.innerHTML = "";
+                snap.forEach(d => {
+                    const item = d.data();
+                    const diff = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
+                    if(diff <= 3) criticos++;
+                    
+                    const card = document.createElement('div');
+                    card.className = `flex flex-col p-4 rounded-2xl bg-white shadow-sm border-l-8 ${diff <= 3 ? 'border-red-500 card-vencido' : 'border-blue-500'}`;
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="text-[8px] font-black bg-slate-100 px-2 py-0.5 rounded uppercase text-slate-500">${item.setor}</span>
+                            <span class="text-[11px] font-black ${diff <= 3 ? 'text-red-600' : 'text-slate-400'} uppercase">${diff} dias</span>
+                        </div>
+                        <h3 class="font-black text-slate-800 uppercase text-sm mb-1">${item.produto}</h3>
+                        <div class="bg-slate-50 p-2 rounded-lg border border-slate-100 mb-2">
+                            <p class="text-[14px] font-mono font-bold text-blue-600 tracking-wider text-center">${item.codigo}</p>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <p class="text-[11px] font-bold text-slate-400 italic">Vencimento: ${item.vencimento.split('-').reverse().join('/')}</p>
+                            <button onclick="window.darBaixaItem('${d.id}')" class="bg-slate-900 text-white text-[9px] px-4 py-1.5 rounded-lg font-black uppercase shadow-md">Baixa</button>
+                        </div>`;
+                    lista.appendChild(card);
+                });
+                document.getElementById('count-total').innerText = snap.size;
+                document.getElementById('count-critico').innerText = criticos;
+            });
+        }
+
+        // BAIXA
+        window.darBaixaItem = async (id) => {
+            if(confirm("Confirmar baixa deste item?")) await deleteDoc(doc(db, "validades", id));
+        };
+
+        // FILTRO DE BUSCA
+        window.filtrarProdutos = () => {
+            const termo = document.getElementById('input-busca').value.toLowerCase();
+            document.querySelectorAll('#lista-vencimento > div').forEach(c => {
+                c.style.display = c.innerText.toLowerCase().includes(termo) ? "flex" : "none";
+            });
+        };
+
+        // FUNÇÃO WHATSAPP VOLTOU
+        document.getElementById('btn-whatsapp').onclick = () => {
+            let msg = "*RELATÓRIO DE VALIDADES - NEW MARKET*\n\n";
+            let itens = 0;
+            document.querySelectorAll('#lista-vencimento > div').forEach(c => {
+                if(c.style.display !== "none") {
+                    const textoCard = c.innerText.replace("Baixa", "").trim();
+                    msg += "📌 " + textoCard.split('\n').join(' | ') + "\n\n";
+                    itens++;
+                }
+            });
             
+            if(itens === 0) return alert("Nenhum item na lista para enviar!");
+            
+            const link = "https://wa.me/?text=" + encodeURIComponent(msg);
+            window.open(link, '_blank');
+        };
+    </script>
+</body>
+</html>
