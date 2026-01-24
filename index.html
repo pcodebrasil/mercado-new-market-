@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - Gestão</title>
+    <title>New Market - Gestão Total</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,8 +14,9 @@
     <style>
         .modal-active { display: flex !important; }
         .nav-active { color: #2563eb; border-top: 4px solid #2563eb; }
-        .filter-active { transform: scale(1.05); border-width: 4px !important; opacity: 1 !important; }
+        .filter-active { transform: scale(1.05); border-width: 4px !important; opacity: 1 !important; z-index: 10; }
         .filter-inactive { opacity: 0.5; border-width: 2px !important; }
+        body { -webkit-tap-highlight-color: transparent; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans antialiased text-slate-900 pb-20">
@@ -125,7 +126,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, getDoc, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, getDoc, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
@@ -143,11 +144,11 @@
         let itemParaBaixa = null;
         let filtroAtual = 'todos';
 
-        // LOGIN / LOGOUT
+        // LOGIN
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
-            catch (err) { alert("Erro ao entrar!"); }
+            catch (err) { alert("Acesso negado!"); }
         };
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
@@ -171,72 +172,37 @@
             }
         });
 
-        // SALVAR LANÇAMENTO
+        // SALVAR
         document.getElementById('btn-salvar').onclick = async () => {
-            const ean = document.getElementById('prod-ean').value;
-            const qtd = document.getElementById('prod-qtd').value;
-            const nome = document.getElementById('prod-nome').value;
-            const setor = document.getElementById('prod-setor').value;
-            const data = document.getElementById('prod-data').value;
-            if(!ean || !qtd || !nome || !data) return alert("Preencha tudo!");
+            const btn = document.getElementById('btn-salvar');
+            const data = {
+                produto: document.getElementById('prod-nome').value.toUpperCase(),
+                codigo: document.getElementById('prod-ean').value,
+                quantidade: document.getElementById('prod-qtd').value,
+                setor: document.getElementById('prod-setor').value,
+                vencimento: document.getElementById('prod-data').value,
+                criadoEm: serverTimestamp()
+            };
+            if(!data.produto || !data.vencimento) return alert("Preencha os campos!");
+            
+            btn.disabled = true; btn.innerText = "GRAVANDO...";
             try {
-                await addDoc(collection(db, "validades"), {
-                    produto: nome.toUpperCase(), codigo: ean, quantidade: qtd, setor: setor, vencimento: data, criadoEm: new Date()
-                });
-                alert("✅ Registrado!");
-                document.getElementById('prod-nome').value = ""; document.getElementById('prod-ean').value = ""; document.getElementById('prod-qtd').value = "";
-            } catch (e) { alert("Erro ao salvar."); }
+                await addDoc(collection(db, "validades"), data);
+                alert("✅ Sucesso!");
+                document.getElementById('prod-nome').value = ""; document.getElementById('prod-ean').value = ""; 
+            } catch (e) { alert("Erro de conexão."); }
+            btn.disabled = false; btn.innerText = "GRAVAR AGORA";
         };
 
         // FILTROS
         window.setFiltro = (tipo) => {
             filtroAtual = tipo;
             document.querySelectorAll('[id^="filter-btn-"]').forEach(btn => {
-                btn.classList.remove('filter-active');
-                btn.classList.add('filter-inactive');
+                btn.classList.replace('filter-active', 'filter-inactive');
             });
-            document.getElementById(`filter-btn-${tipo}`).classList.add('filter-active');
-            document.getElementById(`filter-btn-${tipo}`).classList.remove('filter-inactive');
+            document.getElementById(`filter-btn-${tipo}`).classList.replace('filter-inactive', 'filter-active');
             filtrarProdutos();
         };
-
-        // CARREGAR DADOS
-        function carregarDados() {
-            onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
-                const lista = document.getElementById('lista-vencimento');
-                let cCount = 0, aCount = 0;
-                lista.innerHTML = "";
-                snap.forEach(d => {
-                    const item = d.data();
-                    const diff = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
-                    let categoria = "normal", cor = "border-green-500", txt = "text-green-600";
-                    
-                    if(diff <= 5) { cor = "border-red-500"; txt = "text-red-600 font-black animate-pulse"; cCount++; categoria = "critico"; }
-                    else if(diff <= 15) { cor = "border-yellow-500"; txt = "text-yellow-600 font-bold"; aCount++; categoria = "atencao"; }
-                    
-                    const card = document.createElement('div');
-                    card.dataset.categoria = categoria;
-                    card.className = `p-4 rounded-2xl bg-white shadow-sm border-l-8 ${cor} flex flex-col gap-2 product-card`;
-                    card.innerHTML = `
-                        <div class="flex justify-between text-[8px] font-black uppercase text-slate-400"><span>${item.setor}</span><span class="${txt}">${diff} DIAS</span></div>
-                        <div class="flex justify-between items-center"><h3 class="font-black text-sm uppercase">${item.produto}</h3><span class="bg-blue-600 text-white text-[9px] px-2 py-1 rounded-lg">QTD: ${item.quantidade}</span></div>
-                        <div class="text-[11px] font-mono font-bold text-blue-600 text-center bg-slate-50 p-1 rounded border">${item.codigo}</div>
-                        <div class="flex justify-between items-center"><p class="text-[9px] font-bold text-slate-400 italic">VENCE: ${item.vencimento.split('-').reverse().join('/')}</p><button onclick="abrirBaixa('${d.id}')" class="bg-slate-900 text-white text-[8px] px-3 py-1.5 rounded-lg font-black uppercase">Baixa</button></div>`;
-                    lista.appendChild(card);
-                });
-                
-                // ALERTA VISUAL PARA O GERENTE SE HOUVER CRÍTICOS
-                if (cCount > 0 && gerentes.includes(auth.currentUser?.email)) {
-                    // Notificação interna simples ao carregar
-                    console.log("Atenção: Existem produtos críticos!");
-                }
-
-                document.getElementById('count-total').innerText = snap.size;
-                document.getElementById('count-critico').innerText = cCount;
-                document.getElementById('count-atencao').innerText = aCount;
-                filtrarProdutos();
-            });
-        }
 
         window.filtrarProdutos = () => {
             const busca = document.getElementById('input-busca').value.toLowerCase();
@@ -247,54 +213,81 @@
             });
         };
 
-        function carregarPerdas() {
-            onSnapshot(query(collection(db, "perdas"), orderBy("dataBaixa", "desc"), limit(50)), (snap) => {
-                const lista = document.getElementById('lista-perdas');
-                let totalLoss = 0;
+        // CARREGAR VENCIMENTOS
+        function carregarDados() {
+            onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
+                const lista = document.getElementById('lista-vencimento');
+                let cCount = 0, aCount = 0;
                 lista.innerHTML = "";
                 snap.forEach(d => {
                     const item = d.data();
-                    totalLoss += Number(item.quantidade);
-                    const card = document.createElement('div');
-                    card.className = "bg-white p-3 rounded-xl border-l-4 border-red-900 flex justify-between items-center shadow-sm";
-                    card.innerHTML = `<div><p class="font-black text-[11px] uppercase">${item.produto}</p><p class="text-[8px] text-slate-400 uppercase">${item.setor}</p></div><div class="text-right"><p class="text-red-600 font-black text-sm">-${item.quantidade}</p></div>`;
-                    lista.appendChild(card);
+                    const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
+                    let cat = "normal", border = "border-green-500", text = "text-green-600";
+                    
+                    if(diff <= 5) { border = "border-red-500"; text = "text-red-600 font-black animate-pulse"; cCount++; cat = "critico"; }
+                    else if(diff <= 15) { border = "border-yellow-500"; text = "text-yellow-600 font-bold"; aCount++; cat = "atencao"; }
+                    
+                    const div = document.createElement('div');
+                    div.className = `product-card p-4 rounded-2xl bg-white shadow-sm border-l-8 ${border} flex flex-col gap-2`;
+                    div.dataset.categoria = cat;
+                    div.innerHTML = `
+                        <div class="flex justify-between text-[8px] font-black uppercase text-slate-400"><span>${item.setor}</span><span class="${text}">${diff} DIAS</span></div>
+                        <div class="flex justify-between items-center"><h3 class="font-black text-sm uppercase">${item.produto}</h3><span class="bg-blue-600 text-white text-[10px] px-2 py-1 rounded-lg">QTD: ${item.quantidade}</span></div>
+                        <div class="text-[11px] font-mono font-bold text-blue-600 text-center bg-slate-50 p-1 rounded border">${item.codigo || 'SEM EAN'}</div>
+                        <div class="flex justify-between items-center pt-1"><p class="text-[9px] font-bold text-slate-400">VENC: ${item.vencimento.split('-').reverse().join('/')}</p><button onclick="abrirBaixa('${d.id}')" class="bg-slate-900 text-white text-[8px] px-4 py-2 rounded-xl font-black uppercase">Baixa</button></div>`;
+                    lista.appendChild(div);
                 });
-                document.getElementById('loss-count').innerText = totalLoss;
+                document.getElementById('count-total').innerText = snap.size;
+                document.getElementById('count-critico').innerText = cCount;
+                document.getElementById('count-atencao').innerText = aCount;
+                filtrarProdutos();
+            });
+        }
+
+        // BAIXAS E PERDAS (CORRIGIDO)
+        window.abrirBaixa = (id) => { itemParaBaixa = id; document.getElementById('modal-baixa').classList.add('modal-active'); };
+        window.fecharModal = () => { document.getElementById('modal-baixa').classList.remove('modal-active'); };
+
+        window.confirmarBaixa = async (motivo) => {
+            if(!itemParaBaixa) return;
+            try {
+                const docRef = doc(db, "validades", itemParaBaixa);
+                const snap = await getDoc(docRef);
+                if(snap.exists() && motivo === 'Descarte') {
+                    await addDoc(collection(db, "perdas"), { ...snap.data(), dataBaixa: serverTimestamp() });
+                }
+                await deleteDoc(docRef);
+                fecharModal();
+            } catch (e) { alert("Erro ao processar."); }
+        };
+
+        function carregarPerdas() {
+            onSnapshot(query(collection(db, "perdas"), orderBy("dataBaixa", "desc"), limit(30)), (snap) => {
+                const lista = document.getElementById('lista-perdas');
+                let total = 0; lista.innerHTML = "";
+                snap.forEach(d => {
+                    const item = d.data();
+                    total += Number(item.quantidade);
+                    const dataF = item.dataBaixa ? item.dataBaixa.toDate().toLocaleDateString('pt-BR') : "...";
+                    const div = document.createElement('div');
+                    div.className = "bg-white p-3 rounded-xl border-l-4 border-red-800 flex justify-between items-center shadow-sm mb-2";
+                    div.innerHTML = `<div><p class="font-black text-[10px] uppercase">${item.produto}</p><p class="text-[8px] text-slate-400 uppercase">${item.setor} | ${dataF}</p></div><p class="text-red-600 font-black">-${item.quantidade}</p>`;
+                    lista.appendChild(div);
+                });
+                document.getElementById('loss-count').innerText = total;
             });
         }
 
         window.switchTab = (tab) => {
-            if(tab === 'lista') {
-                document.getElementById('tab-lista').classList.remove('hidden');
-                document.getElementById('tab-perdas').classList.add('hidden');
-                document.getElementById('nav-lista').classList.add('nav-active');
-                document.getElementById('nav-perdas').classList.remove('nav-active');
-            } else {
-                document.getElementById('tab-lista').classList.add('hidden');
-                document.getElementById('tab-perdas').classList.remove('hidden');
-                document.getElementById('nav-perdas').classList.add('nav-active');
-                document.getElementById('nav-lista').classList.remove('nav-active');
-            }
+            document.getElementById('tab-lista').classList.toggle('hidden', tab !== 'lista');
+            document.getElementById('tab-perdas').classList.toggle('hidden', tab !== 'perdas');
+            document.getElementById('nav-lista').classList.toggle('nav-active', tab === 'lista');
+            document.getElementById('nav-perdas').classList.toggle('nav-active', tab === 'perdas');
         };
 
-        window.abrirBaixa = (id) => { itemParaBaixa = id; document.getElementById('modal-baixa').classList.add('modal-active'); };
-        window.fecharModal = () => { document.getElementById('modal-baixa').classList.remove('modal-active'); itemParaBaixa = null; };
-        window.confirmarBaixa = async (motivo) => {
-            if(!itemParaBaixa) return;
-            const docRef = doc(db, "validades", itemParaBaixa);
-            const docSnap = await getDoc(docRef);
-            if(docSnap.exists() && motivo === 'Descarte') {
-                await addDoc(collection(db, "perdas"), { ...docSnap.data(), dataBaixa: new Date() });
-            }
-            await deleteDoc(docRef); fecharModal();
-        };
-
-        // REGISTRO DO SERVICE WORKER (PWA)
+        // SERVICE WORKER
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW pronto.'));
-            });
+            window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
         }
     </script>
 </body>
