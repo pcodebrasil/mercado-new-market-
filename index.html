@@ -13,8 +13,12 @@
         .card-normal { border-left: 8px solid #10b981; }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
+        
+        /* Animações da Saudação */
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        .welcome-anim { animation: fadeInDown 0.5s ease-out; }
+        @keyframes fadeOutUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); height: 0; margin-bottom: 0; padding: 0; overflow: hidden; } }
+        .welcome-anim { animation: fadeInDown 0.5s ease-out forwards; }
+        .welcome-hide { animation: fadeOutUp 0.8s ease-in forwards; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
@@ -52,11 +56,11 @@
 
         <main class="p-4 max-w-xl mx-auto w-full flex-grow space-y-6">
             
-            <div id="welcome-msg" class="welcome-anim bg-white p-4 rounded-2xl shadow-sm border-l-4 border-blue-600 flex items-center gap-3">
+            <div id="welcome-msg" class="hidden welcome-anim bg-white p-4 rounded-2xl shadow-sm border-l-4 border-blue-600 flex items-center gap-3">
                 <div class="bg-blue-100 p-2 rounded-full text-xl">👋</div>
                 <div>
                     <p id="welcome-text" class="font-black text-blue-900 uppercase text-xs leading-none"></p>
-                    <p class="text-[9px] text-slate-400 font-bold uppercase mt-1">Tenha um excelente trabalho!</p>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase mt-1 italic">Bom trabalho hoje!</p>
                 </div>
             </div>
 
@@ -119,45 +123,46 @@
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         let filtroAtual = 'todos';
 
-        // IDENTIFICAÇÃO DE GÊNERO E BOAS-VINDAS
-        function saudacaoPersonalizada(email) {
-            const nome = email.split('@')[0].toLowerCase();
-            let saudacao = "Olá";
-            let displayNome = nome.charAt(0).toUpperCase() + nome.slice(1);
-
-            if (nome === 'adrielle' || nome.endsWith('a')) {
-                saudacao = "Bem-vinda";
-            } else if (nome === 'adriano' || nome.endsWith('o')) {
-                saudacao = "Bem-vindo";
-            } else {
-                saudacao = "Olá";
-            }
-
+        // LÓGICA DE SAUDAÇÃO TEMPORÁRIA
+        function mostrarSaudacao(email) {
+            const nomeStr = email.split('@')[0].toLowerCase();
+            let saudacao = (nomeStr === 'adrielle' || nomeStr.endsWith('a')) ? "Bem-vinda" : 
+                           (nomeStr === 'adriano' || nomeStr.endsWith('o')) ? "Bem-vindo" : "Olá";
+            let displayNome = nomeStr.charAt(0).toUpperCase() + nomeStr.slice(1);
+            
+            const card = document.getElementById('welcome-msg');
             document.getElementById('welcome-text').innerText = `${saudacao}, ${displayNome}!`;
+            
+            card.classList.remove('hidden', 'welcome-hide');
+            
+            // Inicia o sumiço após 4 segundos
+            setTimeout(() => {
+                card.classList.add('welcome-hide');
+                setTimeout(() => card.classList.add('hidden'), 800);
+            }, 4000);
         }
 
-        // ALTERAR SENHA (Lógica do modal)
+        // TROCA SENHA
         window.abrirModalSenha = () => document.getElementById('modal-senha').classList.add('active');
         window.fecharModalSenha = () => document.getElementById('modal-senha').classList.remove('active');
         window.processarTrocaSenha = async () => {
             const user = auth.currentUser;
             const sA = document.getElementById('pass-atual').value;
             const sN = document.getElementById('pass-nova').value;
-            if(!sA || !sN) return alert("Preencha as senhas!");
             try {
                 const cred = EmailAuthProvider.credential(user.email, sA);
                 await reauthenticateWithCredential(user, cred);
                 await updatePassword(user, sN);
                 alert("✅ Senha alterada!");
                 fecharModalSenha();
-            } catch { alert("❌ Erro na alteração."); }
+            } catch { alert("❌ Erro ao trocar senha."); }
         };
 
-        // LOGIN / LOGOUT
+        // LOGIN
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
-            catch { alert("Acesso negado."); }
+            catch { alert("Erro de acesso."); }
         };
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
@@ -167,7 +172,7 @@
                 document.getElementById('main-panel').classList.remove('hidden');
                 const isG = gerentes.includes(user.email);
                 document.getElementById('repositor-form').classList.toggle('hidden', isG);
-                saudacaoPersonalizada(user.email);
+                mostrarSaudacao(user.email);
                 carregar(isG);
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
@@ -175,7 +180,7 @@
             }
         });
 
-        // GRAVAR, CARREGAR, FILTRAR E APAGAR (Mesma lógica robusta anterior)
+        // GRAVAR
         document.getElementById('btn-salvar').onclick = async () => {
             const data = {
                 produto: document.getElementById('p-nome').value.toUpperCase(),
@@ -185,10 +190,10 @@
                 vencimento: document.getElementById('p-data').value,
                 criadoEm: serverTimestamp()
             };
-            if(!data.produto || !data.vencimento) return alert("Preencha Nome e Data!");
+            if(!data.produto || !data.vencimento) return alert("Faltam dados!");
             try {
                 await addDoc(collection(db, "validades"), data);
-                alert("Salvo com sucesso!");
+                alert("Salvo!");
                 document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
             } catch { alert("Erro ao salvar."); }
         };
@@ -218,7 +223,7 @@
                     div.dataset.cat = cat;
                     div.innerHTML = `
                         <div class="flex justify-between text-[8px] font-black uppercase text-slate-400"><span>${item.setor}</span><span class="${txt}">${diff} DIAS</span></div>
-                        <div class="flex justify-between items-center mt-1"><h3 class="font-black text-sm uppercase leading-tight">${item.produto}</h3><span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-lg">QTD: ${item.quantidade}</span></div>
+                        <div class="flex justify-between items-center mt-1"><h3 class="font-black text-sm uppercase">${item.produto}</h3><span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-lg">QTD: ${item.quantidade}</span></div>
                         <div class="flex justify-between items-center mt-3"><p class="text-[9px] font-bold text-slate-400">VENCE: ${item.vencimento.split('-').reverse().join('/')}</p>
                         ${podeApagar ? `<button onclick="apagar('${d.id}')" class="text-slate-300 font-bold text-[9px] uppercase">Remover</button>` : ''}</div>`;
                     lista.appendChild(div);
