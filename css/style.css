@@ -25,4 +25,18 @@ input, select {
     background: #cbd5e1;
     border-radius: 10px;
 }
+.card-vencido {
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+input, select { font-size: 16px !important; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
