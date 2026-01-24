@@ -3,32 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - Master</title>
+    <title>New Market - Gestão de Validades</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <style>
         .card-critico { border-left: 8px solid #ef4444; }
+        .card-atencao { border-left: 8px solid #f59e0b; }
         .card-normal { border-left: 8px solid #10b981; }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
-        #scanner-container { width: 100%; height: 250px; border-radius: 1rem; overflow: hidden; background: #000; }
+        #scanner-container { width: 100%; height: 250px; border-radius: 1.5rem; overflow: hidden; background: #000; position: relative; }
         #scanner-container video { width: 100%; height: 100%; object-fit: cover; }
-        .img-preview { width: 100%; height: 150px; object-fit: cover; border-radius: 1rem; display: none; }
-        .check-item { width: 22px; height: 22px; accent-color: #2563eb; }
+        canvas.drawingBuffer { position: absolute; top: 0; left: 0; }
+        .check-item { width: 24px; height: 24px; accent-color: #2563eb; cursor: pointer; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
 
     <div id="modal-scanner" class="modal">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6">
-            <h3 class="font-black text-center mb-4 uppercase">Escanear Código</h3>
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+            <h3 class="font-black text-center mb-4 uppercase text-slate-800">Escanear Código</h3>
             <div id="scanner-container"></div>
-            <button onclick="stopScanner()" class="w-full bg-red-500 text-white p-4 rounded-2xl font-black mt-4 uppercase">Fechar</button>
+            <p class="text-[10px] text-center text-slate-400 mt-4 uppercase font-bold italic">Centralize o código de barras</p>
+            <button onclick="stopScanner()" class="w-full bg-red-500 text-white p-4 rounded-2xl font-black mt-4 uppercase shadow-lg">Cancelar</button>
         </div>
-    </div>
-
-    <div id="modal-foto" class="modal" onclick="this.classList.remove('active')">
-        <img id="foto-ampliada" src="" class="max-w-full max-h-full rounded-2xl">
     </div>
 
     <div id="modal-contatos" class="modal">
@@ -41,17 +39,18 @@
 
     <div id="login-screen" class="flex-grow flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border-t-8 border-blue-600">
-            <h1 class="text-3xl font-black text-blue-900 text-center uppercase italic">New Market</h1>
-            <form id="login-form" class="space-y-4 mt-6">
-                <input type="email" id="email" class="w-full p-4 border rounded-2xl outline-none" placeholder="E-mail" required>
-                <input type="password" id="password" class="w-full p-4 border rounded-2xl outline-none" placeholder="Senha" required>
-                <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase">Entrar</button>
+            <h1 class="text-3xl font-black text-blue-900 text-center uppercase italic leading-none">New Market</h1>
+            <p class="text-[9px] text-center text-slate-400 font-bold uppercase mt-2 mb-8 tracking-tighter italic">Gestão de Perdas 2026</p>
+            <form id="login-form" class="space-y-4">
+                <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm" placeholder="E-mail corporativo" required>
+                <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm" placeholder="Senha" required>
+                <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Acessar Painel</button>
             </form>
         </div>
     </div>
 
     <div id="main-panel" class="hidden flex-grow flex flex-col">
-        <nav class="bg-blue-900 text-white p-4 flex justify-between items-center sticky top-0 z-50">
+        <nav class="bg-blue-900 text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
             <span class="font-black italic uppercase text-lg">New Market</span>
             <button id="btn-logout" class="text-[10px] bg-white/10 px-3 py-1 rounded-full uppercase font-bold">Sair</button>
         </nav>
@@ -59,41 +58,35 @@
         <main class="p-4 max-w-xl mx-auto w-full flex-grow space-y-6">
             
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-lg border-b-8 border-green-500 space-y-4">
-                <h2 class="font-black uppercase text-green-700 text-[10px]">Lançar Produto</h2>
+                <h2 class="font-black uppercase text-green-700 text-[10px]">Novo Registro</h2>
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50 outline-none text-sm">
                 
-                <div class="flex gap-2">
-                    <input type="text" id="p-nome" placeholder="PRODUTO" class="flex-grow p-4 border rounded-2xl font-bold uppercase bg-slate-50 outline-none">
-                    <label class="bg-blue-100 p-4 rounded-2xl cursor-pointer">
-                        <span class="text-xl">📷</span>
-                        <input type="file" id="p-foto" accept="image/*" capture="environment" class="hidden" onchange="previewFoto(this)">
-                    </label>
-                </div>
-                <img id="img-preview" class="img-preview">
-
                 <div class="grid grid-cols-2 gap-2">
                     <div class="relative">
-                        <input type="number" id="p-ean" placeholder="CÓDIGO" class="w-full p-4 border rounded-2xl font-bold bg-slate-50 outline-none">
-                        <button onclick="startScanner()" class="absolute right-2 top-2 bg-blue-600 text-white p-2 rounded-xl">📷</button>
+                        <input type="number" id="p-ean" placeholder="CÓDIGO EAN" class="w-full p-4 border rounded-2xl font-bold bg-slate-50 outline-none text-sm">
+                        <button onclick="startScanner()" class="absolute right-2 top-2 bg-blue-600 text-white p-2 rounded-xl shadow-md">📷</button>
                     </div>
-                    <input type="number" id="p-qtd" placeholder="QTD" class="w-full p-4 border rounded-2xl font-bold bg-slate-50 outline-none">
+                    <input type="number" id="p-qtd" placeholder="QTD" class="w-full p-4 border rounded-2xl font-bold bg-slate-50 outline-none text-sm">
                 </div>
 
-                <select id="p-setor" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50 outline-none">
+                <select id="p-setor" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50 outline-none text-sm">
                     <option value="Depósito">Depósito</option>
                     <option value="Corredor do Paulo">Corredor do Paulo</option>
                     <option value="Corredor do Leandro">Corredor do Leandro</option>
                     <option value="Corredor do Pedro">Corredor do Pedro</option>
                     <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
-                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold bg-slate-50 outline-none">
-                <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl uppercase shadow-lg">Salvar Agora</button>
+                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold bg-slate-50 outline-none text-sm">
+                <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl uppercase shadow-lg active:scale-95 transition-transform">Salvar Registro</button>
             </div>
 
             <div class="space-y-4">
-                <button onclick="abrirModalContatos()" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-3">
-                    <span class="text-lg">📊</span> <span id="zap-text">Selecionar para Relatório</span>
+                <button onclick="abrirModalContatos()" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-3 shadow-md active:scale-95 transition-all">
+                    <span class="text-lg">📊</span> <span id="zap-text">Selecionar para Enviar</span>
                 </button>
-                <input type="text" id="busca" onkeyup="filtrar()" placeholder="🔍 Pesquisar..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none">
+
+                <input type="text" id="busca" onkeyup="filtrar()" placeholder="🔍 Pesquisar na lista..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none border-none text-sm">
+                
                 <div id="lista" class="space-y-3 pt-2 pb-10"></div>
             </div>
         </main>
@@ -103,13 +96,12 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
             projectId: "mercado-c3e95",
-            storageBucket: "mercado-c3e95.firebasestorage.app", // Storage Ativo
+            storageBucket: "mercado-c3e95.firebasestorage.app",
             messagingSenderId: "883539091925",
             appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c"
         };
@@ -117,7 +109,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
         const emailJoao = 'joao@newmarket.com';
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
@@ -129,20 +120,19 @@
         ];
 
         let itensSelecionados = [];
-        let usuarioEmail = "";
-        let fotoBlob = null;
+        let usuarioAtualEmail = "";
 
-        // AUTH
+        // LOGIN / LOGOUT
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
-            catch { alert("Erro de login."); }
+            catch { alert("Acesso não autorizado."); }
         };
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                usuarioEmail = user.email;
+                usuarioAtualEmail = user.email;
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-panel').classList.remove('hidden');
                 const isJoao = user.email === emailJoao;
@@ -155,63 +145,38 @@
             }
         });
 
-        // PREVIEW FOTO
-        window.previewFoto = (input) => {
-            if (input.files && input.files[0]) {
-                fotoBlob = input.files[0];
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const preview = document.getElementById('img-preview');
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        };
-
-        // SALVAR COM UPLOAD
+        // SALVAR PRODUTO
         document.getElementById('btn-salvar').onclick = async () => {
-            const btn = document.getElementById('btn-salvar');
-            const n = document.getElementById('p-nome').value, d = document.getElementById('p-data').value;
-            if(!n || !d) return alert("Preencha Nome e Data!");
-            
-            btn.disabled = true; btn.innerText = "Enviando...";
+            const elN = document.getElementById('p-nome'), elE = document.getElementById('p-ean');
+            const elQ = document.getElementById('p-qtd'), elD = document.getElementById('p-data'), elS = document.getElementById('p-setor');
 
-            let fotoUrl = "";
-            if(fotoBlob) {
-                const storageRef = ref(storage, `validades/${Date.now()}_${fotoBlob.name}`);
-                const snapshot = await uploadBytes(storageRef, fotoBlob);
-                fotoUrl = await getDownloadURL(snapshot.ref);
-            }
+            if(!elN.value || !elD.value) return alert("Nome e Data são obrigatórios!");
 
             await addDoc(collection(db, "validades"), {
-                produto: n.toUpperCase(), codigo: document.getElementById('p-ean').value, 
-                quantidade: document.getElementById('p-qtd').value, setor: document.getElementById('p-setor').value, 
-                vencimento: d, foto: fotoUrl, criadoEm: serverTimestamp()
+                produto: elN.value.toUpperCase(), codigo: elE.value, quantidade: elQ.value,
+                setor: elS.value, vencimento: elD.value, criadoEm: serverTimestamp()
             });
 
-            document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
-            document.getElementById('p-qtd').value = ""; document.getElementById('img-preview').style.display = 'none';
-            fotoBlob = null; btn.disabled = false; btn.innerText = "Salvar Agora";
-            alert("Sucesso!");
+            elN.value = ""; elE.value = ""; elQ.value = ""; elD.value = ""; alert("Produto salvo!");
         };
 
-        // SCANNER
+        // LEITOR DE CÓDIGO (SCANNER)
         window.startScanner = () => {
             document.getElementById('modal-scanner').classList.add('active');
             Quagga.init({
                 inputStream: { name: "Live", type: "LiveStream", target: document.querySelector('#scanner-container'), constraints: { facingMode: "environment" } },
-                decoder: { readers: ["ean_reader", "ean_8_reader"] }
+                decoder: { readers: ["ean_reader", "ean_8_reader", "code_128_reader"] }
             }, (err) => { if(!err) Quagga.start(); });
         };
         Quagga.onDetected((res) => {
             document.getElementById('p-ean').value = res.codeResult.code;
             stopScanner();
             document.getElementById('p-qtd').focus();
+            navigator.vibrate(100);
         });
         window.stopScanner = () => { Quagga.stop(); document.getElementById('modal-scanner').classList.remove('active'); };
 
-        // CARREGAR LISTA
+        // CARREGAR E FILTRAR LISTA
         function carregar(podeApagar, apenasDeposito) {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista');
@@ -219,39 +184,44 @@
                 snap.forEach(d => {
                     const item = d.data();
                     if(apenasDeposito && item.setor !== "Depósito") return;
-                    const diff = Math.floor((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
-                    const infoRel = { produto: item.produto, foto: item.foto, venc: item.vencimento, qtd: item.quantidade };
-                    
+
+                    const dataVenc = new Date(item.vencimento + "T00:00:00");
+                    const dataHoje = new Date(); dataHoje.setHours(0,0,0,0);
+                    const diff = Math.floor((dataVenc - dataHoje) / 86400000);
+
+                    const info = { produto: item.produto, venc: item.vencimento, qtd: item.quantidade, setor: item.setor, dias: diff };
+                    const corBorda = diff <= 5 ? 'card-critico' : (diff <= 15 ? 'card-atencao' : 'card-normal');
+
                     const div = document.createElement('div');
-                    div.className = `card p-4 bg-white rounded-2xl shadow-sm border-l-8 ${diff <= 5 ? 'border-red-500' : 'border-green-500'} mb-3`;
+                    div.className = `card p-4 bg-white rounded-2xl shadow-sm border-l-8 ${corBorda} mb-3`;
                     div.innerHTML = `
-                        <div class="flex justify-between">
-                            <span class="text-[8px] font-black uppercase text-slate-400">${item.setor}</span>
-                            <input type="checkbox" onchange='toggleSelecao(${JSON.stringify(infoRel)}, "${d.id}")' class="check-item">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[8px] font-black uppercase text-slate-400">${item.setor} | ${diff} DIAS</span>
+                            <input type="checkbox" onchange='toggleSelecao(${JSON.stringify(info)}, "${d.id}")' class="check-item">
                         </div>
-                        <div class="flex items-center gap-3 mt-2">
-                            ${item.foto ? `<img src="${item.foto}" onclick="ampliar('${item.foto}')" class="w-12 h-12 rounded-lg object-cover">` : '<div class="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center text-xs">S/F</div>'}
-                            <div class="flex-grow">
-                                <h3 class="font-black text-sm uppercase">${item.produto}</h3>
-                                <p class="text-[9px] font-bold text-blue-600">${item.vencimento.split('-').reverse().join('/')} (${diff} dias)</p>
+                        <h3 class="font-black text-sm uppercase mt-1">${item.produto}</h3>
+                        <div class="flex justify-between items-center mt-2">
+                            <p class="text-[9px] font-bold text-slate-500 uppercase">Venc: ${item.vencimento.split('-').reverse().join('/')}</p>
+                            <div class="flex gap-2">
+                                <span class="bg-slate-100 text-slate-600 text-[9px] px-2 py-1 rounded font-bold">QTD: ${item.quantidade}</span>
+                                ${podeApagar ? `<button onclick="apagar('${d.id}')" class="text-red-400 text-[9px] font-bold uppercase">Excluir</button>` : ''}
                             </div>
-                        </div>
-                        ${podeApagar ? `<button onclick="apagar('${d.id}')" class="text-red-300 font-bold text-[8px] mt-2 uppercase">Remover</button>` : ''}
-                    `;
+                        </div>`;
                     lista.appendChild(div);
                 });
             });
         }
 
+        // WHATSAPP
         window.toggleSelecao = (info, id) => {
             const idx = itensSelecionados.findIndex(i => i.id === id);
             if (idx > -1) itensSelecionados.splice(idx, 1);
             else itensSelecionados.push({ ...info, id });
-            document.getElementById('zap-text').innerText = itensSelecionados.length > 0 ? `Enviar ${itensSelecionados.length} itens` : "Selecionar para Relatório";
+            document.getElementById('zap-text').innerText = itensSelecionados.length > 0 ? `Enviar ${itensSelecionados.length} selecionados` : "Selecionar para Enviar";
         };
 
         window.abrirModalContatos = () => {
-            if(itensSelecionados.length === 0) return alert("Marque os produtos!");
+            if(itensSelecionados.length === 0) return alert("Selecione itens na lista primeiro!");
             document.getElementById('modal-contatos').classList.add('active');
         };
         window.fecharModalContatos = () => document.getElementById('modal-contatos').classList.remove('active');
@@ -261,13 +231,15 @@
             container.innerHTML = "";
             contatos.forEach(c => {
                 const btn = document.createElement('button');
-                btn.className = "w-full p-4 bg-slate-100 rounded-2xl font-black uppercase text-xs text-blue-700 mb-2";
+                btn.className = "w-full p-4 bg-slate-100 rounded-2xl font-black uppercase text-xs text-blue-700 mb-2 active:bg-blue-200";
                 btn.innerText = `👤 ${c.nome}`;
                 btn.onclick = () => {
-                    const cab = usuarioEmail === emailJoao ? "*📦 DEPÓSITO (JOÃO)*" : "*📊 RELATÓRIO*";
-                    let msg = `${cab}\n\n`;
+                    const isJoao = usuarioAtualEmail === emailJoao;
+                    const cabecalho = isJoao ? "*📦 AVISO DO DEPÓSITO (JOÃO)*" : "*📊 RELATÓRIO DE VALIDADES*";
+                    let msg = `${cabecalho}\n\n`;
                     itensSelecionados.forEach(p => {
-                        msg += `🔹 *${p.produto}*\n   └ Vence: ${p.venc.split('-').reverse().join('/')}\n   ${p.foto ? `└ Foto: ${p.foto}` : ''}\n\n`;
+                        const alert = p.dias <= 5 ? '🚨' : (p.dias <= 15 ? '⚠️' : '✅');
+                        msg += `${alert} *${p.produto}*\n   └ Vencimento: ${p.venc.split('-').reverse().join('/')}\n   └ Qtd: ${p.qtd} | Setor: ${p.setor}\n\n`;
                     });
                     window.open(`https://wa.me/${c.fone}?text=${encodeURIComponent(msg)}`);
                     fecharModalContatos();
@@ -276,8 +248,7 @@
             });
         }
 
-        window.ampliar = (src) => { document.getElementById('foto-ampliada').src = src; document.getElementById('modal-foto').classList.add('active'); };
-        window.apagar = async (id) => { if(confirm("Apagar?")) await deleteDoc(doc(db, "validades", id)); };
+        window.apagar = async (id) => { if(confirm("Confirmar exclusão?")) await deleteDoc(doc(db, "validades", id)); };
         window.filtrar = () => {
             const b = document.getElementById('busca').value.toLowerCase();
             document.querySelectorAll('.card').forEach(c => c.style.display = c.innerText.toLowerCase().includes(b) ? "block" : "none");
