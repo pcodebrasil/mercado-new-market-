@@ -13,6 +13,8 @@
         .card-normal { border-left: 8px solid #10b981; }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .welcome-anim { animation: fadeInDown 0.5s ease-out; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
@@ -30,7 +32,8 @@
     <div id="login-screen" class="flex-grow flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border-t-8 border-blue-600">
             <h1 class="text-3xl font-black text-blue-900 text-center uppercase italic">New Market</h1>
-            <form id="login-form" class="mt-8 space-y-4">
+            <p class="text-[10px] text-center text-slate-400 font-bold uppercase mb-6 tracking-widest">Controle de Estoque</p>
+            <form id="login-form" class="space-y-4">
                 <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="E-mail" required>
                 <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="Senha" required>
                 <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Entrar</button>
@@ -49,8 +52,16 @@
 
         <main class="p-4 max-w-xl mx-auto w-full flex-grow space-y-6">
             
+            <div id="welcome-msg" class="welcome-anim bg-white p-4 rounded-2xl shadow-sm border-l-4 border-blue-600 flex items-center gap-3">
+                <div class="bg-blue-100 p-2 rounded-full text-xl">👋</div>
+                <div>
+                    <p id="welcome-text" class="font-black text-blue-900 uppercase text-xs leading-none"></p>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase mt-1">Tenha um excelente trabalho!</p>
+                </div>
+            </div>
+
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-lg border-b-8 border-green-500 space-y-4">
-                <h2 class="font-black uppercase text-green-700 text-sm">Lançar Novo Produto</h2>
+                <h2 class="font-black uppercase text-green-700 text-xs">Lançar Novo Produto</h2>
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none">
                 <div class="grid grid-cols-2 gap-2">
                     <input type="number" id="p-ean" placeholder="CÓD. BARRAS" class="w-full p-4 border rounded-2xl font-bold outline-none">
@@ -66,7 +77,7 @@
                 <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl uppercase shadow-lg active:scale-95">Salvar</button>
             </div>
 
-            <div id="lista-geral" class="space-y-4">
+            <div class="space-y-4">
                 <div class="grid grid-cols-3 gap-2 text-center font-black">
                     <button onclick="setFiltro('critico')" id="f-critico" class="bg-white p-3 rounded-2xl border-2 border-red-500 text-red-600 filter-inactive">
                         <p class="text-[8px] uppercase">Crítico</p><p id="c-critico" class="text-xl">0</p>
@@ -81,7 +92,6 @@
                 <input type="text" id="busca" onkeyup="filtrar()" placeholder="🔍 Pesquisar na lista..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none border-none">
                 <div id="lista" class="space-y-3 pt-2"></div>
             </div>
-
         </main>
     </div>
 
@@ -109,7 +119,24 @@
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         let filtroAtual = 'todos';
 
-        // ALTERAR SENHA
+        // IDENTIFICAÇÃO DE GÊNERO E BOAS-VINDAS
+        function saudacaoPersonalizada(email) {
+            const nome = email.split('@')[0].toLowerCase();
+            let saudacao = "Olá";
+            let displayNome = nome.charAt(0).toUpperCase() + nome.slice(1);
+
+            if (nome === 'adrielle' || nome.endsWith('a')) {
+                saudacao = "Bem-vinda";
+            } else if (nome === 'adriano' || nome.endsWith('o')) {
+                saudacao = "Bem-vindo";
+            } else {
+                saudacao = "Olá";
+            }
+
+            document.getElementById('welcome-text').innerText = `${saudacao}, ${displayNome}!`;
+        }
+
+        // ALTERAR SENHA (Lógica do modal)
         window.abrirModalSenha = () => document.getElementById('modal-senha').classList.add('active');
         window.fecharModalSenha = () => document.getElementById('modal-senha').classList.remove('active');
         window.processarTrocaSenha = async () => {
@@ -126,7 +153,7 @@
             } catch { alert("❌ Erro na alteração."); }
         };
 
-        // LOGIN
+        // LOGIN / LOGOUT
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
@@ -140,6 +167,7 @@
                 document.getElementById('main-panel').classList.remove('hidden');
                 const isG = gerentes.includes(user.email);
                 document.getElementById('repositor-form').classList.toggle('hidden', isG);
+                saudacaoPersonalizada(user.email);
                 carregar(isG);
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
@@ -147,7 +175,7 @@
             }
         });
 
-        // GRAVAR
+        // GRAVAR, CARREGAR, FILTRAR E APAGAR (Mesma lógica robusta anterior)
         document.getElementById('btn-salvar').onclick = async () => {
             const data = {
                 produto: document.getElementById('p-nome').value.toUpperCase(),
@@ -157,15 +185,14 @@
                 vencimento: document.getElementById('p-data').value,
                 criadoEm: serverTimestamp()
             };
-            if(!data.produto || !data.vencimento) return alert("Nome e Data obrigatórios!");
+            if(!data.produto || !data.vencimento) return alert("Preencha Nome e Data!");
             try {
                 await addDoc(collection(db, "validades"), data);
-                alert("Salvo!");
+                alert("Salvo com sucesso!");
                 document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
             } catch { alert("Erro ao salvar."); }
         };
 
-        // FILTROS
         window.setFiltro = (t) => {
             filtroAtual = t;
             ['f-critico', 'f-atencao', 'f-todos'].forEach(id => {
