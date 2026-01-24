@@ -4,8 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>New Market - Gestão</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1e3a8a">
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style.css">
     <style>
         .modal-active { display: flex !important; }
         .nav-active { color: #2563eb; border-top: 4px solid #2563eb; }
@@ -166,7 +171,7 @@
             }
         });
 
-        // SALVAR
+        // SALVAR LANÇAMENTO
         document.getElementById('btn-salvar').onclick = async () => {
             const ean = document.getElementById('prod-ean').value;
             const qtd = document.getElementById('prod-qtd').value;
@@ -183,10 +188,9 @@
             } catch (e) { alert("Erro ao salvar."); }
         };
 
-        // FILTROS DE CATEGORIA
+        // FILTROS
         window.setFiltro = (tipo) => {
             filtroAtual = tipo;
-            // Atualiza botões
             document.querySelectorAll('[id^="filter-btn-"]').forEach(btn => {
                 btn.classList.remove('filter-active');
                 btn.classList.add('filter-inactive');
@@ -196,7 +200,7 @@
             filtrarProdutos();
         };
 
-        // CARREGAR LISTA
+        // CARREGAR DADOS
         function carregarDados() {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista-vencimento');
@@ -220,6 +224,13 @@
                         <div class="flex justify-between items-center"><p class="text-[9px] font-bold text-slate-400 italic">VENCE: ${item.vencimento.split('-').reverse().join('/')}</p><button onclick="abrirBaixa('${d.id}')" class="bg-slate-900 text-white text-[8px] px-3 py-1.5 rounded-lg font-black uppercase">Baixa</button></div>`;
                     lista.appendChild(card);
                 });
+                
+                // ALERTA VISUAL PARA O GERENTE SE HOUVER CRÍTICOS
+                if (cCount > 0 && gerentes.includes(auth.currentUser?.email)) {
+                    // Notificação interna simples ao carregar
+                    console.log("Atenção: Existem produtos críticos!");
+                }
+
                 document.getElementById('count-total').innerText = snap.size;
                 document.getElementById('count-critico').innerText = cCount;
                 document.getElementById('count-atencao').innerText = aCount;
@@ -236,7 +247,6 @@
             });
         };
 
-        // CARREGAR PERDAS
         function carregarPerdas() {
             onSnapshot(query(collection(db, "perdas"), orderBy("dataBaixa", "desc"), limit(50)), (snap) => {
                 const lista = document.getElementById('lista-perdas');
@@ -247,16 +257,13 @@
                     totalLoss += Number(item.quantidade);
                     const card = document.createElement('div');
                     card.className = "bg-white p-3 rounded-xl border-l-4 border-red-900 flex justify-between items-center shadow-sm";
-                    card.innerHTML = `
-                        <div><p class="font-black text-[11px] uppercase">${item.produto}</p><p class="text-[8px] text-slate-400 uppercase">${item.setor}</p></div>
-                        <div class="text-right"><p class="text-red-600 font-black text-sm">-${item.quantidade}</p><p class="text-[8px] text-slate-300">${item.dataBaixa.toDate().toLocaleDateString()}</p></div>`;
+                    card.innerHTML = `<div><p class="font-black text-[11px] uppercase">${item.produto}</p><p class="text-[8px] text-slate-400 uppercase">${item.setor}</p></div><div class="text-right"><p class="text-red-600 font-black text-sm">-${item.quantidade}</p></div>`;
                     lista.appendChild(card);
                 });
                 document.getElementById('loss-count').innerText = totalLoss;
             });
         }
 
-        // MODAL E TABS
         window.switchTab = (tab) => {
             if(tab === 'lista') {
                 document.getElementById('tab-lista').classList.remove('hidden');
@@ -282,6 +289,13 @@
             }
             await deleteDoc(docRef); fecharModal();
         };
+
+        // REGISTRO DO SERVICE WORKER (PWA)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW pronto.'));
+            });
+        }
     </script>
 </body>
 </html>
