@@ -6,16 +6,16 @@
     <title>New Market - Gestão</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body class="bg-slate-100 font-sans antialiased text-slate-900">
 
     <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border-t-8 border-blue-600">
             <h1 class="text-4xl font-black text-blue-900 italic text-center uppercase tracking-tighter">New Market</h1>
-            <form id="login-form" class="space-y-4 mt-8">
+            <p class="text-center text-slate-400 text-[10px] font-bold uppercase mt-2 mb-8 italic">Acesso Restrito</p>
+            <form id="login-form" class="space-y-4">
                 <input type="email" id="email" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 bg-slate-50" placeholder="usuario@newmarket.com" required>
-                <input type="password" id="password" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 bg-slate-50" placeholder="Senha" required>
+                <input type="password" id="password" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 bg-slate-50" placeholder="Sua senha" required>
                 <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black text-lg shadow-lg active:scale-95">ENTRAR</button>
             </form>
         </div>
@@ -23,8 +23,11 @@
 
     <div id="main-panel" class="hidden min-h-screen">
         <nav class="bg-blue-900 text-white p-4 shadow-xl sticky top-0 z-50 flex justify-between items-center">
-            <h1 class="font-black italic text-xl uppercase text-white">New Market</h1>
-            <button id="btn-logout" class="text-[10px] font-black bg-blue-800 px-4 py-2 rounded-full uppercase">Sair</button>
+            <h1 class="font-black italic text-xl uppercase">New Market</h1>
+            <div class="flex items-center gap-2">
+                <span id="user-display" class="text-[9px] font-bold bg-blue-800 px-3 py-1 rounded-full border border-blue-500 uppercase"></span>
+                <button id="btn-logout" class="text-[9px] font-bold text-red-300 ml-2">SAIR</button>
+            </div>
         </nav>
 
         <main class="p-4 max-w-xl mx-auto w-full">
@@ -32,46 +35,56 @@
                 <div class="bg-white p-6 rounded-3xl shadow-xl border-b-8 border-green-500">
                     <h2 class="font-black mb-4 uppercase text-lg text-green-700">Lançar Validade</h2>
                     <div class="space-y-4">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Nome do Produto</label>
+                            <input type="text" id="prod-nome" placeholder="EX: ARROZ TIO JOÃO 5KG" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold uppercase outline-none focus:border-green-500">
+                        </div>
                         
-                        <div class="flex gap-2">
-                            <input type="number" id="prod-ean" placeholder="CÓDIGO DE BARRAS" class="flex-1 p-4 border rounded-2xl bg-slate-50 font-bold outline-none focus:border-green-500">
-                            <button id="btn-scan" class="bg-blue-600 text-white p-4 rounded-2xl shadow-lg active:scale-95 text-xl">📷</button>
-                        </div>
-                        <div id="reader" class="hidden w-full overflow-hidden rounded-2xl border-2 border-blue-500 mb-3"></div>
-
-                        <div class="relative">
-                            <input type="text" id="prod-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold uppercase outline-none focus:border-green-500">
-                            <div id="loading-prod" class="hidden absolute right-4 top-4">
-                                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                            </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Código de Barras (Opcional)</label>
+                            <input type="number" id="prod-ean" placeholder="789..." class="w-full p-4 border rounded-2xl bg-slate-50 font-bold outline-none focus:border-green-500">
                         </div>
 
-                        <select id="prod-setor" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold outline-none focus:border-green-500">
-                            <option value="Corredor do Paulo">Corredor do Paulo</option>
-                            <option value="Corredor do Leandro">Corredor do Leandro</option>
-                            <option value="Corredor do Pedro">Corredor do Pedro</option>
-                            <option value="Corredor do Edmar">Corredor do Edmar</option>
-                        </select>
-                        <input type="date" id="prod-data" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold outline-none focus:border-green-500">
-                        <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl shadow-lg active:scale-95 uppercase">Enviar Agora</button>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Setor / Corredor</label>
+                            <select id="prod-setor" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold outline-none focus:border-green-500">
+                                <option value="Corredor do Paulo">Corredor do Paulo</option>
+                                <option value="Corredor do Leandro">Corredor do Leandro</option>
+                                <option value="Corredor do Pedro">Corredor do Pedro</option>
+                                <option value="Corredor do Edmar">Corredor do Edmar</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Data de Vencimento</label>
+                            <input type="date" id="prod-data" class="w-full p-4 border rounded-2xl bg-slate-50 font-bold outline-none focus:border-green-500">
+                        </div>
+
+                        <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl shadow-lg active:scale-95 uppercase">Gravar no Sistema</button>
                     </div>
                 </div>
             </div>
 
             <div id="gerente-view" class="hidden space-y-4">
-                <div class="grid grid-cols-2 gap-3 mb-4 text-center">
-                    <div class="bg-white p-4 rounded-3xl border-2 border-red-100 text-red-600 font-black">
-                        <p class="text-[10px] uppercase">Vencendo</p>
+                <div class="grid grid-cols-2 gap-3 mb-4 text-center font-black">
+                    <div class="bg-white p-4 rounded-3xl border-2 border-red-100 text-red-600">
+                        <p class="text-[10px] uppercase">Vencendo (3d)</p>
                         <p id="count-critico" class="text-3xl">0</p>
                     </div>
-                    <div class="bg-white p-4 rounded-3xl border-2 border-blue-100 text-blue-600 font-black">
-                        <p class="text-[10px] uppercase">Total</p>
+                    <div class="bg-white p-4 rounded-3xl border-2 border-blue-100 text-blue-600">
+                        <p class="text-[10px] uppercase">Total Geral</p>
                         <p id="count-total" class="text-3xl">0</p>
                     </div>
                 </div>
-                <input type="text" id="input-busca" onkeyup="filtrarProdutos()" placeholder="🔍 Buscar..." class="w-full p-4 border-none rounded-2xl bg-white shadow-md font-bold outline-none">
-                <button id="btn-whatsapp" class="w-full bg-emerald-500 text-white font-black py-4 rounded-2xl text-xs uppercase shadow-md mt-2">Enviar Relatório WhatsApp 📊</button>
-                <div id="lista-vencimento" class="space-y-3 mt-4 pb-10"></div>
+
+                <div class="sticky top-[72px] bg-slate-100 pt-2 pb-4 z-40 space-y-2">
+                    <input type="text" id="input-busca" onkeyup="filtrarProdutos()" placeholder="🔍 Buscar por nome ou código..." class="w-full p-4 border-none rounded-2xl bg-white shadow-md font-bold outline-none">
+                    <button id="btn-whatsapp" class="w-full bg-emerald-500 text-white font-black py-4 rounded-2xl text-xs uppercase shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all">
+                        Enviar Relatório WhatsApp 📊
+                    </button>
+                </div>
+
+                <div id="lista-vencimento" class="space-y-3 pb-10"></div>
             </div>
         </main>
     </div>
@@ -95,64 +108,24 @@
         const db = getFirestore(app);
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
 
-        // --- BUSCA NOME DO PRODUTO PELA API ---
-        async function buscarNomeProduto(ean) {
-            const loading = document.getElementById('loading-prod');
-            const inputNome = document.getElementById('prod-nome');
-            loading.classList.remove('hidden');
-            
-            try {
-                // Usando a API do OpenFoodFacts (Grátis e sem chave)
-                const response = await fetch(`https://world.openfoodfacts.org/api/v2/product/${ean}.json`);
-                const data = await response.json();
-                
-                if (data.status === 1 && data.product.product_name) {
-                    inputNome.value = data.product.product_name.toUpperCase();
-                } else {
-                    console.log("Produto não encontrado na base de dados.");
-                }
-            } catch (error) {
-                console.error("Erro ao buscar produto:", error);
-            } finally {
-                loading.classList.add('hidden');
-            }
-        }
-
-        // --- SCANNER ---
-        const html5QrCode = new Html5Qrcode("reader");
-        document.getElementById('btn-scan').onclick = () => {
-            const readerDiv = document.getElementById('reader');
-            readerDiv.classList.remove('hidden');
-            html5QrCode.start(
-                { facingMode: "environment" }, 
-                { fps: 10, qrbox: { width: 280, height: 160 } },
-                (decodedText) => {
-                    document.getElementById('prod-ean').value = decodedText;
-                    buscarNomeProduto(decodedText); // Chama a busca automática
-                    html5QrCode.stop().then(() => readerDiv.classList.add('hidden'));
-                },
-                (errorMessage) => {}
-            );
-        };
-
-        // Escuta também se o usuário digitar o EAN manualmente e sair do campo
-        document.getElementById('prod-ean').onblur = (e) => {
-            if(e.target.value.length >= 8) buscarNomeProduto(e.target.value);
-        };
-
-        // --- FIREBASE LOGIC ---
+        // LOGIN
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
-            try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
-            catch (err) { alert("Erro no login!"); }
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            try { await signInWithEmailAndPassword(auth, email, pass); } 
+            catch (err) { alert("Credenciais incorretas!"); }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
+        // ESTADO USUÁRIO
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-panel').classList.remove('hidden');
+                document.getElementById('user-display').innerText = user.email.split('@')[0].toUpperCase();
+                
                 if (gerentes.includes(user.email)) {
                     document.getElementById('gerente-view').classList.remove('hidden');
                     document.getElementById('repositor-view').classList.add('hidden');
@@ -167,22 +140,24 @@
             }
         });
 
+        // SALVAR
         document.getElementById('btn-salvar').onclick = async () => {
             const nome = document.getElementById('prod-nome').value;
-            const ean = document.getElementById('prod-ean').value || "S/ CÓDIGO";
+            const ean = document.getElementById('prod-ean').value || "S/ COD";
             const setor = document.getElementById('prod-setor').value;
             const data = document.getElementById('prod-data').value;
-            if(!nome || !data) return alert("Preencha Nome e Data!");
+            if(!nome || !data) return alert("Preencha o Nome e a Data!");
             try {
                 await addDoc(collection(db, "validades"), {
                     produto: nome, codigo: ean, setor: setor, vencimento: data, criadoEm: new Date()
                 });
-                alert("✅ Registrado!");
+                alert("✅ Registrado com sucesso!");
                 document.getElementById('prod-nome').value = "";
                 document.getElementById('prod-ean').value = "";
             } catch (e) { alert("Erro ao salvar."); }
         };
 
+        // LISTAGEM
         function carregarDados() {
             const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
             onSnapshot(q, (snap) => {
@@ -198,13 +173,15 @@
                     card.innerHTML = `
                         <div class="flex justify-between items-start mb-1">
                             <span class="text-[8px] font-black bg-slate-100 px-2 py-0.5 rounded uppercase text-slate-500">${item.setor}</span>
-                            <span class="text-[11px] font-black ${diff <= 3 ? 'text-red-600' : 'text-slate-400'}">${diff}d</span>
+                            <span class="text-[11px] font-black ${diff <= 3 ? 'text-red-600' : 'text-slate-400'} uppercase">${diff} dias</span>
                         </div>
                         <h3 class="font-black text-slate-800 uppercase text-sm mb-1">${item.produto}</h3>
-                        <p class="text-[12px] font-mono font-bold text-blue-600 bg-blue-50 p-1 rounded text-center mb-2">${item.codigo}</p>
+                        <div class="bg-slate-50 p-2 rounded-lg border border-slate-100 mb-2 text-center">
+                            <p class="text-[13px] font-mono font-bold text-blue-600 tracking-wider">${item.codigo}</p>
+                        </div>
                         <div class="flex justify-between items-center">
                             <p class="text-[11px] font-bold text-slate-400">Vence: ${item.vencimento.split('-').reverse().join('/')}</p>
-                            <button onclick="window.darBaixaItem('${d.id}')" class="bg-slate-900 text-white text-[9px] px-4 py-1.5 rounded-lg font-black uppercase">Baixa</button>
+                            <button onclick="window.darBaixaItem('${d.id}')" class="bg-slate-900 text-white text-[9px] px-4 py-1.5 rounded-lg font-black uppercase shadow-md">Baixa</button>
                         </div>`;
                     lista.appendChild(card);
                 });
@@ -214,7 +191,7 @@
         }
 
         window.darBaixaItem = async (id) => {
-            if(confirm("Confirmar baixa?")) await deleteDoc(doc(db, "validades", id));
+            if(confirm("Confirmar baixa deste produto?")) await deleteDoc(doc(db, "validades", id));
         };
 
         window.filtrarProdutos = () => {
@@ -226,9 +203,14 @@
 
         document.getElementById('btn-whatsapp').onclick = () => {
             let msg = "*RELATÓRIO DE VALIDADES - NEW MARKET*\n\n";
+            let cont = 0;
             document.querySelectorAll('#lista-vencimento > div').forEach(c => {
-                if(c.style.display !== "none") msg += "📌 " + c.innerText.replace("Baixa", "").trim().split('\n').join(' | ') + "\n\n";
+                if(c.style.display !== "none") {
+                    msg += "📌 " + c.innerText.replace("Baixa", "").trim().split('\n').join(' | ') + "\n\n";
+                    cont++;
+                }
             });
+            if(cont === 0) return alert("A lista está vazia!");
             window.open("https://wa.me/?text=" + encodeURIComponent(msg), '_blank');
         };
     </script>
