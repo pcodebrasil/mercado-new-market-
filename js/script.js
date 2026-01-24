@@ -14,6 +14,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
 const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
 
 // LOGIN
@@ -24,14 +25,14 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     try {
         await signInWithEmailAndPassword(auth, email, pass);
     } catch (err) {
-        alert("E-mail ou senha incorretos.");
+        alert("E-mail ou senha inválidos. Verifique se criou o usuário no Firebase.");
     }
 });
 
 // LOGOUT
 document.getElementById('btn-logout').onclick = () => signOut(auth);
 
-// ESTADO DO UTILIZADOR
+// CONTROLE DE ACESSO
 onAuthStateChanged(auth, (user) => {
     if (user) {
         document.getElementById('login-screen').classList.add('hidden');
@@ -52,46 +53,42 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// SALVAR (REPOSITOR)
+// SALVAR
 document.getElementById('btn-salvar').onclick = async () => {
     const nome = document.getElementById('prod-nome').value;
     const setor = document.getElementById('prod-setor').value;
     const data = document.getElementById('prod-data').value;
-
-    if(!nome || !data) return alert("Preencha tudo!");
-
+    if(!nome || !data) return alert("Preencha o nome e a data!");
     try {
         await addDoc(collection(db, "validades"), {
             produto: nome, setor: setor, vencimento: data, lancadoPor: auth.currentUser.email, criadoEm: new Date()
         });
-        alert("✅ Enviado!");
+        alert("✅ Lançado!");
         document.getElementById('prod-nome').value = "";
-    } catch (e) { alert("Erro ao gravar."); }
+    } catch (e) { alert("Erro ao gravar. Verifique as regras do Firestore."); }
 };
 
-// MONITOR (GERENTE)
+// MONITOR
 function carregarDados() {
     const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
     onSnapshot(q, (snap) => {
         const lista = document.getElementById('lista-vencimento');
         let criticos = 0;
         lista.innerHTML = "";
-        
         snap.forEach(d => {
             const item = d.data();
             const diff = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
             if(diff <= 3) criticos++;
-
             const card = document.createElement('div');
             card.className = `flex justify-between items-center p-4 rounded-3xl bg-white shadow-sm border-l-[10px] ${diff <= 3 ? 'border-red-500 card-vencido' : 'border-blue-400'}`;
             card.innerHTML = `
-                <div class="flex-1">
+                <div class="flex-1 text-left">
                     <span class="text-[8px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md uppercase">${item.setor}</span>
-                    <h3 class="font-black text-slate-800 text-md leading-tight mt-1 uppercase">${item.produto}</h3>
+                    <h3 class="font-black text-slate-800 text-sm leading-tight mt-1 uppercase">${item.produto}</h3>
                     <p class="text-[10px] font-bold text-slate-400 italic">${item.vencimento.split('-').reverse().join('/')}</p>
                 </div>
                 <div class="text-right ml-4">
-                    <p class="text-[10px] font-black ${diff <= 3 ? 'text-red-600' : 'text-slate-500'}">${diff}d</p>
+                    <p class="text-[10px] font-black ${diff <= 3 ? 'text-red-600' : 'text-slate-500'}">${diff} Dias</p>
                     <button onclick="window.darBaixa('${d.id}')" class="mt-2 bg-slate-900 text-white text-[8px] font-black px-3 py-1 rounded-xl uppercase">Baixa</button>
                 </div>`;
             lista.appendChild(card);
@@ -105,7 +102,6 @@ window.darBaixa = async (id) => {
     if(confirm("Confirmar baixa?")) await deleteDoc(doc(db, "validades", id));
 };
 
-// BUSCA
 window.filtrarProdutos = () => {
     const termo = document.getElementById('input-busca').value.toLowerCase();
     document.querySelectorAll('#lista-vencimento > div').forEach(c => {
@@ -113,7 +109,6 @@ window.filtrarProdutos = () => {
     });
 };
 
-// WHATSAPP
 document.getElementById('btn-whatsapp').onclick = () => {
     let msg = "*NEW MARKET - RELATÓRIO*\n\n";
     document.querySelectorAll('#lista-vencimento > div').forEach(c => {
