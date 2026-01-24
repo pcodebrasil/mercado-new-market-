@@ -11,30 +11,29 @@
         .card-critico { border-left: 8px solid #ef4444; }
         .card-atencao { border-left: 8px solid #f59e0b; }
         .card-normal { border-left: 8px solid #10b981; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-center: center; padding: 20px; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
 
     <div id="modal-senha" class="modal">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
-            <h3 class="font-black text-slate-800 uppercase mb-4 text-center">Alterar Senha</h3>
-            <div class="space-y-3">
-                <input type="password" id="pass-atual" placeholder="Senha Atual" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none">
-                <input type="password" id="pass-nova" placeholder="Nova Senha" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none">
-                <button onclick="processarTrocaSenha()" id="btn-confirmar-senha" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase">Confirmar Troca</button>
-                <button onclick="fecharModalSenha()" class="w-full text-slate-400 font-bold text-xs uppercase p-2">Cancelar</button>
-            </div>
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center">
+            <h3 class="font-black text-slate-800 uppercase mb-4">Alterar Senha</h3>
+            <input type="password" id="pass-atual" placeholder="Senha Atual" class="w-full p-4 mb-2 border rounded-2xl bg-slate-50 outline-none">
+            <input type="password" id="pass-nova" placeholder="Nova Senha" class="w-full p-4 mb-4 border rounded-2xl bg-slate-50 outline-none">
+            <button onclick="processarTrocaSenha()" id="btn-confirmar-senha" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase">Confirmar Troca</button>
+            <button onclick="fecharModalSenha()" class="w-full text-slate-400 font-bold text-xs uppercase p-4">Cancelar</button>
         </div>
     </div>
 
     <div id="login-screen" class="flex-grow flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border-t-8 border-blue-600">
-            <h1 class="text-3xl font-black text-blue-900 text-center uppercase italic">New Market</h1>
-            <form id="login-form" class="mt-8 space-y-4">
-                <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none focus:border-blue-500" placeholder="E-mail" required>
-                <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none focus:border-blue-500" placeholder="Senha" required>
+            <h1 class="text-3xl font-black text-blue-900 text-center uppercase italic leading-none">New Market</h1>
+            <p class="text-[9px] font-bold text-center text-slate-400 mb-8 uppercase tracking-tighter italic">Gestão Individual de Validades</p>
+            <form id="login-form" class="space-y-4">
+                <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="E-mail" required>
+                <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="Senha" required>
                 <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Entrar</button>
             </form>
         </div>
@@ -43,21 +42,22 @@
     <div id="main-panel" class="hidden flex-grow flex flex-col">
         <nav class="bg-blue-900 text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
             <div class="flex flex-col">
-                <span class="font-black italic uppercase leading-none">New Market</span>
-                <button onclick="abrirModalSenha()" class="text-[8px] text-blue-300 font-bold uppercase mt-1 text-left">Alterar Senha ⚙️</button>
+                <span class="font-black italic uppercase leading-none text-lg">New Market</span>
+                <button onclick="abrirModalSenha()" class="text-[8px] text-blue-300 font-bold uppercase mt-1 text-left tracking-widest">Configurar Senha ⚙️</button>
             </div>
-            <button id="btn-logout" class="text-[10px] bg-white/10 px-3 py-1 rounded-full uppercase">Sair</button>
+            <button id="btn-logout" class="text-[10px] bg-white/10 px-3 py-1 rounded-full uppercase font-bold">Sair</button>
         </nav>
 
-        <main class="p-4 max-w-xl mx-auto w-full flex-grow">
-            <div id="repositor-view" class="hidden bg-white p-6 rounded-3xl shadow-lg border-b-8 border-green-500 space-y-4">
-                <h2 class="font-black uppercase text-green-700">Lançar Produto</h2>
+        <main class="p-4 max-w-xl mx-auto w-full flex-grow space-y-6">
+            
+            <div id="form-cadastro" class="bg-white p-6 rounded-3xl shadow-lg border-b-8 border-green-500 space-y-4">
+                <h2 class="font-black uppercase text-green-700 text-xs">Lançar Novo Produto</h2>
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none">
                 <div class="grid grid-cols-2 gap-2">
                     <input type="number" id="p-ean" placeholder="CÓD. BARRAS" class="w-full p-4 border rounded-2xl font-bold outline-none">
                     <input type="number" id="p-qtd" placeholder="QTD" class="w-full p-4 border rounded-2xl font-bold outline-none">
                 </div>
-                <select id="p-setor" class="w-full p-4 border rounded-2xl font-bold uppercase bg-white">
+                <select id="p-setor" class="w-full p-4 border rounded-2xl font-bold uppercase bg-white outline-none">
                     <option value="Corredor do Paulo">Corredor do Paulo</option>
                     <option value="Corredor do Leandro">Corredor do Leandro</option>
                     <option value="Corredor do Pedro">Corredor do Pedro</option>
@@ -67,7 +67,10 @@
                 <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl uppercase shadow-lg active:scale-95">Salvar</button>
             </div>
 
-            <div id="gerente-view" class="hidden space-y-4">
+            <div class="space-y-4">
+                <div class="bg-blue-50 p-2 rounded-xl text-center mb-2">
+                    <p id="txt-permissao" class="text-[9px] font-black text-blue-800 uppercase italic"></p>
+                </div>
                 <div class="grid grid-cols-3 gap-2 text-center font-black">
                     <button onclick="setFiltro('critico')" id="f-critico" class="bg-white p-3 rounded-2xl border-2 border-red-500 text-red-600 filter-inactive">
                         <p class="text-[8px] uppercase">Crítico</p><p id="c-critico" class="text-xl">0</p>
@@ -79,20 +82,20 @@
                         <p class="text-[8px] uppercase">Total</p><p id="c-total" class="text-xl">0</p>
                     </button>
                 </div>
-                <input type="text" id="busca" onkeyup="filtrar()" placeholder="🔍 Pesquisar..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none">
+                <input type="text" id="busca" onkeyup="filtrar()" placeholder="🔍 Pesquisar na minha lista..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none border-none">
                 <div id="lista" class="space-y-3 pt-2"></div>
             </div>
         </main>
     </div>
 
-    <footer class="w-full p-4 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+    <footer class="w-full p-4 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-auto">
         Desenvolvido por <span class="text-blue-600">"Paulo Souza"</span> 2026
     </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
@@ -109,57 +112,50 @@
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         let filtroAtual = 'todos';
 
-        // ALTERAR SENHA LÓGICA
+        // TROCA SENHA
         window.abrirModalSenha = () => document.getElementById('modal-senha').classList.add('active');
         window.fecharModalSenha = () => document.getElementById('modal-senha').classList.remove('active');
-
         window.processarTrocaSenha = async () => {
             const user = auth.currentUser;
-            const senhaAtual = document.getElementById('pass-atual').value;
-            const novaSenha = document.getElementById('pass-nova').value;
-            const btn = document.getElementById('btn-confirmar-senha');
-
-            if(!senhaAtual || !novaSenha) return alert("Preencha as senhas!");
-            if(novaSenha.length < 6) return alert("A nova senha deve ter no mínimo 6 dígitos!");
-
-            btn.disabled = true; btn.innerText = "PROCESSANDO...";
-            
+            const sA = document.getElementById('pass-atual').value;
+            const sN = document.getElementById('pass-nova').value;
+            if(!sA || !sN) return alert("Preencha as senhas!");
             try {
-                const credential = EmailAuthProvider.credential(user.email, senhaAtual);
-                await reauthenticateWithCredential(user, credential);
-                await updatePassword(user, novaSenha);
-                alert("✅ Senha alterada com sucesso!");
+                const cred = EmailAuthProvider.credential(user.email, sA);
+                await reauthenticateWithCredential(user, cred);
+                await updatePassword(user, sN);
+                alert("✅ Senha alterada!");
                 fecharModalSenha();
-            } catch (error) {
-                alert("❌ Erro: Verifique se a senha atual está correta.");
-            }
-            btn.disabled = false; btn.innerText = "Confirmar Troca";
+            } catch { alert("❌ Erro na alteração."); }
         };
 
-        // ... RESTANTE DO CÓDIGO (LOGIN, GRAVAR, CARREGAR, FILTRAR, APAGAR) ...
+        // LOGIN
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
-            catch { alert("Erro de login."); }
+            catch { alert("Acesso negado."); }
         };
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
         onAuthStateChanged(auth, (user) => {
-            const login = document.getElementById('login-screen');
-            const main = document.getElementById('main-panel');
             if (user) {
-                login.classList.add('hidden'); main.classList.remove('hidden');
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-panel').classList.remove('hidden');
                 const isG = gerentes.includes(user.email);
-                document.getElementById('gerente-view').classList.toggle('hidden', !isG);
-                document.getElementById('repositor-view').classList.toggle('hidden', isG);
-                if(isG) carregar();
+                document.getElementById('txt-permissao').innerText = isG ? "Visão Geral (Gerência)" : "Minha Lista Individual";
+                carregar(user.uid, isG);
             } else {
-                login.classList.remove('hidden'); main.classList.add('hidden');
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('main-panel').classList.add('hidden');
             }
         });
 
+        // SALVAR COM UID DO USUÁRIO
         document.getElementById('btn-salvar').onclick = async () => {
+            const user = auth.currentUser;
             const data = {
+                uid: user.uid, // Identificador de quem cadastrou
+                usuario: user.email,
                 produto: document.getElementById('p-nome').value.toUpperCase(),
                 codigo: document.getElementById('p-ean').value,
                 quantidade: document.getElementById('p-qtd').value,
@@ -167,26 +163,28 @@
                 vencimento: document.getElementById('p-data').value,
                 criadoEm: serverTimestamp()
             };
-            if(!data.produto || !data.vencimento) return alert("Preencha Nome e Data!");
+            if(!data.produto || !data.vencimento) return alert("Nome e Data obrigatórios!");
             try {
                 await addDoc(collection(db, "validades"), data);
-                alert("Salvo!");
+                alert("Salvo na sua lista!");
                 document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
             } catch { alert("Erro ao salvar."); }
         };
 
-        window.setFiltro = (t) => {
-            filtroAtual = t;
-            ['f-critico', 'f-atencao', 'f-todos'].forEach(id => {
-                const el = document.getElementById(id);
-                el.classList.toggle('filter-active', id === 'f-'+t);
-                el.classList.toggle('filter-inactive', id !== 'f-'+t);
-            });
-            filtrar();
-        };
+        // CARREGAR (FILTRADO POR UID SE NÃO FOR GERENTE)
+        function carregar(userUid, isGerente) {
+            let q;
+            const colRef = collection(db, "validades");
+            
+            if (isGerente) {
+                // Gerente vê tudo
+                q = query(colRef, orderBy("vencimento", "asc"));
+            } else {
+                // Usuário comum vê apenas o dele
+                q = query(colRef, where("uid", "==", userUid), orderBy("vencimento", "asc"));
+            }
 
-        function carregar() {
-            onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
+            onSnapshot(q, (snap) => {
                 const lista = document.getElementById('lista');
                 let c1 = 0, c2 = 0; lista.innerHTML = "";
                 snap.forEach(d => {
@@ -195,21 +193,38 @@
                     let cat = "normal", estilo = "card-normal", txt = "text-green-600";
                     if(diff <= 5) { estilo = "card-critico"; txt = "text-red-600 font-black animate-pulse"; c1++; cat = "critico"; }
                     else if(diff <= 15) { estilo = "card-atencao"; txt = "text-yellow-600 font-bold"; c2++; cat = "atencao"; }
+                    
                     const div = document.createElement('div');
                     div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3`;
                     div.dataset.cat = cat;
                     div.innerHTML = `
-                        <div class="flex justify-between text-[8px] font-black uppercase text-slate-400"><span>${item.setor}</span><span class="${txt}">${diff} DIAS</span></div>
-                        <div class="flex justify-between items-center mt-1"><h3 class="font-black text-sm uppercase">${item.produto}</h3><span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-lg">QTD: ${item.quantidade}</span></div>
-                        <div class="flex justify-between items-center mt-3"><p class="text-[9px] font-bold text-slate-400 italic">VENCE: ${item.vencimento.split('-').reverse().join('/')}</p><button onclick="apagar('${d.id}')" class="text-slate-300 font-bold text-[10px] uppercase">Remover</button></div>`;
+                        <div class="flex justify-between text-[8px] font-black uppercase text-slate-400">
+                            <span>${item.setor} ${isGerente ? '| ' + item.usuario.split('@')[0] : ''}</span>
+                            <span class="${txt}">${diff} DIAS</span>
+                        </div>
+                        <div class="flex justify-between items-center mt-1"><h3 class="font-black text-sm uppercase leading-tight">${item.produto}</h3><span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-lg">QTD: ${item.quantidade}</span></div>
+                        <div class="flex justify-between items-center mt-3"><p class="text-[9px] font-bold text-slate-400">VENCE: ${item.vencimento.split('-').reverse().join('/')}</p>
+                        <button onclick="apagar('${d.id}')" class="text-slate-300 font-bold text-[9px] uppercase">Remover</button></div>`;
                     lista.appendChild(div);
                 });
                 document.getElementById('c-total').innerText = snap.size;
                 document.getElementById('c-critico').innerText = c1;
                 document.getElementById('c-atencao').innerText = c2;
                 filtrar();
+            }, (error) => {
+                // Caso falte índice no Firebase, ele avisa aqui
+                console.error("Erro ao carregar:", error);
             });
         }
+
+        window.setFiltro = (t) => {
+            filtroAtual = t;
+            ['f-critico', 'f-atencao', 'f-todos'].forEach(id => {
+                document.getElementById(id).classList.toggle('filter-active', id === 'f-'+t);
+                document.getElementById(id).classList.toggle('filter-inactive', id !== 'f-'+t);
+            });
+            filtrar();
+        };
 
         window.filtrar = () => {
             const b = document.getElementById('busca').value.toLowerCase();
@@ -220,7 +235,7 @@
             });
         };
 
-        window.apagar = async (id) => { if(confirm("Deseja apagar?")) await deleteDoc(doc(db, "validades", id)); };
+        window.apagar = async (id) => { if(confirm("Apagar da lista?")) await deleteDoc(doc(db, "validades", id)); };
     </script>
 </body>
 </html>
