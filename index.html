@@ -29,9 +29,8 @@
 
     <div id="login-screen" class="flex-grow flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border-t-8 border-blue-600">
-            <h1 class="text-3xl font-black text-blue-900 text-center uppercase italic leading-none">New Market</h1>
-            <p class="text-[9px] font-bold text-center text-slate-400 mb-8 uppercase tracking-tighter italic">Gestão Individual de Validades</p>
-            <form id="login-form" class="space-y-4">
+            <h1 class="text-3xl font-black text-blue-900 text-center uppercase italic">New Market</h1>
+            <form id="login-form" class="mt-8 space-y-4">
                 <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="E-mail" required>
                 <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="Senha" required>
                 <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Entrar</button>
@@ -42,16 +41,16 @@
     <div id="main-panel" class="hidden flex-grow flex flex-col">
         <nav class="bg-blue-900 text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
             <div class="flex flex-col">
-                <span class="font-black italic uppercase leading-none text-lg">New Market</span>
-                <button onclick="abrirModalSenha()" class="text-[8px] text-blue-300 font-bold uppercase mt-1 text-left tracking-widest">Configurar Senha ⚙️</button>
+                <span class="font-black italic uppercase leading-none">New Market</span>
+                <button onclick="abrirModalSenha()" class="text-[8px] text-blue-300 font-bold uppercase mt-1 text-left tracking-widest">Alterar Senha ⚙️</button>
             </div>
             <button id="btn-logout" class="text-[10px] bg-white/10 px-3 py-1 rounded-full uppercase font-bold">Sair</button>
         </nav>
 
         <main class="p-4 max-w-xl mx-auto w-full flex-grow space-y-6">
             
-            <div id="form-cadastro" class="bg-white p-6 rounded-3xl shadow-lg border-b-8 border-green-500 space-y-4">
-                <h2 class="font-black uppercase text-green-700 text-xs">Lançar Novo Produto</h2>
+            <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-lg border-b-8 border-green-500 space-y-4">
+                <h2 class="font-black uppercase text-green-700 text-sm">Lançar Novo Produto</h2>
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none">
                 <div class="grid grid-cols-2 gap-2">
                     <input type="number" id="p-ean" placeholder="CÓD. BARRAS" class="w-full p-4 border rounded-2xl font-bold outline-none">
@@ -67,10 +66,7 @@
                 <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl uppercase shadow-lg active:scale-95">Salvar</button>
             </div>
 
-            <div class="space-y-4">
-                <div class="bg-blue-50 p-2 rounded-xl text-center mb-2">
-                    <p id="txt-permissao" class="text-[9px] font-black text-blue-800 uppercase italic"></p>
-                </div>
+            <div id="lista-geral" class="space-y-4">
                 <div class="grid grid-cols-3 gap-2 text-center font-black">
                     <button onclick="setFiltro('critico')" id="f-critico" class="bg-white p-3 rounded-2xl border-2 border-red-500 text-red-600 filter-inactive">
                         <p class="text-[8px] uppercase">Crítico</p><p id="c-critico" class="text-xl">0</p>
@@ -82,9 +78,10 @@
                         <p class="text-[8px] uppercase">Total</p><p id="c-total" class="text-xl">0</p>
                     </button>
                 </div>
-                <input type="text" id="busca" onkeyup="filtrar()" placeholder="🔍 Pesquisar na minha lista..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none border-none">
+                <input type="text" id="busca" onkeyup="filtrar()" placeholder="🔍 Pesquisar na lista..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none border-none">
                 <div id="lista" class="space-y-3 pt-2"></div>
             </div>
+
         </main>
     </div>
 
@@ -95,7 +92,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
@@ -112,7 +109,7 @@
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         let filtroAtual = 'todos';
 
-        // TROCA SENHA
+        // ALTERAR SENHA
         window.abrirModalSenha = () => document.getElementById('modal-senha').classList.add('active');
         window.fecharModalSenha = () => document.getElementById('modal-senha').classList.remove('active');
         window.processarTrocaSenha = async () => {
@@ -142,20 +139,17 @@
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-panel').classList.remove('hidden');
                 const isG = gerentes.includes(user.email);
-                document.getElementById('txt-permissao').innerText = isG ? "Visão Geral (Gerência)" : "Minha Lista Individual";
-                carregar(user.uid, isG);
+                document.getElementById('repositor-form').classList.toggle('hidden', isG);
+                carregar(isG);
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
                 document.getElementById('main-panel').classList.add('hidden');
             }
         });
 
-        // SALVAR COM UID DO USUÁRIO
+        // GRAVAR
         document.getElementById('btn-salvar').onclick = async () => {
-            const user = auth.currentUser;
             const data = {
-                uid: user.uid, // Identificador de quem cadastrou
-                usuario: user.email,
                 produto: document.getElementById('p-nome').value.toUpperCase(),
                 codigo: document.getElementById('p-ean').value,
                 quantidade: document.getElementById('p-qtd').value,
@@ -166,25 +160,23 @@
             if(!data.produto || !data.vencimento) return alert("Nome e Data obrigatórios!");
             try {
                 await addDoc(collection(db, "validades"), data);
-                alert("Salvo na sua lista!");
+                alert("Salvo!");
                 document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
             } catch { alert("Erro ao salvar."); }
         };
 
-        // CARREGAR (FILTRADO POR UID SE NÃO FOR GERENTE)
-        function carregar(userUid, isGerente) {
-            let q;
-            const colRef = collection(db, "validades");
-            
-            if (isGerente) {
-                // Gerente vê tudo
-                q = query(colRef, orderBy("vencimento", "asc"));
-            } else {
-                // Usuário comum vê apenas o dele
-                q = query(colRef, where("uid", "==", userUid), orderBy("vencimento", "asc"));
-            }
+        // FILTROS
+        window.setFiltro = (t) => {
+            filtroAtual = t;
+            ['f-critico', 'f-atencao', 'f-todos'].forEach(id => {
+                document.getElementById(id).classList.toggle('filter-active', id === 'f-'+t);
+                document.getElementById(id).classList.toggle('filter-inactive', id !== 'f-'+t);
+            });
+            filtrar();
+        };
 
-            onSnapshot(q, (snap) => {
+        function carregar(podeApagar) {
+            onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista');
                 let c1 = 0, c2 = 0; lista.innerHTML = "";
                 snap.forEach(d => {
@@ -198,33 +190,18 @@
                     div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3`;
                     div.dataset.cat = cat;
                     div.innerHTML = `
-                        <div class="flex justify-between text-[8px] font-black uppercase text-slate-400">
-                            <span>${item.setor} ${isGerente ? '| ' + item.usuario.split('@')[0] : ''}</span>
-                            <span class="${txt}">${diff} DIAS</span>
-                        </div>
+                        <div class="flex justify-between text-[8px] font-black uppercase text-slate-400"><span>${item.setor}</span><span class="${txt}">${diff} DIAS</span></div>
                         <div class="flex justify-between items-center mt-1"><h3 class="font-black text-sm uppercase leading-tight">${item.produto}</h3><span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-lg">QTD: ${item.quantidade}</span></div>
                         <div class="flex justify-between items-center mt-3"><p class="text-[9px] font-bold text-slate-400">VENCE: ${item.vencimento.split('-').reverse().join('/')}</p>
-                        <button onclick="apagar('${d.id}')" class="text-slate-300 font-bold text-[9px] uppercase">Remover</button></div>`;
+                        ${podeApagar ? `<button onclick="apagar('${d.id}')" class="text-slate-300 font-bold text-[9px] uppercase">Remover</button>` : ''}</div>`;
                     lista.appendChild(div);
                 });
                 document.getElementById('c-total').innerText = snap.size;
                 document.getElementById('c-critico').innerText = c1;
                 document.getElementById('c-atencao').innerText = c2;
                 filtrar();
-            }, (error) => {
-                // Caso falte índice no Firebase, ele avisa aqui
-                console.error("Erro ao carregar:", error);
             });
         }
-
-        window.setFiltro = (t) => {
-            filtroAtual = t;
-            ['f-critico', 'f-atencao', 'f-todos'].forEach(id => {
-                document.getElementById(id).classList.toggle('filter-active', id === 'f-'+t);
-                document.getElementById(id).classList.toggle('filter-inactive', id !== 'f-'+t);
-            });
-            filtrar();
-        };
 
         window.filtrar = () => {
             const b = document.getElementById('busca').value.toLowerCase();
@@ -235,7 +212,7 @@
             });
         };
 
-        window.apagar = async (id) => { if(confirm("Apagar da lista?")) await deleteDoc(doc(db, "validades", id)); };
+        window.apagar = async (id) => { if(confirm("Apagar item?")) await deleteDoc(doc(db, "validades", id)); };
     </script>
 </body>
 </html>
