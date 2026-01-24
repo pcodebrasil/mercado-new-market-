@@ -72,14 +72,18 @@
             </div>
 
             <div id="gerente-view" class="hidden space-y-4">
-                <div class="grid grid-cols-2 gap-3 mb-4 text-center font-black">
-                    <div class="bg-white p-4 rounded-3xl border-2 border-red-100 text-red-600 shadow-sm">
-                        <p class="text-[10px] uppercase">Vencendo (3d)</p>
-                        <p id="count-critico" class="text-3xl">0</p>
+                <div class="grid grid-cols-3 gap-2 mb-4 text-center font-black">
+                    <div class="bg-white p-3 rounded-2xl border-b-4 border-red-500 text-red-600 shadow-sm">
+                        <p class="text-[8px] uppercase">Crítico (5d)</p>
+                        <p id="count-critico" class="text-xl">0</p>
                     </div>
-                    <div class="bg-white p-4 rounded-3xl border-2 border-blue-100 text-blue-600 shadow-sm">
-                        <p class="text-[10px] uppercase">Total Itens</p>
-                        <p id="count-total" class="text-3xl">0</p>
+                    <div class="bg-white p-3 rounded-2xl border-b-4 border-yellow-500 text-yellow-600 shadow-sm">
+                        <p class="text-[8px] uppercase">Atenção (15d)</p>
+                        <p id="count-atencao" class="text-xl">0</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-2xl border-b-4 border-blue-500 text-blue-600 shadow-sm">
+                        <p class="text-[8px] uppercase">Total Itens</p>
+                        <p id="count-total" class="text-xl">0</p>
                     </div>
                 </div>
 
@@ -172,21 +176,35 @@
             onSnapshot(q, (snap) => {
                 const lista = document.getElementById('lista-vencimento');
                 let criticos = 0;
+                let atencao = 0;
                 lista.innerHTML = "";
                 snap.forEach(d => {
                     const item = d.data();
                     const diff = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
-                    if(diff <= 3) criticos++;
+                    
+                    let corBorda = "border-green-500";
+                    let corTexto = "text-green-600";
+                    
+                    if (diff <= 5) {
+                        corBorda = "border-red-500";
+                        corTexto = "text-red-600 font-black animate-pulse";
+                        criticos++;
+                    } else if (diff <= 15) {
+                        corBorda = "border-yellow-500";
+                        corTexto = "text-yellow-600 font-bold";
+                        atencao++;
+                    }
+
                     const card = document.createElement('div');
-                    card.className = `flex flex-col p-4 rounded-2xl bg-white shadow-sm border-l-8 ${diff <= 3 ? 'border-red-500' : 'border-blue-500'}`;
+                    card.className = `flex flex-col p-4 rounded-2xl bg-white shadow-sm border-l-8 ${corBorda}`;
                     card.innerHTML = `
                         <div class="flex justify-between items-start mb-1">
                             <span class="text-[8px] font-black bg-slate-100 px-2 py-0.5 rounded uppercase text-slate-500">${item.setor}</span>
-                            <span class="text-[11px] font-black ${diff <= 3 ? 'text-red-600' : 'text-slate-400'} uppercase">${diff} dias</span>
+                            <span class="text-[11px] uppercase ${corTexto}">${diff} dias</span>
                         </div>
                         <div class="flex justify-between items-end mb-2">
                             <h3 class="font-black text-slate-800 uppercase text-sm flex-1 mr-2">${item.produto}</h3>
-                            <span class="bg-blue-600 text-white text-[10px] px-2 py-1 rounded-lg font-black">QTD: ${item.quantidade}</span>
+                            <span class="bg-blue-600 text-white text-[10px] px-2 py-1 rounded-lg font-black italic">QTD: ${item.quantidade}</span>
                         </div>
                         <div class="bg-slate-50 p-2 rounded-lg border border-slate-100 mb-2 text-center">
                             <p class="text-[13px] font-mono font-bold text-blue-600 tracking-wider">${item.codigo}</p>
@@ -199,6 +217,7 @@
                 });
                 document.getElementById('count-total').innerText = snap.size;
                 document.getElementById('count-critico').innerText = criticos;
+                document.getElementById('count-atencao').innerText = atencao;
             });
         }
 
@@ -214,22 +233,19 @@
         };
 
         document.getElementById('btn-whatsapp').onclick = () => {
-            let msg = "*RELATÓRIO DE VALIDADES - NEW MARKET*\n\n";
+            let msg = "*RELATÓRIO SEMÁFORO - NEW MARKET*\n\n";
             let cont = 0;
             document.querySelectorAll('#lista-vencimento > div').forEach(c => {
                 if(c.style.display !== "none") {
-                    // Extraímos as informações de forma limpa para o zap
-                    const setor = c.querySelector('span:nth-child(1)').innerText;
-                    const dias = c.querySelector('span:nth-child(2)').innerText;
+                    const status = c.classList.contains('border-red-500') ? "🔴 CRÍTICO" : 
+                                 c.classList.contains('border-yellow-500') ? "🟡 ATENÇÃO" : "🟢 OK";
+                    
                     const produto = c.querySelector('h3').innerText;
                     const qtd = c.querySelector('.bg-blue-600').innerText;
-                    const cod = c.querySelector('p').innerText;
+                    const dias = c.querySelector('span:nth-child(2)').innerText;
                     const venc = c.querySelector('p:last-of-type').innerText;
 
-                    msg += `📦 *${produto}*\n`;
-                    msg += `🔹 ${qtd} | ${setor}\n`;
-                    msg += `⚠️ ${dias} (${venc})\n`;
-                    msg += `🔢 ${cod}\n\n`;
+                    msg += `${status}\n📦 *${produto}*\n🔹 ${qtd} | ${dias}\n🗓️ ${venc}\n\n`;
                     cont++;
                 }
             });
