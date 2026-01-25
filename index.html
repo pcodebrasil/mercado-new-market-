@@ -31,7 +31,7 @@
 
     <div id="loading-screen">
         <div class="w-12 h-12 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Sincronizando New Market</p>
+        <p class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">New Market Cloud 2026</p>
     </div>
 
     <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-4">
@@ -74,8 +74,13 @@
                 </div>
 
                 <div class="border-t border-slate-700 pt-4">
+                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Notificações Push</p>
+                    <button id="btn-ativar-push" class="w-full bg-purple-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">🔔 Ativar Alertas no Celular</button>
+                </div>
+
+                <div class="border-t border-slate-700 pt-4">
                     <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Acessos da Equipe</p>
-                    <button id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Abrir Gerenciador Firebase</button>
+                    <button id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Gerenciar E-mails (Firebase)</button>
                 </div>
             </div>
 
@@ -136,6 +141,15 @@
         const db = getFirestore(app);
         try { enableIndexedDbPersistence(db); } catch (e) {}
         
+        // REGISTRO DO SERVICE WORKER (VIGIA)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW Ativo!', reg.scope))
+                    .catch(err => console.log('Erro SW:', err));
+            });
+        }
+
         const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         const gerentesOCULTOS = ['paulo@newmarket.com']; 
 
@@ -153,20 +167,28 @@
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                
                 const isGerenteReal = gerentesREAIS.includes(user.email);
                 const isPaulo = gerentesOCULTOS.includes(user.email);
-                
                 document.getElementById('user-display').innerText = (isGerenteReal) ? `ADMIN: ${user.email.split('@')[0]}` : `REPO: ${user.email.split('@')[0]}`;
                 document.getElementById('btn-config').classList.toggle('hidden', !(isGerenteReal || isPaulo));
                 document.getElementById('repositor-form').classList.toggle('hidden', isGerenteReal);
-                
                 carregar(isGerenteReal || isPaulo);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-panel').style.display = 'none';
             }
         });
+
+        // ATIVAR NOTIFICAÇÕES NO CLIQUE
+        document.getElementById('btn-ativar-push').onclick = async () => {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                showToast("Notificações Ativadas!", "#10b981");
+                // Futuramente salvaremos o token do FCM aqui
+            } else {
+                showToast("Permissão Negada", "#dc2626");
+            }
+        };
 
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
@@ -182,8 +204,8 @@
         document.getElementById('btn-confirmar-senha').onclick = async () => {
             const ns = document.getElementById('nova-senha').value;
             if (ns.length < 6) return showToast("Mínimo 6 caracteres!", "#f59e0b");
-            try { await updatePassword(auth.currentUser, ns); showToast("Senha alterada! Relogue.", "#10b981"); setTimeout(()=>signOut(auth), 2000); } 
-            catch (e) { showToast("Relogue para mudar a senha", "#dc2626"); }
+            try { await updatePassword(auth.currentUser, ns); showToast("Sucesso! Relogue.", "#10b981"); setTimeout(()=>signOut(auth), 2000); } 
+            catch (e) { showToast("Relogue para mudar", "#dc2626"); }
         };
 
         function carregar(podeApagar) {
@@ -241,7 +263,7 @@
 
         document.getElementById('btn-whatsapp').onclick = () => {
             const cards = document.querySelectorAll('.card-checked');
-            if(cards.length === 0) return showToast("Marque os itens primeiro!", "#f59e0b");
+            if(cards.length === 0) return showToast("Marque os itens!", "#f59e0b");
             const ids = Array.from(cards).map(c => c.dataset.id);
             const itens = dadosAtuais.filter(d => ids.includes(d.id));
             let msg = `*📊 RELATÓRIO NEW MARKET*\n\n`;
@@ -253,7 +275,7 @@
             document.querySelectorAll('.card').forEach(c => { if(c.dataset.cat === 'critico') { c.querySelector('.item-check').checked = true; c.classList.add('card-checked'); } });
         };
 
-        window.apagarItem = async (id) => { if(confirm("Deseja realmente excluir este produto?")) await deleteDoc(doc(db, "validades", id)); };
+        window.apagarItem = async (id) => { if(confirm("Excluir produto?")) await deleteDoc(doc(db, "validades", id)); };
     </script>
 </body>
 </html>
