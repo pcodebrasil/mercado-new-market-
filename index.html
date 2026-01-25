@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>New Market Supermercados - Painel</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
     <style>
-        /* Bloqueio inicial de visualização */
+        /* Controle de visibilidade inicial */
         #login-screen, #main-panel { display: none; }
         #loading-screen { position: fixed; inset: 0; background: white; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
@@ -21,9 +20,6 @@
         .card-checked { opacity: 0.4; filter: grayscale(1); background-color: #f1f5f9 !important; border-left-color: #94a3b8 !important; transform: scale(0.96); }
         .card-checked h3 { text-decoration: line-through; }
 
-        #scanner-container { width: 100%; height: 250px; position: relative; overflow: hidden; border-radius: 20px; background: #000; display: none; margin-bottom: 15px; border: 4px solid #facc15; }
-        #scanner-container video { width: 100%; height: 100%; object-fit: cover; }
-        
         .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
         .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; }
 
@@ -44,7 +40,7 @@
 
     <div id="login-screen" class="flex-grow flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-t-8 border-blue-800 text-center relative overflow-hidden">
-            <h1 class="text-3xl font-black uppercase italic italic leading-none">
+            <h1 class="text-3xl font-black uppercase italic leading-none">
                 <span class="text-blue-800">New</span> <span class="text-red-600">Market</span>
             </h1>
             <p class="text-[10px] text-yellow-600 font-black uppercase tracking-widest mt-1">Nazaré Paulista</p>
@@ -73,13 +69,14 @@
 
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-lg border-b-8 border-green-500 space-y-4">
                 <h2 class="font-black uppercase text-green-700 text-[10px]">Novo Lançamento</h2>
-                <div id="scanner-container"></div>
+                
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50">
-                <div class="grid grid-cols-5 gap-2">
-                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
-                    <button type="button" id="btn-scan-trigger" class="col-span-1 bg-slate-800 text-white rounded-2xl text-xl">📷</button>
+                
+                <div class="grid grid-cols-4 gap-2">
+                    <input type="number" id="p-ean" placeholder="CÓDIGO EAN" class="col-span-3 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
                     <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
                 </div>
+
                 <select id="p-setor" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50 text-sm">
                     <option value="Corredor do Paulo">Corredor do Paulo</option>
                     <option value="Corredor do Leandro">Corredor do Leandro</option>
@@ -124,19 +121,17 @@
         let dadosAtuais = [];
         let filtroAtual = 'todos';
 
-        // --- CONTROLE DE TELAS ---
         const loader = document.getElementById('loading-screen');
         const loginScreen = document.getElementById('login-screen');
         const mainPanel = document.getElementById('main-panel');
 
         onAuthStateChanged(auth, (user) => {
-            loader.style.display = 'none'; // Garante que o loader suma SEMPRE
+            loader.style.display = 'none';
 
             if (user) {
                 loginScreen.style.display = 'none';
                 mainPanel.style.display = 'flex';
                 
-                // Ativar Boas-Vindas
                 const welcome = document.getElementById('welcome-msg');
                 document.getElementById('welcome-text').innerText = `BOAS-VINDAS, ${user.email.split('@')[0].toUpperCase()}!`;
                 welcome.classList.remove('hidden');
@@ -151,7 +146,6 @@
             }
         });
 
-        // --- LOGIN ---
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-entrar');
@@ -166,37 +160,6 @@
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
-        // --- SCANNER ---
-        let scannerAtivo = false;
-        document.getElementById('btn-scan-trigger').onclick = () => {
-            const container = document.getElementById('scanner-container');
-            if (scannerAtivo) {
-                Quagga.stop();
-                container.style.display = "none";
-                scannerAtivo = false;
-            } else {
-                container.style.display = "block";
-                Quagga.init({
-                    inputStream: { name: "Live", type: "LiveStream", target: container, constraints: { facingMode: "environment" } },
-                    decoder: { readers: ["ean_reader", "ean_8_reader"] }
-                }, (err) => {
-                    if (err) { alert("Câmara não disponível."); return; }
-                    Quagga.start();
-                    scannerAtivo = true;
-                });
-            }
-        };
-
-        Quagga.onDetected((data) => {
-            if (data.codeResult.code) {
-                document.getElementById('p-ean').value = data.codeResult.code;
-                Quagga.stop();
-                document.getElementById('scanner-container').style.display = "none";
-                scannerAtivo = false;
-            }
-        });
-
-        // --- LISTAGEM ---
         function carregar(podeApagar) {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista');
@@ -251,7 +214,6 @@
             });
         }
 
-        // --- SALVAR ---
         document.getElementById('btn-salvar').onclick = async () => {
             const data = {
                 produto: document.getElementById('p-nome').value.toUpperCase(),
@@ -267,7 +229,6 @@
             alert("Salvo!");
         };
 
-        // --- WHATSAPP ---
         document.getElementById('btn-whatsapp').onclick = () => {
             const selecionados = Array.from(document.querySelectorAll('.item-check:checked')).map(cb => cb.dataset.id);
             if(selecionados.length === 0) return alert("Marque os itens primeiro!");
@@ -279,7 +240,6 @@
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
         };
 
-        // --- FILTROS ---
         function filtrar() {
             const b = document.getElementById('busca').value.toLowerCase();
             document.querySelectorAll('.card').forEach(c => {
