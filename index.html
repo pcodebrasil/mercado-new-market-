@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - Nazaré Paulista</title>
+    <title>New Market Supermercados - Nazaré Paulista</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .filter-active { border-width: 4px !important; opacity: 1 !important; transform: scale(1.05); }
@@ -39,26 +39,25 @@
             <h1 class="text-3xl font-black uppercase italic leading-none">
                 <span class="text-blue-800">New</span> <span class="text-red-600">Market</span>
             </h1>
-            <p class="text-[12px] text-slate-500 font-bold uppercase mt-1 tracking-widest">Nazaré Paulista</p>
-            <p class="text-[9px] text-slate-400 font-bold uppercase mt-2 mb-8 italic">Desenvolvedor: Paulo Souza</p>
+            <p class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] -mt-1">Supermercados</p>
+            <p class="text-[12px] text-slate-500 font-bold uppercase mt-2 mb-8 tracking-widest">Nazaré Paulista</p>
             
             <form id="login-form" class="space-y-4 text-left">
                 <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm focus:border-blue-500" placeholder="E-mail" required>
                 <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm focus:border-red-600" placeholder="Senha" required>
-                <button type="submit" id="btn-entrar" class="w-full bg-gradient-to-r from-blue-700 to-red-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg hover:shadow-xl transition-all">Acessar Sistema</button>
+                <button type="submit" id="btn-entrar" class="w-full bg-gradient-to-r from-blue-700 to-red-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Acessar Sistema</button>
             </form>
         </div>
     </div>
 
     <div id="main-panel" class="hidden flex-grow flex flex-col">
         <nav class="bg-gradient-to-r from-blue-900 via-blue-800 to-red-700 text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
-            <div class="flex flex-col">
+            <div class="flex flex-col text-left">
                 <span class="font-black italic uppercase text-lg leading-none">New Market</span>
-                <span class="text-[9px] font-bold uppercase tracking-wider opacity-90">Nazaré Paulista</span>
-                <span class="text-[7px] font-bold uppercase opacity-75 mt-0.5">Desenvolvedor: Paulo Souza</span>
+                <span class="text-[8px] font-black uppercase tracking-widest opacity-80 -mt-0.5 text-red-200">Supermercados</span>
                 <button onclick="abrirModalSenha()" class="text-[8px] text-blue-200 font-bold uppercase mt-1 text-left w-fit underline">Ajustes ⚙️</button>
             </div>
-            <button id="btn-logout" class="text-[10px] bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full uppercase font-bold transition-all">Sair</button>
+            <button id="btn-logout" class="text-[10px] bg-white/20 px-4 py-2 rounded-full uppercase font-bold">Sair</button>
         </nav>
 
         <main class="p-4 max-w-xl mx-auto w-full flex-grow space-y-6">
@@ -97,19 +96,20 @@
                     </button>
                 </div>
 
-                <button onclick="enviarSelecionados()" class="w-full bg-green-600 hover:bg-green-700 transition-colors text-white p-4 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-3 shadow-md">
+                <button onclick="enviarSelecionados()" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-3 shadow-md">
                     <span class="text-lg">📊</span> Enviar Selecionados (WhatsApp)
                 </button>
 
-                <input type="text" id="busca" onkeyup="filtrar()" placeholder="🔍 Pesquisar produto..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none text-sm">
+                <input type="text" id="busca" onkeyup="filtrar()" placeholder="🔍 Pesquisar produto..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none text-sm border border-transparent focus:border-blue-400">
                 
                 <div id="lista" class="space-y-3 pb-10"></div>
             </div>
         </main>
     </div>
 
-    <footer class="w-full p-4 text-center text-[10px] font-bold text-slate-400 uppercase mt-auto">
-        New Market Nazaré Paulista • 2026 • Desenvolvedor: <span class="text-blue-600">"Paulo Souza"</span>
+    <footer class="w-full p-6 text-center text-[10px] font-bold text-slate-400 uppercase mt-auto">
+        <p>New Market Supermercados • Nazaré Paulista</p>
+        <p class="mt-1">Dev: Paulo Souza - 2026</p>
     </footer>
 
     <script type="module">
@@ -158,10 +158,10 @@
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-entrar');
-            btn.innerText = "Entrando...";
+            btn.innerText = "ENTRANDO...";
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
             catch { alert("Erro de login."); }
-            finally { btn.innerText = "Acessar Sistema"; }
+            finally { btn.innerText = "ACESSAR SISTEMA"; }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
@@ -242,9 +242,9 @@
         }
 
         window.enviarSelecionados = () => {
-            const selecionadosIds = Array.from(document.querySelectorAll('.item-check:checked')).map(cb => cb.dataset.id);
-            if(selecionadosIds.length === 0) return alert("Selecione os produtos tocando nos cards!");
-            const itens = dadosAtuais.filter(d => selecionadosIds.includes(d.id));
+            const ids = Array.from(document.querySelectorAll('.item-check:checked')).map(cb => cb.dataset.id);
+            if(ids.length === 0) return alert("Selecione os produtos!");
+            const itens = dadosAtuais.filter(d => ids.includes(d.id));
             let msg = `*📊 RELATÓRIO DE VALIDADES - NEW MARKET*\n\n`;
             itens.forEach(p => {
                 const icon = p.cat === 'critico' ? '🚨' : (p.cat === 'atencao' ? '⚠️' : '✅');
@@ -271,12 +271,12 @@
             });
         };
 
-        window.apagarItem = async (id) => { if(confirm("Apagar definitivamente?")) await deleteDoc(doc(db, "validades", id)); };
+        window.apagarItem = async (id) => { if(confirm("Apagar registro?")) await deleteDoc(doc(db, "validades", id)); };
         window.abrirModalSenha = () => document.getElementById('modal-senha').classList.add('active');
         window.fecharModalSenha = () => document.getElementById('modal-senha').classList.remove('active');
         window.processarTrocaSenha = async () => {
-            try { await updatePassword(auth.currentUser, document.getElementById('pass-nova').value); alert("Sucesso!"); fecharModalSenha(); }
-            catch { alert("Erro ao atualizar senha."); }
+            try { await updatePassword(auth.currentUser, document.getElementById('pass-nova').value); alert("Senha alterada!"); fecharModalSenha(); }
+            catch { alert("Erro. Tente re-logar."); }
         };
     </script>
 </body>
