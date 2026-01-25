@@ -54,26 +54,31 @@
                 <span id="user-display" class="text-[8px] font-black uppercase tracking-widest text-yellow-200">...</span>
             </div>
             <div class="flex gap-2">
-                <button id="btn-abrir-senha" class="text-[8px] bg-white/20 px-3 py-2 rounded-full uppercase font-bold border border-white/20">Senha</button>
+                <button id="btn-config" class="hidden bg-white/20 p-2 rounded-full border border-white/20">⚙️</button>
                 <button id="btn-logout" class="text-[8px] bg-black/40 px-3 py-2 rounded-full uppercase font-bold border border-white/20">Sair</button>
             </div>
         </nav>
 
         <main class="p-4 max-w-xl mx-auto w-full flex-grow space-y-5">
             
-            <div id="area-gerente" class="hidden space-y-4">
-                <div class="bg-slate-800 p-6 rounded-3xl shadow-xl border-b-8 border-yellow-500 space-y-4">
-                    <h2 class="font-black uppercase text-yellow-500 text-[10px]">Gerenciar Equipe (Novos Acessos)</h2>
-                    <input type="email" id="new-user-email" placeholder="E-MAIL DO FUNCIONÁRIO" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-700 text-white placeholder-slate-400">
-                    <input type="password" id="new-user-pass" placeholder="SENHA INICIAL" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-700 text-white placeholder-slate-400">
-                    <button id="btn-cadastrar-user" class="w-full bg-yellow-500 text-slate-900 p-4 rounded-2xl font-black uppercase shadow-lg text-[10px]">Criar Acesso Repositor</button>
+            <div id="gaveta-config" class="hidden bg-slate-800 p-6 rounded-3xl shadow-xl border-b-8 border-yellow-500 space-y-4 animate-bounce-in">
+                <div class="flex justify-between items-center">
+                    <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações de Gerente</h2>
+                    <button id="btn-fechar-config" class="text-white font-black text-xs">X</button>
                 </div>
-            </div>
+                
+                <div class="border-t border-slate-700 pt-4">
+                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Mudar Minha Senha</p>
+                    <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-3 border-none rounded-xl font-bold outline-none text-xs bg-slate-700 text-white mb-2">
+                    <button id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Confirmar e Sair</button>
+                </div>
 
-            <div id="modal-senha" class="hidden bg-yellow-50 p-6 rounded-3xl border-2 border-yellow-200 shadow-inner space-y-4">
-                <h2 class="font-black uppercase text-yellow-700 text-[10px]">Alterar Minha Senha</h2>
-                <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm">
-                <button id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-4 rounded-2xl font-black uppercase text-[10px]">Confirmar e Sair</button>
+                <div class="border-t border-slate-700 pt-4">
+                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Cadastrar Novo Acesso (Repositor)</p>
+                    <input type="email" id="new-user-email" placeholder="E-MAIL" class="w-full p-3 border-none rounded-xl font-bold outline-none text-xs bg-slate-700 text-white mb-2">
+                    <input type="password" id="new-user-pass" placeholder="SENHA INICIAL" class="w-full p-3 border-none rounded-xl font-bold outline-none text-xs bg-slate-700 text-white mb-2">
+                    <button id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Abrir Console e Criar</button>
+                </div>
             </div>
 
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
@@ -116,7 +121,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -150,8 +155,8 @@
                 document.getElementById('main-panel').style.display = 'flex';
                 const isGerente = gerentes.includes(user.email);
                 
-                document.getElementById('user-display').innerText = isGerente ? `GERENTE: ${user.email.split('@')[0]}` : `REPOSITOR: ${user.email.split('@')[0]}`;
-                document.getElementById('area-gerente').classList.toggle('hidden', !isGerente);
+                document.getElementById('user-display').innerText = isGerente ? `ADMIN: ${user.email.split('@')[0]}` : `REPO: ${user.email.split('@')[0]}`;
+                document.getElementById('btn-config').classList.toggle('hidden', !isGerente);
                 document.getElementById('repositor-form').classList.toggle('hidden', isGerente);
                 
                 carregar(isGerente);
@@ -168,23 +173,15 @@
             catch (err) { showToast("Acesso Negado", "#dc2626"); }
         };
 
-        // GESTÃO DE EQUIPE (SÓ PARA GERENTES)
-        document.getElementById('btn-cadastrar-user').onclick = async () => {
-            const email = document.getElementById('new-user-email').value;
-            const pass = document.getElementById('new-user-pass').value;
-            if(!email || pass.length < 6) return showToast("E-mail válido e senha 6+ dígitos!", "#f59e0b");
-            
-            try {
-                // Como o Firebase não permite criar user sem logar nele, 
-                // aqui apenas simulamos o aviso. Para produção real, o Adriano precisaria
-                // deslogar ou usar uma Cloud Function. 
-                // Por simplicidade, este botão avisa para usar o console ou podemos criar uma coleção 'usuarios_pendentes'.
-                showToast("Acesse o Console Firebase para validar o novo e-mail", "#1e40af");
-                window.open('https://console.firebase.google.com/project/mercado-c3e95/authentication/users', '_blank');
-            } catch (err) { showToast("Erro ao criar: " + err.message, "#dc2626"); }
+        // CONTROLES DE CONFIGURAÇÃO (ESCONDIDOS)
+        document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
+        document.getElementById('btn-fechar-config').onclick = () => document.getElementById('gaveta-config').classList.add('hidden');
+
+        document.getElementById('btn-cadastrar-user').onclick = () => {
+            showToast("Abrindo console...", "#1e40af");
+            window.open('https://console.firebase.google.com/project/mercado-c3e95/authentication/users', '_blank');
         };
 
-        // SENHA
         document.getElementById('btn-confirmar-senha').onclick = async () => {
             const novaSenha = document.getElementById('nova-senha').value;
             if (novaSenha.length < 6) return showToast("Mínimo 6 caracteres!", "#f59e0b");
@@ -195,7 +192,6 @@
             } catch (err) { showToast("Relogue para mudar a senha", "#dc2626"); }
         };
 
-        document.getElementById('btn-abrir-senha').onclick = () => document.getElementById('modal-senha').classList.toggle('hidden');
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
         // CARREGAR DADOS
@@ -209,7 +205,6 @@
                     const item = { id: d.id, ...d.data() };
                     const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
                     let cat = "normal", estilo = "card-normal", corTxt = "text-green-600";
-                    
                     if(diff <= 7) { estilo="card-critico"; corTxt="text-red-600 animate-pulse font-black"; counts.critico++; cat="critico"; }
                     else if(diff <= 15) { estilo="card-atencao"; corTxt="text-yellow-600 font-black"; counts.atencao++; cat="atencao"; }
                     
@@ -243,13 +238,12 @@
             document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = ""; document.getElementById('p-qtd').value = "";
         };
 
-        // FILTROS
         function filtrar() {
             const busca = document.getElementById('busca').value.toLowerCase();
             document.querySelectorAll('.card').forEach(c => {
-                const mStatus = (filtroStatus === 'todos' || c.dataset.cat === filtroStatus);
-                const mBusca = c.dataset.search.includes(busca);
-                c.style.display = (mStatus && mBusca) ? "block" : "none";
+                const matchStatus = (filtroStatus === 'todos' || c.dataset.cat === filtroStatus);
+                const matchBusca = c.dataset.search.includes(busca);
+                c.style.display = (matchStatus && matchBusca) ? "block" : "none";
             });
         }
         document.getElementById('busca').oninput = () => filtrar();
@@ -262,7 +256,6 @@
             };
         });
 
-        // WHATSAPP
         document.getElementById('btn-whatsapp').onclick = () => {
             const cards = document.querySelectorAll('.card-checked');
             if(cards.length === 0) return showToast("Marque os itens!", "#f59e0b");
