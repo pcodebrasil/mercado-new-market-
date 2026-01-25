@@ -11,14 +11,20 @@
         .card-critico { border-left: 8px solid #ef4444; }
         .card-atencao { border-left: 8px solid #f59e0b; }
         .card-normal { border-left: 8px solid #10b981; }
-        /* Estilo visual para item selecionado (Check-in local) */
-        .card-checked { opacity: 0.6; filter: grayscale(0.5); background-color: #f1f5f9 !important; border-left-color: #94a3b8 !important; }
-        .card-checked h3 { text-decoration: line-through; }
+        
+        /* Estilo para item selecionado/conferido */
+        .card-checked { opacity: 0.5; filter: grayscale(0.7); background-color: #f1f5f9 !important; border-left-color: #94a3b8 !important; transform: scale(0.98); }
+        .card-checked h3 { text-decoration: line-through; color: #64748b; }
         
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
+        
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOutUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); height: 0; margin-bottom: 0; padding: 0; overflow: hidden; } }
+        
         .welcome-anim { animation: fadeInDown 0.5s ease-out forwards; }
+        .welcome-hide { animation: fadeOutUp 0.8s ease-in forwards; }
+        
         input[type="checkbox"] { transform: scale(1.6); }
         .card { transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; cursor: pointer; }
     </style>
@@ -27,10 +33,10 @@
 
     <div id="modal-senha" class="modal">
         <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center">
-            <h3 class="font-black text-slate-800 uppercase mb-4 text-sm">Acesso Seguro</h3>
+            <h3 class="font-black text-slate-800 uppercase mb-4 text-sm">Ajustar Senha</h3>
             <input type="password" id="pass-nova" placeholder="Nova Senha" class="w-full p-4 mb-4 border rounded-2xl bg-slate-50 outline-none text-sm">
-            <button onclick="processarTrocaSenha()" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Atualizar Senha</button>
-            <button onclick="fecharModalSenha()" class="w-full text-slate-400 font-bold text-[10px] uppercase p-4 tracking-widest">Fechar</button>
+            <button onclick="processarTrocaSenha()" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Atualizar</button>
+            <button onclick="fecharModalSenha()" class="w-full text-slate-400 font-bold text-[10px] uppercase p-4 mt-2">Fechar</button>
         </div>
     </div>
 
@@ -40,12 +46,12 @@
                 <span class="text-blue-800">New</span> <span class="text-red-600">Market</span>
             </h1>
             <p class="text-[12px] text-center text-slate-500 font-bold uppercase mt-1 tracking-widest">Nazaré Paulista</p>
-            <p class="text-[8px] text-center text-slate-400 font-bold uppercase mt-1 mb-8">Desenvolvido por Paulo Souza</p>
+            <p class="text-[8px] text-center text-slate-400 font-bold uppercase mt-1 mb-8 italic">Dev: Paulo Souza</p>
             
             <form id="login-form" class="space-y-4">
-                <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm" placeholder="E-mail" required>
-                <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm" placeholder="Senha" required>
-                <button type="submit" class="w-full bg-gradient-to-r from-blue-700 to-red-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Acessar Sistema</button>
+                <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm focus:border-blue-500" placeholder="E-mail" required>
+                <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm focus:border-red-600" placeholder="Senha" required>
+                <button type="submit" id="btn-entrar" class="w-full bg-gradient-to-r from-blue-700 to-red-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg hover:shadow-xl transition-all">Acessar Sistema</button>
             </form>
         </div>
     </div>
@@ -55,19 +61,24 @@
             <div class="flex flex-col">
                 <span class="font-black italic uppercase text-lg leading-none">New Market</span>
                 <span class="text-[9px] font-bold uppercase tracking-wider opacity-90">Nazaré Paulista</span>
-                <button onclick="abrirModalSenha()" class="text-[8px] text-blue-200 font-bold uppercase mt-1 text-left">Ajustes ⚙️</button>
+                <button onclick="abrirModalSenha()" class="text-[8px] text-blue-200 font-bold uppercase mt-1 text-left w-fit">Ajustes ⚙️</button>
             </div>
-            <button id="btn-logout" class="text-[10px] bg-white/20 px-4 py-2 rounded-full uppercase font-bold">Sair</button>
+            <button id="btn-logout" class="text-[10px] bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full uppercase font-bold transition-all">Sair</button>
         </nav>
 
         <main class="p-4 max-w-xl mx-auto w-full flex-grow space-y-6">
             
+            <div id="welcome-msg" class="hidden bg-white p-4 rounded-2xl shadow-sm border-l-4 border-blue-600 flex items-center gap-3">
+                <div class="bg-blue-100 p-2 rounded-full text-xl">🚀</div>
+                <div><p id="welcome-text" class="font-black text-blue-900 uppercase text-xs"></p></div>
+            </div>
+
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-lg border-b-8 border-green-500 space-y-4">
                 <h2 class="font-black uppercase text-green-700 text-[10px] tracking-widest">Novo Lançamento</h2>
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50">
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50 focus:bg-white focus:border-green-500 transition-colors">
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="number" id="p-ean" placeholder="CÓDIGO EAN" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
-                    <input type="number" id="p-qtd" placeholder="QTD" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
+                    <input type="number" id="p-ean" placeholder="CÓDIGO EAN" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50 focus:bg-white focus:border-green-500">
+                    <input type="number" id="p-qtd" placeholder="QTD" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50 focus:bg-white focus:border-green-500">
                 </div>
                 <select id="p-setor" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50 text-sm">
                     <option value="Corredor do Paulo">Corredor do Paulo</option>
@@ -75,8 +86,8 @@
                     <option value="Corredor do Pedro">Corredor do Pedro</option>
                     <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
-                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-sm bg-slate-50">
-                <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl uppercase shadow-lg">Salvar Agora</button>
+                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-sm bg-slate-50 focus:bg-white focus:border-green-500">
+                <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl uppercase shadow-lg hover:bg-green-700 transition-colors">Salvar Agora</button>
             </div>
 
             <div class="space-y-4">
@@ -92,16 +103,20 @@
                     </button>
                 </div>
 
-                <button onclick="enviarSelecionados()" class="w-full bg-green-600 hover:bg-green-700 text-white p-4 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-3 shadow-md">
-                    <span class="text-lg">📊</span> Enviar Itens Selecionados (WhatsApp)
+                <button onclick="enviarSelecionados()" class="w-full bg-green-600 hover:bg-green-700 transition-colors text-white p-4 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-3 shadow-md">
+                    <span class="text-lg">📊</span> Enviar Selecionados (WhatsApp)
                 </button>
 
-                <input type="text" id="busca" onkeyup="filtrar()" placeholder="🔍 Pesquisar produto..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none text-sm">
+                <input type="text" id="busca" onkeyup="filtrar()" placeholder="🔍 Pesquisar produto ou código..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none text-sm border border-transparent focus:border-blue-400">
                 
                 <div id="lista" class="space-y-3 pb-10"></div>
             </div>
         </main>
     </div>
+
+    <footer class="w-full p-4 text-center text-[10px] font-bold text-slate-400 uppercase mt-auto">
+        New Market Nazaré Paulista • 2026
+    </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -124,10 +139,16 @@
         let dadosAtuais = [];
         let filtroAtual = 'todos';
 
+        // Lógica de Autenticação e Boas-Vindas
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-panel').classList.remove('hidden');
+                
+                // Exibir Boas-Vindas
+                const nomeUser = user.email.split('@')[0].toUpperCase();
+                exibirBoasVindas(nomeUser);
+
                 const isG = gerentes.includes(user.email);
                 document.getElementById('repositor-form').classList.toggle('hidden', isG);
                 carregar(isG);
@@ -137,13 +158,26 @@
             }
         });
 
+        function exibirBoasVindas(nome) {
+            const box = document.getElementById('welcome-msg');
+            document.getElementById('welcome-text').innerText = `BEM-VINDO, ${nome}!`;
+            box.classList.remove('hidden', 'welcome-hide');
+            box.classList.add('welcome-anim');
+            setTimeout(() => box.classList.add('welcome-hide'), 4000);
+        }
+
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
+            const btn = document.getElementById('btn-entrar');
+            btn.innerText = "Entrando...";
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
-            catch { alert("Erro no login."); }
+            catch { alert("Erro ao entrar. Verifique os dados."); }
+            finally { btn.innerText = "Acessar Sistema"; }
         };
+
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
+        // Salvar Produto
         document.getElementById('btn-salvar').onclick = async () => {
             const btn = document.getElementById('btn-salvar');
             const data = {
@@ -154,16 +188,17 @@
                 vencimento: document.getElementById('p-data').value,
                 criadoEm: serverTimestamp()
             };
-            if(!data.produto || !data.vencimento) return alert("Preencha Nome e Data!");
+            if(!data.produto || !data.vencimento) return alert("Preencha os campos obrigatórios!");
             btn.disabled = true;
             try { 
                 await addDoc(collection(db, "validades"), data); 
-                document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = ""; 
-                document.getElementById('p-qtd').value = ""; document.getElementById('p-data').value = "";
+                document.querySelectorAll('#repositor-form input').forEach(i => i.value = "");
+                alert("Produto salvo!");
             } catch(e) { alert("Erro ao salvar."); } 
             finally { btn.disabled = false; }
         };
 
+        // Carregar e Renderizar Lista
         function carregar(podeApagar) {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista');
@@ -182,12 +217,11 @@
                     dadosAtuais.push({...item, dias: diff, cat});
 
                     const div = document.createElement('div');
-                    div.id = `card-${item.id}`;
-                    div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 flex items-start gap-4`;
+                    div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 flex items-start gap-4 transition-all`;
                     div.dataset.cat = cat;
                     div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
                     
-                    // FUNÇÃO DE CLIQUE NO CARD (CHECK-IN LOCAL)
+                    // Lógica de clique no card para check-in local
                     div.onclick = (e) => {
                         if(e.target.tagName === 'BUTTON') return;
                         const cb = div.querySelector('.item-check');
@@ -204,12 +238,12 @@
                                 <span>${item.setor}</span><span class="${corTxt}">${diff} DIAS</span>
                             </div>
                             <h3 class="font-black text-sm uppercase leading-tight mt-1 text-slate-800">${item.produto}</h3>
-                            <div class="flex gap-4 mt-1 text-[10px] font-bold text-blue-700 uppercase">
-                                <span>Cod: ${item.codigo}</span><span>Qtd: ${item.quantidade}</span>
+                            <div class="flex gap-4 mt-1 text-[10px] font-bold text-blue-700">
+                                <span>EAN: ${item.codigo}</span><span>QTD: ${item.quantidade}</span>
                             </div>
                             <div class="flex justify-between items-center mt-3">
                                 <p class="text-[9px] font-bold text-slate-400">VENCE: ${item.vencimento.split('-').reverse().join('/')}</p>
-                                ${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-400 text-[9px] font-bold uppercase p-2">Excluir</button>` : ''}
+                                ${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-400 text-[10px] font-black p-2 uppercase">Excluir</button>` : ''}
                             </div>
                         </div>`;
                     lista.appendChild(div);
@@ -221,23 +255,17 @@
             });
         }
 
+        // WhatsApp atualizado
         window.enviarSelecionados = () => {
-            // Pega todos os checkboxes marcados na tela no momento
-            const checkboxes = document.querySelectorAll('.item-check:checked');
-            const selecionadosIds = Array.from(checkboxes).map(cb => cb.dataset.id);
-
+            const selecionadosIds = Array.from(document.querySelectorAll('.item-check:checked')).map(cb => cb.dataset.id);
             if(selecionadosIds.length === 0) return alert("Selecione os produtos tocando nos cards!");
 
             const itens = dadosAtuais.filter(d => selecionadosIds.includes(d.id));
             let msg = `*📊 RELATÓRIO DE VALIDADES - NEW MARKET*\n\n`;
-            
             itens.forEach(p => {
                 const icon = p.cat === 'critico' ? '🚨' : (p.cat === 'atencao' ? '⚠️' : '✅');
-                msg += `${icon} *${p.produto}*\n`;
-                msg += `└ Vence: ${p.vencimento.split('-').reverse().join('/')} (${p.dias} dias)\n`;
-                msg += `└ Qtd: ${p.quantidade} | EAN: ${p.codigo}\n\n`;
+                msg += `${icon} *${p.produto}*\n└ Vence: ${p.vencimento.split('-').reverse().join('/')} (${p.dias} dias)\n└ Qtd: ${p.quantidade} | EAN: ${p.codigo}\n\n`;
             });
-
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
         };
 
@@ -259,12 +287,12 @@
             });
         };
 
-        window.apagarItem = async (id) => { if(confirm("Apagar?")) await deleteDoc(doc(db, "validades", id)); };
+        window.apagarItem = async (id) => { if(confirm("Apagar produto definitivamente?")) await deleteDoc(doc(db, "validades", id)); };
         window.abrirModalSenha = () => document.getElementById('modal-senha').classList.add('active');
         window.fecharModalSenha = () => document.getElementById('modal-senha').classList.remove('active');
         window.processarTrocaSenha = async () => {
-            try { await updatePassword(auth.currentUser, document.getElementById('pass-nova').value); alert("Senha alterada!"); fecharModalSenha(); }
-            catch { alert("Erro. Re-logue para alterar."); }
+            try { await updatePassword(auth.currentUser, document.getElementById('pass-nova').value); alert("Senha atualizada!"); fecharModalSenha(); }
+            catch { alert("Erro. Re-inicie sessão para mudar a senha."); }
         };
     </script>
 </body>
