@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - Sistema 2026</title>
+    <title>New Market - Sistema 2026 (Pro)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
@@ -54,7 +54,7 @@
                 <span class="text-[8px] font-black uppercase tracking-widest text-yellow-200">Painel de Validades</span>
             </div>
             <div class="flex gap-2">
-                <button id="btn-abrir-senha" class="text-[8px] bg-white/20 px-3 py-2 rounded-full uppercase font-bold border border-white/20">Mudar Senha</button>
+                <button id="btn-abrir-senha" class="text-[8px] bg-white/20 px-3 py-2 rounded-full uppercase font-bold border border-white/20">Senha</button>
                 <button id="btn-logout" class="text-[8px] bg-black/40 px-3 py-2 rounded-full uppercase font-bold border border-white/20">Sair</button>
             </div>
         </nav>
@@ -75,7 +75,7 @@
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50">
                 <div class="grid grid-cols-4 gap-2">
                     <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
-                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
+                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50" value="1">
                 </div>
                 <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50 text-sm outline-none">
                     <option value="Corredor do Paulo">Corredor do Paulo</option>
@@ -115,7 +115,6 @@
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // CONFIGURAÇÃO: 7 DIAS PARA NÍVEL CRÍTICO
         const DIAS_CRITICOS = 7; 
         const DIAS_ATENCAO = 15;
 
@@ -132,18 +131,22 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        try { enableIndexedDbPersistence(db); } catch (err) {}
+        try { enableIndexedDbPersistence(db); } catch (err) { console.log("Offline mode active"); }
         
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         let dadosAtuais = [];
         let filtroStatus = 'todos';
 
-        function showToast(msg, color = "#333") {
+        // UTILS
+        const showToast = (msg, color = "#333") => {
             const t = document.getElementById("toast");
             t.innerText = msg; t.style.backgroundColor = color; t.className = "show";
-            setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000);
-        }
+            setTimeout(() => { t.className = ""; }, 3000);
+        };
 
+        const formatarData = (data) => data.split('-').reverse().join('/');
+
+        // AUTH
         onAuthStateChanged(auth, (user) => {
             document.getElementById('loading-screen').style.display = 'none';
             if (user) {
@@ -151,7 +154,7 @@
                 document.getElementById('main-panel').style.display = 'flex';
                 const isG = gerentes.includes(user.email);
                 document.getElementById('repositor-form').classList.toggle('hidden', isG);
-                carregar(isG);
+                carregarOtimizado(isG);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-panel').style.display = 'none';
@@ -164,62 +167,120 @@
             catch (err) { showToast("Usuário ou Senha inválidos", "#dc2626"); }
         };
 
-        document.getElementById('btn-abrir-senha').onclick = () => document.getElementById('modal-senha').classList.toggle('hidden');
-        document.getElementById('btn-cancelar-senha').onclick = () => document.getElementById('modal-senha').classList.add('hidden');
-        document.getElementById('btn-confirmar-senha').onclick = async () => {
-            const novaSenha = document.getElementById('nova-senha').value;
-            if (novaSenha.length < 6) return showToast("Mínimo 6 caracteres!", "#f59e0b");
-            try {
-                await updatePassword(auth.currentUser, novaSenha);
-                showToast("Senha Alterada!", "#10b981");
-                document.getElementById('modal-senha').classList.add('hidden');
-                document.getElementById('nova-senha').value = "";
-            } catch (err) { showToast("Relogue por segurança", "#dc2626"); }
-        };
-
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
-        function carregar(podeApagar) {
-            onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
+        // LANÇAMENTO INTELIGENTE (Não apaga Setor e Data)
+        document.getElementById('btn-salvar').onclick = async () => {
+            const btn = document.getElementById('btn-salvar');
+            const data = { 
+                produto: document.getElementById('p-nome').value.toUpperCase(), 
+                codigo: document.getElementById('p-ean').value || "0000000000000", 
+                quantidade: document.getElementById('p-qtd').value || "1", 
+                setor: document.getElementById('p-setor-add').value, 
+                vencimento: document.getElementById('p-data').value, 
+                criadoEm: serverTimestamp() 
+            };
+
+            if(!data.produto || !data.vencimento) return showToast("Preencha Nome e Data!", "#dc2626");
+            
+            btn.disabled = true; btn.innerText = "Salvando...";
+            try {
+                await addDoc(collection(db, "validades"), data);
+                showToast("Produto Salvo!", "#10b981");
+                // Limpa apenas Nome, EAN e QTD. Mantém Setor e Data para o próximo item.
+                document.getElementById('p-nome').value = "";
+                document.getElementById('p-ean').value = "";
+                document.getElementById('p-qtd').value = "1";
+                document.getElementById('p-nome').focus();
+            } catch (e) { showToast("Erro ao salvar", "#dc2626"); }
+            btn.disabled = false; btn.innerText = "Salvar Produto";
+        };
+
+        // RENDERIZAÇÃO OTIMIZADA (GRANULAR)
+        function carregarOtimizado(podeApagar) {
+            const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
+            
+            onSnapshot(q, (snapshot) => {
                 const lista = document.getElementById('lista');
-                lista.innerHTML = ""; dadosAtuais = [];
-                let counts = {critico: 0, atencao: 0};
-                snap.forEach(d => {
-                    const item = { id: d.id, ...d.data() };
-                    const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
+                
+                snapshot.docChanges().forEach((change) => {
+                    const docId = change.doc.id;
+                    const item = { id: docId, ...change.doc.data() };
                     
-                    let cat = "normal", estilo = "card-normal", corTxt = "text-green-600";
-                    if(diff <= DIAS_CRITICOS) { estilo = "card-critico"; corTxt = "text-red-600 animate-pulse font-black"; counts.critico++; cat = "critico"; }
-                    else if(diff <= DIAS_ATENCAO) { estilo = "card-atencao"; corTxt = "text-yellow-600 font-black"; counts.atencao++; cat = "atencao"; }
-                    
-                    dadosAtuais.push({...item, dias: diff, cat});
-                    const div = document.createElement('div');
-                    div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 border border-slate-100`;
-                    div.dataset.id = item.id; div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
-                    div.onclick = (e) => { 
-                        if(e.target.tagName === 'BUTTON') return; 
-                        const cb = div.querySelector('.item-check');
-                        cb.checked = !cb.checked;
-                        div.classList.toggle('card-checked', cb.checked);
-                    };
-                    div.innerHTML = `<div class="flex gap-3"><input type="checkbox" class="item-check mt-1 scale-150 accent-blue-600 pointer-events-none" data-id="${item.id}"><div class="flex-grow"><div class="flex justify-between text-[7px] font-black text-slate-400"><span>${item.setor}</span><span class="${corTxt}">${diff} DIAS</span></div><h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3><div class="my-2 bg-white border rounded-lg p-1"><svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35" jsbarcode-fontSize="14"></svg></div><div class="flex justify-between items-end"><div class="text-[9px] font-bold text-slate-500">QTD: ${item.quantidade} | VENC: ${item.vencimento.split('-').reverse().join('/')}</div>${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-600 text-[8px] font-black bg-red-50 px-3 py-2 rounded-lg active:bg-red-200">Excluir</button>` : ''}</div></div></div>`;
-                    lista.appendChild(div);
+                    if (change.type === "added") {
+                        const card = criarCardHTML(item, podeApagar);
+                        // Inserção ordenada: encontra a posição correta ou anexa ao fim
+                        lista.appendChild(card); 
+                    }
+                    if (change.type === "modified") {
+                        const cardAntigo = document.querySelector(`[data-id="${docId}"]`);
+                        if (cardAntigo) cardAntigo.replaceWith(criarCardHTML(item, podeApagar));
+                    }
+                    if (change.type === "removed") {
+                        document.querySelector(`[data-id="${docId}"]`)?.remove();
+                    }
                 });
-                JsBarcode(".barcode").init();
-                document.getElementById('c-total').innerText = snap.size;
-                document.getElementById('c-critico').innerText = counts.critico;
-                document.getElementById('c-atencao').innerText = counts.atencao;
+
+                // Atualiza contadores e metadados globais
+                dadosAtuais = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
+                atualizarContadores();
                 filtrar();
+                JsBarcode(".barcode").init();
             });
         }
 
-        document.getElementById('btn-salvar').onclick = async () => {
-            const data = { produto: document.getElementById('p-nome').value.toUpperCase(), codigo: document.getElementById('p-ean').value || "0000000000000", quantidade: document.getElementById('p-qtd').value || "1", setor: document.getElementById('p-setor-add').value, vencimento: document.getElementById('p-data').value, criadoEm: serverTimestamp() };
-            if(!data.produto || !data.vencimento) return showToast("Preencha Nome e Data!", "#dc2626");
-            await addDoc(collection(db, "validades"), data);
-            showToast("Produto Salvo!", "#10b981");
-            document.querySelectorAll('#repositor-form input').forEach(i => i.value = "");
-        };
+        function criarCardHTML(item, podeApagar) {
+            const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
+            let cat = "normal", estilo = "card-normal", corTxt = "text-green-600";
+            
+            if(diff <= DIAS_CRITICOS) { estilo = "card-critico"; corTxt = "text-red-600 animate-pulse font-black"; cat = "critico"; }
+            else if(diff <= DIAS_ATENCAO) { estilo = "card-atencao"; corTxt = "text-yellow-600 font-black"; cat = "atencao"; }
+
+            const div = document.createElement('div');
+            div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 border border-slate-100 transition-all duration-300`;
+            div.dataset.id = item.id; 
+            div.dataset.cat = cat; 
+            div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
+            
+            div.onclick = (e) => { 
+                if(e.target.tagName === 'BUTTON') return; 
+                const cb = div.querySelector('.item-check');
+                cb.checked = !cb.checked;
+                div.classList.toggle('card-checked', cb.checked);
+            };
+
+            div.innerHTML = `
+                <div class="flex gap-3">
+                    <input type="checkbox" class="item-check mt-1 scale-150 accent-blue-600 pointer-events-none" data-id="${item.id}">
+                    <div class="flex-grow">
+                        <div class="flex justify-between text-[7px] font-black text-slate-400">
+                            <span>${item.setor}</span>
+                            <span class="${corTxt}">${diff} DIAS</span>
+                        </div>
+                        <h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3>
+                        <div class="my-2 bg-white border rounded-lg p-1">
+                            <svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35" jsbarcode-fontSize="14"></svg>
+                        </div>
+                        <div class="flex justify-between items-end">
+                            <div class="text-[9px] font-bold text-slate-500">QTD: ${item.quantidade} | VENC: ${formatarData(item.vencimento)}</div>
+                            ${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-600 text-[8px] font-black bg-red-50 px-3 py-2 rounded-lg active:bg-red-200">Excluir</button>` : ''}
+                        </div>
+                    </div>
+                </div>`;
+            return div;
+        }
+
+        function atualizarContadores() {
+            let criticos = 0, atencao = 0;
+            dadosAtuais.forEach(item => {
+                const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
+                if(diff <= DIAS_CRITICOS) criticos++;
+                else if(diff <= DIAS_ATENCAO) atencao++;
+            });
+            document.getElementById('c-total').innerText = dadosAtuais.length;
+            document.getElementById('c-critico').innerText = criticos;
+            document.getElementById('c-atencao').innerText = atencao;
+        }
 
         function filtrar() {
             const busca = document.getElementById('busca').value.toLowerCase();
@@ -230,52 +291,29 @@
             });
         }
 
-        document.getElementById('f-critico').onclick = () => { filtroStatus='critico'; filtrar(); toggleFiltro('f-critico'); };
-        document.getElementById('f-atencao').onclick = () => { filtroStatus='atencao'; filtrar(); toggleFiltro('f-atencao'); };
-        document.getElementById('f-todos').onclick = () => { filtroStatus='todos'; filtrar(); toggleFiltro('f-todos'); };
+        // EVENTOS DE FILTRO
+        ['f-critico', 'f-atencao', 'f-todos'].forEach(id => {
+            document.getElementById(id).onclick = () => {
+                filtroStatus = id.split('-')[1];
+                document.querySelectorAll('[id^="f-"]').forEach(b => b.classList.replace('filter-active', 'filter-inactive'));
+                document.getElementById(id).classList.replace('filter-inactive', 'filter-active');
+                filtrar();
+            };
+        });
+
         document.getElementById('busca').oninput = () => filtrar();
 
-        function toggleFiltro(id) {
-            ['f-critico', 'f-atencao', 'f-todos'].forEach(b => document.getElementById(b).classList.replace('filter-active', 'filter-inactive'));
-            document.getElementById(id).classList.replace('filter-inactive', 'filter-active');
-        }
-
         document.getElementById('btn-selecionar-criticos').onclick = () => {
-            let total = 0;
             document.querySelectorAll('.card').forEach(card => {
                 if(card.dataset.cat === 'critico') {
                     const cb = card.querySelector('.item-check');
-                    cb.checked = true;
-                    card.classList.add('card-checked');
-                    total++;
+                    cb.checked = true; card.classList.add('card-checked');
                 }
             });
-            showToast(`${total} itens marcados!`, "#1e40af");
-        };
-
-        document.getElementById('btn-whatsapp').onclick = () => {
-            const selecionados = Array.from(document.querySelectorAll('.item-check:checked')).map(cb => cb.dataset.id);
-            if(selecionados.length === 0) return showToast("Selecione os itens!", "#f59e0b");
-            const itens = dadosAtuais.filter(d => selecionados.includes(d.id));
-            
-            let msg = `*📊 RELATÓRIO DE VALIDADES - NEW MARKET*\n`;
-            msg += `_Favor verificar as ações para os produtos abaixo:_\n\n`;
-            
-            itens.forEach(p => {
-                let alerta = p.dias <= DIAS_CRITICOS ? "🚨 *CRÍTICO*" : "⚠️ *ATENÇÃO*";
-                msg += `${alerta}: *${p.produto}*\n`;
-                msg += `📅 Venc: *${p.vencimento.split('-').reverse().join('/')}*\n`;
-                msg += `⏳ Faltam: *${p.dias} dias*\n`;
-                msg += `📦 Qtd: ${p.quantidade} | ${p.setor}\n\n`;
-            });
-            
-            msg += `_Gerado por: Sistema New Market 2026_\n`;
-            msg += `_Responsável: Paulo Souza_`;
-            
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
         window.apagarItem = async (id) => { if(confirm("Apagar permanentemente?")) await deleteDoc(doc(db, "validades", id)); };
+
     </script>
 </body>
 </html>
