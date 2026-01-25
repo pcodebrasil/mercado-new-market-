@@ -7,29 +7,35 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
     <style>
-        /* Estados iniciais: tudo escondido para evitar o "flash" da tela errada */
         #login-screen, #main-panel, #loading-screen { display: none; }
-        #loading-screen { display: flex; } /* Só o loading aparece de início */
+        #loading-screen { display: flex; }
 
         .filter-active { border-width: 4px !important; opacity: 1 !important; transform: scale(1.05); }
         .filter-inactive { opacity: 0.5; }
+        
+        /* Estilos dos Cards */
         .card-critico { border-left: 8px solid #ef4444; }
         .card-atencao { border-left: 8px solid #f59e0b; }
         .card-normal { border-left: 8px solid #10b981; }
+        
+        /* Estilo quando MARCAR o produto */
         .card-checked { opacity: 0.5; filter: grayscale(0.7); background-color: #f1f5f9 !important; border-left-color: #94a3b8 !important; transform: scale(0.98); }
+        .card-checked h3 { text-decoration: line-through; color: #64748b; }
+
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
         #scanner-container { width: 100%; height: 250px; position: relative; overflow: hidden; border-radius: 20px; background: #000; display: none; margin-bottom: 15px; border: 4px solid #facc15; }
         #scanner-container video { width: 100%; height: 100%; object-fit: cover; }
         .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
         .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; }
+        .card { transition: all 0.2s ease; cursor: pointer; -webkit-tap-highlight-color: transparent; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
 
     <div id="loading-screen" class="fixed inset-0 bg-white z-[200] flex flex-col items-center justify-center">
         <div class="w-12 h-12 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Carregando New Market...</p>
+        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Verificando Acesso...</p>
     </div>
 
     <div id="login-screen" class="flex-grow flex items-center justify-center p-4">
@@ -38,17 +44,17 @@
             <h1 class="text-3xl font-black uppercase italic leading-none">
                 <span class="text-blue-800">New</span> <span class="text-red-600">Market</span>
             </h1>
-            <p class="text-[10px] text-yellow-600 font-black uppercase tracking-[0.2em] -mt-1">Supermercados</p>
+            <p class="text-[10px] text-yellow-600 font-black uppercase mt-1">Supermercados</p>
             <form id="login-form" class="space-y-4 text-left mt-8">
                 <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm" placeholder="E-mail" required>
                 <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm" placeholder="Senha" required>
-                <button type="submit" id="btn-entrar" class="w-full btn-newmarket text-white p-4 rounded-2xl font-black uppercase shadow-lg">Acessar</button>
+                <button type="submit" id="btn-entrar" class="w-full btn-newmarket text-white p-4 rounded-2xl font-black uppercase shadow-lg">Entrar</button>
             </form>
         </div>
     </div>
 
     <div id="main-panel" class="flex-grow flex flex-col">
-        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md text-left">
+        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
             <div>
                 <span class="font-black italic uppercase text-lg leading-none">New Market</span><br>
                 <span class="text-[8px] font-black uppercase tracking-widest text-yellow-200">Supermercados</span>
@@ -58,12 +64,12 @@
 
         <main class="p-4 max-w-xl mx-auto w-full flex-grow space-y-6">
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-lg border-b-8 border-green-500 space-y-4">
-                <h2 class="font-black uppercase text-green-700 text-[10px] tracking-widest">Novo Lançamento</h2>
+                <h2 class="font-black uppercase text-green-700 text-[10px]">Novo Lançamento</h2>
                 <div id="scanner-container"></div>
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50">
+                <input type="text" id="p-nome" placeholder="PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50">
                 <div class="grid grid-cols-5 gap-2">
-                    <input type="number" id="p-ean" placeholder="CÓDIGO EAN" class="col-span-3 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
-                    <button type="button" id="btn-scan-trigger" class="col-span-1 bg-slate-800 text-white rounded-2xl flex items-center justify-center text-xl">📷</button>
+                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
+                    <button type="button" id="btn-scan-trigger" class="col-span-1 bg-slate-800 text-white rounded-2xl text-xl">📷</button>
                     <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
                 </div>
                 <select id="p-setor" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50 text-sm">
@@ -73,24 +79,26 @@
                     <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
                 <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-sm bg-slate-50">
-                <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl uppercase shadow-lg">Salvar Agora</button>
+                <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black uppercase shadow-lg">Salvar</button>
             </div>
 
             <div class="space-y-4">
                 <div class="grid grid-cols-3 gap-2 text-center font-black">
-                    <button id="f-critico" class="bg-white p-3 rounded-2xl border-2 border-red-500 text-red-600 filter-inactive"><p class="text-[8px] uppercase">🚨 Crítico</p><p id="c-critico" class="text-xl">0</p></button>
-                    <button id="f-atencao" class="bg-white p-3 rounded-2xl border-2 border-yellow-500 text-yellow-600 filter-inactive"><p class="text-[8px] uppercase">⚠️ Atenção</p><p id="c-atencao" class="text-xl">0</p></button>
-                    <button id="f-todos" class="bg-white p-3 rounded-2xl border-2 border-blue-500 text-blue-600 filter-active"><p class="text-[8px] uppercase">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
+                    <button id="f-critico" class="bg-white p-3 rounded-2xl border-2 border-red-500 text-red-600 filter-inactive"><p class="text-[8px]">🚨 Crítico</p><p id="c-critico" class="text-xl">0</p></button>
+                    <button id="f-atencao" class="bg-white p-3 rounded-2xl border-2 border-yellow-500 text-yellow-600 filter-inactive"><p class="text-[8px]">⚠️ Atenção</p><p id="c-atencao" class="text-xl">0</p></button>
+                    <button id="f-todos" class="bg-white p-3 rounded-2xl border-2 border-blue-500 text-blue-600 filter-active"><p class="text-[8px]">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
                 </div>
-                <input type="text" id="busca" placeholder="🔍 Pesquisar produto..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none text-sm border focus:border-yellow-400">
+                
+                <button id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs shadow-md">📊 Enviar Selecionados (WhatsApp)</button>
+                
+                <input type="text" id="busca" placeholder="🔍 Pesquisar..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none text-sm border focus:border-yellow-400">
                 <div id="lista" class="space-y-3 pb-10"></div>
             </div>
         </main>
     </div>
 
     <footer class="w-full p-6 text-center text-[10px] font-bold text-slate-400 uppercase mt-auto">
-        <p>New Market Supermercados • Nazaré Paulista</p>
-        <p class="mt-1">Dev: Paulo Souza - 2026</p>
+        <p>New Market • Dev: Paulo Souza - 2026</p>
     </footer>
 
     <script type="module">
@@ -112,42 +120,33 @@
         const db = getFirestore(app);
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         let dadosAtuais = [];
+        let filtroAtual = 'todos';
 
-        // LÓGICA DE TRANSIÇÃO SUAVE (ESTRUTURAL)
+        // AUTH
         onAuthStateChanged(auth, (user) => {
-            const loader = document.getElementById('loading-screen');
-            const login = document.getElementById('login-screen');
-            const panel = document.getElementById('main-panel');
-
-            // Remove o loader primeiro
-            loader.style.display = 'none';
-
+            document.getElementById('loading-screen').style.display = 'none';
             if (user) {
-                login.style.display = 'none';
-                panel.style.display = 'flex';
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-panel').style.display = 'flex';
                 const isG = gerentes.includes(user.email);
                 document.getElementById('repositor-form').classList.toggle('hidden', isG);
                 carregar(isG);
             } else {
-                login.style.display = 'flex';
-                panel.style.display = 'none';
+                document.getElementById('login-screen').style.display = 'flex';
+                document.getElementById('main-panel').style.display = 'none';
             }
         });
 
-        // LOGIN E RESTANTE DO JS (Igual ao anterior)
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-entrar');
-            btn.innerText = "ENTRANDO...";
+            btn.innerText = "VERIFICANDO...";
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
-            catch { alert("Erro no login."); btn.innerText = "ACESSAR"; }
+            catch { alert("Erro de login."); btn.innerText = "Entrar"; }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
-        // Funções de carregar, salvar e scanner simplificadas aqui...
-        // [Mantive a mesma lógica interna do seu scanner e lista funcional]
-        
         // SCANNER
         let scannerAtivo = false;
         document.getElementById('btn-scan-trigger').onclick = () => {
@@ -169,38 +168,98 @@
             }
         });
 
+        // LISTA E MARCAÇÃO
         function carregar(podeApagar) {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista');
                 lista.innerHTML = ""; dadosAtuais = [];
                 let c1 = 0, c2 = 0;
+                
                 snap.forEach(d => {
                     const item = { id: d.id, ...d.data() };
                     const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
-                    let cat = "normal", estilo = "card-normal";
-                    if(diff <= 5) { estilo = "card-critico"; c1++; cat = "critico"; }
-                    else if(diff <= 15) { estilo = "card-atencao"; c2++; cat = "atencao"; }
-                    dadosAtuais.push({...item, cat});
+                    let cat = "normal", estilo = "card-normal", corTxt = "text-green-600";
+                    
+                    if(diff <= 5) { estilo = "card-critico"; corTxt = "text-red-600 animate-pulse"; c1++; cat = "critico"; }
+                    else if(diff <= 15) { estilo = "card-atencao"; corTxt = "text-yellow-600"; c2++; cat = "atencao"; }
+                    
+                    dadosAtuais.push({...item, dias: diff, cat});
+
                     const div = document.createElement('div');
                     div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 flex items-start gap-4`;
+                    div.dataset.id = item.id;
+                    div.dataset.cat = cat;
+                    div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
+
+                    // FUNÇÃO DE MARCAR
+                    div.onclick = (e) => {
+                        if(e.target.tagName === 'BUTTON') return;
+                        const cb = div.querySelector('.item-check');
+                        cb.checked = !cb.checked;
+                        div.classList.toggle('card-checked', cb.checked);
+                    };
+
                     div.innerHTML = `
-                        <input type="checkbox" class="item-check mt-1" data-id="${item.id}">
-                        <div class="flex-grow">
-                            <div class="flex justify-between text-[8px] font-black uppercase text-slate-400"><span>${item.setor}</span><span>${diff} DIAS</span></div>
+                        <input type="checkbox" class="item-check mt-1 scale-125 pointer-events-none" data-id="${item.id}">
+                        <div class="flex-grow pointer-events-none">
+                            <div class="flex justify-between text-[8px] font-black uppercase text-slate-400">
+                                <span>${item.setor}</span><span class="${corTxt}">${diff} DIAS</span>
+                            </div>
                             <h3 class="font-black text-sm uppercase text-slate-800">${item.produto}</h3>
-                            <p class="text-[9px] font-bold text-slate-400">VENCE: ${item.vencimento.split('-').reverse().join('/')}</p>
-                        </div>
-                        ${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-500 text-[10px] font-black">X</button>` : ''}
-                    `;
+                            <div class="flex gap-4 text-[10px] font-bold text-blue-700">
+                                <span>EAN: ${item.codigo}</span><span>QTD: ${item.quantidade}</span>
+                            </div>
+                            <div class="flex justify-between items-center mt-2">
+                                <p class="text-[9px] font-bold text-slate-400">VENCE: ${item.vencimento.split('-').reverse().join('/')}</p>
+                                ${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-500 text-[10px] font-black uppercase pointer-events-auto p-1">Excluir</button>` : ''}
+                            </div>
+                        </div>`;
                     lista.appendChild(div);
                 });
                 document.getElementById('c-total').innerText = snap.size;
                 document.getElementById('c-critico').innerText = c1;
                 document.getElementById('c-atencao').innerText = c2;
+                executarFiltro();
             });
         }
 
-        window.apagarItem = async (id) => { if(confirm("Apagar?")) await deleteDoc(doc(db, "validades", id)); };
+        // WHATSAPP (CORRIGIDO PARA LER OS CHECKBOXES)
+        document.getElementById('btn-whatsapp').onclick = () => {
+            const selecionados = Array.from(document.querySelectorAll('.item-check:checked')).map(cb => cb.dataset.id);
+            if(selecionados.length === 0) return alert("Selecione os produtos primeiro!");
+            const itens = dadosAtuais.filter(d => selecionados.includes(d.id));
+            let msg = `*📊 RELATÓRIO DE VALIDADES - NEW MARKET*\n\n`;
+            itens.forEach(p => {
+                msg += `📍 *${p.produto}*\n└ Vence: ${p.vencimento.split('-').reverse().join('/')}\n└ Qtd: ${p.quantidade} | EAN: ${p.codigo}\n\n`;
+            });
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+        };
+
+        // FILTROS
+        function executarFiltro() {
+            const busca = document.getElementById('busca').value.toLowerCase();
+            document.querySelectorAll('.card').forEach(c => {
+                const matchFiltro = (filtroAtual === 'todos' || c.dataset.cat === filtroAtual);
+                const matchBusca = c.dataset.search.includes(busca);
+                c.style.display = (matchFiltro && matchBusca) ? "flex" : "none";
+            });
+        }
+
+        const setFiltro = (t) => {
+            filtroAtual = t;
+            ['f-critico', 'f-atencao', 'f-todos'].forEach(id => {
+                document.getElementById(id).classList.toggle('filter-active', id === 'f-'+t);
+                document.getElementById(id).classList.toggle('filter-inactive', id !== 'f-'+t);
+            });
+            executarFiltro();
+        };
+
+        document.getElementById('f-critico').onclick = () => setFiltro('critico');
+        document.getElementById('f-atencao').onclick = () => setFiltro('atencao');
+        document.getElementById('f-todos').onclick = () => setFiltro('todos');
+        document.getElementById('busca').onkeyup = () => executarFiltro();
+
+        window.apagarItem = async (id) => { if(confirm("Apagar registro?")) await deleteDoc(doc(db, "validades", id)); };
 
         document.getElementById('btn-salvar').onclick = async () => {
             const data = {
@@ -211,7 +270,7 @@
                 vencimento: document.getElementById('p-data').value,
                 criadoEm: serverTimestamp()
             };
-            if(!data.produto || !data.vencimento) return alert("Preencha tudo!");
+            if(!data.produto || !data.vencimento) return alert("Preencha Nome e Data!");
             await addDoc(collection(db, "validades"), data);
             document.querySelectorAll('#repositor-form input').forEach(i => i.value = "");
             alert("Salvo!");
