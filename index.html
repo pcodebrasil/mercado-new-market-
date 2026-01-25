@@ -32,6 +32,30 @@
         </div>
     </div>
 
+    <div id="modal-baixa" class="modal">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center border-t-8 border-red-500">
+            <h3 class="font-black text-slate-800 uppercase mb-2 text-lg">Registrar Saída</h3>
+            <p class="text-xs text-slate-500 mb-4">Por que este produto está saindo?</p>
+            
+            <div class="space-y-2 mb-4">
+                <button onclick="confirmarBaixa('VENCIMENTO')" class="w-full bg-red-100 text-red-700 hover:bg-red-200 p-3 rounded-xl font-bold uppercase text-xs flex items-center gap-3 transition-colors">
+                    <span class="text-lg">📅</span> Venceu / Descarte
+                </button>
+                <button onclick="confirmarBaixa('AVARIA')" class="w-full bg-orange-100 text-orange-700 hover:bg-orange-200 p-3 rounded-xl font-bold uppercase text-xs flex items-center gap-3 transition-colors">
+                    <span class="text-lg">🏚️</span> Avaria / Quebrado
+                </button>
+                <button onclick="confirmarBaixa('USO_INTERNO')" class="w-full bg-blue-100 text-blue-700 hover:bg-blue-200 p-3 rounded-xl font-bold uppercase text-xs flex items-center gap-3 transition-colors">
+                    <span class="text-lg">🍴</span> Uso Interno / Consumo
+                </button>
+                <button onclick="confirmarBaixa('CORRECAO')" class="w-full bg-slate-100 text-slate-700 hover:bg-slate-200 p-3 rounded-xl font-bold uppercase text-xs flex items-center gap-3 transition-colors">
+                    <span class="text-lg">❌</span> Erro de Digitação
+                </button>
+            </div>
+            
+            <button onclick="fecharModalBaixa()" class="w-full text-slate-400 font-bold text-[10px] uppercase p-2 tracking-widest">Cancelar</button>
+        </div>
+    </div>
+
     <div id="login-screen" class="flex-grow flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border-t-8 border-red-600">
             <h1 class="text-3xl font-black text-center uppercase italic leading-none">
@@ -134,6 +158,7 @@
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         let dadosAtuais = [];
         let filtroAtual = 'todos';
+        let idParaBaixa = null; // Armazena ID temporário
 
         // AUTH E INTERFACE
         onAuthStateChanged(auth, (user) => {
@@ -157,7 +182,7 @@
         };
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
-        // SALVAR
+        // SALVAR NOVO ITEM
         document.getElementById('btn-salvar').onclick = async () => {
             const btn = document.getElementById('btn-salvar');
             const data = {
@@ -220,7 +245,7 @@
                             </div>
                             <div class="flex justify-between items-center mt-3">
                                 <p class="text-[9px] font-bold text-slate-400">VENCE: ${item.vencimento.split('-').reverse().join('/')}</p>
-                                ${podeApagar ? `<button onclick="apagar('${item.id}')" class="text-red-400 hover:text-red-600 text-[9px] font-bold uppercase transition-colors">Excluir</button>` : ''}
+                                ${podeApagar ? `<button onclick="abrirBaixa('${item.id}')" class="bg-red-50 text-red-600 px-3 py-1 rounded-lg text-[9px] font-black uppercase hover:bg-red-100 transition-colors">Dar Baixa 📤</button>` : ''}
                             </div>
                         </div>`;
                     lista.appendChild(div);
@@ -232,7 +257,44 @@
             });
         }
 
-        // ENVIAR SELECIONADOS
+        // --- SISTEMA DE BAIXA E HISTÓRICO ---
+        window.abrirBaixa = (id) => {
+            idParaBaixa = id;
+            document.getElementById('modal-baixa').classList.add('active');
+        };
+
+        window.fecharModalBaixa = () => {
+            idParaBaixa = null;
+            document.getElementById('modal-baixa').classList.remove('active');
+        };
+
+        window.confirmarBaixa = async (motivo) => {
+            if(!idParaBaixa) return;
+            const item = dadosAtuais.find(d => d.id === idParaBaixa);
+            
+            if(item && confirm(`Confirmar saída por: ${motivo}?`)) {
+                try {
+                    // 1. Salva no Histórico
+                    await addDoc(collection(db, "historico_saidas"), {
+                        ...item,
+                        motivoSaida: motivo,
+                        dataSaida: serverTimestamp(),
+                        usuarioResponsavel: auth.currentUser.email
+                    });
+                    
+                    // 2. Remove da Lista Atual
+                    await deleteDoc(doc(db, "validades", idParaBaixa));
+                    alert("Baixa registrada com sucesso!");
+                    fecharModalBaixa();
+                } catch(e) {
+                    console.error(e);
+                    alert("Erro ao registrar baixa.");
+                }
+            }
+        };
+        // ------------------------------------
+
+        // ENVIAR SELECIONADOS WHATSAPP
         window.enviarSelecionados = () => {
             const selecionados = Array.from(document.querySelectorAll('.item-check:checked')).map(cb => cb.dataset.id);
             if(selecionados.length === 0) return alert("Selecione ao menos um item no quadradinho para enviar!");
@@ -248,31 +310,4 @@
                 msg += `└ Setor: ${p.setor}\n\n`;
             });
 
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
-        };
-
-        // FILTROS
-        window.setFiltro = (t) => {
-            filtroAtual = t;
-            ['f-critico', 'f-atencao', 'f-todos'].forEach(id => {
-                document.getElementById(id).classList.toggle('filter-active', id === 'f-'+t);
-                document.getElementById(id).classList.toggle('filter-inactive', id !== 'f-'+t);
-            });
-            filtrar();
-        };
-
-        window.filtrar = () => {
-            const b = document.getElementById('busca').value.toLowerCase();
-            document.querySelectorAll('.card').forEach(c => {
-                const mF = (filtroAtual === 'todos' || c.dataset.cat === filtroAtual);
-                const mB = c.dataset.search.includes(b);
-                c.style.display = (mF && mB) ? "flex" : "none";
-            });
-        };
-
-        window.apagar = async (id) => { if(confirm("Tem certeza que deseja apagar este item?")) await deleteDoc(doc(db, "validades", id)); };
-        window.abrirModalSenha = () => document.getElementById('modal-senha').classList.add('active');
-        window.fecharModalSenha = () => document.getElementById('modal-senha').classList.remove('active');
-    </script>
-</body>
-</html>
+            window.open(`https://wa.me/?text=
