@@ -11,20 +11,14 @@
         .card-critico { border-left: 8px solid #ef4444; }
         .card-atencao { border-left: 8px solid #f59e0b; }
         .card-normal { border-left: 8px solid #10b981; }
-        
-        /* Estilo para item selecionado/conferido */
         .card-checked { opacity: 0.5; filter: grayscale(0.7); background-color: #f1f5f9 !important; border-left-color: #94a3b8 !important; transform: scale(0.98); }
         .card-checked h3 { text-decoration: line-through; color: #64748b; }
-        
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
-        
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeOutUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); height: 0; margin-bottom: 0; padding: 0; overflow: hidden; } }
-        
         .welcome-anim { animation: fadeInDown 0.5s ease-out forwards; }
         .welcome-hide { animation: fadeOutUp 0.8s ease-in forwards; }
-        
         input[type="checkbox"] { transform: scale(1.6); }
         .card { transition: all 0.2s ease; -webkit-tap-highlight-color: transparent; cursor: pointer; }
     </style>
@@ -32,7 +26,7 @@
 <body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
 
     <div id="modal-senha" class="modal">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center">
+        <div class="bg-white w-full max-sm rounded-3xl p-6 shadow-2xl text-center">
             <h3 class="font-black text-slate-800 uppercase mb-4 text-sm">Ajustar Senha</h3>
             <input type="password" id="pass-nova" placeholder="Nova Senha" class="w-full p-4 mb-4 border rounded-2xl bg-slate-50 outline-none text-sm">
             <button onclick="processarTrocaSenha()" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Atualizar</button>
@@ -41,14 +35,14 @@
     </div>
 
     <div id="login-screen" class="flex-grow flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border-t-8 border-red-600">
-            <h1 class="text-3xl font-black text-center uppercase italic leading-none">
+        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border-t-8 border-red-600 text-center">
+            <h1 class="text-3xl font-black uppercase italic leading-none">
                 <span class="text-blue-800">New</span> <span class="text-red-600">Market</span>
             </h1>
-            <p class="text-[12px] text-center text-slate-500 font-bold uppercase mt-1 tracking-widest">Nazaré Paulista</p>
-            <p class="text-[8px] text-center text-slate-400 font-bold uppercase mt-1 mb-8 italic">Dev: Paulo Souza</p>
+            <p class="text-[12px] text-slate-500 font-bold uppercase mt-1 tracking-widest">Nazaré Paulista</p>
+            <p class="text-[9px] text-slate-400 font-bold uppercase mt-2 mb-8 italic">Desenvolvedor: Paulo Souza</p>
             
-            <form id="login-form" class="space-y-4">
+            <form id="login-form" class="space-y-4 text-left">
                 <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm focus:border-blue-500" placeholder="E-mail" required>
                 <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none text-sm focus:border-red-600" placeholder="Senha" required>
                 <button type="submit" id="btn-entrar" class="w-full bg-gradient-to-r from-blue-700 to-red-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg hover:shadow-xl transition-all">Acessar Sistema</button>
@@ -61,13 +55,13 @@
             <div class="flex flex-col">
                 <span class="font-black italic uppercase text-lg leading-none">New Market</span>
                 <span class="text-[9px] font-bold uppercase tracking-wider opacity-90">Nazaré Paulista</span>
-                <button onclick="abrirModalSenha()" class="text-[8px] text-blue-200 font-bold uppercase mt-1 text-left w-fit">Ajustes ⚙️</button>
+                <span class="text-[7px] font-bold uppercase opacity-75 mt-0.5">Desenvolvedor: Paulo Souza</span>
+                <button onclick="abrirModalSenha()" class="text-[8px] text-blue-200 font-bold uppercase mt-1 text-left w-fit underline">Ajustes ⚙️</button>
             </div>
             <button id="btn-logout" class="text-[10px] bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full uppercase font-bold transition-all">Sair</button>
         </nav>
 
         <main class="p-4 max-w-xl mx-auto w-full flex-grow space-y-6">
-            
             <div id="welcome-msg" class="hidden bg-white p-4 rounded-2xl shadow-sm border-l-4 border-blue-600 flex items-center gap-3">
                 <div class="bg-blue-100 p-2 rounded-full text-xl">🚀</div>
                 <div><p id="welcome-text" class="font-black text-blue-900 uppercase text-xs"></p></div>
@@ -86,7 +80,7 @@
                     <option value="Corredor do Pedro">Corredor do Pedro</option>
                     <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
-                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-sm bg-slate-50 focus:bg-white focus:border-green-500">
+                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-sm bg-slate-50">
                 <button id="btn-salvar" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black text-xl uppercase shadow-lg hover:bg-green-700 transition-colors">Salvar Agora</button>
             </div>
 
@@ -107,7 +101,7 @@
                     <span class="text-lg">📊</span> Enviar Selecionados (WhatsApp)
                 </button>
 
-                <input type="text" id="busca" onkeyup="filtrar()" placeholder="🔍 Pesquisar produto ou código..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none text-sm border border-transparent focus:border-blue-400">
+                <input type="text" id="busca" onkeyup="filtrar()" placeholder="🔍 Pesquisar produto..." class="w-full p-4 rounded-2xl bg-white shadow-md font-bold outline-none text-sm">
                 
                 <div id="lista" class="space-y-3 pb-10"></div>
             </div>
@@ -115,7 +109,7 @@
     </div>
 
     <footer class="w-full p-4 text-center text-[10px] font-bold text-slate-400 uppercase mt-auto">
-        New Market Nazaré Paulista • 2026
+        New Market Nazaré Paulista • 2026 • Desenvolvedor: <span class="text-blue-600">"Paulo Souza"</span>
     </footer>
 
     <script type="module">
@@ -139,16 +133,11 @@
         let dadosAtuais = [];
         let filtroAtual = 'todos';
 
-        // Lógica de Autenticação e Boas-Vindas
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-panel').classList.remove('hidden');
-                
-                // Exibir Boas-Vindas
-                const nomeUser = user.email.split('@')[0].toUpperCase();
-                exibirBoasVindas(nomeUser);
-
+                exibirBoasVindas(user.email.split('@')[0].toUpperCase());
                 const isG = gerentes.includes(user.email);
                 document.getElementById('repositor-form').classList.toggle('hidden', isG);
                 carregar(isG);
@@ -171,13 +160,12 @@
             const btn = document.getElementById('btn-entrar');
             btn.innerText = "Entrando...";
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
-            catch { alert("Erro ao entrar. Verifique os dados."); }
+            catch { alert("Erro de login."); }
             finally { btn.innerText = "Acessar Sistema"; }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
-        // Salvar Produto
         document.getElementById('btn-salvar').onclick = async () => {
             const btn = document.getElementById('btn-salvar');
             const data = {
@@ -188,17 +176,16 @@
                 vencimento: document.getElementById('p-data').value,
                 criadoEm: serverTimestamp()
             };
-            if(!data.produto || !data.vencimento) return alert("Preencha os campos obrigatórios!");
+            if(!data.produto || !data.vencimento) return alert("Preencha Nome e Data!");
             btn.disabled = true;
             try { 
                 await addDoc(collection(db, "validades"), data); 
                 document.querySelectorAll('#repositor-form input').forEach(i => i.value = "");
-                alert("Produto salvo!");
+                alert("Salvo!");
             } catch(e) { alert("Erro ao salvar."); } 
             finally { btn.disabled = false; }
         };
 
-        // Carregar e Renderizar Lista
         function carregar(podeApagar) {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista');
@@ -221,7 +208,6 @@
                     div.dataset.cat = cat;
                     div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
                     
-                    // Lógica de clique no card para check-in local
                     div.onclick = (e) => {
                         if(e.target.tagName === 'BUTTON') return;
                         const cb = div.querySelector('.item-check');
@@ -255,11 +241,9 @@
             });
         }
 
-        // WhatsApp atualizado
         window.enviarSelecionados = () => {
             const selecionadosIds = Array.from(document.querySelectorAll('.item-check:checked')).map(cb => cb.dataset.id);
             if(selecionadosIds.length === 0) return alert("Selecione os produtos tocando nos cards!");
-
             const itens = dadosAtuais.filter(d => selecionadosIds.includes(d.id));
             let msg = `*📊 RELATÓRIO DE VALIDADES - NEW MARKET*\n\n`;
             itens.forEach(p => {
@@ -287,12 +271,12 @@
             });
         };
 
-        window.apagarItem = async (id) => { if(confirm("Apagar produto definitivamente?")) await deleteDoc(doc(db, "validades", id)); };
+        window.apagarItem = async (id) => { if(confirm("Apagar definitivamente?")) await deleteDoc(doc(db, "validades", id)); };
         window.abrirModalSenha = () => document.getElementById('modal-senha').classList.add('active');
         window.fecharModalSenha = () => document.getElementById('modal-senha').classList.remove('active');
         window.processarTrocaSenha = async () => {
-            try { await updatePassword(auth.currentUser, document.getElementById('pass-nova').value); alert("Senha atualizada!"); fecharModalSenha(); }
-            catch { alert("Erro. Re-inicie sessão para mudar a senha."); }
+            try { await updatePassword(auth.currentUser, document.getElementById('pass-nova').value); alert("Sucesso!"); fecharModalSenha(); }
+            catch { alert("Erro ao atualizar senha."); }
         };
     </script>
 </body>
