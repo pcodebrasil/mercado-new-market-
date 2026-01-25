@@ -31,7 +31,7 @@
 
     <div id="loading-screen">
         <div class="w-12 h-12 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase text-slate-400">New Market Cloud</p>
+        <p class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Sincronizando New Market</p>
     </div>
 
     <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-4">
@@ -120,8 +120,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore as getDB, collection as col, addDoc as add, onSnapshot as listen, query as q, orderBy as ord, doc as dRef, deleteDoc as del, serverTimestamp as ts, enableIndexedDbPersistence as cache } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
@@ -134,8 +133,8 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getDB(app);
-        try { cache(db); } catch (e) {}
+        const db = getFirestore(app);
+        try { enableIndexedDbPersistence(db); } catch (e) {}
         
         const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         const gerentesOCULTOS = ['paulo@newmarket.com']; 
@@ -158,11 +157,8 @@
                 const isGerenteReal = gerentesREAIS.includes(user.email);
                 const isPaulo = gerentesOCULTOS.includes(user.email);
                 
-                // Paulo vê REPO, mas agora vê a ENGRENAGEM (isGerenteReal || isPaulo)
                 document.getElementById('user-display').innerText = (isGerenteReal) ? `ADMIN: ${user.email.split('@')[0]}` : `REPO: ${user.email.split('@')[0]}`;
                 document.getElementById('btn-config').classList.toggle('hidden', !(isGerenteReal || isPaulo));
-                
-                // Formulário: Paulo ainda vê o formulário pois ele repõe (isGerenteReal é false para ele)
                 document.getElementById('repositor-form').classList.toggle('hidden', isGerenteReal);
                 
                 carregar(isGerenteReal || isPaulo);
@@ -175,10 +171,10 @@
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
-            catch (err) { showToast("Erro no Login", "#dc2626"); }
+            catch (err) { showToast("Usuário ou Senha Inválidos", "#dc2626"); }
         };
-        document.getElementById('btn-logout').onclick = () => signOut(auth);
 
+        document.getElementById('btn-logout').onclick = () => signOut(auth);
         document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
         document.getElementById('btn-fechar-config').onclick = () => document.getElementById('gaveta-config').classList.add('hidden');
         document.getElementById('btn-cadastrar-user').onclick = () => window.open('https://console.firebase.google.com/project/mercado-c3e95/authentication/users', '_blank');
@@ -186,12 +182,12 @@
         document.getElementById('btn-confirmar-senha').onclick = async () => {
             const ns = document.getElementById('nova-senha').value;
             if (ns.length < 6) return showToast("Mínimo 6 caracteres!", "#f59e0b");
-            try { await updatePassword(auth.currentUser, ns); showToast("Sucesso! Relogue.", "#10b981"); setTimeout(()=>signOut(auth), 2000); } 
-            catch (e) { showToast("Relogue para mudar", "#dc2626"); }
+            try { await updatePassword(auth.currentUser, ns); showToast("Senha alterada! Relogue.", "#10b981"); setTimeout(()=>signOut(auth), 2000); } 
+            catch (e) { showToast("Relogue para mudar a senha", "#dc2626"); }
         };
 
         function carregar(podeApagar) {
-            listen(q(col(db, "validades"), ord("vencimento", "asc")), (snap) => {
+            onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista');
                 lista.innerHTML = ""; dadosAtuais = [];
                 let counts = {critico: 0, atencao: 0};
@@ -218,10 +214,10 @@
         }
 
         document.getElementById('btn-salvar').onclick = async () => {
-            const data = { produto: document.getElementById('p-nome').value.toUpperCase(), codigo: document.getElementById('p-ean').value || "0000000000000", quantidade: document.getElementById('p-qtd').value, setor: document.getElementById('p-setor-add').value, vencimento: document.getElementById('p-data').value, criadoEm: ts() };
-            if(!data.produto || !data.vencimento || !data.quantidade) return showToast("Dados incompletos!", "#dc2626");
-            await add(col(db, "validades"), data);
-            showToast("Salvo!", "#10b981");
+            const data = { produto: document.getElementById('p-nome').value.toUpperCase(), codigo: document.getElementById('p-ean').value || "0000000000000", quantidade: document.getElementById('p-qtd').value, setor: document.getElementById('p-setor-add').value, vencimento: document.getElementById('p-data').value, criadoEm: serverTimestamp() };
+            if(!data.produto || !data.vencimento || !data.quantidade) return showToast("Preencha Nome, Data e Qtd!", "#dc2626");
+            await addDoc(collection(db, "validades"), data);
+            showToast("Produto Salvo!", "#10b981");
             document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = ""; document.getElementById('p-qtd').value = "";
         };
 
@@ -245,7 +241,7 @@
 
         document.getElementById('btn-whatsapp').onclick = () => {
             const cards = document.querySelectorAll('.card-checked');
-            if(cards.length === 0) return showToast("Marque os itens!", "#f59e0b");
+            if(cards.length === 0) return showToast("Marque os itens primeiro!", "#f59e0b");
             const ids = Array.from(cards).map(c => c.dataset.id);
             const itens = dadosAtuais.filter(d => ids.includes(d.id));
             let msg = `*📊 RELATÓRIO NEW MARKET*\n\n`;
@@ -257,7 +253,7 @@
             document.querySelectorAll('.card').forEach(c => { if(c.dataset.cat === 'critico') { c.querySelector('.item-check').checked = true; c.classList.add('card-checked'); } });
         };
 
-        window.apagarItem = async (id) => { if(confirm("Apagar?")) await del(dRef(db, "validades", id)); };
+        window.apagarItem = async (id) => { if(confirm("Deseja realmente excluir este produto?")) await deleteDoc(doc(db, "validades", id)); };
     </script>
 </body>
 </html>
