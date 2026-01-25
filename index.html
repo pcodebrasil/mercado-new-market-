@@ -9,48 +9,39 @@
     <style>
         #login-screen, #main-panel { display: none; }
         #loading-screen { position: fixed; inset: 0; background: white; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        
         .filter-active { border-width: 4px !important; opacity: 1 !important; transform: scale(1.05); transition: 0.3s; }
         .filter-inactive { opacity: 0.6; }
-        
         .card-critico { border-left: 8px solid #ef4444; }
         .card-atencao { border-left: 8px solid #f59e0b; }
         .card-normal { border-left: 8px solid #10b981; }
-        
         .card-checked { opacity: 0.4; filter: grayscale(1); background-color: #f1f5f9 !important; border-left-color: #94a3b8 !important; transform: scale(0.96); }
-        .card-checked h3 { text-decoration: line-through; }
-
         .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
         .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; }
-
-        /* Toast Notification */
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; text-transform: uppercase; font-size: 10px; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-
         svg.barcode { width: 100%; max-height: 55px; }
         .dev-footer { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-top: 20px; padding-bottom: 10px; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
 
-    <div id="toast">Mensagem Aqui</div>
+    <div id="toast"></div>
 
     <div id="loading-screen">
         <div class="w-12 h-12 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">New Market Cloud</p>
+        <p class="text-[10px] font-black uppercase text-slate-400">New Market Cloud</p>
     </div>
 
-    <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-4 text-center">
-        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-t-8 border-blue-800">
+    <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-t-8 border-blue-800 text-center">
             <h1 class="text-3xl font-black uppercase italic text-blue-800">New <span class="text-red-600">Market</span></h1>
             <p class="text-[10px] text-yellow-600 font-black uppercase tracking-widest mt-1">Nazaré Paulista</p>
-            <form id="login-form" class="space-y-4 mt-8 text-left">
+            <form id="login-form" class="space-y-4 mt-8">
                 <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="E-mail" required>
                 <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="Senha" required>
-                <button type="submit" id="btn-entrar" class="w-full btn-newmarket text-white p-4 rounded-2xl font-black uppercase shadow-lg">Acessar Painel</button>
+                <button type="submit" class="w-full btn-newmarket text-white p-4 rounded-2xl font-black uppercase shadow-lg">Acessar Painel</button>
             </form>
         </div>
         <footer class="dev-footer">Desenvolvido por Paulo Souza by 2026</footer>
@@ -71,22 +62,19 @@
         <main class="p-4 max-w-xl mx-auto w-full flex-grow space-y-5">
             
             <div id="modal-senha" class="hidden bg-yellow-50 p-6 rounded-3xl border-2 border-yellow-200 shadow-inner space-y-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="font-black uppercase text-yellow-700 text-[10px]">Alterar Minha Senha</h2>
-                    <span class="text-[8px] text-yellow-600 font-bold">MÍN. 6 CARACTERES</span>
-                </div>
-                <input type="password" id="nova-senha" placeholder="DIGITE A NOVA SENHA" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm focus:ring-2 ring-yellow-500">
+                <h2 class="font-black uppercase text-yellow-700 text-[10px]">Alterar Minha Senha</h2>
+                <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-4 border rounded-2xl font-bold outline-none text-sm">
                 <div class="flex gap-2">
-                    <button id="btn-confirmar-senha" class="flex-grow bg-yellow-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md active:scale-95 transition-transform">Confirmar Alteração</button>
-                    <button id="btn-cancelar-senha" class="bg-slate-200 text-slate-600 px-6 rounded-2xl font-black uppercase text-[10px]">X</button>
+                    <button id="btn-confirmar-senha" class="flex-grow bg-yellow-600 text-white p-4 rounded-2xl font-black uppercase text-[10px]">Confirmar</button>
+                    <button id="btn-cancelar-senha" class="bg-slate-200 text-slate-600 px-4 rounded-2xl font-black uppercase text-[10px]">X</button>
                 </div>
             </div>
 
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
                 <h2 class="font-black uppercase text-blue-800 text-[10px]">Lançar Validade</h2>
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50 focus:bg-white transition-all">
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50">
                 <div class="grid grid-cols-4 gap-2">
-                    <input type="number" id="p-ean" placeholder="CÓDIGO EAN" class="col-span-3 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
+                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
                     <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
                 </div>
                 <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50 text-sm outline-none">
@@ -96,28 +84,22 @@
                     <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
                 <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-sm bg-slate-50">
-                <button id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-transform">Salvar Agora</button>
+                <button id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar Produto</button>
             </div>
 
             <div class="space-y-4">
                 <div class="grid grid-cols-3 gap-2 text-center font-black">
-                    <button id="f-critico" class="bg-white p-3 rounded-2xl border-2 border-red-500 text-red-600 filter-inactive"><p class="text-[8px] uppercase">🚨 Crítico</p><p id="c-critico" class="text-xl">0</p></button>
-                    <button id="f-atencao" class="bg-white p-3 rounded-2xl border-2 border-yellow-500 text-yellow-600 filter-inactive"><p class="text-[8px] uppercase">⚠️ Atenção</p><p id="c-atencao" class="text-xl">0</p></button>
-                    <button id="f-todos" class="bg-white p-3 rounded-2xl border-2 border-blue-500 text-blue-600 filter-active"><p class="text-[8px] uppercase">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
+                    <button id="f-critico" class="bg-white p-3 rounded-2xl border-2 border-red-500 text-red-600 filter-inactive"><p class="text-[8px]">🚨 Crítico</p><p id="c-critico" class="text-xl">0</p></button>
+                    <button id="f-atencao" class="bg-white p-3 rounded-2xl border-2 border-yellow-500 text-yellow-600 filter-inactive"><p class="text-[8px]">⚠️ Atenção</p><p id="c-atencao" class="text-xl">0</p></button>
+                    <button id="f-todos" class="bg-white p-3 rounded-2xl border-2 border-blue-500 text-blue-600 filter-active"><p class="text-[8px]">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
                 </div>
 
-                <div class="flex flex-col gap-2">
-                    <input type="text" id="busca" placeholder="🔍 Buscar produto ou EAN..." class="w-full p-4 rounded-2xl bg-white shadow-sm font-bold outline-none border focus:ring-2 ring-blue-500">
-                    <select id="f-setor" class="w-full p-3 rounded-2xl bg-white shadow-sm font-black outline-none border text-[10px] uppercase text-slate-500">
-                        <option value="todos">📂 Ver Todos os Setores</option>
-                        <option value="Corredor do Paulo">Corredor do Paulo</option>
-                        <option value="Corredor do Leandro">Corredor do Leandro</option>
-                        <option value="Corredor do Pedro">Corredor do Pedro</option>
-                        <option value="Corredor do Edmar">Corredor do Edmar</option>
-                    </select>
+                <div class="flex gap-2">
+                    <input type="text" id="busca" placeholder="🔍 Buscar..." class="flex-grow p-4 rounded-2xl bg-white shadow-sm font-bold outline-none border">
+                    <button id="btn-selecionar-criticos" class="bg-blue-600 text-white px-4 rounded-2xl font-black text-[9px] uppercase shadow-md active:scale-95 transition-transform">Marcar Críticos</button>
                 </div>
-
-                <button id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md flex items-center justify-center gap-2 active:bg-green-700">📊 Relatório WhatsApp</button>
+                
+                <button id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md active:bg-green-700">📊 Relatório WhatsApp de Marcados</button>
                 
                 <div id="lista" class="space-y-3 pb-8"></div>
                 
@@ -133,6 +115,10 @@
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // CONFIGURAÇÃO: 7 DIAS PARA NÍVEL CRÍTICO
+        const DIAS_CRITICOS = 7; 
+        const DIAS_ATENCAO = 15;
+
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -146,8 +132,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Modo Offline Ativado
-        try { enableIndexedDbPersistence(db); } catch (err) { console.warn("Offline desativado"); }
+        try { enableIndexedDbPersistence(db); } catch (err) {}
         
         const gerentes = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         let dadosAtuais = [];
@@ -175,33 +160,21 @@
 
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
-            try { 
-                await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
-                showToast("Bem-vindo!", "#1e40af");
-            } catch (err) { showToast("Usuário ou Senha incorretos", "#dc2626"); }
+            try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
+            catch (err) { showToast("Usuário ou Senha inválidos", "#dc2626"); }
         };
 
-        // LÓGICA DE ALTERAÇÃO DE SENHA PELO PRÓPRIO USUÁRIO
-        document.getElementById('btn-abrir-senha').onclick = () => {
-            const modal = document.getElementById('modal-senha');
-            modal.classList.toggle('hidden');
-        };
-
+        document.getElementById('btn-abrir-senha').onclick = () => document.getElementById('modal-senha').classList.toggle('hidden');
         document.getElementById('btn-cancelar-senha').onclick = () => document.getElementById('modal-senha').classList.add('hidden');
-        
         document.getElementById('btn-confirmar-senha').onclick = async () => {
             const novaSenha = document.getElementById('nova-senha').value;
             if (novaSenha.length < 6) return showToast("Mínimo 6 caracteres!", "#f59e0b");
-            
             try {
                 await updatePassword(auth.currentUser, novaSenha);
-                showToast("Senha alterada com sucesso!", "#10b981");
+                showToast("Senha Alterada!", "#10b981");
                 document.getElementById('modal-senha').classList.add('hidden');
                 document.getElementById('nova-senha').value = "";
-            } catch (err) {
-                // Se o usuário estiver logado há muito tempo, o Firebase exige novo login por segurança
-                showToast("Por segurança, saia e entre novamente para trocar a senha", "#dc2626");
-            }
+            } catch (err) { showToast("Relogue por segurança", "#dc2626"); }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
@@ -214,14 +187,21 @@
                 snap.forEach(d => {
                     const item = { id: d.id, ...d.data() };
                     const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
+                    
                     let cat = "normal", estilo = "card-normal", corTxt = "text-green-600";
-                    if(diff <= 5) { estilo = "card-critico"; corTxt = "text-red-600 animate-pulse font-black"; counts.critico++; cat = "critico"; }
-                    else if(diff <= 15) { estilo = "card-atencao"; corTxt = "text-yellow-600 font-black"; counts.atencao++; cat = "atencao"; }
+                    if(diff <= DIAS_CRITICOS) { estilo = "card-critico"; corTxt = "text-red-600 animate-pulse font-black"; counts.critico++; cat = "critico"; }
+                    else if(diff <= DIAS_ATENCAO) { estilo = "card-atencao"; corTxt = "text-yellow-600 font-black"; counts.atencao++; cat = "atencao"; }
+                    
                     dadosAtuais.push({...item, dias: diff, cat});
                     const div = document.createElement('div');
                     div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 border border-slate-100`;
-                    div.dataset.id = item.id; div.dataset.cat = cat; div.dataset.setor = item.setor; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
-                    div.onclick = (e) => { if(e.target.tagName === 'BUTTON') return; const cb = div.querySelector('.item-check'); cb.checked = !cb.checked; div.classList.toggle('card-checked', cb.checked); };
+                    div.dataset.id = item.id; div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
+                    div.onclick = (e) => { 
+                        if(e.target.tagName === 'BUTTON') return; 
+                        const cb = div.querySelector('.item-check');
+                        cb.checked = !cb.checked;
+                        div.classList.toggle('card-checked', cb.checked);
+                    };
                     div.innerHTML = `<div class="flex gap-3"><input type="checkbox" class="item-check mt-1 scale-150 accent-blue-600 pointer-events-none" data-id="${item.id}"><div class="flex-grow"><div class="flex justify-between text-[7px] font-black text-slate-400"><span>${item.setor}</span><span class="${corTxt}">${diff} DIAS</span></div><h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3><div class="my-2 bg-white border rounded-lg p-1"><svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35" jsbarcode-fontSize="14"></svg></div><div class="flex justify-between items-end"><div class="text-[9px] font-bold text-slate-500">QTD: ${item.quantidade} | VENC: ${item.vencimento.split('-').reverse().join('/')}</div>${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-600 text-[8px] font-black bg-red-50 px-3 py-2 rounded-lg active:bg-red-200">Excluir</button>` : ''}</div></div></div>`;
                     lista.appendChild(div);
                 });
@@ -235,7 +215,7 @@
 
         document.getElementById('btn-salvar').onclick = async () => {
             const data = { produto: document.getElementById('p-nome').value.toUpperCase(), codigo: document.getElementById('p-ean').value || "0000000000000", quantidade: document.getElementById('p-qtd').value || "1", setor: document.getElementById('p-setor-add').value, vencimento: document.getElementById('p-data').value, criadoEm: serverTimestamp() };
-            if(!data.produto || !data.vencimento) return showToast("Falta Nome ou Data!", "#dc2626");
+            if(!data.produto || !data.vencimento) return showToast("Preencha Nome e Data!", "#dc2626");
             await addDoc(collection(db, "validades"), data);
             showToast("Produto Salvo!", "#10b981");
             document.querySelectorAll('#repositor-form input').forEach(i => i.value = "");
@@ -243,19 +223,16 @@
 
         function filtrar() {
             const busca = document.getElementById('busca').value.toLowerCase();
-            const setor = document.getElementById('f-setor').value;
             document.querySelectorAll('.card').forEach(c => {
                 const matchStatus = (filtroStatus === 'todos' || c.dataset.cat === filtroStatus);
-                const matchSetor = (setor === 'todos' || c.dataset.setor === setor);
                 const matchBusca = c.dataset.search.includes(busca);
-                c.style.display = (matchStatus && matchSetor && matchBusca) ? "block" : "none";
+                c.style.display = (matchStatus && matchBusca) ? "block" : "none";
             });
         }
 
         document.getElementById('f-critico').onclick = () => { filtroStatus='critico'; filtrar(); toggleFiltro('f-critico'); };
         document.getElementById('f-atencao').onclick = () => { filtroStatus='atencao'; filtrar(); toggleFiltro('f-atencao'); };
         document.getElementById('f-todos').onclick = () => { filtroStatus='todos'; filtrar(); toggleFiltro('f-todos'); };
-        document.getElementById('f-setor').onchange = () => filtrar();
         document.getElementById('busca').oninput = () => filtrar();
 
         function toggleFiltro(id) {
@@ -263,16 +240,42 @@
             document.getElementById(id).classList.replace('filter-inactive', 'filter-active');
         }
 
+        document.getElementById('btn-selecionar-criticos').onclick = () => {
+            let total = 0;
+            document.querySelectorAll('.card').forEach(card => {
+                if(card.dataset.cat === 'critico') {
+                    const cb = card.querySelector('.item-check');
+                    cb.checked = true;
+                    card.classList.add('card-checked');
+                    total++;
+                }
+            });
+            showToast(`${total} itens marcados!`, "#1e40af");
+        };
+
         document.getElementById('btn-whatsapp').onclick = () => {
             const selecionados = Array.from(document.querySelectorAll('.item-check:checked')).map(cb => cb.dataset.id);
             if(selecionados.length === 0) return showToast("Selecione os itens!", "#f59e0b");
             const itens = dadosAtuais.filter(d => selecionados.includes(d.id));
-            let msg = `*📊 VALIDADES - NEW MARKET*\n\n`;
-            itens.forEach(p => { msg += `📦 *${p.produto}*\nVenc: ${p.vencimento.split('-').reverse().join('/')}\nQtd: ${p.quantidade} | ${p.setor}\n\n`; });
+            
+            let msg = `*📊 RELATÓRIO DE VALIDADES - NEW MARKET*\n`;
+            msg += `_Favor verificar as ações para os produtos abaixo:_\n\n`;
+            
+            itens.forEach(p => {
+                let alerta = p.dias <= DIAS_CRITICOS ? "🚨 *CRÍTICO*" : "⚠️ *ATENÇÃO*";
+                msg += `${alerta}: *${p.produto}*\n`;
+                msg += `📅 Venc: *${p.vencimento.split('-').reverse().join('/')}*\n`;
+                msg += `⏳ Faltam: *${p.dias} dias*\n`;
+                msg += `📦 Qtd: ${p.quantidade} | ${p.setor}\n\n`;
+            });
+            
+            msg += `_Gerado por: Sistema New Market 2026_\n`;
+            msg += `_Responsável: Paulo Souza_`;
+            
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
-        window.apagarItem = async (id) => { if(confirm("Deseja apagar este item permanentemente?")) await deleteDoc(doc(db, "validades", id)); };
+        window.apagarItem = async (id) => { if(confirm("Apagar permanentemente?")) await deleteDoc(doc(db, "validades", id)); };
     </script>
 </body>
 </html>
