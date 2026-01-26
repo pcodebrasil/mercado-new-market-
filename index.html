@@ -3,103 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - Gestão de Validades</title>
+    <title>New Market - Sistema 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
-        body { font-family: 'Roboto', sans-serif; background-color: #0f172a; color: #f8fafc; }
         #login-screen, #main-panel { display: none; }
-
-        /* Cores Originais do Sistema */
-        .brand-blue { background-color: #1e3a8a; }
-        .brand-dark { background-color: #1e293b; }
-        
-        /* Sistema de Cores de Status Original */
-        .status-critico { border-left: 10px solid #ef4444; background: #2d1a1a; } /* Vermelho suave dark */
-        .status-atencao { border-left: 10px solid #f59e0b; background: #2d261a; } /* Laranja suave dark */
-        .status-ok { border-left: 10px solid #10b981; background: #1a2d24; }      /* Verde suave dark */
-
-        .card { border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5); transition: transform 0.2s; }
-        .card:active { transform: scale(0.98); }
-
-        /* Estilização da Tela de Login Original */
-        .login-card { background: #ffffff; border-radius: 2.5rem; color: #1e293b; }
-        
-        #toast { visibility: hidden; min-width: 280px; background: #334155; color: #fff; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; border: 1px solid #475569; }
-        #toast.show { visibility: visible; animation: fadein 0.5s; }
+        #loading-screen { position: fixed; inset: 0; background: white; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .filter-active { border-width: 4px !important; opacity: 1 !important; transform: scale(1.05); transition: 0.3s; }
+        .filter-inactive { opacity: 0.6; }
+        .card-critico { border-left: 8px solid #ef4444; }
+        .card-atencao { border-left: 8px solid #f59e0b; }
+        .card-normal { border-left: 8px solid #10b981; }
+        .card-checked { opacity: 0.4; filter: grayscale(1); background-color: #f1f5f9 !important; border-left-color: #94a3b8 !important; transform: scale(0.96); }
+        .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
+        .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; }
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; text-transform: uppercase; font-size: 10px; }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        svg.barcode { width: 100%; max-height: 55px; }
+        .dev-footer { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-top: 20px; padding-bottom: 10px; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
+
     <div id="toast"></div>
 
-    <div id="login-screen" class="flex-grow flex items-center justify-center p-6">
-        <div class="login-card p-10 w-full max-w-md shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-            <div class="text-center mb-10">
-                <h1 class="text-4xl font-black italic text-blue-900 uppercase leading-none">New Market</h1>
-                <p class="text-[10px] font-bold text-slate-400 mt-2 tracking-widest uppercase">Portal de Operações</p>
-            </div>
-            <form id="login-form" class="space-y-5">
-                <div>
-                    <label class="text-[10px] font-black uppercase ml-2 text-slate-500">Usuário</label>
-                    <input type="email" id="email" class="w-full p-4 bg-slate-100 rounded-2xl outline-none font-bold text-sm border-2 border-transparent focus:border-blue-900" placeholder="seu@email.com" required>
-                </div>
-                <div>
-                    <label class="text-[10px] font-black uppercase ml-2 text-slate-500">Senha de Acesso</label>
-                    <input type="password" id="password" class="w-full p-4 bg-slate-100 rounded-2xl outline-none font-bold text-sm border-2 border-transparent focus:border-blue-900" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="w-full brand-blue text-white p-5 rounded-2xl font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all">Entrar no Sistema</button>
+    <div id="loading-screen">
+        <div class="w-12 h-12 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
+        <p class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Sincronizando New Market</p>
+    </div>
+
+    <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-t-8 border-blue-800 text-center">
+            <h1 class="text-3xl font-black uppercase italic text-blue-800">New <span class="text-red-600">Market</span></h1>
+            <p class="text-[10px] text-yellow-600 font-black uppercase tracking-widest mt-1">Nazaré Paulista</p>
+            <form id="login-form" class="space-y-4 mt-8">
+                <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="E-mail" required>
+                <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="Senha" required>
+                <button type="submit" class="w-full btn-newmarket text-white p-4 rounded-2xl font-black uppercase shadow-lg">Acessar Painel</button>
             </form>
         </div>
+        <footer class="dev-footer">Desenvolvido por Paulo Souza by 2026</footer>
     </div>
 
     <div id="main-panel" class="flex-grow flex flex-col">
-        <nav class="brand-blue p-5 flex justify-between items-center sticky top-0 z-50 shadow-2xl">
-            <div class="flex flex-col">
-                <span class="font-black italic uppercase text-xl leading-none">New Market</span>
-                <span id="user-tag" class="text-[8px] font-bold opacity-80 mt-1 uppercase">Operador Online</span>
+        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
+            <div class="leading-none">
+                <span class="font-black italic uppercase text-lg text-white">New Market</span><br>
+                <span id="user-display" class="text-[8px] font-black uppercase tracking-widest text-yellow-200">...</span>
             </div>
-            <div class="flex gap-3">
-                <button id="btn-relatorio" class="bg-green-600 px-3 py-2 rounded-lg text-[9px] font-black uppercase">Relatório</button>
-                <button id="btn-logout" class="bg-white/10 px-3 py-2 rounded-lg text-[9px] font-black uppercase">Sair</button>
+            <div class="flex gap-2">
+                <button id="btn-config" class="hidden bg-white/20 p-2 rounded-full border border-white/20">⚙️</button>
+                <button id="btn-logout" class="text-[8px] bg-black/40 px-3 py-2 rounded-full uppercase font-bold border border-white/20">Sair</button>
             </div>
         </nav>
 
-        <main class="p-4 max-w-xl mx-auto w-full space-y-6">
+        <main class="p-4 max-w-xl mx-auto w-full flex-grow space-y-5">
             
-            <div class="brand-dark p-6 rounded-2xl shadow-xl space-y-4 border border-slate-700">
-                <div class="flex items-center gap-2 mb-2">
-                    <div class="w-2 h-6 bg-blue-500 rounded-full"></div>
-                    <h2 class="font-black uppercase text-xs tracking-tighter">Check-in de Mercadoria</h2>
+            <div id="gaveta-config" class="hidden bg-slate-800 p-6 rounded-3xl shadow-xl border-b-8 border-yellow-500 space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações</h2>
+                    <button id="btn-fechar-config" class="text-white font-black text-xs">X</button>
                 </div>
                 
-                <input type="text" id="p-nome" class="w-full p-4 bg-slate-800 rounded-xl outline-none font-bold uppercase text-xs border border-slate-700 focus:border-blue-500" placeholder="Descrição do Produto">
-                
-                <div class="grid grid-cols-2 gap-3">
-                    <input type="text" id="p-lote" class="p-4 bg-slate-800 rounded-xl outline-none font-bold uppercase text-xs border border-slate-700" placeholder="Lote / Série">
-                    <input type="number" id="p-estoque" class="p-4 bg-slate-800 rounded-xl outline-none font-bold text-xs border border-slate-700" placeholder="Quantidade">
+                <div class="border-t border-slate-700 pt-4">
+                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Mudar Minha Senha</p>
+                    <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-3 border-none rounded-xl font-bold outline-none text-xs bg-slate-700 text-white mb-2">
+                    <button id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Confirmar e Sair</button>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-3">
-                    <input type="date" id="p-data" class="p-4 bg-slate-800 rounded-xl outline-none font-bold text-xs border border-slate-700 text-slate-400">
-                    <button id="btn-salvar" class="brand-blue text-white rounded-xl font-black uppercase text-xs shadow-lg active:scale-95">Confirmar</button>
+
+                <div class="border-t border-slate-700 pt-4">
+                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Acessos da Equipe</p>
+                    <button id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Abrir Gerenciador Firebase</button>
                 </div>
             </div>
 
-            <div class="relative">
-                <input type="text" id="campo-busca" class="w-full p-4 pl-12 bg-slate-800 rounded-xl border border-slate-700 font-bold text-xs uppercase outline-none" placeholder="Localizar produto...">
-                <span class="absolute left-4 top-4 opacity-40">🔍</span>
+            <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
+                <h2 class="font-black uppercase text-blue-800 text-[10px]">Lançar Validade</h2>
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50">
+                <div class="grid grid-cols-4 gap-2">
+                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
+                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
+                </div>
+                <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50 text-sm outline-none">
+                    <option value="Corredor do Paulo">Corredor do Paulo</option>
+                    <option value="Corredor do Leandro">Corredor do Leandro</option>
+                    <option value="Corredor do Pedro">Corredor do Pedro</option>
+                    <option value="Corredor do Edmar">Corredor do Edmar</option>
+                </select>
+                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-sm bg-slate-50">
+                <button id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar Produto</button>
             </div>
 
-            <div id="lista" class="space-y-3 pb-24"></div>
+            <div class="space-y-4">
+                <div class="grid grid-cols-3 gap-2 text-center font-black">
+                    <button id="f-critico" class="bg-white p-3 rounded-2xl border-2 border-red-500 text-red-600 filter-inactive"><p class="text-[8px]">🚨 Crítico</p><p id="c-critico" class="text-xl">0</p></button>
+                    <button id="f-atencao" class="bg-white p-3 rounded-2xl border-2 border-yellow-500 text-yellow-600 filter-inactive"><p class="text-[8px]">⚠️ Atenção</p><p id="c-atencao" class="text-xl">0</p></button>
+                    <button id="f-todos" class="bg-white p-3 rounded-2xl border-2 border-blue-500 text-blue-600 filter-active"><p class="text-[8px]">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
+                </div>
+
+                <div class="flex gap-2">
+                    <input type="text" id="busca" placeholder="🔍 Buscar..." class="flex-grow p-4 rounded-2xl bg-white shadow-sm font-bold outline-none border">
+                    <button id="btn-selecionar-criticos" class="bg-blue-600 text-white px-4 rounded-2xl font-black text-[9px] uppercase shadow-md">Marcar Críticos</button>
+                </div>
+
+                <button id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md flex items-center justify-center gap-2">
+                    <span>🟢 Relatório WhatsApp (Marcados)</span>
+                </button>
+                
+                <div id="lista" class="space-y-3 pb-8"></div>
+            </div>
         </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
@@ -113,15 +134,34 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        try { enableIndexedDbPersistence(db); } catch (e) {}
+        
+        const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
+        const gerentesOCULTOS = ['paulo@newmarket.com']; 
 
-        let dataStore = [];
+        let dadosAtuais = [];
+        let filtroStatus = 'todos';
+
+        function showToast(msg, color = "#333") {
+            const t = document.getElementById("toast");
+            t.innerText = msg; t.style.backgroundColor = color; t.className = "show";
+            setTimeout(() => { t.className = ""; }, 3000);
+        }
 
         onAuthStateChanged(auth, (user) => {
+            document.getElementById('loading-screen').style.display = 'none';
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                document.getElementById('user-tag').innerText = `Operador: ${user.email}`;
-                init();
+                
+                const isGerenteReal = gerentesREAIS.includes(user.email);
+                const isPaulo = gerentesOCULTOS.includes(user.email);
+                
+                document.getElementById('user-display').innerText = (isGerenteReal) ? `ADMIN: ${user.email.split('@')[0]}` : `REPO: ${user.email.split('@')[0]}`;
+                document.getElementById('btn-config').classList.toggle('hidden', !(isGerenteReal || isPaulo));
+                document.getElementById('repositor-form').classList.toggle('hidden', isGerenteReal);
+                
+                carregar(isGerenteReal || isPaulo);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-panel').style.display = 'none';
@@ -130,89 +170,90 @@
 
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
-            try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); }
-            catch (err) { alert("Credenciais Incorretas"); }
+            try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
+            catch (err) { showToast("Usuário ou Senha Inválidos", "#dc2626"); }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
+        document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
+        document.getElementById('btn-fechar-config').onclick = () => document.getElementById('gaveta-config').classList.add('hidden');
+        document.getElementById('btn-cadastrar-user').onclick = () => window.open('https://console.firebase.google.com/project/mercado-c3e95/authentication/users', '_blank');
+
+        document.getElementById('btn-confirmar-senha').onclick = async () => {
+            const ns = document.getElementById('nova-senha').value;
+            if (ns.length < 6) return showToast("Mínimo 6 caracteres!", "#f59e0b");
+            try { await updatePassword(auth.currentUser, ns); showToast("Senha alterada! Relogue.", "#10b981"); setTimeout(()=>signOut(auth), 2000); } 
+            catch (e) { showToast("Relogue para mudar a senha", "#dc2626"); }
+        };
+
+        function carregar(podeApagar) {
+            onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
+                const lista = document.getElementById('lista');
+                lista.innerHTML = ""; dadosAtuais = [];
+                let counts = {critico: 0, atencao: 0};
+                snap.forEach(d => {
+                    const item = { id: d.id, ...d.data() };
+                    const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
+                    let cat = "normal", estilo = "card-normal", corTxt = "text-green-600";
+                    if(diff <= 7) { estilo="card-critico"; corTxt="text-red-600 animate-pulse font-black"; counts.critico++; cat="critico"; }
+                    else if(diff <= 15) { estilo="card-atencao"; corTxt="text-yellow-600 font-black"; counts.atencao++; cat="atencao"; }
+                    dadosAtuais.push({...item, dias: diff, cat});
+                    const div = document.createElement('div');
+                    div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 border border-slate-100`;
+                    div.dataset.id = item.id; div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
+                    div.onclick = (e) => { if(e.target.tagName !== 'BUTTON') { const cb = div.querySelector('.item-check'); cb.checked = !cb.checked; div.classList.toggle('card-checked', cb.checked); } };
+                    div.innerHTML = `<div class="flex gap-3"><input type="checkbox" class="item-check mt-1 scale-150 accent-blue-600 pointer-events-none"><div class="flex-grow"><div class="flex justify-between text-[7px] font-black text-slate-400"><span>${item.setor}</span><span class="${corTxt}">${diff} DIAS</span></div><h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3><div class="my-2 bg-white border rounded-lg p-1 text-center"><svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35"></svg></div><div class="flex justify-between items-end text-[9px] font-bold text-slate-500"><span>QTD: ${item.quantidade} | VENC: ${item.vencimento.split('-').reverse().join('/')}</span>${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-600 bg-red-50 px-3 py-2 rounded-lg font-black text-[8px]">Excluir</button>` : ''}</div></div></div>`;
+                    lista.appendChild(div);
+                });
+                JsBarcode(".barcode").init();
+                document.getElementById('c-total').innerText = snap.size;
+                document.getElementById('c-critico').innerText = counts.critico;
+                document.getElementById('c-atencao').innerText = counts.atencao;
+                filtrar();
+            });
+        }
 
         document.getElementById('btn-salvar').onclick = async () => {
-            const n = document.getElementById('p-nome').value.toUpperCase().trim();
-            const d = document.getElementById('p-data').value;
-            const l = document.getElementById('p-lote').value.toUpperCase() || "N/A";
-            const q = document.getElementById('p-estoque').value || "0";
-            
-            if(!n || !d) return showToast("DADOS OBRIGATÓRIOS!");
-            
-            await addDoc(collection(db, "validades"), {
-                produto: n, vencimento: d, lote: l, estoque: q,
-                timestamp: serverTimestamp()
-            });
-            
-            ["p-nome", "p-data", "p-lote", "p-estoque"].forEach(i => document.getElementById(i).value = "");
-            showToast("CHECK-IN REALIZADO");
+            const data = { produto: document.getElementById('p-nome').value.toUpperCase(), codigo: document.getElementById('p-ean').value || "0000000000000", quantidade: document.getElementById('p-qtd').value, setor: document.getElementById('p-setor-add').value, vencimento: document.getElementById('p-data').value, criadoEm: serverTimestamp() };
+            if(!data.produto || !data.vencimento || !data.quantidade) return showToast("Preencha Nome, Data e Qtd!", "#dc2626");
+            await addDoc(collection(db, "validades"), data);
+            showToast("Produto Salvo!", "#10b981");
+            document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = ""; document.getElementById('p-qtd').value = "";
         };
 
-        function init() {
-            onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
-                dataStore = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                render(dataStore);
+        function filtrar() {
+            const busca = document.getElementById('busca').value.toLowerCase();
+            document.querySelectorAll('.card').forEach(c => {
+                const matchStatus = (filtroStatus === 'todos' || c.dataset.cat === filtroStatus);
+                const matchBusca = c.dataset.search.includes(busca);
+                c.style.display = (matchStatus && matchBusca) ? "block" : "none";
             });
         }
+        document.getElementById('busca').oninput = () => filtrar();
+        ['f-critico', 'f-atencao', 'f-todos'].forEach(id => {
+            document.getElementById(id).onclick = () => {
+                filtroStatus = id.split('-')[1];
+                document.querySelectorAll('[id^="f-"]').forEach(b => b.classList.replace('filter-active', 'filter-inactive'));
+                document.getElementById(id).classList.replace('filter-inactive', 'filter-active');
+                filtrar();
+            };
+        });
 
-        function render(itens) {
-            const container = document.getElementById('lista');
-            container.innerHTML = "";
-            itens.forEach(item => {
-                const dif = Math.ceil((new Date(item.vencimento + "T12:00:00") - new Date()) / (1000 * 60 * 60 * 24));
-                const status = dif <= 5 ? 'status-critico' : (dif <= 15 ? 'status-atencao' : 'status-ok');
-
-                const div = document.createElement('div');
-                div.className = `p-5 card ${status} border border-slate-800`;
-                div.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div class="flex-grow">
-                            <h3 class="font-black uppercase text-xs text-white leading-tight">${item.produto}</h3>
-                            <div class="flex gap-4 mt-2">
-                                <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">LOTE: ${item.lote}</span>
-                                <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">EST: ${item.estoque}</span>
-                            </div>
-                            <p class="text-[9px] font-black text-blue-400 mt-2 uppercase">VAL: ${item.vencimento}</p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-[10px] font-black px-3 py-1 rounded-md ${dif <= 5 ? 'bg-red-600' : 'bg-slate-700 text-slate-300'}">${dif} DIAS</div>
-                            <button onclick="remover('${item.id}')" class="mt-4 text-[8px] font-bold text-red-500 uppercase opacity-50">Apagar</button>
-                        </div>
-                    </div>
-                    <canvas id="bc-${item.id}" class="w-full h-8 mt-4 opacity-30"></canvas>
-                `;
-                container.appendChild(div);
-                JsBarcode(`#bc-${item.id}`, item.produto.substring(0, 10), { format: "CODE128", height: 25, displayValue: false });
-            });
-        }
-
-        document.getElementById('campo-busca').oninput = (e) => {
-            const val = e.target.value.toUpperCase();
-            render(dataStore.filter(d => d.produto.includes(val)));
+        document.getElementById('btn-whatsapp').onclick = () => {
+            const cards = document.querySelectorAll('.card-checked');
+            if(cards.length === 0) return showToast("Marque os itens primeiro!", "#f59e0b");
+            const ids = Array.from(cards).map(c => c.dataset.id);
+            const itens = dadosAtuais.filter(d => ids.includes(d.id));
+            let msg = `*📊 RELATÓRIO NEW MARKET*\n\n`;
+            itens.forEach(p => msg += `${p.dias <= 7 ? '🚨':'⚠️'} *${p.produto}*\nVenc: ${p.vencimento.split('-').reverse().join('/')}\nFaltam: ${p.dias} dias | Qtd: ${p.quantidade}\n\n`);
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
-        document.getElementById('btn-relatorio').onclick = () => {
-            let msg = "*📊 RELATÓRIO NEW MARKET*\n\n";
-            dataStore.forEach(i => {
-                const d = Math.ceil((new Date(i.vencimento + "T12:00:00") - new Date()) / (1000 * 60 * 60 * 24));
-                const icone = d <= 5 ? "🔴" : (d <= 15 ? "🟠" : "🟢");
-                msg += `${icone} *${i.produto}*\nVenc: ${i.vencimento} (${d} dias)\nLote: ${i.lote} | Qtd: ${i.estoque}\n\n`;
-            });
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+        document.getElementById('btn-selecionar-criticos').onclick = () => {
+            document.querySelectorAll('.card').forEach(c => { if(c.dataset.cat === 'critico') { c.querySelector('.item-check').checked = true; c.classList.add('card-checked'); } });
         };
 
-        window.remover = async (id) => { if(confirm("EXCLUIR REGISTRO?")) await deleteDoc(doc(db, "validades", id)); };
-
-        function showToast(m) {
-            const t = document.getElementById("toast");
-            t.innerText = m; t.className = "show";
-            setTimeout(() => t.className = "", 3000);
-        }
+        window.apagarItem = async (id) => { if(confirm("Deseja realmente excluir este produto?")) await deleteDoc(doc(db, "validades", id)); };
     </script>
 </body>
 </html>
