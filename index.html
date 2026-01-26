@@ -3,77 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - Sistema de Validade</title>
-
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignal.js" defer></script>
-    <script>
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-          appId: "b506dbfa-b632-41c1-a56c-c3ed0ac2c709",
-          safari_web_id: "web.onesignal.auto.63584824-3450-4886-9818-875654",
-          notifyButton: { enable: false },
-        });
-      });
-    </script>
+    <title>New Market - Gestão de Validade</title>
 
     <style>
         :root { --p: #2563eb; --d: #dc2626; --w: #f59e0b; --s: #16a34a; --bg: #f8fafc; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { background: var(--bg); padding-bottom: 70px; }
+        
+        /* Login */
         #login-screen { position: fixed; inset: 0; background: var(--p); display: flex; align-items: center; justify-content: center; z-index: 1000; }
         .card-login { background: white; padding: 2rem; border-radius: 1rem; width: 90%; max-width: 350px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; }
+        
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
         button { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .btn-p { background: var(--p); color: white; }
-        header { background: var(--p); color: white; padding: 1rem; display: flex; justify-content: space-between; }
+        
+        /* App Layout */
+        header { background: var(--p); color: white; padding: 1.2rem; text-align: center; font-weight: bold; font-size: 1.2rem; }
         .container { padding: 15px; }
-        .prod-card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        .prod-card { 
+            background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; 
+            border-left: 5px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* Navegação */
         nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #ddd; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 20px; border-radius: 15px; width: 90%; }
+        nav button { background: none; color: #666; font-size: 0.9rem; }
+
+        /* Modais */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 500; }
+        .modal-content { background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 400px; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <div class="card-login">
-            <h2>New Market</h2><br>
-            <input type="email" id="email" placeholder="E-mail">
-            <input type="password" id="pass" placeholder="Senha">
-            <button class="btn-p" id="btnLogin">Entrar</button>
+            <h2 style="color:var(--p)">New Market</h2><br>
+            <input type="email" id="email" placeholder="Seu e-mail">
+            <input type="password" id="pass" placeholder="Sua senha">
+            <button class="btn-p" id="btnLogin">Entrar no Sistema</button>
         </div>
     </div>
 
-    <header>
-        <span id="user-name">New Market</span>
-        <button onclick="document.getElementById('m-conf').style.display='flex'" style="background:none; color:white; font-size:20px;">⚙️</button>
-    </header>
+    <header>NEW MARKET - GESTÃO</header>
 
-    <div class="container" id="lista"></div>
+    <div class="container" id="lista">
+        </div>
 
     <nav>
-        <button onclick="location.reload()" style="background:none;">📋 Lista</button>
-        <button onclick="document.getElementById('m-add').style.display='flex'" style="background:none;">➕ Lançar</button>
-        <button id="btnLogout" style="background:none; color:red;">🚪 Sair</button>
+        <button onclick="location.reload()">📋 Lista de Produtos</button>
+        <button onclick="document.getElementById('m-add').style.display='flex'">➕ Lançar Validade</button>
+        <button id="btnLogout" style="color:red;">🚪 Sair</button>
     </nav>
 
     <div id="m-add" class="modal">
         <div class="modal-content">
-            <h3>Novo Produto</h3><br>
-            <input type="text" id="p-nome" placeholder="Nome">
+            <h3>Novo Lançamento</h3><br>
+            <input type="text" id="p-nome" placeholder="Nome do Produto">
             <input type="date" id="p-data">
-            <input type="text" id="p-setor" placeholder="Setor">
-            <button class="btn-p" id="btnSalvar">Salvar</button>
-            <button onclick="this.parentElement.parentElement.style.display='none'" style="background:none; margin-top:10px;">Fechar</button>
-        </div>
-    </div>
-
-    <div id="m-conf" class="modal">
-        <div class="modal-content">
-            <h3>Configurações</h3><br>
-            <button class="btn-p" style="background:purple;" onclick="OneSignalDeferred.push(function(o){o.showNativePrompt()})">🔔 Ativar Notificações</button>
-            <button onclick="this.parentElement.parentElement.style.display='none'" style="background:none; margin-top:20px;">Fechar</button>
+            <input type="text" id="p-setor" placeholder="Setor (Opcional)">
+            <button class="btn-p" id="btnSalvar">Salvar no Banco</button>
+            <button onclick="this.parentElement.parentElement.style.display='none'" style="background:none; margin-top:10px; color:gray;">Cancelar</button>
         </div>
     </div>
 
@@ -82,6 +75,7 @@
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
+        // CONFIGURAÇÃO REVISADA E ATIVA
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -99,31 +93,35 @@
         document.getElementById('btnLogin').onclick = () => {
             const e = document.getElementById('email').value;
             const s = document.getElementById('pass').value;
-            signInWithEmailAndPassword(auth, e, s).catch(err => alert("Erro: " + err.message));
+            signInWithEmailAndPassword(auth, e, s).catch(err => alert("Acesso negado: verifique e-mail e senha."));
         };
 
-        // Sair
+        // Logout
         document.getElementById('btnLogout').onclick = () => signOut(auth).then(() => location.reload());
 
-        // Salvar
+        // Salvar Produto
         document.getElementById('btnSalvar').onclick = async () => {
             const nome = document.getElementById('p-nome').value;
             const data = document.getElementById('p-data').value;
-            const setor = document.getElementById('p-setor').value;
-            if(!nome || !data) return alert("Preencha tudo!");
+            const setor = document.getElementById('p-setor').value || "Geral";
+            if(!nome || !data) return alert("Preencha o nome e a data!");
             
-            await addDoc(collection(db, "produtos"), {
-                nome, data, setor,
-                criadoEm: new Date().getTime()
-            });
-            document.getElementById('m-add').style.display = 'none';
+            try {
+                await addDoc(collection(db, "produtos"), {
+                    nome, data, setor,
+                    cadastradoPor: auth.currentUser.email,
+                    timestamp: new Date().getTime()
+                });
+                document.getElementById('m-add').style.display = 'none';
+                document.getElementById('p-nome').value = "";
+                document.getElementById('p-data').value = "";
+            } catch (error) { alert("Erro ao salvar: " + error.message); }
         };
 
-        // Listar
+        // Monitorar Autenticação e Carregar Lista
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('user-name').innerText = user.email.split('@')[0];
                 
                 const q = query(collection(db, "produtos"), orderBy("data", "asc"));
                 onSnapshot(q, (snap) => {
@@ -133,17 +131,24 @@
                         const p = d.data();
                         const card = document.createElement('div');
                         card.className = 'prod-card';
-                        card.innerHTML = `<strong>${p.nome}</strong><br><small>${p.setor}</small><br>
-                                          <span style="color:red; font-weight:bold">${p.data}</span>
-                                          <button style="float:right; background:none; color:red" onclick="window.excluir('${d.id}')">🗑️</button>`;
+                        card.innerHTML = `
+                            <div>
+                                <strong>${p.nome}</strong><br>
+                                <small>${p.setor}</small><br>
+                                <span style="color:var(--d); font-weight:bold">${p.data}</span>
+                            </div>
+                            <button style="width:auto; background:none; font-size:1.2rem" onclick="window.excluir('${d.id}')">🗑️</button>`;
                         lista.appendChild(card);
                     });
                 });
             }
         });
 
+        // Função Global para Excluir
         window.excluir = async (id) => {
-            if(confirm("Excluir produto?")) await deleteDoc(doc(db, "produtos", id));
+            if(confirm("Deseja remover este produto da lista?")) {
+                await deleteDoc(doc(db, "produtos", id));
+            }
         };
     </script>
 </body>
