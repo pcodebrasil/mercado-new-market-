@@ -3,87 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - Gestão de Validades</title>
+    <title>New Market - Gestão 2026</title>
     <link rel="manifest" href="./manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
         #login-screen, #main-panel { display: none; }
         .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
-        /* Estilo dos Cards Originais */
         .card-critico { border-left: 12px solid #ef4444; background: #fff1f2; }
         .card-atencao { border-left: 12px solid #f59e0b; background: #fffbeb; }
         .card-normal { border-left: 12px solid #10b981; background: #f0fdf4; }
-        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        input::placeholder { font-weight: 800; opacity: 0.5; }
+        #toast { visibility: hidden; min-width: 280px; background-color: #1e293b; color: #fff; text-align: center; border-radius: 20px; padding: 20px; position: fixed; z-index: 1000; left: 50%; bottom: 40px; transform: translateX(-50%); font-weight: 900; box-shadow: 0 10px 40px rgba(0,0,0,0.4); border: 2px solid #334155; }
+        #toast.show { visibility: visible; animation: slideup 0.4s, slidedown 0.4s 2.6s; }
+        @keyframes slideup { from {bottom: -50px; opacity: 0;} to {bottom: 40px; opacity: 1;} }
+        @keyframes slidedown { from {bottom: 40px; opacity: 1;} to {bottom: -50px; opacity: 0;} }
     </style>
 </head>
-<body class="bg-slate-50 flex flex-col min-h-screen font-sans antialiased">
+<body class="bg-slate-100 flex flex-col min-h-screen font-sans antialiased text-slate-900">
     <div id="toast"></div>
 
-    <div id="login-screen" class="flex-grow flex items-center justify-center p-6">
-        <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md border-t-[15px] border-blue-900">
+    <div id="login-screen" class="flex-grow flex items-center justify-center p-6 bg-slate-200">
+        <div class="bg-white p-10 rounded-[3.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] w-full max-w-md border-t-[16px] border-blue-900">
             <div class="text-center mb-10">
-                <h1 class="text-4xl font-black uppercase italic text-blue-900 tracking-tighter">New Market</h1>
-                <p class="text-[9px] font-black text-slate-400 tracking-[0.3em] uppercase">Controle de Qualidade</p>
+                <h1 class="text-4xl font-black uppercase italic text-blue-900 tracking-tighter leading-none">New Market</h1>
+                <p class="text-[9px] font-black text-slate-400 mt-2 tracking-[0.4em] uppercase">Security Access</p>
             </div>
             <form id="login-form" class="space-y-4">
-                <input type="email" id="email" class="w-full p-5 bg-slate-100 border-none rounded-3xl outline-none focus:ring-4 ring-blue-500/20 font-bold" placeholder="E-MAIL" required>
-                <input type="password" id="password" class="w-full p-5 bg-slate-100 border-none rounded-3xl outline-none focus:ring-4 ring-blue-500/20 font-bold" placeholder="SENHA" required>
-                <button type="submit" class="w-full bg-blue-900 text-white p-5 rounded-3xl font-black uppercase shadow-xl hover:bg-blue-800 transition-all active:scale-95">Acessar Sistema</button>
+                <input type="email" id="email" class="w-full p-5 bg-slate-50 rounded-3xl outline-none focus:ring-4 ring-blue-500/10 font-black uppercase text-sm border-2 border-slate-100" placeholder="E-mail de acesso" required>
+                <input type="password" id="password" class="w-full p-5 bg-slate-50 rounded-3xl outline-none focus:ring-4 ring-blue-500/10 font-black text-sm border-2 border-slate-100" placeholder="••••••••" required>
+                <button type="submit" class="w-full bg-blue-900 text-white p-5 rounded-3xl font-black uppercase shadow-2xl active:scale-95 transition-all">Entrar no Sistema</button>
             </form>
         </div>
     </div>
 
     <div id="main-panel" class="flex-grow flex flex-col">
-        <nav class="bg-newmarket text-white p-5 flex justify-between items-center sticky top-0 z-50 shadow-xl">
+        <nav class="bg-newmarket text-white p-5 flex justify-between items-center sticky top-0 z-50 shadow-2xl">
             <div class="flex flex-col">
-                <span class="font-black italic uppercase text-2xl leading-none">New Market</span>
-                <span id="user-status" class="text-[8px] font-black opacity-80 mt-1 uppercase">Monitor Online</span>
+                <span class="font-black italic uppercase text-2xl tracking-tighter">New Market</span>
+                <span id="label-user" class="text-[8px] font-black opacity-90 uppercase tracking-widest mt-1">SISTEMA ONLINE</span>
             </div>
             <div class="flex gap-2">
-                <button id="btn-config" class="bg-white/20 p-2.5 rounded-2xl backdrop-blur-md">⚙️</button>
-                <button id="btn-logout" class="bg-black/20 p-2.5 rounded-2xl text-[10px] font-black uppercase">Sair</button>
+                <button id="btn-config" class="bg-black/20 p-3 rounded-2xl backdrop-blur-md">⚙️</button>
+                <button id="btn-logout" class="bg-white/20 p-3 rounded-2xl text-[9px] font-black uppercase">Sair</button>
             </div>
         </nav>
 
         <main class="p-5 max-w-2xl mx-auto w-full space-y-6">
-            <div id="gaveta-config" class="hidden bg-slate-900 p-8 rounded-[2.5rem] text-white space-y-5 shadow-2xl border-2 border-blue-500/30">
-                <div class="flex items-center gap-3">
-                    <span class="text-2xl">🔔</span>
-                    <h2 class="font-black uppercase text-sm text-blue-400">Notificações Push</h2>
+            <div id="gaveta-config" class="hidden bg-slate-900 p-8 rounded-[2.5rem] text-white space-y-6 shadow-2xl border-4 border-blue-500/20">
+                <div class="flex items-center gap-4">
+                    <div class="bg-blue-500 p-3 rounded-2xl">🔔</div>
+                    <h2 class="font-black uppercase text-sm tracking-tight">Notificações Diárias</h2>
                 </div>
-                <button id="btn-ativar-push" class="w-full bg-purple-600 p-5 rounded-3xl font-black uppercase text-xs shadow-lg active:scale-95 transition-all">Ativar Alertas Diários</button>
-                <p class="text-[8px] text-slate-400 text-center uppercase font-black italic">Necessário para receber avisos de vencimento às 08:00h.</p>
+                <button id="btn-ativar-push" class="w-full bg-blue-600 p-5 rounded-3xl font-black uppercase text-xs shadow-xl active:scale-95 transition-all">Ativar Alertas no Celular</button>
             </div>
 
             <div class="relative group">
-                <input type="text" id="campo-busca" placeholder="PESQUISAR PRODUTO..." class="w-full p-5 pl-14 rounded-[2rem] shadow-md border-none uppercase font-black text-sm outline-none bg-white focus:ring-4 ring-blue-900/10">
-                <span class="absolute left-6 top-5 opacity-40">🔍</span>
+                <input type="text" id="campo-busca" placeholder="O QUE VOCÊ ESTÁ PROCURANDO?" class="w-full p-6 pl-14 rounded-[2.2rem] shadow-xl border-none uppercase font-black text-sm outline-none bg-white focus:ring-4 ring-blue-900/10 transition-all">
+                <span class="absolute left-6 top-6 opacity-30 text-xl">🔍</span>
             </div>
 
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl border-b-[12px] border-blue-900 space-y-6">
-                <div class="flex justify-between items-center">
-                    <h2 class="font-black uppercase text-blue-900 text-xs tracking-widest">Registrar Nova Validade</h2>
-                    <span id="label-hoje" class="text-[10px] font-black text-slate-300"></span>
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl border-b-[15px] border-blue-900 space-y-6">
+                <div class="flex justify-between items-center px-1">
+                    <h2 class="font-black uppercase text-blue-900 text-xs tracking-tighter">Cadastrar Validade</h2>
+                    <span id="data-hoje" class="text-[10px] font-black text-slate-300"></span>
                 </div>
                 <div class="space-y-4">
                     <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl uppercase font-black text-slate-700 outline-none focus:border-blue-500">
                     <div class="flex gap-3">
                         <input type="date" id="p-data" class="w-1/2 p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-slate-700 outline-none focus:border-blue-500">
-                        <button id="btn-salvar" class="w-1/2 bg-blue-900 text-white p-5 rounded-2xl font-black uppercase shadow-lg hover:bg-blue-800 transition-all">Salvar</button>
+                        <button id="btn-salvar" class="w-1/2 bg-blue-900 text-white p-5 rounded-2xl font-black uppercase shadow-xl hover:bg-blue-800 transition-all">Gravar</button>
                     </div>
                 </div>
             </div>
 
             <div class="flex items-center justify-between px-4">
-                <h2 class="font-black uppercase text-slate-400 text-[10px] tracking-widest">Itens em Monitoramento</h2>
-                <span id="badge-contador" class="bg-blue-900 text-white text-[10px] px-3 py-1 rounded-full font-black">0 PRODUTOS</span>
+                <h2 class="font-black uppercase text-slate-400 text-[11px] tracking-[0.2em]">Itens no Inventário</h2>
+                <span id="contagem" class="bg-blue-900 text-white text-[10px] px-4 py-1.5 rounded-full font-black">0</span>
             </div>
 
-            <div id="lista" class="space-y-4 pb-32"></div>
+            <div id="lista" class="space-y-5 pb-32"></div>
         </main>
     </div>
 
@@ -107,7 +106,7 @@
         const db = getFirestore(app);
         const messaging = getMessaging(app);
 
-        // FUNÇÃO DE ALERTAS (FOTO 894)
+        // ATIVAÇÃO DE NOTIFICAÇÕES (COLEÇÃO tokens_notificacao)
         document.getElementById('btn-ativar-push').onclick = async () => {
             try {
                 const permission = await Notification.requestPermission();
@@ -119,23 +118,21 @@
                     });
                     if (token) {
                         await setDoc(doc(db, "tokens_notificacao", auth.currentUser.uid), {
-                            token: token,
-                            usuario: auth.currentUser.email,
-                            atualizadoEm: serverTimestamp()
+                            token: token, usuario: auth.currentUser.email, data: serverTimestamp()
                         });
-                        showToast("NOTIFICAÇÕES ATIVADAS!", "#10b981");
+                        showToast("SISTEMA DE ALERTA ATIVO!");
                     }
                 }
-            } catch (e) { showToast("ERRO: " + e.message, "#ef4444"); }
+            } catch (e) { showToast("ERRO AO ATIVAR"); }
         };
 
-        // ESTADO DE LOGIN
+        // CONTROLE DE LOGIN
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                document.getElementById('user-status').innerText = `Logado: ${user.email.split('@')[0]}`;
-                carregarMonitor();
+                document.getElementById('label-user').innerText = user.email.toUpperCase();
+                carregarBase();
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-panel').style.display = 'none';
@@ -145,31 +142,30 @@
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); }
-            catch (err) { showToast("USUÁRIO OU SENHA INVÁLIDOS", "#ef4444"); }
+            catch (err) { showToast("ACESSO NEGADO"); }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
         document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
 
-        // CRUD FIREBASE (FOTO 888)
+        // CADASTRO (FOTO 888)
         document.getElementById('btn-salvar').onclick = async () => {
             const n = document.getElementById('p-nome').value.toUpperCase().trim();
             const d = document.getElementById('p-data').value;
-            if(!n || !d) return showToast("DADOS INCOMPLETOS", "#f59e0b");
-            
+            if(!n || !d) return showToast("PREENCHA OS CAMPOS");
             await addDoc(collection(db, "validades"), {
-                produto: n, vencimento: d, autor: auth.currentUser.email, criadoEm: serverTimestamp()
+                produto: n, vencimento: d, cadastradoPor: auth.currentUser.email, timestamp: serverTimestamp()
             });
             document.getElementById('p-nome').value = "";
-            showToast("REGISTRO SALVO!", "#10b981");
+            showToast("PRODUTO CADASTRADO!");
         };
 
-        // MONITOR DE VALIDADES EM TEMPO REAL
-        function carregarMonitor() {
+        // LISTA COM FILTRO E BARRAS
+        function carregarBase() {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const render = (docs) => {
                     const lista = document.getElementById('lista');
-                    document.getElementById('badge-contador').innerText = `${docs.length} PRODUTOS`;
+                    document.getElementById('contagem').innerText = docs.length;
                     lista.innerHTML = "";
                     
                     docs.forEach(docSnap => {
@@ -178,29 +174,29 @@
                         const venci = new Date(item.vencimento + "T12:00:00");
                         const dif = Math.ceil((venci - hoje) / (1000 * 60 * 60 * 24));
                         
-                        let tipo = "card-normal";
-                        if (dif <= 5) tipo = "card-critico";
-                        else if (dif <= 15) tipo = "card-atencao";
+                        let estilo = "card-normal";
+                        if (dif <= 5) estilo = "card-critico";
+                        else if (dif <= 15) estilo = "card-atencao";
 
                         const card = document.createElement('div');
-                        card.className = `p-6 rounded-[2.5rem] shadow-md flex flex-col gap-4 relative ${tipo}`;
+                        card.className = `p-7 rounded-[3rem] shadow-xl flex flex-col gap-5 ${estilo}`;
                         card.innerHTML = `
                             <div class="flex justify-between items-start">
-                                <div class="max-w-[70%]">
-                                    <h3 class="font-black uppercase text-blue-900 text-lg leading-tight break-words">${item.produto}</h3>
-                                    <p class="text-[9px] font-black text-slate-400 mt-1 uppercase tracking-tighter">Vencimento: ${item.vencimento}</p>
+                                <div class="max-w-[75%]">
+                                    <h3 class="font-black uppercase text-blue-900 text-xl leading-none">${item.produto}</h3>
+                                    <p class="text-[10px] font-black text-slate-400 mt-2 uppercase">Vence em: ${item.vencimento}</p>
                                 </div>
-                                <div class="flex flex-col items-end">
-                                    <span class="text-[11px] font-black p-1.5 px-4 rounded-2xl ${dif <= 5 ? 'bg-red-600 text-white shadow-lg animate-pulse' : 'bg-slate-200 text-slate-500'}">
-                                        ${dif} DIAS
+                                <div class="text-right flex flex-col items-end">
+                                    <span class="text-[12px] font-black p-2 px-5 rounded-2xl ${dif <= 5 ? 'bg-red-600 text-white shadow-lg' : 'bg-slate-200 text-slate-500'}">
+                                        ${dif}D
                                     </span>
-                                    <button onclick="excluirItem('${docSnap.id}')" class="mt-4 text-[10px] font-black text-red-400 hover:text-red-700 uppercase tracking-widest">Excluir</button>
+                                    <button onclick="apagar('${docSnap.id}')" class="mt-4 text-[10px] font-black text-red-400 opacity-50 hover:opacity-100">EXCLUIR</button>
                                 </div>
                             </div>
-                            <canvas id="barcode-${docSnap.id}" class="w-full h-10"></canvas>
+                            <canvas id="bc-${docSnap.id}" class="w-full h-10"></canvas>
                         `;
                         lista.appendChild(card);
-                        try { JsBarcode(`#barcode-${docSnap.id}`, item.produto.substring(0, 15), { format: "CODE128", height: 35, displayValue: false, margin: 0 }); } catch(e) {}
+                        try { JsBarcode(`#bc-${docSnap.id}`, item.produto.substring(0, 15), { format: "CODE128", height: 35, displayValue: false, margin: 0 }); } catch(e) {}
                     });
                 };
 
@@ -212,14 +208,14 @@
             });
         }
 
-        window.excluirItem = async (id) => { if(confirm("CONFIRMA A EXCLUSÃO?")) await deleteDoc(doc(db, "validades", id)); };
+        window.apagar = async (id) => { if(confirm("APAGAR ITEM?")) await deleteDoc(doc(db, "validades", id)); };
 
-        function showToast(m, c) {
+        function showToast(m) {
             const t = document.getElementById("toast");
-            t.innerText = m; t.style.backgroundColor = c; t.className = "show";
+            t.innerText = m; t.className = "show";
             setTimeout(() => t.className = "", 3000);
         }
-        document.getElementById('label-hoje').innerText = new Date().toLocaleDateString('pt-BR');
+        document.getElementById('data-hoje').innerText = new Date().toLocaleDateString('pt-BR');
     </script>
 </body>
 </html>
