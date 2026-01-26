@@ -11,137 +11,176 @@
             --azul-forte: #003366;
             --amarelo-vivo: #FFD700;
             --vermelho-alerta: #CC0000;
-            --cinza-claro: #E5E7EB;
         }
 
-        body { background-color: #F3F4F6; color: #111827; font-family: 'Arial Black', sans-serif; }
+        body { background-color: #f0f2f5; color: #111827; font-family: 'Arial Black', sans-serif; }
         #tela-login, #painel-principal { display: none; }
         
-        /* Barra de Carregamento Estilo Supermercado */
+        /* Efeito New Market em Movimento na Inicialização */
         #tela-carregamento { 
             position: fixed; inset: 0; background: var(--azul-forte); z-index: 9999; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
         }
-        .progresso { width: 80%; height: 20px; background: white; border: 4px solid var(--amarelo-vivo); border-radius: 50px; overflow: hidden; }
-        .barra { width: 0%; height: 100%; background: var(--vermelho-alerta); animation: carregar 2s forwards; }
+        .logo-movimento {
+            animation: flutuar 2s ease-in-out infinite, brilho 1.5s infinite;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+        @keyframes flutuar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes brilho { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        
+        .progresso { width: 70%; height: 12px; background: rgba(255,255,255,0.1); border-radius: 50px; overflow: hidden; margin-top: 20px; border: 2px solid var(--amarelo-vivo); }
+        .barra { width: 0%; height: 100%; background: var(--amarelo-vivo); animation: carregar 2.5s forwards ease-out; }
         @keyframes carregar { to { width: 100%; } }
 
-        /* Estilos de Interface Forte */
-        .cartao-viva { background: white; border: 3px solid var(--azul-forte); border-radius: 15px; box-shadow: 8px 8px 0px rgba(0,0,0,0.1); }
-        .campo-texto { 
-            @apply w-full p-4 border-4 border-slate-300 rounded-lg outline-none focus:border-yellow-500 font-black text-lg uppercase italic; 
+        /* --- DESIGN MODERNO DE REGISTRO --- */
+        .painel-registro {
+            background: white;
+            border-radius: 25px;
+            border: 4px solid var(--azul-forte);
+            box-shadow: 0 15px 35px rgba(0, 51, 102, 0.2);
+            position: relative;
+            overflow: hidden;
         }
-        .botao-acao { 
-            @apply w-full p-5 rounded-lg font-black uppercase text-xl shadow-md active:translate-y-1 transition-all;
+        .painel-registro::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 8px;
+            background: linear-gradient(90deg, var(--vermelho-alerta), var(--amarelo-vivo), var(--azul-forte));
         }
+        .campo-moderno {
+            @apply w-full p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl outline-none transition-all font-black text-blue-900;
+        }
+        .campo-moderno:focus {
+            @apply border-yellow-400 bg-white ring-4 ring-yellow-400/20 scale-[1.02];
+        }
+        .botao-premium {
+            @apply w-full p-5 rounded-2xl font-black uppercase text-xl text-white shadow-xl transition-all;
+            background: linear-gradient(135deg, #003366 0%, #001a33 100%);
+            border-bottom: 6px solid #000;
+        }
+        .botao-premium:active { transform: translateY(4px); border-bottom-width: 2px; }
 
-        /* Cards de Mercadoria */
-        .item-card { @apply cartao-viva p-5 mb-5 transition-all; }
-        .status-vencido { background: #FFEBEB; border-color: var(--vermelho-alerta); border-left-width: 15px; }
-        .status-alerta { background: #FFFDEB; border-color: var(--amarelo-vivo); border-left-width: 15px; }
-        .status-ok { border-color: var(--azul-forte); border-left-width: 15px; }
-        .item-marcado { opacity: 0.5; transform: scale(0.95); filter: grayscale(1); }
+        /* Cards de Itens */
+        .item-card { @apply bg-white p-5 mb-5 rounded-3xl border-4 transition-all shadow-sm; border-color: #e5e7eb; }
+        .status-vencido { border-left-width: 15px; border-color: var(--vermelho-alerta); background: #fff5f5; }
+        .status-alerta { border-left-width: 15px; border-color: var(--amarelo-vivo); background: #fffdf2; }
+        .item-marcado { opacity: 0.4; filter: grayscale(1); transform: scale(0.96); }
 
-        /* Notificação */
         #notificacao { 
-            visibility: hidden; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); 
-            background: var(--vermelho-alerta); color: white; padding: 15px 40px; border: 4px solid var(--amarelo-vivo);
-            font-weight: 900; z-index: 10000; border-radius: 10px;
+            visibility: hidden; position: fixed; top: 30px; left: 50%; transform: translateX(-50%); 
+            background: #111827; color: white; padding: 16px 40px; border-radius: 20px;
+            font-weight: 900; z-index: 10000; border-left: 8px solid var(--amarelo-vivo);
         }
-        #notificacao.show { visibility: visible; animation: cair 0.4s; }
-        @keyframes cair { from { top: -100px; } to { top: 20px; } }
-
-        .filtro-botao { @apply bg-white border-4 border-slate-300 p-3 rounded-xl font-black transition-all; }
-        .ativo-azul { border-color: var(--azul-forte); color: var(--azul-forte); transform: scale(1.1); }
-        .ativo-vermelho { border-color: var(--vermelho-alerta); color: var(--vermelho-alerta); transform: scale(1.1); }
-        .ativo-amarelo { border-color: var(--amarelo-vivo); color: #856404; transform: scale(1.1); }
+        #notificacao.show { visibility: visible; animation: slideDown 0.5s forwards; }
+        @keyframes slideDown { from { transform: translate(-50%, -100px); } to { transform: translate(-50%, 0); } }
     </style>
 </head>
 <body>
 
-    <div id="notificacao">AVISO DO SISTEMA</div>
+    <div id="notificacao">MENSAGEM DO SISTEMA</div>
 
     <div id="tela-carregamento">
-        <h1 class="text-4xl font-black italic text-white mb-6 uppercase tracking-tighter">NEW <span class="text-yellow-400">MARKET</span></h1>
+        <h1 class="text-5xl font-black italic text-white logo-movimento uppercase tracking-tighter">
+            NEW <span class="text-yellow-400">MARKET</span>
+        </h1>
         <div class="progresso"><div class="barra"></div></div>
-        <p class="text-yellow-400 font-black mt-4 uppercase animate-pulse">Carregando Dados 2026...</p>
+        <p class="text-white/50 font-bold mt-6 text-xs uppercase tracking-[0.5em]">Sincronizando Banco de Dados</p>
     </div>
 
-    <div id="tela-login" class="min-h-screen flex items-center justify-center p-4">
-        <div class="cartao-viva p-8 w-full max-w-md bg-white">
-            <div class="bg-blue-900 p-4 rounded-t-lg mb-6">
-                <h1 class="text-3xl font-black italic text-white text-center">LOGIN VIGIA</h1>
-            </div>
-            <form class="space-y-5" onsubmit="return false;">
-                <input type="email" id="email" class="campo-texto" placeholder="E-MAIL OPERADOR">
-                <input type="password" id="senha" class="campo-texto" placeholder="TOKEN/SENHA">
-                <button type="button" id="btn-entrar" class="botao-acao bg-yellow-400 text-blue-900 border-b-8 border-yellow-600">INICIALIZAR</button>
+    <div id="tela-login" class="min-h-screen flex items-center justify-center p-6">
+        <div class="bg-white p-10 rounded-[40px] shadow-2xl w-full max-w-md border-b-[12px] border-blue-900">
+            <h2 class="text-center text-3xl font-black text-blue-900 mb-8 uppercase italic">Acesso Restrito</h2>
+            <form class="space-y-4" onsubmit="return false;">
+                <input type="email" id="email" class="campo-moderno" placeholder="E-MAIL OPERADOR">
+                <input type="password" id="senha" class="campo-moderno" placeholder="CHAVE TOKEN">
+                <button type="button" id="btn-entrar" class="botao-premium">Entrar Agora</button>
             </form>
         </div>
     </div>
 
     <div id="painel-principal" class="flex flex-col min-h-screen">
-        <header class="bg-blue-900 p-5 sticky top-0 z-50 flex justify-between items-center border-b-8 border-yellow-400">
-            <div>
-                <span class="font-black italic text-2xl text-white">NEW MARKET</span>
-                <p id="nome-usuario" class="text-xs font-bold text-yellow-400 uppercase">OFFLINE</p>
+        <header class="bg-white p-4 sticky top-0 z-50 flex justify-between items-center border-b-4 border-blue-900 shadow-lg">
+            <div class="leading-none">
+                <span class="font-black italic text-2xl text-blue-900">NEW MARKET</span>
+                <p id="nome-usuario" class="text-[9px] font-black text-yellow-600 uppercase">IDENTIFICANDO...</p>
             </div>
-            <button id="btn-sair" class="bg-red-600 text-white px-4 py-2 rounded font-black border-b-4 border-red-800">SAIR</button>
+            <button id="btn-sair" class="bg-red-600 text-white px-5 py-2 rounded-xl font-black text-xs">SAIR</button>
         </header>
 
         <main class="p-4 max-w-2xl mx-auto w-full space-y-8">
             
-            <div class="grid grid-cols-3 gap-4">
-                <button onclick="mudarFiltro('critico')" id="f-critico" class="filtro-botao">
-                    <span class="text-[10px] block">CRÍTICO</span>
-                    <span id="cont-critico" class="text-3xl text-red-600">0</span>
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="mudarFiltro('critico')" id="f-critico" class="bg-white p-4 rounded-2xl border-4 border-slate-200 font-black">
+                    <span class="text-red-600 text-[10px] block">CRÍTICO</span>
+                    <span id="cont-critico" class="text-3xl">0</span>
                 </button>
-                <button onclick="mudarFiltro('atencao')" id="f-atencao" class="filtro-botao">
-                    <span class="text-[10px] block">ALERTA</span>
-                    <span id="cont-atencao" class="text-3xl text-yellow-600">0</span>
+                <button onclick="mudarFiltro('atencao')" id="f-atencao" class="bg-white p-4 rounded-2xl border-4 border-slate-200 font-black">
+                    <span class="text-yellow-500 text-[10px] block">ALERTA</span>
+                    <span id="cont-atencao" class="text-3xl">0</span>
                 </button>
-                <button onclick="mudarFiltro('todos')" id="f-todos" class="filtro-botao ativo-azul">
-                    <span class="text-[10px] block">TOTAL</span>
-                    <span id="cont-total" class="text-3xl text-blue-800">0</span>
+                <button onclick="mudarFiltro('todos')" id="f-todos" class="bg-white p-4 rounded-2xl border-4 border-blue-900 font-black scale-105">
+                    <span class="text-blue-900 text-[10px] block">TOTAL</span>
+                    <span id="cont-total" class="text-3xl">0</span>
                 </button>
             </div>
 
-            <div id="caixa-cadastro" class="hidden cartao-viva p-6 border-l-[20px] border-blue-900 space-y-4">
-                <h2 class="text-xl font-black text-blue-900 uppercase underline">Novo Registro</h2>
-                <input type="text" id="cad-produto" placeholder="NOME DO PRODUTO" class="campo-texto">
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="cad-codigo" placeholder="DIGITE SEU CÓDIGO" class="campo-texto">
-                    <input type="number" id="cad-quantidade" placeholder="QUANTIDADE" class="campo-texto">
+            <div id="caixa-cadastro" class="hidden painel-registro p-8 space-y-5">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-black text-blue-900 uppercase">Novo Registro</h2>
+                    <div class="flex space-x-1">
+                        <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                        <div class="w-3 h-3 bg-yellow-400 rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+                        <div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+                    </div>
                 </div>
-                <select id="cad-setor" class="campo-texto bg-slate-100">
-                    <option value="Estoque Central">Estoque Central</option>
-                    <option value="Corredor do Paulo">Corredor: Paulo</option>
-                    <option value="Corredor do Leandro">Corredor: Leandro</option>
-                    <option value="Corredor do Pedro">Corredor: Pedro</option>
-                    <option value="Corredor do Edmar">Corredor: Edmar</option>
-                </select>
-                <div class="border-4 border-blue-900 p-2 rounded">
-                    <label class="font-black text-blue-900 text-xs uppercase block">Vencimento:</label>
-                    <input type="date" id="cad-data" class="w-full text-2xl font-black outline-none bg-transparent">
+
+                <div class="space-y-4">
+                    <input type="text" id="cad-produto" placeholder="DESCRIÇÃO DA MERCADORIA" class="campo-moderno uppercase">
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Código de Barras</label>
+                            <input type="number" id="cad-codigo" placeholder="DIGITE SEU CÓDIGO" class="campo-moderno">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Qtde</label>
+                            <input type="number" id="cad-quantidade" placeholder="0" class="campo-moderno">
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Localização / Setor</label>
+                        <select id="cad-setor" class="campo-moderno cursor-pointer">
+                            <option value="Estoque Central">Estoque Central</option>
+                            <option value="Corredor do Paulo">Corredor: Paulo</option>
+                            <option value="Corredor do Leandro">Corredor: Leandro</option>
+                            <option value="Corredor do Pedro">Corredor: Pedro</option>
+                            <option value="Corredor do Edmar">Corredor: Edmar</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-blue-50 p-4 rounded-2xl border-2 border-blue-100">
+                        <label class="text-xs font-black text-blue-900 uppercase mb-2 block">Data de Vencimento</label>
+                        <input type="date" id="cad-data" class="w-full bg-transparent text-2xl font-black text-blue-900 outline-none">
+                    </div>
                 </div>
-                <button id="btn-registrar" class="botao-acao bg-blue-900 text-white border-b-8 border-blue-950">GRAVAR NO SISTEMA</button>
+
+                <button id="btn-registrar" class="botao-premium mt-4">Gravar Registro</button>
             </div>
 
             <div class="space-y-6">
-                <input type="text" id="campo-busca" oninput="atualizarLista()" placeholder="PESQUISAR PRODUTO OU EAN..." class="campo-texto shadow-xl border-blue-900">
+                <input type="text" id="campo-busca" oninput="atualizarLista()" placeholder="PESQUISAR NO BANCO DE DADOS..." class="campo-moderno shadow-xl border-blue-900 text-center">
                 
-                <div class="flex gap-4">
-                    <button id="btn-marcar-vencidos" class="flex-1 bg-red-100 text-red-700 p-4 rounded-lg font-black border-4 border-red-700">MARCAR CRÍTICOS</button>
-                    <button id="btn-relatorio-whatsapp" class="flex-1 bg-green-600 text-white p-4 rounded-lg font-black border-b-8 border-green-800">ENVIAR WHATSAPP</button>
+                <div class="flex gap-3">
+                    <button id="btn-marcar-vencidos" class="flex-1 bg-white text-red-600 p-4 rounded-2xl font-black border-4 border-red-600 uppercase text-xs">Marcar Críticos</button>
+                    <button id="btn-relatorio-whatsapp" class="flex-1 bg-green-500 text-white p-4 rounded-2xl font-black shadow-lg uppercase text-xs border-b-4 border-green-700">Relatório WhatsApp</button>
                 </div>
                 
                 <div id="container-lista" class="space-y-5 pb-24"></div>
             </div>
         </main>
 
-        <footer class="bg-white border-t-8 border-blue-900 p-8 text-center">
-            <p class="text-xl font-black italic text-blue-900">NEW MARKET 2026</p>
-            <p class="font-bold text-slate-500">TECNOLOGIA PAULO SOUZA</p>
+        <footer class="bg-blue-900 p-10 text-center rounded-t-[50px]">
+            <p class="text-2xl font-black italic text-white uppercase">New Market</p>
+            <p class="text-yellow-400 font-bold text-xs uppercase tracking-widest mt-1">Tecnologia Paulo Souza &copy; 2026</p>
         </footer>
     </div>
 
@@ -163,35 +202,32 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        const gerentes = ['paulo@newmarket.com', 'adriano@newmarket.com', 'adrielle@newmarket.com'];
-        let filtroAtual = 'todos';
+        const adms = ['paulo@newmarket.com', 'adriano@newmarket.com', 'adrielle@newmarket.com'];
+        let filtroF = 'todos';
 
-        function alertar(msg) {
-            const box = document.getElementById("notificacao");
-            box.innerText = msg; box.classList.add("show");
-            setTimeout(() => box.classList.remove("show"), 3000);
+        function notificar(msg) {
+            const b = document.getElementById("notificacao");
+            b.innerText = msg; b.classList.add("show");
+            setTimeout(() => b.classList.remove("show"), 3000);
         }
 
         window.mudarFiltro = (f) => {
-            filtroAtual = f;
-            document.querySelectorAll('.filtro-botao').forEach(b => b.classList.remove('ativo-azul', 'ativo-vermelho', 'ativo-amarelo'));
-            const btn = document.getElementById(`f-${f}`);
-            if(f === 'todos') btn.classList.add('ativo-azul');
-            if(f === 'critico') btn.classList.add('ativo-vermelho');
-            if(f === 'atencao') btn.classList.add('ativo-amarelo');
+            filtroF = f;
+            document.querySelectorAll('[id^="f-"]').forEach(b => b.classList.remove('border-blue-900', 'scale-105'));
+            document.getElementById(`f-${f}`).classList.add('border-blue-900', 'scale-105');
             atualizarLista();
         };
 
         window.atualizarLista = () => {
-            const busca = document.getElementById('campo-busca').value.toLowerCase();
-            document.querySelectorAll('.item-card').forEach(card => {
-                const bFiltro = filtroAtual === 'todos' || card.dataset.categoria === filtroAtual;
-                const bBusca = card.dataset.texto.includes(busca);
-                card.style.display = (bFiltro && bBusca) ? "block" : "none";
+            const b = document.getElementById('campo-busca').value.toLowerCase();
+            document.querySelectorAll('.item-card').forEach(c => {
+                const mF = filtroF === 'todos' || c.dataset.categoria === filtroF;
+                const mB = c.dataset.texto.includes(b);
+                c.style.display = (mF && mB) ? "block" : "none";
             });
         };
 
-        function carregarFirebase(admin) {
+        function iniciar(admin) {
             const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
             onSnapshot(q, (snap) => {
                 const lista = document.getElementById('container-lista');
@@ -201,13 +237,13 @@
 
                 snap.forEach(d => {
                     const info = { id: d.id, ...d.data() };
-                    const dataV = new Date(info.vencimento + "T12:00:00");
-                    const dias = Math.ceil((dataV - hoje) / 86400000);
+                    const dV = new Date(info.vencimento + "T12:00:00");
+                    const diff = Math.ceil((dV - hoje) / 86400000);
                     
-                    let cat = "ok", est = "status-ok", msg = `${dias} DIAS RESTANTES`;
-                    if(dias <= 0) { est="status-vencido"; cat="critico"; msg = "🚨 VENCIDO!"; n.c++; }
-                    else if(dias <= 7) { est="status-vencido"; cat="critico"; msg = "⚠️ PERIGO: VENCE LOGO!"; n.c++; }
-                    else if(dias <= 15) { est="status-alerta"; cat="atencao"; msg = "⚡ ATENÇÃO!"; n.a++; }
+                    let cat = "ok", est = "", msg = `${diff} DIAS`;
+                    if(diff <= 0) { est="status-vencido"; cat="critico"; msg = "🚨 VENCIDO"; n.c++; }
+                    else if(diff <= 7) { est="status-vencido"; cat="critico"; msg = "⚠️ CRÍTICO"; n.c++; }
+                    else if(diff <= 15) { est="status-alerta"; cat="atencao"; msg = "⚡ ALERTA"; n.a++; }
                     
                     const div = document.createElement('div');
                     div.className = `item-card ${est}`;
@@ -215,23 +251,23 @@
                     div.onclick = (e) => { if(e.target.tagName !== 'BUTTON') div.classList.toggle('item-marcado'); };
 
                     div.innerHTML = `
-                        <div class="flex justify-between items-start">
-                            <span class="bg-blue-900 text-white px-2 py-1 text-[8px] font-black uppercase">${info.setor}</span>
-                            <span class="font-black text-xs text-blue-900 uppercase">${msg}</span>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-[9px] font-black text-slate-400 uppercase">${info.setor}</span>
+                            <span class="text-[10px] font-black text-blue-900 uppercase">${msg}</span>
                         </div>
-                        <h3 class="text-2xl font-black text-slate-900 uppercase mt-2">${info.produto}</h3>
-                        <p class="font-black text-slate-500">QTD: ${info.quantidade}</p>
+                        <h3 class="text-xl font-black text-slate-900 uppercase leading-none mb-1">${info.produto}</h3>
+                        <p class="text-xs font-bold text-slate-500 mb-4">QUANTIDADE: ${info.quantidade}</p>
                         
-                        <div class="bg-white p-2 my-3 border-2 border-slate-200 flex justify-center">
+                        <div class="bg-white p-3 border-2 border-dashed border-slate-200 flex justify-center mb-4 rounded-xl">
                             <svg class="barcode" jsbarcode-value="${info.codigo}" jsbarcode-format="auto" jsbarcode-displayValue="true" jsbarcode-height="40"></svg>
                         </div>
 
-                        <div class="flex justify-between items-end border-t-2 border-slate-100 pt-3">
+                        <div class="flex justify-between items-end border-t border-slate-100 pt-4">
                             <div>
-                                <p class="text-[10px] font-black text-slate-400">VENCIMENTO:</p>
-                                <p class="text-3xl font-black text-red-600 tracking-tighter">${info.vencimento.split('-').reverse().join('/')}</p>
+                                <p class="text-[8px] font-black text-slate-400">VENCIMENTO</p>
+                                <p class="text-2xl font-black text-red-600 tracking-tighter">${info.vencimento.split('-').reverse().join('/')}</p>
                             </div>
-                            ${admin ? `<button class="btn-apagar bg-red-600 text-white p-3 font-black rounded border-b-4 border-red-900" data-id="${info.id}">EXCLUIR</button>` : ''}
+                            ${admin ? `<button class="btn-apagar bg-red-50 text-red-600 px-4 py-2 font-black rounded-xl text-[10px] border border-red-200" data-id="${info.id}">EXCLUIR</button>` : ''}
                         </div>`;
                     lista.appendChild(div);
                 });
@@ -244,7 +280,7 @@
                 document.querySelectorAll('.btn-apagar').forEach(b => {
                     b.onclick = async (e) => { 
                         e.stopPropagation(); 
-                        if(confirm("DELETAR DEFINITIVO?")) await deleteDoc(doc(db, "validades", b.dataset.id)); 
+                        if(confirm("Confirmar exclusão definitiva?")) await deleteDoc(doc(db, "validades", b.dataset.id)); 
                     };
                 });
             });
@@ -255,11 +291,11 @@
             if (u) {
                 document.getElementById('tela-login').style.display = 'none';
                 document.getElementById('painel-principal').style.display = 'flex';
-                document.getElementById('nome-usuario').innerText = `OPERADOR: ${u.email}`;
+                document.getElementById('nome-usuario').innerText = `OPERADOR: ${u.email.toUpperCase()}`;
                 
-                const isAdmin = gerentes.includes(u.email);
+                const isAdmin = adms.includes(u.email);
                 document.getElementById('caixa-cadastro').classList.toggle('hidden', isAdmin && u.email !== 'paulo@newmarket.com');
-                carregarFirebase(isAdmin);
+                iniciar(isAdmin);
             } else {
                 document.getElementById('tela-login').style.display = 'flex';
                 document.getElementById('painel-principal').style.display = 'none';
@@ -269,7 +305,7 @@
         document.getElementById('btn-entrar').onclick = async () => {
             const e = document.getElementById('email').value.trim();
             const s = document.getElementById('senha').value;
-            try { await signInWithEmailAndPassword(auth, e, s); } catch { alertar("LOGIN INVÁLIDO"); }
+            try { await signInWithEmailAndPassword(auth, e, s); } catch { notificar("DADOS INVÁLIDOS"); }
         };
 
         document.getElementById('btn-sair').onclick = () => signOut(auth);
@@ -283,22 +319,22 @@
                 vencimento: document.getElementById('cad-data').value, 
                 criadoEm: serverTimestamp() 
             };
-            if(!p.produto || !p.vencimento) return alertar("FALTAM DADOS!");
+            if(!p.produto || !p.vencimento) return notificar("CAMPOS OBRIGATÓRIOS!");
             await addDoc(collection(db, "validades"), p);
-            alertar("PRODUTO GRAVADO!");
+            notificar("REGISTRO SALVO!");
             document.getElementById('cad-produto').value = ""; document.getElementById('cad-codigo').value = "";
         };
 
         document.getElementById('btn-relatorio-whatsapp').onclick = () => {
-            const selecionados = document.querySelectorAll('.item-marcado');
-            if(selecionados.length === 0) return alertar("MARQUE OS PRODUTOS PRIMEIRO");
-            let msg = "*🚨 RELATÓRIO NEW MARKET 2026*\n\n";
-            selecionados.forEach(c => {
+            const marcados = document.querySelectorAll('.item-marcado');
+            if(marcados.length === 0) return notificar("SELECIONE OS PRODUTOS");
+            let m = "*🚨 NEW MARKET - RELATÓRIO DE VENCIMENTOS*\n\n";
+            marcados.forEach(c => {
                 const n = c.querySelector('h3').innerText;
-                const v = c.querySelector('.text-3xl').innerText;
-                msg += `👉 *${n}* | VENCE: ${v}\n`;
+                const v = c.querySelector('.text-2xl').innerText;
+                m += `📌 *${n}* | VENCE EM: ${v}\n`;
             });
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+            window.open(`https://wa.me/?text=${encodeURIComponent(m)}`);
         };
 
         document.getElementById('btn-marcar-vencidos').onclick = () => {
