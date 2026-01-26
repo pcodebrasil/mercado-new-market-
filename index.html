@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VIGIA MARKET | Intelligence 2026</title>
+    <title>VIGIA MARKET | Inteligência 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
-        /* Estética VIGIA - Dark Mode & Glassmorphism */
+        /* Estética VIGIA - Modo Escuro & Glassmorphism */
         :root {
             --vigia-blue: #3b82f6;
             --vigia-red: #ef4444;
@@ -69,7 +69,7 @@
     <div id="login-screen" class="min-h-screen flex items-center justify-center p-6">
         <div class="glass p-8 w-full max-w-md rounded-[2.5rem] text-center border-t-4 border-blue-500 shadow-2xl">
             <h1 class="text-4xl font-black italic tracking-tighter text-white">VIGIA <span class="text-blue-500">MARKET</span></h1>
-            <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-2 mb-8">Data Guard & Validation 2026</p>
+            <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-2 mb-8">Monitoramento e Controle de Validade 2026</p>
             <form class="space-y-4" onsubmit="return false;">
                 <input type="email" id="email" class="input-vigia" placeholder="OPERADOR (E-MAIL)">
                 <input type="password" id="password" class="input-vigia" placeholder="TOKEN DE ACESSO">
@@ -91,15 +91,15 @@
             
             <div class="grid grid-cols-3 gap-3 font-black">
                 <button onclick="aplicarFiltro('critico')" id="f-critico" class="glass p-4 rounded-2xl border-b-4 border-red-500">
-                    <span class="text-[8px] text-slate-400 block mb-1">CRÍTICO</span>
+                    <span class="text-[8px] text-slate-400 block mb-1 uppercase">Crítico</span>
                     <span id="c-critico" class="text-2xl text-red-500">0</span>
                 </button>
                 <button onclick="aplicarFiltro('atencao')" id="f-atencao" class="glass p-4 rounded-2xl border-b-4 border-yellow-500">
-                    <span class="text-[8px] text-slate-400 block mb-1">ALERTA</span>
+                    <span class="text-[8px] text-slate-400 block mb-1 uppercase">Alerta</span>
                     <span id="c-atencao" class="text-2xl text-yellow-500">0</span>
                 </button>
                 <button onclick="aplicarFiltro('todos')" id="f-todos" class="glass p-4 rounded-2xl border-b-4 border-blue-500 filtro-ativo">
-                    <span class="text-[8px] text-slate-400 block mb-1">TOTAL</span>
+                    <span class="text-[8px] text-slate-400 block mb-1 uppercase">Total</span>
                     <span id="c-total" class="text-2xl text-blue-500">0</span>
                 </button>
             </div>
@@ -134,7 +134,7 @@
         </main>
 
         <footer class="p-8 text-center opacity-40">
-            <p class="text-[10px] font-black uppercase tracking-[0.4em]">Intelligence Powered by Paulo Souza 2026</p>
+            <p class="text-[10px] font-black uppercase tracking-[0.4em]">Tecnologia Paulo Souza 2026</p>
         </footer>
     </div>
 
@@ -143,7 +143,6 @@
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Mantenha suas credenciais originais para sincronizar os dados
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -196,7 +195,7 @@
                     const dataVenc = new Date(item.vencimento + "T12:00:00");
                     const diff = Math.ceil((dataVenc - hoje) / 86400000);
                     
-                    let cat = "normal", estilo = "card-normal", statusText = `${diff} dias para o vencimento`;
+                    let cat = "normal", estilo = "card-normal", statusText = `${diff} dias restantes`;
                     if(diff <= 0) { estilo="card-critico"; cat="critico"; statusText = "🚨 PRODUTO VENCIDO"; counts.critico++; }
                     else if(diff <= 7) { estilo="card-critico"; cat="critico"; statusText = "⚠️ RISCO IMEDIATO"; counts.critico++; }
                     else if(diff <= 15) { estilo="card-atencao"; cat="atencao"; statusText = "⚡ ATENÇÃO LOGÍSTICA"; counts.atencao++; }
@@ -224,7 +223,7 @@
 
                             <div class="flex justify-between items-end mt-2">
                                 <div>
-                                    <p class="text-[7px] font-black text-slate-500 uppercase">Data de Expiração</p>
+                                    <p class="text-[7px] font-black text-slate-500 uppercase">Vencimento</p>
                                     <p class="text-xl font-black text-white tracking-tighter">${item.vencimento.split('-').reverse().join('/')}</p>
                                 </div>
                                 ${podeApagar ? `<button class="btn-excluir text-[9px] text-red-500 bg-red-500/10 px-4 py-2 rounded-xl font-black border border-red-500/20" data-id="${item.id}">DELETAR</button>` : ''}
@@ -268,7 +267,7 @@
         document.getElementById('btn-entrar').onclick = async () => {
             const e = document.getElementById('email').value.trim();
             const s = document.getElementById('password').value;
-            try { await signInWithEmailAndPassword(auth, e, s); } catch { showToast("CREDENCIAIS INVÁLIDAS"); }
+            try { await signInWithEmailAndPassword(auth, e, s); } catch { showToast("ACESSO NEGADO"); }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
@@ -295,7 +294,7 @@
             sel.forEach(c => {
                 const nome = c.querySelector('h3').innerText;
                 const data = c.querySelector('.text-xl').innerText;
-                msg += `📌 *${nome}*\n📅 EXPIRA EM: ${data}\n\n`;
+                msg += `📌 *${nome}*\n📅 VENCIMENTO: ${data}\n\n`;
             });
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
         };
