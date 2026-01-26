@@ -6,43 +6,20 @@
     <title>New Market - Sistema 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         #login-screen, #main-panel { display: none; }
         #loading-screen { position: fixed; inset: 0; background: white; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        
         .card-critico { border-left: 10px solid #ef4444; background-color: #fff1f2 !important; }
         .card-atencao { border-left: 10px solid #f59e0b; background-color: #fffbeb !important; }
         .card-normal { border-left: 10px solid #10b981; background-color: #ffffff !important; }
         .card-checked { opacity: 0.4 !important; filter: grayscale(1); transform: scale(0.96); }
-        
-        .text-gradient-yellow {
-            background: linear-gradient(to right, #1e40af, #dc2626, #facc15);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
+        .text-gradient-yellow { background: linear-gradient(to right, #1e40af, #dc2626, #facc15); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
         .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; }
-        
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 12px; position: fixed; z-index: 1100; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-
-        .barcode-container {
-            background: white;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100px;
-            width: 100%;
-        }
-        svg.barcode {
-            width: 100% !important;
-            height: 100% !important;
-        }
-        
+        .barcode-container { background: white; border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100px; width: 100%; }
         .filtro-ativo { border: 4px solid #1e40af !important; transform: scale(1.05); }
     </style>
 </head>
@@ -52,15 +29,14 @@
 
     <div id="loading-screen">
         <div class="w-12 h-12 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase text-slate-400">Carregando...</p>
+        <p class="text-[10px] font-black uppercase text-slate-400">Carregando Sistema...</p>
     </div>
 
     <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-6">
         <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md border-b-8 border-yellow-400 text-center">
             <h1 class="text-4xl font-black uppercase italic text-gradient-yellow leading-none">New Market</h1>
             <p class="text-lg font-bold text-blue-900 uppercase tracking-tighter -mt-1">Supermercados</p>
-            <p class="text-[10px] text-slate-400 font-black tracking-[0.3em] mt-4 mb-8 uppercase border-t pt-2">Sistema de Validade 2026</p>
-            <form class="space-y-4" onsubmit="return false;">
+            <form class="space-y-4 mt-8" onsubmit="return false;">
                 <input type="email" id="email" class="w-full p-4 border-2 rounded-2xl outline-none" placeholder="E-mail">
                 <input type="password" id="password" class="w-full p-4 border-2 rounded-2xl outline-none" placeholder="Senha">
                 <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-5 rounded-2xl font-black uppercase shadow-lg">Entrar</button>
@@ -79,45 +55,39 @@
 
         <main class="p-4 max-w-xl mx-auto w-full space-y-6 flex-grow">
             
+            <div id="dash-container" class="bg-white p-4 rounded-3xl shadow-xl border-t-4 border-blue-600">
+                <div class="relative h-40">
+                    <canvas id="chartVencimentos"></canvas>
+                </div>
+            </div>
+
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
-                <h2 class="font-black uppercase text-blue-800 text-xs tracking-widest">Novo Lançamento</h2>
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50">
                 <div class="grid grid-cols-4 gap-2">
                     <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl outline-none">
                     <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl outline-none">
                 </div>
-                <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-black uppercase bg-yellow-50 text-blue-900 border-yellow-200">
-                    <option value="Estoque Central">Estoque Central (João)</option>
+                <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-black uppercase bg-yellow-50 text-blue-900">
+                    <option value="Estoque Central">Estoque Central</option>
                     <option value="Corredor do Paulo">Corredor do Paulo</option>
                     <option value="Corredor do Leandro">Corredor do Leandro</option>
-                    <option value="Corredor do Pedro">Corredor do Pedro</option>
-                    <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
-                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-blue-700">
-                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar Registro</button>
+                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold">
+                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase">Salvar Registro</button>
             </div>
 
-            <div class="space-y-4">
-                <div class="grid grid-cols-3 gap-2 text-center font-black">
-                    <button type="button" id="f-critico" class="bg-white p-3 rounded-2xl text-red-600 border-2" onclick="aplicarFiltro('critico')"><p class="text-[8px]">🚨 Crítico</p><p id="c-critico" class="text-xl">0</p></button>
-                    <button type="button" id="f-atencao" class="bg-white p-3 rounded-2xl text-yellow-600 border-2" onclick="aplicarFiltro('atencao')"><p class="text-[8px]">⚠️ Atenção</p><p id="c-atencao" class="text-xl">0</p></button>
-                    <button type="button" id="f-todos" class="bg-white p-3 rounded-2xl text-blue-600 border-2 filtro-ativo" onclick="aplicarFiltro('todos')"><p class="text-[8px]">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
-                </div>
-                
-                <div class="flex gap-2">
-                    <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Buscar..." class="flex-grow p-4 rounded-2xl bg-white border-2 outline-none font-bold">
-                    <button type="button" id="btn-selecionar-criticos" class="bg-red-600 text-white px-4 rounded-2xl font-black text-[9px] uppercase">Selecionar Críticos</button>
-                </div>
-                
-                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs shadow-md">📱 Enviar Relatório via WhatsApp</button>
-                
-                <div id="lista" class="space-y-4 pb-10"></div>
+            <div class="grid grid-cols-3 gap-2 text-center font-black">
+                <button id="f-critico" class="bg-white p-3 rounded-2xl text-red-600 border-2" onclick="aplicarFiltro('critico')"><p class="text-[8px]">🚨 Crítico</p><p id="c-critico" class="text-xl">0</p></button>
+                <button id="f-atencao" class="bg-white p-3 rounded-2xl text-yellow-600 border-2" onclick="aplicarFiltro('atencao')"><p class="text-[8px]">⚠️ Atenção</p><p id="c-atencao" class="text-xl">0</p></button>
+                <button id="f-todos" class="bg-white p-3 rounded-2xl text-blue-600 border-2 filtro-ativo" onclick="aplicarFiltro('todos')"><p class="text-[8px]">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
             </div>
+
+            <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Buscar produto..." class="w-full p-4 rounded-2xl bg-white border-2 outline-none font-bold">
+            
+            <button id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs">📱 Enviar Relatório via WhatsApp</button>
+            
+            <div id="lista" class="space-y-4 pb-10"></div>
         </main>
-
-        <footer class="p-6 text-center">
-            <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 italic">Dev Paulo Souza by 2026</p>
-        </footer>
     </div>
 
     <script type="module">
@@ -137,189 +107,93 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
-        const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
-        const pauloADM = 'paulo@newmarket.com';
-        let filtroAtual = 'todos';
-        let currentUserEmail = "";
+        let chartInstance = null;
 
-        function configurarSetorAutomatico(email) {
-            const seletor = document.getElementById('p-setor-add');
-            if (email.includes('paulo')) seletor.value = "Corredor do Paulo";
-            else if (email.includes('leandro')) seletor.value = "Corredor do Leandro";
-            else if (email.includes('pedro')) seletor.value = "Corredor do Pedro";
-            else if (email.includes('edmar')) seletor.value = "Corredor do Edmar";
-            else if (email.includes('joao')) seletor.value = "Estoque Central";
+        function renderChart(c, a, n) {
+            const ctx = document.getElementById('chartVencimentos');
+            if (!ctx) return;
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Crítico', 'Atenção', 'Normal'],
+                    datasets: [{ data: [c, a, n], backgroundColor: ['#ef4444', '#f59e0b', '#10b981'] }]
+                },
+                options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
         }
 
-        function showToast(msg) {
-            const t = document.getElementById("toast");
-            t.innerText = msg; t.className = "show";
-            setTimeout(() => t.className = "", 3000);
-        }
-
-        window.aplicarFiltro = (tipo) => {
-            filtroAtual = tipo;
-            const bts = { critico: 'f-critico', atencao: 'f-atencao', todos: 'f-todos' };
-            Object.values(bts).forEach(id => document.getElementById(id).classList.remove('filtro-ativo'));
-            document.getElementById(bts[tipo]).classList.add('filtro-ativo');
-            processarLista();
+        window.aplicarFiltro = (t) => {
+            document.querySelectorAll('.grid button').forEach(b => b.classList.remove('filtro-ativo'));
+            document.getElementById('f-'+t).classList.add('filtro-ativo');
+            const busca = document.getElementById('busca').value.toLowerCase();
+            document.querySelectorAll('.card').forEach(card => {
+                const mF = t === 'todos' || card.dataset.cat === t;
+                const mB = card.dataset.search.includes(busca);
+                card.style.display = (mF && mB) ? 'block' : 'none';
+            });
         };
 
         window.processarLista = () => {
-            const busca = document.getElementById('busca').value.toLowerCase();
-            document.querySelectorAll('.card').forEach(c => {
-                const matchF = filtroAtual === 'todos' || c.dataset.cat === filtroAtual;
-                const matchB = c.dataset.search.includes(busca);
-                c.style.display = (matchF && matchB) ? "block" : "none";
-            });
+            const t = document.querySelector('.filtro-ativo').id.replace('f-', '');
+            window.aplicarFiltro(t);
         };
-
-        function carregar(podeApagar) {
-            const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
-            onSnapshot(q, (snap) => {
-                const lista = document.getElementById('lista');
-                lista.innerHTML = "";
-                let counts = { critico: 0, atencao: 0 };
-                const hoje = new Date(); hoje.setHours(0,0,0,0);
-
-                snap.forEach(d => {
-                    const item = { id: d.id, ...d.data() };
-                    const dataVenc = new Date(item.vencimento + "T12:00:00");
-                    const diff = Math.ceil((dataVenc - hoje) / 86400000);
-                    
-                    let cat = "normal", estilo = "card-normal", textoVenc = `Vence em ${diff} dias`;
-                    if(diff <= 0) { estilo="card-critico"; cat="critico"; textoVenc = "🚨 VENCIDO HOJE!"; counts.critico++; }
-                    else if(diff <= 7) { estilo="card-critico"; cat="critico"; counts.critico++; }
-                    else if(diff <= 15) { estilo="card-atencao"; cat="atencao"; counts.atencao++; }
-                    
-                    const div = document.createElement('div');
-                    div.className = `card p-5 rounded-3xl shadow-sm ${estilo} mb-3 border-2 transition-all`;
-                    div.dataset.id = item.id; div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
-                    
-                    div.onclick = (e) => { 
-                        if(e.target.tagName !== 'BUTTON') { 
-                            const cb = div.querySelector('.item-check'); 
-                            cb.checked = !cb.checked; 
-                            div.classList.toggle('card-checked', cb.checked); 
-                        } 
-                    };
-
-                    div.innerHTML = `
-                        <div class="flex gap-4">
-                            <input type="checkbox" class="item-check scale-[2] pointer-events-none">
-                            <div class="flex-grow">
-                                <div class="flex justify-between text-[8px] font-black uppercase text-slate-400 mb-1">
-                                    <span>${item.setor}</span>
-                                    <span>Cod: ${item.codigo}</span>
-                                </div>
-                                <h3 class="font-black text-base uppercase text-slate-800 leading-tight">${item.produto}</h3>
-                                <p class="text-[10px] font-bold text-slate-500 mb-2">Qtd: ${item.quantidade}</p>
-                                
-                                <div class="barcode-container my-3">
-                                    <svg class="barcode" 
-                                        jsbarcode-value="${item.codigo}" 
-                                        jsbarcode-format="auto"
-                                        jsbarcode-displayValue="true"
-                                        jsbarcode-fontSize="18"
-                                        jsbarcode-margin="0"
-                                        jsbarcode-height="80">
-                                    </svg>
-                                </div>
-
-                                <div class="flex justify-between items-center mt-2">
-                                    <div class="flex flex-col">
-                                        <span class="text-[9px] uppercase font-black text-slate-400">Vencimento:</span>
-                                        <span class="text-xl font-black text-slate-900 bg-white px-2 rounded-lg border-2 border-slate-200">
-                                            ${item.vencimento.split('-').reverse().join('/')}
-                                        </span>
-                                    </div>
-                                    ${podeApagar ? `<button type="button" class="btn-excluir text-[10px] text-red-600 bg-red-50 px-3 py-2 rounded-xl font-black border-2 border-red-200" data-id="${item.id}">EXCLUIR</button>` : ''}
-                                </div>
-                                <p class="text-[10px] font-black uppercase mt-2 ${cat === 'critico' ? 'text-red-600' : 'text-slate-500'}">${textoVenc}</p>
-                            </div>
-                        </div>`;
-                    lista.appendChild(div);
-                });
-                JsBarcode(".barcode").init();
-                document.getElementById('c-total').innerText = snap.size;
-                document.getElementById('c-critico').innerText = counts.critico;
-                document.getElementById('c-atencao').innerText = counts.atencao;
-                processarLista();
-
-                document.querySelectorAll('.btn-excluir').forEach(btn => {
-                    btn.onclick = async (e) => { 
-                        e.stopPropagation(); 
-                        if(confirm("Deseja apagar este item?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); 
-                    };
-                });
-            });
-        }
 
         onAuthStateChanged(auth, (user) => {
             document.getElementById('loading-screen').style.display = 'none';
             if (user) {
-                currentUserEmail = user.email;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                configurarSetorAutomatico(user.email);
-                const isGerente = gerentesREAIS.includes(user.email);
-                const isPaulo = user.email === pauloADM;
                 document.getElementById('user-display').innerText = user.email;
-                document.getElementById('repositor-form').classList.toggle('hidden', isGerente);
-                carregar(isPaulo || isGerente);
+                if (!user.email.includes('adriano') && !user.email.includes('adrielle')) {
+                    document.getElementById('repositor-form').classList.remove('hidden');
+                }
+                iniciarApp(user.email);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-panel').style.display = 'none';
             }
         });
 
-        document.getElementById('btn-entrar').onclick = async () => {
-            const e = document.getElementById('email').value.trim().toLowerCase();
+        function iniciarApp(email) {
+            const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
+            onSnapshot(q, (snap) => {
+                const lista = document.getElementById('lista');
+                lista.innerHTML = "";
+                let counts = { critico: 0, atencao: 0, normal: 0 };
+                const hoje = new Date(); hoje.setHours(0,0,0,0);
+
+                snap.forEach(d => {
+                    const item = d.data();
+                    const dataVenc = new Date(item.vencimento + "T12:00:00");
+                    const diff = Math.ceil((dataVenc - hoje) / 86400000);
+                    let cat = "normal", estilo = "card-normal";
+                    
+                    if(diff <= 7) { cat="critico"; estilo="card-critico"; counts.critico++; }
+                    else if(diff <= 15) { cat="atencao"; estilo="card-atencao"; counts.atencao++; }
+                    else { counts.normal++; }
+
+                    const div = document.createElement('div');
+                    div.className = `card p-5 rounded-3xl shadow-sm ${estilo} mb-3 border-2`;
+                    div.dataset.cat = cat;
+                    div.dataset.search = (item.produto + " " + item.codigo).toLowerCase();
+                    div.innerHTML = `<h3 class="font-black uppercase">${item.produto}</h3><p class="text-xs">Vence em: ${item.vencimento.split('-').reverse().join('/')}</p>`;
+                    lista.appendChild(div);
+                });
+                renderChart(counts.critico, counts.atencao, counts.normal);
+                document.getElementById('c-total').innerText = snap.size;
+                document.getElementById('c-critico').innerText = counts.critico;
+                document.getElementById('c-atencao').innerText = counts.atencao;
+            });
+        }
+
+        document.getElementById('btn-entrar').onclick = () => {
+            const e = document.getElementById('email').value;
             const s = document.getElementById('password').value;
-            try { await signInWithEmailAndPassword(auth, e, s); } catch (err) { showToast("Login Inválido!"); }
+            signInWithEmailAndPassword(auth, e, s).catch(() => alert("Erro no Login"));
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
-        
-        document.getElementById('btn-salvar').onclick = async () => {
-            const p = { 
-                produto: document.getElementById('p-nome').value.toUpperCase().trim(), 
-                codigo: document.getElementById('p-ean').value || "0", 
-                quantidade: document.getElementById('p-qtd').value || "1", 
-                setor: document.getElementById('p-setor-add').value, 
-                vencimento: document.getElementById('p-data').value, 
-                criadoEm: serverTimestamp() 
-            };
-            if(!p.produto || !p.vencimento) return showToast("Preencha os campos!");
-            await addDoc(collection(db, "validades"), p);
-            showToast("Item salvo!");
-            document.getElementById('p-nome').value = ""; 
-            document.getElementById('p-ean').value = "";
-        };
-
-        document.getElementById('btn-whatsapp').onclick = () => {
-            const sel = document.querySelectorAll('.card-checked');
-            if(sel.length === 0) return showToast("Marque os itens!");
-            let msg = "*⚠️ NEW MARKET - RELATÓRIO DE VENCIMENTOS*\n\n";
-            sel.forEach(c => {
-                const nome = c.querySelector('h3').innerText;
-                const data = c.querySelector('.text-xl').innerText;
-                msg += `📌 *${nome}*\n📅 Vencimento: ${data}\n\n`;
-            });
-            msg += "_Desenvolvido por Paulo Souza_";
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
-        };
-
-        document.getElementById('btn-selecionar-criticos').onclick = () => {
-            const criticos = Array.from(document.querySelectorAll('.card')).filter(c => c.dataset.cat === 'critico');
-            const todosMarcados = criticos.every(c => c.querySelector('.item-check').checked);
-            criticos.forEach(c => {
-                const cb = c.querySelector('.item-check');
-                cb.checked = !todosMarcados;
-                c.classList.toggle('card-checked', !todosMarcados);
-            });
-        };
     </script>
 </body>
 </html>
