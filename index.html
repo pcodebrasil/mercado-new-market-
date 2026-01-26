@@ -148,19 +148,26 @@
             setTimeout(() => { t.className = ""; }, 3000);
         }
 
+        // --- MELHORIA: FIM DO LOOP INFINITO ---
+        const segurancaLoading = setTimeout(() => {
+            if (document.getElementById('loading-screen').style.display !== 'none') {
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('login-screen').style.display = 'flex';
+                showToast("Conexão lenta ou erro de rede.", "#f59e0b");
+            }
+        }, 8000);
+
         onAuthStateChanged(auth, (user) => {
+            clearTimeout(segurancaLoading);
             document.getElementById('loading-screen').style.display = 'none';
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                
                 const isGerenteReal = gerentesREAIS.includes(user.email);
                 const isPaulo = gerentesOCULTOS.includes(user.email);
-                
                 document.getElementById('user-display').innerText = (isGerenteReal) ? `ADMIN: ${user.email.split('@')[0]}` : `REPO: ${user.email.split('@')[0]}`;
                 document.getElementById('btn-config').classList.toggle('hidden', !(isGerenteReal || isPaulo));
                 document.getElementById('repositor-form').classList.toggle('hidden', isGerenteReal);
-                
                 carregar(isGerenteReal || isPaulo);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
@@ -179,13 +186,6 @@
         document.getElementById('btn-fechar-config').onclick = () => document.getElementById('gaveta-config').classList.add('hidden');
         document.getElementById('btn-cadastrar-user').onclick = () => window.open('https://console.firebase.google.com/project/mercado-c3e95/authentication/users', '_blank');
 
-        document.getElementById('btn-confirmar-senha').onclick = async () => {
-            const ns = document.getElementById('nova-senha').value;
-            if (ns.length < 6) return showToast("Mínimo 6 caracteres!", "#f59e0b");
-            try { await updatePassword(auth.currentUser, ns); showToast("Senha alterada! Relogue.", "#10b981"); setTimeout(()=>signOut(auth), 2000); } 
-            catch (e) { showToast("Relogue para mudar a senha", "#dc2626"); }
-        };
-
         function carregar(podeApagar) {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista');
@@ -194,15 +194,26 @@
                 snap.forEach(d => {
                     const item = { id: d.id, ...d.data() };
                     const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
-                    let cat = "normal", estilo = "card-normal", corTxt = "text-green-600";
-                    if(diff <= 7) { estilo="card-critico"; corTxt="text-red-600 animate-pulse font-black"; counts.critico++; cat="critico"; }
-                    else if(diff <= 15) { estilo="card-atencao"; corTxt="text-yellow-600 font-black"; counts.atencao++; cat="atencao"; }
+                    
+                    // --- MELHORIA: TEXTO VENCIDO ---
+                    let cat = "normal", estilo = "card-normal", corTxt = "text-green-600", textoPrazo = `${diff} DIAS`;
+                    
+                    if(diff < 0) { 
+                        estilo="card-critico"; corTxt="text-red-600 animate-pulse font-black"; counts.critico++; cat="critico"; textoPrazo = "VENCIDO";
+                    } else if(diff === 0) {
+                        estilo="card-critico"; corTxt="text-red-600 font-black"; counts.critico++; cat="critico"; textoPrazo = "VENCE HOJE";
+                    } else if(diff <= 7) { 
+                        estilo="card-critico"; corTxt="text-red-600 font-black"; counts.critico++; cat="critico"; 
+                    } else if(diff <= 15) { 
+                        estilo="card-atencao"; corTxt="text-yellow-600 font-black"; counts.atencao++; cat="atencao"; 
+                    }
+
                     dadosAtuais.push({...item, dias: diff, cat});
                     const div = document.createElement('div');
                     div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 border border-slate-100`;
                     div.dataset.id = item.id; div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
                     div.onclick = (e) => { if(e.target.tagName !== 'BUTTON') { const cb = div.querySelector('.item-check'); cb.checked = !cb.checked; div.classList.toggle('card-checked', cb.checked); } };
-                    div.innerHTML = `<div class="flex gap-3"><input type="checkbox" class="item-check mt-1 scale-150 accent-blue-600 pointer-events-none"><div class="flex-grow"><div class="flex justify-between text-[7px] font-black text-slate-400"><span>${item.setor}</span><span class="${corTxt}">${diff} DIAS</span></div><h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3><div class="my-2 bg-white border rounded-lg p-1 text-center"><svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35"></svg></div><div class="flex justify-between items-end text-[9px] font-bold text-slate-500"><span>QTD: ${item.quantidade} | VENC: ${item.vencimento.split('-').reverse().join('/')}</span>${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-600 bg-red-50 px-3 py-2 rounded-lg font-black text-[8px]">Excluir</button>` : ''}</div></div></div>`;
+                    div.innerHTML = `<div class="flex gap-3"><input type="checkbox" class="item-check mt-1 scale-150 accent-blue-600 pointer-events-none"><div class="flex-grow"><div class="flex justify-between text-[7px] font-black text-slate-400"><span>${item.setor}</span><span class="${corTxt}">${textoPrazo}</span></div><h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3><div class="my-2 bg-white border rounded-lg p-1 text-center"><svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35"></svg></div><div class="flex justify-between items-end text-[9px] font-bold text-slate-500"><span>QTD: ${item.quantidade} | VENC: ${item.vencimento.split('-').reverse().join('/')}</span>${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-600 bg-red-50 px-3 py-2 rounded-lg font-black text-[8px]">Excluir</button>` : ''}</div></div></div>`;
                     lista.appendChild(div);
                 });
                 JsBarcode(".barcode").init();
@@ -245,7 +256,10 @@
             const ids = Array.from(cards).map(c => c.dataset.id);
             const itens = dadosAtuais.filter(d => ids.includes(d.id));
             let msg = `*📊 RELATÓRIO NEW MARKET*\n\n`;
-            itens.forEach(p => msg += `${p.dias <= 7 ? '🚨':'⚠️'} *${p.produto}*\nVenc: ${p.vencimento.split('-').reverse().join('/')}\nFaltam: ${p.dias} dias | Qtd: ${p.quantidade}\n\n`);
+            itens.forEach(p => {
+                let status = p.dias < 0 ? "VENCIDO" : (p.dias === 0 ? "VENCE HOJE" : `Faltam ${p.dias} dias`);
+                msg += `${p.dias <= 7 ? '🚨':'⚠️'} *${p.produto}*\nVenc: ${p.vencimento.split('-').reverse().join('/')}\nStatus: ${status} | Qtd: ${p.quantidade}\n\n`;
+            });
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
