@@ -3,76 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="manifest" href="manifest.json">
-    <title>New Market Pro</title>
+    <title>New Market - Gestão Total</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
         #login-screen, #main-panel { display: none; }
         .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
-        .card-critico { border-left: 12px solid #ef4444; background: #fff1f2; }
-        .card-atencao { border-left: 12px solid #f59e0b; background: #fffbeb; }
-        .card-normal { border-left: 12px solid #10b981; background: #f0fdf4; }
-        #toast { visibility: hidden; min-width: 280px; background: #1e293b; color: #fff; text-align: center; border-radius: 20px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 40px; transform: translateX(-50%); font-weight: 900; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        
+        /* Visual dos Cards Original */
+        .card-critico { border-left: 14px solid #ef4444; background: #fff1f2; transform: scale(1.02); }
+        .card-atencao { border-left: 14px solid #f59e0b; background: #fffbeb; }
+        .card-normal { border-left: 14px solid #10b981; background: #f0fdf4; }
+        
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        
+        #toast { visibility: hidden; min-width: 280px; background: #1e293b; color: #fff; text-align: center; border-radius: 20px; padding: 20px; position: fixed; z-index: 1000; left: 50%; bottom: 40px; transform: translateX(-50%); font-weight: 900; box-shadow: 0 10px 40px rgba(0,0,0,0.4); }
         #toast.show { visibility: visible; animation: slideup 0.5s; }
         @keyframes slideup { from { bottom: 0; opacity: 0; } to { bottom: 40px; opacity: 1; } }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen flex flex-col font-sans antialiased">
+<body class="bg-slate-200 min-h-screen flex flex-col font-sans antialiased text-slate-900">
     <div id="toast"></div>
 
     <div id="login-screen" class="flex-grow flex items-center justify-center p-6">
-        <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md border-t-[14px] border-blue-900 text-center">
-            <h1 class="text-4xl font-black uppercase italic text-blue-900 tracking-tighter">New Market</h1>
-            <p class="text-[9px] font-black text-slate-300 mt-2 tracking-[0.4em] uppercase">Security Control</p>
-            <form id="login-form" class="mt-8 space-y-4">
-                <input type="email" id="email" class="w-full p-5 bg-slate-50 border-2 rounded-3xl outline-none focus:border-blue-500 font-bold uppercase text-sm" placeholder="E-MAIL" required>
-                <input type="password" id="password" class="w-full p-5 bg-slate-50 border-2 rounded-3xl outline-none focus:border-blue-500 font-bold" placeholder="SENHA" required>
-                <button type="submit" class="w-full bg-blue-900 text-white p-5 rounded-3xl font-black uppercase shadow-xl hover:bg-blue-800 active:scale-95 transition-all">Entrar</button>
+        <div class="bg-white p-10 rounded-[3.5rem] shadow-2xl w-full max-w-md border-t-[16px] border-blue-900">
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-black uppercase italic text-blue-900 tracking-tighter">New Market</h1>
+                <p class="text-[9px] font-black text-slate-400 mt-2 tracking-[0.4em] uppercase">Controle de Perdas</p>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <input type="email" id="email" class="w-full p-5 bg-slate-100 rounded-3xl outline-none border-2 border-slate-100 focus:border-blue-500 font-black uppercase text-sm" placeholder="USUÁRIO" required>
+                <input type="password" id="password" class="w-full p-5 bg-slate-100 rounded-3xl outline-none border-2 border-slate-100 focus:border-blue-500 font-black text-sm" placeholder="••••••••" required>
+                <button type="submit" class="w-full bg-blue-900 text-white p-5 rounded-3xl font-black uppercase shadow-2xl active:scale-95 transition-all">Acessar Painel</button>
             </form>
         </div>
     </div>
 
     <div id="main-panel" class="flex-grow flex flex-col">
-        <nav class="bg-newmarket text-white p-5 flex justify-between items-center sticky top-0 z-50 shadow-xl">
+        <nav class="bg-newmarket text-white p-6 flex justify-between items-center sticky top-0 z-50 shadow-2xl">
             <div class="flex flex-col">
-                <span class="font-black italic uppercase text-2xl leading-none">New Market</span>
-                <span id="user-display" class="text-[8px] font-black opacity-80 mt-1 uppercase tracking-widest">SISTEMA ONLINE</span>
+                <span class="font-black italic uppercase text-2xl tracking-tighter">New Market</span>
+                <span id="label-user" class="text-[8px] font-black opacity-90 mt-1">LOGADO</span>
             </div>
             <div class="flex gap-2">
-                <button id="btn-config" class="bg-white/20 p-2.5 rounded-2xl backdrop-blur-md">⚙️</button>
-                <button id="btn-logout" class="bg-black/20 p-2.5 rounded-2xl text-[9px] font-black uppercase">Sair</button>
+                <button id="btn-config" class="bg-black/20 p-3 rounded-2xl">⚙️</button>
+                <button id="btn-logout" class="bg-white/20 p-3 rounded-2xl text-[9px] font-black uppercase">Sair</button>
             </div>
         </nav>
 
-        <main class="p-5 max-w-2xl mx-auto w-full space-y-6">
+        <main class="p-6 max-w-2xl mx-auto w-full space-y-6">
+            <button id="btn-whatsapp" class="w-full bg-green-600 text-white p-5 rounded-[2rem] font-black uppercase text-sm shadow-xl flex items-center justify-center gap-3 hover:bg-green-700 transition-all">
+                <span>📊 Enviar Relatório via WhatsApp</span>
+            </button>
+
             <div id="gaveta-config" class="hidden bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl space-y-4">
-                <h2 class="font-black uppercase text-sm text-blue-400">Configurar Alertas</h2>
-                <button id="btn-ativar-push" class="w-full bg-purple-600 p-5 rounded-3xl font-black uppercase text-xs shadow-lg">🔔 Ativar Notificações no Celular</button>
+                <h2 class="font-black uppercase text-sm text-blue-400">Configurações</h2>
+                <button id="btn-ativar-push" class="w-full bg-purple-600 p-5 rounded-3xl font-black uppercase text-xs">🔔 Ativar Notificações</button>
             </div>
 
             <div class="relative">
-                <input type="text" id="campo-busca" placeholder="PESQUISAR PRODUTO..." class="w-full p-6 pl-14 rounded-[2.2rem] shadow-md border-none uppercase font-black text-sm outline-none bg-white focus:ring-4 ring-blue-900/10 transition-all">
-                <span class="absolute left-6 top-6 opacity-30 text-xl">🔍</span>
+                <input type="text" id="campo-busca" placeholder="PROCURAR PRODUTO..." class="w-full p-6 pl-14 rounded-[2.2rem] shadow-xl font-black text-sm uppercase outline-none bg-white">
+                <span class="absolute left-6 top-6 opacity-30">🔍</span>
             </div>
 
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl border-b-[12px] border-blue-900 space-y-5">
-                <h2 class="font-black uppercase text-blue-900 text-xs tracking-widest">Lançar Validade</h2>
+            <div class="bg-white p-8 rounded-[3rem] shadow-2xl border-b-[15px] border-blue-900 space-y-6">
+                <div class="flex justify-between items-center px-1">
+                    <h2 class="font-black uppercase text-blue-900 text-xs">Registrar Validade</h2>
+                    <span id="data-hoje" class="text-[10px] font-black text-slate-300"></span>
+                </div>
                 <div class="space-y-4">
                     <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl uppercase font-black text-slate-700 outline-none focus:border-blue-500">
                     <div class="flex gap-3">
                         <input type="date" id="p-data" class="w-1/2 p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-slate-700 outline-none focus:border-blue-500">
-                        <button id="btn-salvar" class="w-1/2 bg-blue-900 text-white p-5 rounded-2xl font-black uppercase shadow-lg hover:bg-blue-800 transition-all">Salvar</button>
+                        <button id="btn-salvar" class="w-1/2 bg-blue-900 text-white p-5 rounded-2xl font-black uppercase shadow-xl hover:bg-blue-800 transition-all">Gravar</button>
                     </div>
                 </div>
             </div>
 
             <div class="flex items-center justify-between px-4">
-                <h2 class="font-black uppercase text-slate-400 text-[10px] tracking-widest">Monitoramento</h2>
-                <span id="contador" class="bg-blue-900 text-white text-[10px] px-3 py-1 rounded-full font-black">0</span>
+                <h2 class="font-black uppercase text-slate-400 text-[10px] tracking-widest uppercase">Itens no Sistema</h2>
+                <span id="contagem" class="bg-blue-900 text-white text-[10px] px-4 py-1.5 rounded-full font-black">0</span>
             </div>
 
-            <div id="lista" class="space-y-4 pb-32"></div>
+            <div id="lista" class="space-y-5 pb-32"></div>
         </main>
     </div>
 
@@ -96,18 +109,14 @@
         const db = getFirestore(app);
         const messaging = getMessaging(app);
 
-        // SERVICE WORKER REGISTRATION (RESOLVE O INCOMPLETO)
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./firebase-messaging-sw.js');
-        }
+        let listaAtual = [];
 
-        // LOGIN / LOGOUT
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                document.getElementById('user-display').innerText = user.email.toUpperCase();
-                carregarDados();
+                document.getElementById('label-user').innerText = user.email.toUpperCase();
+                carregarBase();
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-panel').style.display = 'none';
@@ -117,84 +126,86 @@
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); }
-            catch (err) { alert("ACESSO NEGADO"); }
+            catch (err) { showToast("ACESSO NEGADO"); }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
         document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
 
-        // NOTIFICAÇÕES (COLEÇÃO TOKENS)
-        document.getElementById('btn-ativar-push').onclick = async () => {
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                const token = await getToken(messaging, { vapidKey: 'BNdM1ijQ6x9eFK4Zop7MfUZ6GnyVSFVR_DJJSOwBsXKfs6Q6bouX2o3b5KD44_f5xWXbXCqwHeJWJlcOEo7DrLA' });
-                if (token) {
-                    await setDoc(doc(db, "tokens_notificacao", auth.currentUser.uid), { token: token, user: auth.currentUser.email, data: serverTimestamp() });
-                    showToast("ALERTA DIÁRIO ATIVO!");
-                }
-            }
-        };
-
-        // CRUD E BUSCA
         document.getElementById('btn-salvar').onclick = async () => {
             const n = document.getElementById('p-nome').value.toUpperCase().trim();
             const d = document.getElementById('p-data').value;
-            if(!n || !d) return;
+            if(!n || !d) return showToast("PREENCHA TUDO");
             await addDoc(collection(db, "validades"), { produto: n, vencimento: d, user: auth.currentUser.email, criadoEm: serverTimestamp() });
             document.getElementById('p-nome').value = "";
-            showToast("SALVO COM SUCESSO!");
+            showToast("SALVO COM SUCESSO");
         };
 
-        function carregarDados() {
+        function carregarBase() {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
-                const render = (docs) => {
+                listaAtual = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                const render = (dados) => {
                     const lista = document.getElementById('lista');
-                    document.getElementById('contador').innerText = docs.length;
+                    document.getElementById('contagem').innerText = dados.length;
                     lista.innerHTML = "";
-                    docs.forEach(d => {
-                        const item = d.data();
+                    dados.forEach(item => {
                         const hoje = new Date();
                         const venci = new Date(item.vencimento + "T12:00:00");
                         const dif = Math.ceil((venci - hoje) / (1000 * 60 * 60 * 24));
                         
-                        let cor = "card-normal";
-                        if (dif <= 5) cor = "card-critico";
-                        else if (dif <= 15) cor = "card-atencao";
+                        let estilo = "card-normal";
+                        if (dif <= 5) estilo = "card-critico";
+                        else if (dif <= 15) estilo = "card-atencao";
 
                         const div = document.createElement('div');
-                        div.className = `p-7 rounded-[2.5rem] shadow-xl flex flex-col gap-4 ${cor}`;
+                        div.className = `p-7 rounded-[3rem] shadow-xl flex flex-col gap-5 ${estilo}`;
                         div.innerHTML = `
                             <div class="flex justify-between items-start">
                                 <div class="max-w-[70%]">
-                                    <h3 class="font-black uppercase text-blue-900 text-lg leading-tight">${item.produto}</h3>
-                                    <p class="text-[9px] font-bold text-slate-400 mt-2 uppercase">Vence: ${item.vencimento}</p>
+                                    <h3 class="font-black uppercase text-blue-900 text-xl leading-none">${item.produto}</h3>
+                                    <p class="text-[10px] font-black text-slate-400 mt-2">VENCE: ${item.vencimento}</p>
                                 </div>
                                 <div class="text-right flex flex-col items-end">
-                                    <span class="text-[12px] font-black p-2 px-5 rounded-2xl ${dif <= 5 ? 'bg-red-600 text-white' : 'bg-slate-200 text-slate-500'}">${dif}D</span>
-                                    <button onclick="apagar('${d.id}')" class="mt-4 text-[10px] font-black text-red-400 opacity-50 hover:opacity-100 uppercase">Apagar</button>
+                                    <span class="text-[12px] font-black p-2 px-5 rounded-2xl ${dif <= 5 ? 'bg-red-600 text-white shadow-lg animate-pulse' : 'bg-slate-200 text-slate-500'}">${dif}D</span>
+                                    <button onclick="apagar('${item.id}')" class="mt-4 text-[10px] font-black text-red-500 opacity-50 uppercase">Excluir</button>
                                 </div>
                             </div>
-                            <canvas id="bc-${d.id}" class="w-full h-10"></canvas>
+                            <canvas id="bc-${item.id}" class="w-full h-10"></canvas>
                         `;
                         lista.appendChild(div);
-                        JsBarcode(`#bc-${d.id}`, item.produto.substring(0, 15), { format: "CODE128", height: 35, displayValue: false, margin: 0 });
+                        try { JsBarcode(`#bc-${item.id}`, item.produto.substring(0, 15), { format: "CODE128", height: 35, displayValue: false, margin: 0 }); } catch(e) {}
                     });
                 };
-                render(snap.docs);
+                render(listaAtual);
                 document.getElementById('campo-busca').oninput = (e) => {
                     const t = e.target.value.toUpperCase();
-                    render(snap.docs.filter(d => d.data().produto.includes(t)));
+                    render(listaAtual.filter(d => d.produto.includes(t)));
                 };
             });
         }
 
-        window.apagar = async (id) => { if(confirm("Deseja apagar?")) await deleteDoc(doc(db, "validades", id)); };
+        // RELATÓRIO WHATSAPP
+        document.getElementById('btn-whatsapp').onclick = () => {
+            if (listaAtual.length === 0) return showToast("LISTA VAZIA");
+            let msg = "*📊 RELATÓRIO DE VALIDADES - NEW MARKET*\n\n";
+            listaAtual.forEach(item => {
+                const hoje = new Date();
+                const venci = new Date(item.vencimento + "T12:00:00");
+                const dif = Math.ceil((venci - hoje) / (1000 * 60 * 60 * 24));
+                const status = dif <= 5 ? "🔴 CRÍTICO" : (dif <= 15 ? "🟠 ATENÇÃO" : "🟢 OK");
+                msg += `*${item.produto}*\n📅 ${item.vencimento} (${dif} dias)\nStatus: ${status}\n\n`;
+            });
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+        };
+
+        window.apagar = async (id) => { if(confirm("APAGAR ITEM?")) await deleteDoc(doc(db, "validades", id)); };
 
         function showToast(m) {
             const t = document.getElementById("toast");
             t.innerText = m; t.className = "show";
             setTimeout(() => t.className = "", 3000);
         }
+        document.getElementById('data-hoje').innerText = new Date().toLocaleDateString('pt-BR');
     </script>
 </body>
 </html>
