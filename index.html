@@ -16,7 +16,7 @@
         .card-normal { border-left: 8px solid #10b981; }
         .card-checked { opacity: 0.5; filter: grayscale(0.8); background-color: #f8fafc !important; transform: scale(0.98); transition: 0.2s; }
         .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
-        .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; }
+        .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; cursor: pointer; }
         .btn-newmarket:hover { background-position: right center; }
         #toast { visibility: hidden; min-width: 280px; background-color: #333; color: #fff; text-align: center; border-radius: 16px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; text-transform: uppercase; font-size: 11px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
@@ -39,10 +39,10 @@
         <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-t-8 border-blue-800 text-center">
             <h1 class="text-3xl font-black uppercase italic text-blue-800">New <span class="text-red-600">Market</span></h1>
             <p class="text-[10px] text-yellow-600 font-black uppercase tracking-widest mt-1">Nazaré Paulista</p>
-            <form id="login-form" class="space-y-4 mt-8">
-                <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none focus:ring-2 ring-blue-500" placeholder="E-mail" required autocomplete="email">
-                <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none focus:ring-2 ring-blue-500" placeholder="Senha" required autocomplete="current-password">
-                <button type="submit" class="w-full btn-newmarket text-white p-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-transform">Acessar Painel</button>
+            <form id="login-form" class="space-y-4 mt-8" onsubmit="return false;">
+                <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none focus:ring-2 ring-blue-500" placeholder="E-mail" required>
+                <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none focus:ring-2 ring-blue-500" placeholder="Senha" required>
+                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-transform">Acessar Painel</button>
             </form>
         </div>
         <footer class="dev-footer">Desenvolvido por Paulo Souza by 2026</footer>
@@ -55,34 +55,34 @@
                 <span id="user-display" class="text-[8px] font-black uppercase tracking-widest text-yellow-200">...</span>
             </div>
             <div class="flex gap-2">
-                <button id="btn-config" class="hidden bg-white/20 p-2 rounded-full border border-white/20 hover:bg-white/40 transition">⚙️</button>
-                <button id="btn-logout" class="text-[8px] bg-black/40 px-3 py-2 rounded-full uppercase font-bold border border-white/20 hover:bg-black/60 transition">Sair</button>
+                <button type="button" id="btn-config" class="hidden bg-white/20 p-2 rounded-full border border-white/20">⚙️</button>
+                <button type="button" id="btn-logout" class="text-[8px] bg-black/40 px-3 py-2 rounded-full uppercase font-bold border border-white/20">Sair</button>
             </div>
         </nav>
 
         <main class="p-4 max-w-xl mx-auto w-full flex-grow space-y-5">
             
-            <div id="gaveta-config" class="hidden bg-slate-800 p-6 rounded-3xl shadow-xl border-b-8 border-yellow-500 space-y-4 animate-in slide-in-from-top duration-300">
+            <div id="gaveta-config" class="hidden bg-slate-800 p-6 rounded-3xl shadow-xl border-b-8 border-yellow-500 space-y-4">
                 <div class="flex justify-between items-center">
                     <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações Internas</h2>
-                    <button id="btn-fechar-config" class="text-white font-black text-xs hover:text-red-500">FECHAR [X]</button>
+                    <button type="button" id="btn-fechar-config" class="text-white font-black text-xs">FECHAR [X]</button>
                 </div>
                 
                 <div class="border-t border-slate-700 pt-4">
-                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase tracking-tighter">Segurança da Conta</p>
-                    <input type="password" id="nova-senha" placeholder="DIGITE A NOVA SENHA" class="w-full p-3 border-none rounded-xl font-bold outline-none text-xs bg-slate-700 text-white mb-2">
-                    <button id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-3 rounded-xl font-black uppercase text-[9px] hover:bg-yellow-700 active:scale-95 transition">Atualizar minha senha</button>
+                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Mudar Minha Senha</p>
+                    <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-3 border-none rounded-xl font-bold outline-none text-xs bg-slate-700 text-white mb-2">
+                    <button type="button" id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Atualizar Senha</button>
                 </div>
 
                 <div id="area-admin-firebase" class="border-t border-slate-700 pt-4 hidden">
-                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase tracking-tighter">Administração de Equipe</p>
-                    <button id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px] hover:bg-blue-700 active:scale-95 transition">Gerenciar Acessos (Firebase)</button>
+                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Acessos da Equipe</p>
+                    <button type="button" id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Abrir Gerenciador Firebase</button>
                 </div>
             </div>
 
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
-                <h2 class="font-black uppercase text-blue-800 text-[10px]">Novo Item no Estoque</h2>
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50 focus:border-blue-500">
+                <h2 class="font-black uppercase text-blue-800 text-[10px]">Lançar Validade</h2>
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50">
                 <div class="grid grid-cols-4 gap-2">
                     <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
                     <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
@@ -94,23 +94,23 @@
                     <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
                 <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-sm bg-slate-50">
-                <button id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition">Registrar Validade</button>
+                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar Produto</button>
             </div>
 
             <div class="space-y-4">
                 <div class="grid grid-cols-3 gap-2 text-center font-black">
-                    <button id="f-critico" class="bg-white p-3 rounded-2xl border-2 text-red-600 filter-inactive"><p class="text-[8px]">🚨 Crítico</p><p id="c-critico" class="text-xl">0</p></button>
-                    <button id="f-atencao" class="bg-white p-3 rounded-2xl border-2 text-yellow-600 filter-inactive"><p class="text-[8px]">⚠️ Atenção</p><p id="c-atencao" class="text-xl">0</p></button>
-                    <button id="f-todos" class="bg-white p-3 rounded-2xl border-2 text-blue-600 filter-active"><p class="text-[8px]">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
+                    <button type="button" id="f-critico" class="bg-white p-3 rounded-2xl border-2 text-red-600 filter-inactive"><p class="text-[8px]">🚨 Crítico</p><p id="c-critico" class="text-xl">0</p></button>
+                    <button type="button" id="f-atencao" class="bg-white p-3 rounded-2xl border-2 text-yellow-600 filter-inactive"><p class="text-[8px]">⚠️ Atenção</p><p id="c-atencao" class="text-xl">0</p></button>
+                    <button type="button" id="f-todos" class="bg-white p-3 rounded-2xl border-2 text-blue-600 filter-active"><p class="text-[8px]">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
                 </div>
 
                 <div class="flex gap-2">
-                    <input type="text" id="busca" placeholder="🔍 Pesquisar produto ou código..." class="flex-grow p-4 rounded-2xl bg-white shadow-sm font-bold outline-none border focus:border-blue-400 transition">
-                    <button id="btn-selecionar-criticos" class="bg-blue-600 text-white px-4 rounded-2xl font-black text-[9px] uppercase shadow-md active:scale-95">Selecionar Críticos</button>
+                    <input type="text" id="busca" placeholder="🔍 Buscar..." class="flex-grow p-4 rounded-2xl bg-white shadow-sm font-bold outline-none border">
+                    <button type="button" id="btn-selecionar-criticos" class="bg-blue-600 text-white px-4 rounded-2xl font-black text-[9px] uppercase shadow-md">Marcar Críticos</button>
                 </div>
 
-                <button id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md flex items-center justify-center gap-2 hover:bg-green-700 transition">
-                    <span>🟢 Enviar Relatório (Itens Marcados)</span>
+                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md flex items-center justify-center gap-2">
+                    <span>🟢 Relatório WhatsApp (Marcados)</span>
                 </button>
                 
                 <div id="lista" class="space-y-3 pb-8"></div>
@@ -135,7 +135,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        try { enableIndexedDbPersistence(db); } catch (e) { console.warn("Persistência offline já ativa ou não suportada."); }
+        try { enableIndexedDbPersistence(db); } catch (e) {}
         
         const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         const gerentesOCULTOS = ['paulo@newmarket.com']; 
@@ -149,18 +149,7 @@
             setTimeout(() => { t.className = ""; }, 3000);
         }
 
-        // Função para apagar item (Escopo Global para o botão funcionar)
-        window.apagarItem = async (id) => { 
-            if(confirm("Tem certeza que deseja EXCLUIR permanentemente este item?")) {
-                try {
-                    await deleteDoc(doc(db, "validades", id));
-                    showToast("Item removido com sucesso!", "#10b981");
-                } catch (e) {
-                    showToast("Erro ao excluir item.", "#dc2626");
-                }
-            }
-        };
-
+        // Lógica de Autenticação
         onAuthStateChanged(auth, (user) => {
             document.getElementById('loading-screen').style.display = 'none';
             if (user) {
@@ -169,32 +158,28 @@
                 
                 const isGerenteReal = gerentesREAIS.includes(user.email);
                 const isPaulo = gerentesOCULTOS.includes(user.email);
-                const eAdmin = (isGerenteReal || isPaulo);
                 
-                document.getElementById('user-display').innerText = eAdmin ? `ADMIN: ${user.email.split('@')[0]}` : `REPO: ${user.email.split('@')[0]}`;
-                
-                // Paulo vê engrenagem, mas botão de cadastro fica oculto para ele
-                document.getElementById('btn-config').classList.toggle('hidden', !eAdmin);
+                document.getElementById('user-display').innerText = (isGerenteReal || isPaulo) ? `ADMIN: ${user.email.split('@')[0]}` : `REPO: ${user.email.split('@')[0]}`;
+                document.getElementById('btn-config').classList.toggle('hidden', !(isGerenteReal || isPaulo));
                 document.getElementById('area-admin-firebase').classList.toggle('hidden', !isGerenteReal);
-                
-                // Esconder form de lançamento para gerentes oficiais (foco em conferência)
                 document.getElementById('repositor-form').classList.toggle('hidden', isGerenteReal);
                 
-                carregar(eAdmin);
+                carregar(isGerenteReal || isPaulo);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-panel').style.display = 'none';
             }
         });
 
-        document.getElementById('login-form').onsubmit = async (e) => {
-            e.preventDefault();
+        // Botão de Login corrigido (sem recarregar)
+        document.getElementById('btn-entrar').onclick = async () => {
             const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value;
+            if(!email || !pass) return showToast("Preencha todos os campos", "#dc2626");
             try { 
                 await signInWithEmailAndPassword(auth, email, pass); 
             } catch (err) { 
-                showToast("E-mail ou senha incorretos!", "#dc2626"); 
+                showToast("Erro no acesso!", "#dc2626"); 
             }
         };
 
@@ -205,16 +190,17 @@
 
         document.getElementById('btn-confirmar-senha').onclick = async () => {
             const ns = document.getElementById('nova-senha').value;
-            if (ns.length < 6) return showToast("A senha deve ter no mínimo 6 dígitos!", "#f59e0b");
+            if (ns.length < 6) return showToast("Mínimo 6 caracteres!", "#f59e0b");
             try { 
                 await updatePassword(auth.currentUser, ns); 
-                showToast("Senha alterada! Reiniciando...", "#10b981"); 
+                showToast("Senha alterada! Relogue.", "#10b981"); 
                 setTimeout(()=>signOut(auth), 2000); 
             } catch (e) { 
-                showToast("Sua sessão expirou. Saia e entre novamente para mudar a senha.", "#dc2626"); 
+                showToast("Erro: Relogue para alterar", "#dc2626"); 
             }
         };
 
+        // Função de Carregamento
         function carregar(podeApagar) {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista');
@@ -227,7 +213,7 @@
 
                 snap.forEach(d => {
                     const item = { id: d.id, ...d.data() };
-                    const dataVenc = new Date(item.vencimento + "T12:00:00"); // Fix fuso horário
+                    const dataVenc = new Date(item.vencimento + "T12:00:00");
                     const diff = Math.ceil((dataVenc - hoje) / 86400000);
                     
                     let cat = "normal", estilo = "card-normal", corTxt = "text-green-600";
@@ -237,7 +223,7 @@
                     dadosAtuais.push({...item, dias: diff, cat});
 
                     const div = document.createElement('div');
-                    div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 border border-slate-100 transition-all active:scale-[0.98]`;
+                    div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 border border-slate-100`;
                     div.dataset.id = item.id; 
                     div.dataset.cat = cat; 
                     div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
@@ -252,11 +238,11 @@
 
                     div.innerHTML = `
                         <div class="flex gap-3">
-                            <input type="checkbox" class="item-check mt-1 scale-150 accent-blue-600 pointer-events-none">
+                            <input type="checkbox" class="item-check mt-1 scale-150 pointer-events-none">
                             <div class="flex-grow">
                                 <div class="flex justify-between text-[7px] font-black text-slate-400">
-                                    <span>Setor: ${item.setor}</span>
-                                    <span class="${corTxt}">${diff <= 0 ? 'VENCIDO' : diff + ' DIAS'}</span>
+                                    <span>${item.setor}</span>
+                                    <span class="${corTxt}">${diff} DIAS</span>
                                 </div>
                                 <h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3>
                                 <div class="my-2 bg-white border rounded-lg p-1 text-center">
@@ -264,7 +250,7 @@
                                 </div>
                                 <div class="flex justify-between items-end text-[9px] font-bold text-slate-500">
                                     <span>QTD: ${item.quantidade} | VENC: ${item.vencimento.split('-').reverse().join('/')}</span>
-                                    ${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-600 bg-red-50 px-3 py-2 rounded-lg font-black text-[8px] border border-red-100">Excluir</button>` : ''}
+                                    ${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-600 bg-red-50 px-3 py-2 rounded-lg font-black text-[8px]">Excluir</button>` : ''}
                                 </div>
                             </div>
                         </div>`;
@@ -279,27 +265,49 @@
             });
         }
 
-        document.getElementById('btn-salvar').onclick = async () => {
-            const nome = document.getElementById('p-nome').value.toUpperCase().trim();
-            const ean = document.getElementById('p-ean').value || "0000000000000";
-            const qtd = document.getElementById('p-qtd').value;
-            const setor = document.getElementById('p-setor-add').value;
-            const venc = document.getElementById('p-data').value;
-
-            if(!nome || !venc || !qtd) return showToast("Preencha Nome, Data e Quantidade!", "#dc2626");
-
+        // Salvar sem recarregar
+        document.getElementById('btn-salvar').onclick = async (e) => {
+            e.preventDefault();
+            const data = { 
+                produto: document.getElementById('p-nome').value.toUpperCase(), 
+                codigo: document.getElementById('p-ean').value || "0000000000000", 
+                quantidade: document.getElementById('p-qtd').value, 
+                setor: document.getElementById('p-setor-add').value, 
+                vencimento: document.getElementById('p-data').value, 
+                criadoEm: serverTimestamp() 
+            };
+            if(!data.produto || !data.vencimento || !data.quantidade) return showToast("Campos obrigatórios!", "#dc2626");
+            
             try {
-                await addDoc(collection(db, "validades"), { 
-                    produto: nome, 
-                    codigo: ean, 
-                    quantidade: qtd, 
-                    setor: setor, 
-                    vencimento: venc, 
-                    criadoEm: serverTimestamp() 
-                });
-                showToast("Produto registrado com sucesso!", "#10b981");
-                document.getElementById('p-nome').value = ""; 
-                document.getElementById('p-ean').value = ""; 
-                document.getElementById('p-qtd').value = "";
-            } catch (e) {
-                showToast("Erro ao salvar
+                await addDoc(collection(db, "validades"), data);
+                showToast("Salvo!", "#10b981");
+                document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = ""; document.getElementById('p-qtd').value = "";
+            } catch (err) {
+                showToast("Erro ao salvar", "#dc2626");
+            }
+        };
+
+        // Funções de Filtro e UI
+        function filtrar() {
+            const busca = document.getElementById('busca').value.toLowerCase();
+            document.querySelectorAll('.card').forEach(c => {
+                const matchStatus = (filtroStatus === 'todos' || c.dataset.cat === filtroStatus);
+                const matchBusca = c.dataset.search.includes(busca);
+                c.style.display = (matchStatus && matchBusca) ? "block" : "none";
+            });
+        }
+
+        document.getElementById('busca').oninput = () => filtrar();
+
+        ['f-critico', 'f-atencao', 'f-todos'].forEach(id => {
+            document.getElementById(id).onclick = () => {
+                filtroStatus = id.split('-')[1];
+                document.querySelectorAll('[id^="f-"]').forEach(b => b.classList.replace('filter-active', 'filter-inactive'));
+                document.getElementById(id).classList.replace('filter-inactive', 'filter-active');
+                filtrar();
+            };
+        });
+
+        document.getElementById('btn-whatsapp').onclick = () => {
+            const cards = document.querySelectorAll('.card-checked');
+            if(cards.l
