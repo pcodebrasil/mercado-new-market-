@@ -4,18 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>New Market - Premium System</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
     <style>
-        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; }
         #login-screen { 
             display: flex; 
-            background: url('https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1374&q=80') no-repeat center center fixed;
+            background: url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1374&q=80') no-repeat center center fixed;
             background-size: cover;
         }
         .glass-card {
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255, 255, 255, 0.94);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.3);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
@@ -28,17 +30,16 @@
         #main-panel { display: none; }
         #loading-screen { position: fixed; inset: 0; background: white; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        .card-critico { border-left: 8px solid #ef4444; }
-        .card-atencao { border-left: 8px solid #f59e0b; }
-        .card-normal { border-left: 8px solid #10b981; }
-        .card-checked { opacity: 0.5; transform: scale(0.97); filter: grayscale(1); background: #f1f5f9 !important; }
+        /* Estilos de Lista */
+        .card-validade { border-left: 8px solid #1e3a8a; transition: 0.3s; }
+        .card-vencido { border-left: 8px solid #ef4444; }
         
-        #toast { visibility: hidden; min-width: 250px; background: #1e293b; color: #fff; text-align: center; border-radius: 1rem; padding: 1rem; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; text-transform: uppercase; font-size: 10px; }
+        #toast { visibility: hidden; min-width: 200px; background: #1e293b; color: #fff; text-align: center; border-radius: 1rem; padding: 1rem; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; font-size: 11px; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
         
-        svg.barcode { width: 100%; max-height: 50px; }
+        svg.barcode { width: 100%; max-height: 60px; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 flex flex-col min-h-screen">
@@ -47,10 +48,10 @@
 
     <div id="loading-screen">
         <div class="w-16 h-16 border-4 border-blue-900 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Sincronizando New Market</p>
+        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Autenticando New Market</p>
     </div>
 
-    <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-6">
+    <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center p-6">
         <div class="glass-card p-10 rounded-[3rem] w-full max-w-md text-center">
             <div class="mb-8">
                 <div class="bg-blue-900 w-20 h-20 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-2xl">
@@ -62,15 +63,15 @@
 
             <form id="login-form" class="space-y-5 text-left">
                 <div>
-                    <label class="text-[9px] font-black uppercase ml-4 text-slate-500 tracking-widest">E-mail de Acesso</label>
-                    <input type="email" id="email" class="w-full p-5 bg-white rounded-2xl border-none shadow-inner focus:ring-2 focus:ring-blue-900 outline-none font-bold" placeholder="exemplo@newmarket.com" required>
+                    <label class="text-[9px] font-black uppercase ml-4 text-slate-500 tracking-widest">Usuário</label>
+                    <input type="email" id="email" class="w-full p-5 bg-white rounded-2xl border-none shadow-inner outline-none font-bold" placeholder="colaborador@newmarket.com" required>
                 </div>
                 <div>
                     <label class="text-[9px] font-black uppercase ml-4 text-slate-500 tracking-widest">Senha Operacional</label>
-                    <input type="password" id="password" class="w-full p-5 bg-white rounded-2xl border-none shadow-inner focus:ring-2 focus:ring-blue-900 outline-none font-bold" placeholder="••••••••" required>
+                    <input type="password" id="password" class="w-full p-5 bg-white rounded-2xl border-none shadow-inner outline-none font-bold" placeholder="••••••••" required>
                 </div>
                 <button type="submit" class="w-full bg-blue-900 hover:bg-red-700 text-white p-5 rounded-2xl font-black uppercase tracking-[0.2em] shadow-2xl transition-all active:scale-95">
-                    Acessar Painel
+                    Entrar no Sistema
                 </button>
             </form>
             <p class="mt-10 text-[10px] text-slate-500 font-black uppercase tracking-widest">Powered by Paulo Souza</p>
@@ -104,15 +105,17 @@
                 <button id="btn-salvar" class="w-full bg-blue-900 text-white p-5 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-all">Salvar Registro</button>
             </div>
 
-            <div id="lista" class="space-y-4 pb-20"></div>
+            <div id="lista" class="space-y-4 pb-20">
+                </div>
         </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // SUA CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -132,53 +135,77 @@
             setTimeout(() => { t.className = ""; }, 3000);
         }
 
+        // MONITOR DE LOGIN
         onAuthStateChanged(auth, (user) => {
             document.getElementById('loading-screen').style.display = 'none';
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
                 document.getElementById('user-display').innerText = user.email.split('@')[0].toUpperCase();
-                carregar();
+                carregarItens();
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-panel').style.display = 'none';
             }
         });
 
-        document.getElementById('login-form').onsubmit = async (e) => {
+        // LOGIN MANUAL
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            try { 
-                await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); 
-            } catch (err) { 
-                showToast("ACESSO NEGADO"); 
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
+            } catch (error) {
+                showToast("ERRO: USUÁRIO OU SENHA INVÁLIDOS");
+            }
+        });
+
+        // LOGOUT
+        document.getElementById('btn-logout').onclick = () => signOut(auth);
+
+        // SALVAR PRODUTO
+        document.getElementById('btn-salvar').onclick = async () => {
+            const nome = document.getElementById('p-nome').value.toUpperCase();
+            const data = document.getElementById('p-data').value;
+            const qtd = document.getElementById('p-qtd').value;
+            
+            if(!nome || !data || !qtd) return showToast("PREENCHA TODOS OS CAMPOS");
+
+            try {
+                await addDoc(collection(db, "validades"), {
+                    produto: nome,
+                    codigo: document.getElementById('p-ean').value || "0000000000000",
+                    quantidade: qtd,
+                    setor: document.getElementById('p-setor-add').value,
+                    vencimento: data,
+                    criadoEm: serverTimestamp()
+                });
+                showToast("PRODUTO REGISTRADO COM SUCESSO!");
+                document.getElementById('p-nome').value = "";
+                document.getElementById('p-ean').value = "";
+                document.getElementById('p-qtd').value = "";
+            } catch (e) {
+                showToast("ERRO AO SALVAR NO BANCO");
             }
         };
 
-        document.getElementById('btn-logout').onclick = () => signOut(auth);
-
-        document.getElementById('btn-salvar').onclick = async () => {
-            const data = { 
-                produto: document.getElementById('p-nome').value.toUpperCase(), 
-                codigo: document.getElementById('p-ean').value || "0000000000000", 
-                quantidade: document.getElementById('p-qtd').value, 
-                setor: document.getElementById('p-setor-add').value, 
-                vencimento: document.getElementById('p-data').value, 
-                criadoEm: serverTimestamp() 
-            };
-            if(!data.produto || !data.vencimento) return showToast("DADOS INCOMPLETOS");
-            await addDoc(collection(db, "validades"), data);
-            showToast("PRODUTO SALVO!");
-            document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = ""; document.getElementById('p-qtd').value = "";
-        };
-
-        function carregar() {
-            onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
+        // CARREGAR LISTA REALTIME
+        function carregarItens() {
+            const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
+            onSnapshot(q, (snap) => {
                 const lista = document.getElementById('lista');
                 lista.innerHTML = "";
+                
+                if(snap.empty) {
+                    lista.innerHTML = "<p class='text-center text-slate-400 font-bold uppercase text-[10px]'>Nenhum produto registrado</p>";
+                }
+
                 snap.forEach(d => {
                     const item = d.data();
+                    const hoje = new Date().toISOString().split('T')[0];
+                    const isVencido = item.vencimento <= hoje;
+
                     const div = document.createElement('div');
-                    div.className = "bg-white p-5 rounded-[2rem] shadow-md card-normal mb-3 border border-slate-100 transition-all";
+                    div.className = `bg-white p-5 rounded-[2rem] shadow-md mb-3 ${isVencido ? 'card-vencido' : 'card-validade'}`;
                     div.innerHTML = `
                         <div class="flex flex-col gap-2">
                             <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest">${item.setor}</span>
@@ -188,11 +215,14 @@
                             </div>
                             <div class="flex justify-between items-center mt-2">
                                 <span class="text-[10px] font-black text-blue-900 uppercase">Qtd: ${item.quantidade}</span>
-                                <span class="text-[10px] font-black text-red-600 uppercase">Venc: ${item.vencimento.split('-').reverse().join('/')}</span>
+                                <span class="text-[10px] font-black ${isVencido ? 'text-red-600 animate-pulse' : 'text-green-600'} uppercase">
+                                    ${isVencido ? '🚨 VENCIDO: ' : 'Venc: '} ${item.vencimento.split('-').reverse().join('/')}
+                                </span>
                             </div>
                         </div>`;
                     lista.appendChild(div);
                 });
+                // Reinicia o código de barras para os novos elementos
                 JsBarcode(".barcode").init();
             });
         }
