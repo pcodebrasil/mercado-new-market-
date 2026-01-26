@@ -14,86 +14,74 @@
         .card-atencao { border-left: 10px solid #f59e0b; background-color: #fffbeb !important; }
         .card-normal { border-left: 10px solid #10b981; background-color: #ffffff !important; }
         .card-checked { opacity: 0.4 !important; filter: grayscale(1); transform: scale(0.96); }
-        .text-gradient-yellow { background: linear-gradient(to right, #1e40af, #dc2626, #facc15); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
         .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; }
-        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 12px; position: fixed; z-index: 1100; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; }
-        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-        .barcode-container { background: white; border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 100px; width: 100%; }
         .filtro-ativo { border: 4px solid #1e40af !important; transform: scale(1.05); }
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 12px; position: fixed; z-index: 1100; left: 50%; bottom: 30px; transform: translateX(-50%); }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
 
     <div id="toast"></div>
-
     <div id="loading-screen">
         <div class="w-12 h-12 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
         <p class="text-[10px] font-black uppercase text-slate-400">Carregando Sistema...</p>
     </div>
 
     <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-6">
-        <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md border-b-8 border-yellow-400 text-center">
-            <h1 class="text-4xl font-black uppercase italic text-gradient-yellow leading-none">New Market</h1>
-            <p class="text-lg font-bold text-blue-900 uppercase tracking-tighter -mt-1">Supermercados</p>
-            <form class="space-y-4 mt-8" onsubmit="return false;">
-                <input type="email" id="email" class="w-full p-4 border-2 rounded-2xl outline-none" placeholder="E-mail">
-                <input type="password" id="password" class="w-full p-4 border-2 rounded-2xl outline-none" placeholder="Senha">
-                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-5 rounded-2xl font-black uppercase shadow-lg">Entrar</button>
-            </form>
+        <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-md text-center">
+            <h1 class="text-3xl font-black italic text-blue-800">NEW MARKET</h1>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Validade 2026</p>
+            <input type="email" id="email" class="w-full p-4 border-2 rounded-xl mb-3 outline-none" placeholder="E-mail">
+            <input type="password" id="password" class="w-full p-4 border-2 rounded-xl mb-4 outline-none" placeholder="Senha">
+            <button id="btn-entrar" class="w-full btn-newmarket text-white p-4 rounded-xl font-black uppercase shadow-lg">Entrar</button>
         </div>
     </div>
 
     <div id="main-panel" class="flex-grow flex flex-col">
-        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
-            <div class="leading-none text-left">
-                <span class="font-black italic uppercase text-lg">New Market</span><br>
-                <span id="user-display" class="text-[8px] font-black text-yellow-200 uppercase tracking-widest">...</span>
-            </div>
-            <button type="button" id="btn-logout" class="text-[9px] bg-black/40 px-4 py-2 rounded-full font-bold border border-white/20 uppercase">Sair</button>
+        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50">
+            <div class="leading-none"><span class="font-black italic uppercase">New Market</span><br><span id="user-display" class="text-[8px] text-yellow-200 uppercase">...</span></div>
+            <button id="btn-logout" class="text-[9px] bg-black/40 px-3 py-1 rounded-full border border-white/20">SAIR</button>
         </nav>
 
-        <main class="p-4 max-w-xl mx-auto w-full space-y-6 flex-grow">
-            
-            <div id="dash-container" class="bg-white p-4 rounded-3xl shadow-xl border-t-4 border-blue-600">
-                <div class="relative h-40">
-                    <canvas id="chartVencimentos"></canvas>
-                </div>
+        <main class="p-4 max-w-xl mx-auto w-full space-y-4 flex-grow">
+            <div class="bg-white p-4 rounded-3xl shadow-lg border-t-4 border-blue-600">
+                <div class="h-40 w-full"><canvas id="chartVencimentos"></canvas></div>
             </div>
 
-            <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50">
-                <div class="grid grid-cols-4 gap-2">
-                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl outline-none">
-                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl outline-none">
+            <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-lg border-b-4 border-blue-600 space-y-3">
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-3 border rounded-xl font-bold uppercase">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="p-ean" placeholder="EAN" class="p-3 border rounded-xl">
+                    <input type="number" id="p-qtd" placeholder="QTD" class="p-3 border rounded-xl">
                 </div>
-                <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-black uppercase bg-yellow-50 text-blue-900">
+                <select id="p-setor-add" class="w-full p-3 border rounded-xl font-bold bg-yellow-50">
                     <option value="Estoque Central">Estoque Central</option>
                     <option value="Corredor do Paulo">Corredor do Paulo</option>
                     <option value="Corredor do Leandro">Corredor do Leandro</option>
                 </select>
-                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold">
-                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase">Salvar Registro</button>
+                <input type="date" id="p-data" class="w-full p-3 border rounded-xl font-bold">
+                <button id="btn-salvar" class="w-full bg-blue-700 text-white p-3 rounded-xl font-black uppercase">Salvar Item</button>
             </div>
 
-            <div class="grid grid-cols-3 gap-2 text-center font-black">
-                <button id="f-critico" class="bg-white p-3 rounded-2xl text-red-600 border-2" onclick="aplicarFiltro('critico')"><p class="text-[8px]">🚨 Crítico</p><p id="c-critico" class="text-xl">0</p></button>
-                <button id="f-atencao" class="bg-white p-3 rounded-2xl text-yellow-600 border-2" onclick="aplicarFiltro('atencao')"><p class="text-[8px]">⚠️ Atenção</p><p id="c-atencao" class="text-xl">0</p></button>
-                <button id="f-todos" class="bg-white p-3 rounded-2xl text-blue-600 border-2 filtro-ativo" onclick="aplicarFiltro('todos')"><p class="text-[8px]">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
+            <div class="grid grid-cols-3 gap-2">
+                <button onclick="aplicarFiltro('critico')" id="f-critico" class="bg-white p-2 rounded-xl text-red-600 border-2"><p class="text-[8px]">Crítico</p><p id="c-critico" class="text-lg font-black">0</p></button>
+                <button onclick="aplicarFiltro('atencao')" id="f-atencao" class="bg-white p-2 rounded-xl text-yellow-600 border-2"><p class="text-[8px]">Atenção</p><p id="c-atencao" class="text-lg font-black">0</p></button>
+                <button onclick="aplicarFiltro('todos')" id="f-todos" class="bg-white p-2 rounded-xl text-blue-600 border-2 filtro-ativo"><p class="text-[8px]">Total</p><p id="c-total" class="text-lg font-black">0</p></button>
             </div>
 
-            <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Buscar produto..." class="w-full p-4 rounded-2xl bg-white border-2 outline-none font-bold">
-            
-            <button id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs">📱 Enviar Relatório via WhatsApp</button>
-            
-            <div id="lista" class="space-y-4 pb-10"></div>
+            <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Buscar..." class="w-full p-4 rounded-xl border-2 outline-none font-bold">
+            <div id="lista" class="space-y-3 pb-10"></div>
         </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
@@ -109,34 +97,40 @@
         const db = getFirestore(app);
         let chartInstance = null;
 
-        function renderChart(c, a, n) {
-            const ctx = document.getElementById('chartVencimentos');
-            if (!ctx) return;
-            if (chartInstance) chartInstance.destroy();
+        function showToast(m) {
+            const t = document.getElementById("toast");
+            t.innerText = m; t.className = "show";
+            setTimeout(() => t.className = "", 3000);
+        }
+
+        function updateChart(c, a, n) {
+            const ctx = document.getElementById('chartVencimentos').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: ['Crítico', 'Atenção', 'Normal'],
                     datasets: [{ data: [c, a, n], backgroundColor: ['#ef4444', '#f59e0b', '#10b981'] }]
                 },
-                options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } }
             });
         }
 
-        window.aplicarFiltro = (t) => {
-            document.querySelectorAll('.grid button').forEach(b => b.classList.remove('filtro-ativo'));
-            document.getElementById('f-'+t).classList.add('filtro-ativo');
-            const busca = document.getElementById('busca').value.toLowerCase();
-            document.querySelectorAll('.card').forEach(card => {
-                const mF = t === 'todos' || card.dataset.cat === t;
-                const mB = card.dataset.search.includes(busca);
-                card.style.display = (mF && mB) ? 'block' : 'none';
-            });
+        window.aplicarFiltro = (tipo) => {
+            const bts = { critico: 'f-critico', atencao: 'f-atencao', todos: 'f-todos' };
+            Object.values(bts).forEach(id => document.getElementById(id).classList.remove('filtro-ativo'));
+            document.getElementById(bts[tipo]).classList.add('filtro-ativo');
+            processarLista();
         };
 
         window.processarLista = () => {
-            const t = document.querySelector('.filtro-ativo').id.replace('f-', '');
-            window.aplicarFiltro(t);
+            const b = document.getElementById('busca').value.toLowerCase();
+            const f = document.querySelector('.filtro-ativo').id.replace('f-', '');
+            document.querySelectorAll('.card').forEach(c => {
+                const matchF = f === 'todos' || c.dataset.cat === f;
+                const matchB = c.dataset.search.includes(b);
+                c.style.display = (matchF && matchB) ? 'block' : 'none';
+            });
         };
 
         onAuthStateChanged(auth, (user) => {
@@ -148,52 +142,63 @@
                 if (!user.email.includes('adriano') && !user.email.includes('adrielle')) {
                     document.getElementById('repositor-form').classList.remove('hidden');
                 }
-                iniciarApp(user.email);
+                const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
+                onSnapshot(q, (snap) => {
+                    const lista = document.getElementById('lista');
+                    lista.innerHTML = "";
+                    let counts = { critico: 0, atencao: 0, normal: 0 };
+                    const hoje = new Date(); hoje.setHours(0,0,0,0);
+
+                    snap.forEach(d => {
+                        const item = d.data();
+                        const dataVenc = new Date(item.vencimento + "T12:00:00");
+                        const diff = Math.ceil((dataVenc - hoje) / 86400000);
+                        let cat = "normal", estilo = "card-normal";
+                        if(diff <= 7) { cat="critico"; estilo="card-critico"; counts.critico++; }
+                        else if(diff <= 15) { cat="atencao"; estilo="card-atencao"; counts.atencao++; }
+                        else { counts.normal++; }
+
+                        const div = document.createElement('div');
+                        div.className = `card p-4 rounded-2xl shadow-sm ${estilo} border-2 mb-2`;
+                        div.dataset.cat = cat;
+                        div.dataset.search = (item.produto + " " + (item.codigo || "")).toLowerCase();
+                        div.innerHTML = `<div class="flex justify-between items-center"><h3 class="font-black uppercase text-sm">${item.produto}</h3><span class="text-[10px] font-bold bg-white px-2 rounded-lg border">${item.vencimento.split('-').reverse().join('/')}</span></div>`;
+                        lista.appendChild(div);
+                    });
+                    updateChart(counts.critico, counts.atencao, counts.normal);
+                    document.getElementById('c-total').innerText = snap.size;
+                    document.getElementById('c-critico').innerText = counts.critico;
+                    document.getElementById('c-atencao').innerText = counts.atencao;
+                    processarLista();
+                });
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-panel').style.display = 'none';
             }
         });
 
-        function iniciarApp(email) {
-            const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
-            onSnapshot(q, (snap) => {
-                const lista = document.getElementById('lista');
-                lista.innerHTML = "";
-                let counts = { critico: 0, atencao: 0, normal: 0 };
-                const hoje = new Date(); hoje.setHours(0,0,0,0);
-
-                snap.forEach(d => {
-                    const item = d.data();
-                    const dataVenc = new Date(item.vencimento + "T12:00:00");
-                    const diff = Math.ceil((dataVenc - hoje) / 86400000);
-                    let cat = "normal", estilo = "card-normal";
-                    
-                    if(diff <= 7) { cat="critico"; estilo="card-critico"; counts.critico++; }
-                    else if(diff <= 15) { cat="atencao"; estilo="card-atencao"; counts.atencao++; }
-                    else { counts.normal++; }
-
-                    const div = document.createElement('div');
-                    div.className = `card p-5 rounded-3xl shadow-sm ${estilo} mb-3 border-2`;
-                    div.dataset.cat = cat;
-                    div.dataset.search = (item.produto + " " + item.codigo).toLowerCase();
-                    div.innerHTML = `<h3 class="font-black uppercase">${item.produto}</h3><p class="text-xs">Vence em: ${item.vencimento.split('-').reverse().join('/')}</p>`;
-                    lista.appendChild(div);
-                });
-                renderChart(counts.critico, counts.atencao, counts.normal);
-                document.getElementById('c-total').innerText = snap.size;
-                document.getElementById('c-critico').innerText = counts.critico;
-                document.getElementById('c-atencao').innerText = counts.atencao;
-            });
-        }
-
         document.getElementById('btn-entrar').onclick = () => {
-            const e = document.getElementById('email').value;
+            const e = document.getElementById('email').value.trim();
             const s = document.getElementById('password').value;
-            signInWithEmailAndPassword(auth, e, s).catch(() => alert("Erro no Login"));
+            if(e && s) signInWithEmailAndPassword(auth, e, s).catch(() => alert("Falha no Login!"));
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
+
+        document.getElementById('btn-salvar').onclick = async () => {
+            const p = { 
+                produto: document.getElementById('p-nome').value.toUpperCase().trim(), 
+                codigo: document.getElementById('p-ean').value || "0", 
+                quantidade: document.getElementById('p-qtd').value || "1", 
+                setor: document.getElementById('p-setor-add').value, 
+                vencimento: document.getElementById('p-data').value, 
+                criadoEm: serverTimestamp() 
+            };
+            if(!p.produto || !p.vencimento) return alert("Preencha os campos!");
+            await addDoc(collection(db, "validades"), p);
+            showToast("Item salvo com sucesso!");
+            document.getElementById('p-nome').value = "";
+        };
     </script>
 </body>
 </html>
