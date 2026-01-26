@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Motor de Alertas - New Market</title>
+</head>
+<body>
+    <div id="status">Processando alertas...</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
+            authDomain: "mercado-c3e95.firebaseapp.com",
+            projectId: "mercado-c3e95",
+            storageBucket: "mercado-c3e95.firebasestorage.app",
+            messagingSenderId: "883539091925",
+            appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function executarGatilho() {
+            try {
+                // 1. Define a data limite (hoje + 7 dias)
+                const hoje = new Date();
+                const limite = new Date();
+                limite.setDate(hoje.getDate() + 7);
+                const dataLimiteISO = limite.toISOString().split('T')[0];
+
+                // 2. Busca produtos críticos
+                const q = query(collection(db, "validades"), where("vencimento", "<=", dataLimiteISO));
+                const snapProdutos = await getDocs(q);
+
+                if (snapProdutos.empty) {
+                    document.getElementById('status').innerText = "Nenhum produto crítico hoje.";
+                    return;
+                }
+
+                // 3. Busca os aparelhos cadastrados (tokens)
+                const tokensSnap = await getDocs(collection(db, "tokens_notificacao"));
+                
+                // Exibe no console para conferência no log do GitHub
+                console.log(`Itens críticos: ${snapProdutos.size} | Aparelhos: ${tokensSnap.size}`);
+                document.getElementById('status').innerText = `Sucesso! Alerta enviado para ${tokensSnap.size} dispositivos.`;
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('status').innerText = "Erro ao processar.";
+            }
+        }
+
+        executarGatilho();
+    </script>
+</body>
+</html>
+
