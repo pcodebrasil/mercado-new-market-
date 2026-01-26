@@ -10,7 +10,6 @@
         #login-screen, #main-panel { display: none; }
         #loading-screen { position: fixed; inset: 0; background: white; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        /* Estilos de Card */
         .card-critico { border-left: 10px solid #ef4444; background-color: #fff1f2 !important; }
         .card-atencao { border-left: 10px solid #f59e0b; background-color: #fffbeb !important; }
         .card-normal { border-left: 10px solid #10b981; background-color: #ffffff !important; }
@@ -28,7 +27,6 @@
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 12px; position: fixed; z-index: 1100; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
 
-        /* Ajuste do Código de Barras para preencher o quadro */
         .barcode-container {
             background: white;
             border: 2px solid #e2e8f0;
@@ -37,7 +35,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100px; /* Altura fixa para o quadro */
+            height: 100px;
             width: 100%;
         }
         svg.barcode {
@@ -54,17 +52,18 @@
 
     <div id="loading-screen">
         <div class="w-12 h-12 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase text-slate-400">Iniciando New Market...</p>
+        <p class="text-[10px] font-black uppercase text-slate-400">Carregando...</p>
     </div>
 
     <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-6">
         <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md border-b-8 border-yellow-400 text-center">
-            <h1 class="text-4xl font-black uppercase italic text-gradient-yellow">New Market</h1>
-            <p class="text-[11px] text-slate-400 font-black tracking-widest mt-2 mb-8 uppercase">Gestão de Validades 2026</p>
+            <h1 class="text-4xl font-black uppercase italic text-gradient-yellow leading-none">New Market</h1>
+            <p class="text-lg font-bold text-blue-900 uppercase tracking-tighter -mt-1">Supermercados</p>
+            <p class="text-[10px] text-slate-400 font-black tracking-[0.3em] mt-4 mb-8 uppercase border-t pt-2">Sistema de Validade 2026</p>
             <form class="space-y-4" onsubmit="return false;">
                 <input type="email" id="email" class="w-full p-4 border-2 rounded-2xl outline-none" placeholder="E-mail">
                 <input type="password" id="password" class="w-full p-4 border-2 rounded-2xl outline-none" placeholder="Senha">
-                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-5 rounded-2xl font-black uppercase shadow-lg">Acessar Painel</button>
+                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-5 rounded-2xl font-black uppercase shadow-lg">Entrar</button>
             </form>
         </div>
     </div>
@@ -81,7 +80,7 @@
         <main class="p-4 max-w-xl mx-auto w-full space-y-6 flex-grow">
             
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
-                <h2 class="font-black uppercase text-blue-800 text-xs tracking-widest">Lançar Novo Produto</h2>
+                <h2 class="font-black uppercase text-blue-800 text-xs tracking-widest">Novo Lançamento</h2>
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50">
                 <div class="grid grid-cols-4 gap-2">
                     <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl outline-none">
@@ -95,7 +94,7 @@
                     <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
                 <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-blue-700">
-                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar no Banco</button>
+                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar Registro</button>
             </div>
 
             <div class="space-y-4">
@@ -107,14 +106,18 @@
                 
                 <div class="flex gap-2">
                     <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Buscar..." class="flex-grow p-4 rounded-2xl bg-white border-2 outline-none font-bold">
-                    <button type="button" id="btn-selecionar-criticos" class="bg-red-600 text-white px-4 rounded-2xl font-black text-[9px] uppercase">Marcar Críticos</button>
+                    <button type="button" id="btn-selecionar-criticos" class="bg-red-600 text-white px-4 rounded-2xl font-black text-[9px] uppercase">Selecionar Críticos</button>
                 </div>
                 
-                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs shadow-md">📱 Enviar Relatório Selecionado</button>
+                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs shadow-md">📱 Enviar Relatório via WhatsApp</button>
                 
                 <div id="lista" class="space-y-4 pb-10"></div>
             </div>
         </main>
+
+        <footer class="p-6 text-center">
+            <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 italic">Dev Paulo Souza by 2026</p>
+        </footer>
     </div>
 
     <script type="module">
@@ -247,7 +250,7 @@
                 document.querySelectorAll('.btn-excluir').forEach(btn => {
                     btn.onclick = async (e) => { 
                         e.stopPropagation(); 
-                        if(confirm("Confirmar exclusão?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); 
+                        if(confirm("Deseja apagar este item?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); 
                     };
                 });
             });
@@ -274,7 +277,7 @@
         document.getElementById('btn-entrar').onclick = async () => {
             const e = document.getElementById('email').value.trim().toLowerCase();
             const s = document.getElementById('password').value;
-            try { await signInWithEmailAndPassword(auth, e, s); } catch (err) { showToast("Erro no Login!"); }
+            try { await signInWithEmailAndPassword(auth, e, s); } catch (err) { showToast("Login Inválido!"); }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
@@ -288,22 +291,23 @@
                 vencimento: document.getElementById('p-data').value, 
                 criadoEm: serverTimestamp() 
             };
-            if(!p.produto || !p.vencimento) return showToast("Faltam dados!");
+            if(!p.produto || !p.vencimento) return showToast("Preencha os campos!");
             await addDoc(collection(db, "validades"), p);
-            showToast("Salvo com sucesso!");
+            showToast("Item salvo!");
             document.getElementById('p-nome').value = ""; 
             document.getElementById('p-ean').value = "";
         };
 
         document.getElementById('btn-whatsapp').onclick = () => {
             const sel = document.querySelectorAll('.card-checked');
-            if(sel.length === 0) return showToast("Selecione itens primeiro!");
-            let msg = "*⚠️ NEW MARKET - RELATÓRIO*\n\n";
+            if(sel.length === 0) return showToast("Marque os itens!");
+            let msg = "*⚠️ NEW MARKET - RELATÓRIO DE VENCIMENTOS*\n\n";
             sel.forEach(c => {
                 const nome = c.querySelector('h3').innerText;
                 const data = c.querySelector('.text-xl').innerText;
                 msg += `📌 *${nome}*\n📅 Vencimento: ${data}\n\n`;
             });
+            msg += "_Desenvolvido por Paulo Souza_";
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
         };
 
