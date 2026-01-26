@@ -31,7 +31,7 @@
 
     <div id="loading-screen">
         <div class="w-12 h-12 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase text-slate-400">Sincronizando New Market...</p>
+        <p class="text-[10px] font-black uppercase text-slate-400">Iniciando New Market...</p>
     </div>
 
     <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-4">
@@ -47,9 +47,9 @@
 
     <div id="main-panel" class="flex-grow flex flex-col">
         <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50">
-            <div class="leading-none text-left">
+            <div class="leading-none">
                 <span class="font-black italic uppercase">New Market</span><br>
-                <span id="user-display" class="text-[8px] font-black text-yellow-200 uppercase tracking-widest">...</span>
+                <span id="user-display" class="text-[8px] font-black text-yellow-200 uppercase">...</span>
             </div>
             <div class="flex gap-2">
                 <button type="button" id="btn-config" class="hidden bg-white/20 p-2 rounded-full">⚙️</button>
@@ -59,30 +59,30 @@
 
         <main class="p-4 max-w-xl mx-auto w-full space-y-5">
             <div id="gaveta-config" class="hidden bg-slate-800 p-6 rounded-3xl shadow-xl border-b-8 border-yellow-500 space-y-4 text-white">
-                <div class="flex justify-between font-black text-[10px] uppercase"><span>Painel Administrativo</span><button type="button" id="btn-fechar-config">X</button></div>
-                <div id="area-admin-firebase" class="hidden pt-4">
+                <div class="flex justify-between font-black text-[10px] uppercase"><span>Configurações ADM</span><button type="button" id="btn-fechar-config">X</button></div>
+                <div id="area-admin-firebase" class="hidden border-t border-slate-700 pt-4">
                     <button type="button" id="btn-cadastrar-user" class="w-full bg-blue-600 p-3 rounded-xl font-black uppercase text-[9px]">Gerenciar Usuários</button>
                 </div>
-                <input type="password" id="nova-senha" placeholder="MUDAR MINHA SENHA" class="w-full p-3 rounded-xl bg-slate-700 outline-none border border-slate-600 text-white">
-                <button type="button" id="btn-confirmar-senha" class="w-full bg-yellow-600 p-3 rounded-xl font-black uppercase text-[9px]">Confirmar Senha</button>
+                <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-3 rounded-xl bg-slate-700 outline-none border border-slate-600">
+                <button type="button" id="btn-confirmar-senha" class="w-full bg-yellow-600 p-3 rounded-xl font-black uppercase text-[9px]">Mudar Senha</button>
             </div>
 
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
-                <h2 class="font-black uppercase text-blue-800 text-[10px] tracking-widest">Entrada de Produtos</h2>
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none bg-slate-50">
+                <h2 class="font-black uppercase text-blue-800 text-[10px]">Lançar Validade</h2>
+                <input type="text" id="p-nome" placeholder="PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none bg-slate-50">
                 <div class="grid grid-cols-4 gap-2">
-                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl outline-none bg-slate-50">
-                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl outline-none bg-slate-50">
+                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl outline-none">
+                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl outline-none">
                 </div>
-                <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50 outline-none">
+                <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50">
                     <option value="Estoque Central">Estoque Central (João)</option>
                     <option value="Corredor do Paulo">Corredor do Paulo</option>
                     <option value="Corredor do Leandro">Corredor do Leandro</option>
                     <option value="Corredor do Pedro">Corredor do Pedro</option>
                     <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
-                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl outline-none bg-slate-50">
-                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar No Sistema</button>
+                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl outline-none">
+                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase">Salvar</button>
             </div>
 
             <div class="space-y-4">
@@ -91,13 +91,11 @@
                     <button type="button" id="f-atencao" class="bg-white p-3 rounded-2xl text-yellow-600 border-2" onclick="aplicarFiltro('atencao')"><p class="text-[8px]">⚠️ Atenção</p><p id="c-atencao" class="text-xl">0</p></button>
                     <button type="button" id="f-todos" class="bg-white p-3 rounded-2xl text-blue-600 border-4 border-blue-800" onclick="aplicarFiltro('todos')"><p class="text-[8px]">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
                 </div>
-
                 <div class="flex gap-2">
-                    <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Buscar..." class="flex-grow p-4 rounded-2xl bg-white shadow-sm font-bold border outline-none">
-                    <button type="button" id="btn-selecionar-criticos" class="bg-red-600 text-white px-4 rounded-2xl font-black text-[9px] uppercase shadow-md">Marcar/Desmarcar Críticos</button>
+                    <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Buscar..." class="flex-grow p-4 rounded-2xl bg-white border outline-none">
+                    <button type="button" id="btn-selecionar-criticos" class="bg-red-600 text-white px-4 rounded-2xl font-black text-[9px] uppercase">Marcar Críticos</button>
                 </div>
-
-                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md">Enviar Relatório WhatsApp</button>
+                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px]">Gerar Relatório</button>
                 <div id="lista" class="space-y-3 pb-8"></div>
             </div>
         </main>
@@ -122,7 +120,8 @@
         const db = getFirestore(app);
         
         const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
-        const gerentesOCULTOS = ['paulo@newmarket.com', 'joao@newmarket.com']; 
+        const pauloADM = 'paulo@newmarket.com';
+        const joaoESTOQUE = 'joao@newmarket.com';
 
         let filtroAtual = 'todos';
 
@@ -178,7 +177,7 @@
                                 <div class="my-2 bg-white border rounded-lg p-1 text-center"><svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35"></svg></div>
                                 <div class="flex justify-between items-end text-[9px] font-bold text-slate-500">
                                     <span>VENC: ${item.vencimento.split('-').reverse().join('/')}</span>
-                                    ${podeApagar ? `<button type="button" class="btn-excluir text-red-600 bg-red-50 px-2 py-1 rounded font-black border border-red-100" data-id="${item.id}">APAGAR</button>` : ''}
+                                    ${podeApagar ? `<button type="button" class="btn-excluir text-red-600 bg-red-50 px-2 py-1 rounded font-black border border-red-100" data-id="${item.id}">EXCLUIR</button>` : ''}
                                 </div>
                             </div>
                         </div>`;
@@ -189,9 +188,8 @@
                 document.getElementById('c-critico').innerText = counts.critico;
                 document.getElementById('c-atencao').innerText = counts.atencao;
                 processarLista();
-                
                 document.querySelectorAll('.btn-excluir').forEach(btn => {
-                    btn.onclick = async (e) => { e.stopPropagation(); if(confirm("Apagar item?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); };
+                    btn.onclick = async (e) => { e.stopPropagation(); if(confirm("Apagar?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); };
                 });
             });
         }
@@ -201,11 +199,20 @@
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                const isAdm = gerentesREAIS.includes(user.email) || gerentesOCULTOS.includes(user.email);
+                
+                const isGerenteReal = gerentesREAIS.includes(user.email);
+                const isPaulo = user.email === pauloADM;
+                const isJoao = user.email === joaoESTOQUE;
+
                 document.getElementById('user-display').innerText = user.email;
-                document.getElementById('btn-config').classList.toggle('hidden', !isAdm);
-                document.getElementById('repositor-form').classList.toggle('hidden', gerentesREAIS.includes(user.email));
-                carregar(isAdm);
+                
+                // REGRAS DE VISIBILIDADE
+                document.getElementById('btn-config').classList.toggle('hidden', !(isGerenteReal || isPaulo));
+                document.getElementById('area-admin-firebase').classList.toggle('hidden', !isGerenteReal);
+                document.getElementById('repositor-form').classList.toggle('hidden', isGerenteReal);
+                
+                // SÓ QUEM PODE APAGAR É O PAULO OU GERENTES REAIS. JOÃO NÃO APAGA.
+                carregar(isPaulo || isGerenteReal);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-panel').style.display = 'none';
@@ -213,9 +220,14 @@
         });
 
         document.getElementById('btn-entrar').onclick = async () => {
-            const e = document.getElementById('email').value.trim();
+            const e = document.getElementById('email').value.trim().toLowerCase();
             const s = document.getElementById('password').value;
-            try { await signInWithEmailAndPassword(auth, e, s); } catch (err) { showToast("Erro no Login!"); }
+            try { 
+                await signInWithEmailAndPassword(auth, e, s); 
+            } catch (err) { 
+                if(err.code === 'auth/invalid-credential') showToast("E-mail ou Senha incorretos!");
+                else showToast("Erro: " + err.code);
+            }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
@@ -223,7 +235,7 @@
             const p = { produto: document.getElementById('p-nome').value.toUpperCase().trim(), codigo: document.getElementById('p-ean').value || "0", quantidade: document.getElementById('p-qtd').value || "0", setor: document.getElementById('p-setor-add').value, vencimento: document.getElementById('p-data').value, criadoEm: serverTimestamp() };
             if(!p.produto || !p.vencimento) return showToast("Faltam dados!");
             await addDoc(collection(db, "validades"), p);
-            showToast("Item Registrado!");
+            showToast("Salvo!");
             document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
         };
 
@@ -239,8 +251,8 @@
 
         document.getElementById('btn-whatsapp').onclick = () => {
             const sel = document.querySelectorAll('.card-checked');
-            if(sel.length === 0) return showToast("Marque os itens!");
-            let msg = "*RELATÓRIO DE VALIDADES*\n\n";
+            if(sel.length === 0) return showToast("Marque itens!");
+            let msg = "*RELATÓRIO NEW MARKET*\n\n";
             sel.forEach(c => msg += `• *${c.querySelector('h3').innerText}*\nSetor: ${c.querySelector('.text-slate-400 span').innerText}\n\n`);
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
         };
