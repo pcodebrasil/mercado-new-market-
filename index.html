@@ -20,6 +20,9 @@
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
         svg.barcode { width: 100%; max-height: 50px; }
+        
+        /* Classe de destaque para os filtros */
+        .filtro-ativo { border: 4px solid #1e40af !important; transform: scale(1.05); z-index: 10; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
@@ -28,7 +31,7 @@
 
     <div id="loading-screen">
         <div class="w-12 h-12 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase text-slate-400">Autenticando...</p>
+        <p class="text-[10px] font-black uppercase text-slate-400">Sincronizando...</p>
     </div>
 
     <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-4">
@@ -37,7 +40,7 @@
             <form class="space-y-4 mt-8" onsubmit="return false;">
                 <input type="email" id="email" class="w-full p-4 border rounded-2xl outline-none" placeholder="E-mail">
                 <input type="password" id="password" class="w-full p-4 border rounded-2xl outline-none" placeholder="Senha">
-                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-4 rounded-2xl font-black uppercase">Entrar</button>
+                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-4 rounded-2xl font-black uppercase">Acessar</button>
             </form>
         </div>
     </div>
@@ -56,17 +59,17 @@
 
         <main class="p-4 max-w-xl mx-auto w-full space-y-5">
             <div id="gaveta-config" class="hidden bg-slate-800 p-6 rounded-3xl shadow-xl border-b-8 border-yellow-500 space-y-4 text-white">
-                <div class="flex justify-between font-black text-[10px] uppercase"><span>Painel Administrativo</span><button type="button" id="btn-fechar-config">X</button></div>
+                <div class="flex justify-between font-black text-[10px] uppercase"><span>Administração</span><button type="button" id="btn-fechar-config">X</button></div>
                 <div id="area-admin-firebase" class="hidden border-t border-slate-700 pt-4">
                     <button type="button" id="btn-cadastrar-user" class="w-full bg-blue-600 p-3 rounded-xl font-black uppercase text-[9px]">Gerenciar Usuários</button>
                 </div>
-                <input type="password" id="nova-senha" placeholder="MUDAR MINHA SENHA" class="w-full p-3 rounded-xl bg-slate-700 outline-none border border-slate-600 text-white">
-                <button type="button" id="btn-confirmar-senha" class="w-full bg-yellow-600 p-3 rounded-xl font-black uppercase text-[9px]">Confirmar Nova Senha</button>
+                <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-3 rounded-xl bg-slate-700 outline-none border border-slate-600">
+                <button type="button" id="btn-confirmar-senha" class="w-full bg-yellow-600 p-3 rounded-xl font-black uppercase text-[9px]">Confirmar Senha</button>
             </div>
 
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
-                <h2 class="font-black uppercase text-blue-800 text-[10px] tracking-widest">Cadastro de Validade</h2>
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none bg-slate-50">
+                <h2 class="font-black uppercase text-blue-800 text-[10px]">Novo Registro</h2>
+                <input type="text" id="p-nome" placeholder="PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none bg-slate-50">
                 <div class="grid grid-cols-4 gap-2">
                     <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl outline-none">
                     <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl outline-none">
@@ -79,20 +82,22 @@
                     <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
                 <input type="date" id="p-data" class="w-full p-4 border rounded-2xl outline-none">
-                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar Item</button>
+                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar</button>
             </div>
 
             <div class="space-y-4">
                 <div class="grid grid-cols-3 gap-2 text-center font-black">
                     <button type="button" id="f-critico" class="bg-white p-3 rounded-2xl text-red-600 border-2" onclick="aplicarFiltro('critico')"><p class="text-[8px]">🚨 Crítico</p><p id="c-critico" class="text-xl">0</p></button>
                     <button type="button" id="f-atencao" class="bg-white p-3 rounded-2xl text-yellow-600 border-2" onclick="aplicarFiltro('atencao')"><p class="text-[8px]">⚠️ Atenção</p><p id="c-atencao" class="text-xl">0</p></button>
-                    <button type="button" id="f-todos" class="bg-white p-3 rounded-2xl text-blue-600 border-4 border-blue-800" onclick="aplicarFiltro('todos')"><p class="text-[8px]">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
+                    <button type="button" id="f-todos" class="bg-white p-3 rounded-2xl text-blue-600 border-2 filtro-ativo" onclick="aplicarFiltro('todos')"><p class="text-[8px]">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
                 </div>
+                
                 <div class="flex gap-2">
                     <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Buscar..." class="flex-grow p-4 rounded-2xl bg-white border outline-none">
                     <button type="button" id="btn-selecionar-criticos" class="bg-red-600 text-white px-4 rounded-2xl font-black text-[9px] uppercase">Marcar Críticos</button>
                 </div>
-                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md">Gerar Relatório WhatsApp</button>
+                
+                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px]">Relatório WhatsApp (Gerentes)</button>
                 <div id="lista" class="space-y-3 pb-8"></div>
             </div>
         </main>
@@ -129,11 +134,19 @@
             setTimeout(() => t.className = "", 3000);
         }
 
+        // LÓGICA DE FILTROS CORRIGIDA
         window.aplicarFiltro = (tipo) => {
             filtroAtual = tipo;
             const bts = { critico: 'f-critico', atencao: 'f-atencao', todos: 'f-todos' };
-            Object.values(bts).forEach(id => document.getElementById(id).style.borderWidth = "2px");
-            document.getElementById(bts[tipo]).style.borderWidth = "4px";
+            
+            // Remove o destaque de todos
+            Object.values(bts).forEach(id => {
+                document.getElementById(id).classList.remove('filtro-ativo');
+            });
+            
+            // Adiciona destaque apenas no clicado
+            document.getElementById(bts[tipo]).classList.add('filtro-ativo');
+            
             processarLista();
         };
 
@@ -170,7 +183,7 @@
                         <div class="flex gap-3">
                             <input type="checkbox" class="item-check mt-1 scale-150 pointer-events-none">
                             <div class="flex-grow">
-                                <div class="flex justify-between text-[7px] font-black uppercase text-slate-400"><span>${item.setor}</span><span class="text-slate-600">${diff <= 0 ? 'HOJE' : diff + ' DIAS'}</span></div>
+                                <div class="flex justify-between text-[7px] font-black uppercase text-slate-400"><span>${item.setor}</span></div>
                                 <h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3>
                                 <div class="my-2 bg-white border rounded-lg p-1 text-center"><svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35"></svg></div>
                                 <div class="flex justify-between items-end text-[9px] font-bold text-slate-500">
@@ -187,7 +200,7 @@
                 document.getElementById('c-atencao').innerText = counts.atencao;
                 processarLista();
                 document.querySelectorAll('.btn-excluir').forEach(btn => {
-                    btn.onclick = async (e) => { e.stopPropagation(); if(confirm("Apagar item?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); };
+                    btn.onclick = async (e) => { e.stopPropagation(); if(confirm("Apagar Registro?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); };
                 });
             });
         }
@@ -217,20 +230,16 @@
         document.getElementById('btn-entrar').onclick = async () => {
             const e = document.getElementById('email').value.trim().toLowerCase();
             const s = document.getElementById('password').value;
-            try { 
-                await signInWithEmailAndPassword(auth, e, s); 
-            } catch (err) { 
-                showToast("Erro no Login: Verifique e-mail e senha!");
-            }
+            try { await signInWithEmailAndPassword(auth, e, s); } catch (err) { showToast("Login Inválido!"); }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
         
         document.getElementById('btn-salvar').onclick = async () => {
             const p = { produto: document.getElementById('p-nome').value.toUpperCase().trim(), codigo: document.getElementById('p-ean').value || "0", quantidade: document.getElementById('p-qtd').value || "0", setor: document.getElementById('p-setor-add').value, vencimento: document.getElementById('p-data').value, criadoEm: serverTimestamp() };
-            if(!p.produto || !p.vencimento) return showToast("Preencha o produto e a data!");
+            if(!p.produto || !p.vencimento) return showToast("Dados incompletos!");
             await addDoc(collection(db, "validades"), p);
-            showToast("Item salvo com sucesso!");
+            showToast("Salvo!");
             document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
         };
 
@@ -246,7 +255,7 @@
 
         document.getElementById('btn-whatsapp').onclick = () => {
             const sel = document.querySelectorAll('.card-checked');
-            if(sel.length === 0) return showToast("Marque os itens primeiro!");
+            if(sel.length === 0) return showToast("Selecione os itens!");
             
             let msg = "*⚠️ ATENÇÃO GERÊNCIA - NEW MARKET*\n";
             msg += "_Verificação de validades pendente:_\n\n";
@@ -254,7 +263,7 @@
 
             sel.forEach(c => {
                 const nome = c.querySelector('h3').innerText;
-                const setor = c.querySelector('.text-slate-400 span:first-child').innerText;
+                const setor = c.querySelector('.text-slate-400 span').innerText;
                 const vencText = c.querySelector('.venc-text').innerText;
                 msg += `📦 *${nome}*\n📍 LOCAL: ${setor}\n📅 ${vencText}\n\n`;
             });
