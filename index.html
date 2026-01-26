@@ -6,36 +6,25 @@
     <title>New Market - Sistema 2026</title>
     <link rel="manifest" href="./manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
         #login-screen, #main-panel { display: none; }
-        #loading-screen { position: fixed; inset: 0; background: white; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
-        .card-critico { border-left: 8px solid #ef4444; }
-        .card-atencao { border-left: 8px solid #f59e0b; }
-        .card-normal { border-left: 8px solid #10b981; }
-        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; }
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
 </head>
-<body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
-
+<body class="bg-slate-100 flex flex-col min-h-screen">
     <div id="toast"></div>
 
-    <div id="loading-screen">
-        <div class="w-12 h-12 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase text-slate-400">Sincronizando New Market</p>
-    </div>
-
-    <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-t-8 border-blue-800 text-center">
-            <h1 class="text-3xl font-black uppercase italic text-blue-800">New <span class="text-red-600">Market</span></h1>
+    <div id="login-screen" class="flex-grow flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-t-8 border-blue-800">
+            <h1 class="text-3xl font-black uppercase text-center text-blue-800">New Market</h1>
             <form id="login-form" class="space-y-4 mt-8">
                 <input type="email" id="email" class="w-full p-4 border rounded-2xl outline-none" placeholder="E-mail" required>
                 <input type="password" id="password" class="w-full p-4 border rounded-2xl outline-none" placeholder="Senha" required>
-                <button type="submit" class="w-full bg-blue-800 text-white p-4 rounded-2xl font-black uppercase">Acessar</button>
+                <button type="submit" class="w-full bg-blue-800 text-white p-4 rounded-2xl font-black uppercase">Entrar</button>
             </form>
         </div>
     </div>
@@ -43,32 +32,21 @@
     <div id="main-panel" class="flex-grow flex flex-col">
         <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50">
             <span class="font-black italic uppercase">New Market</span>
-            <div class="flex gap-2">
-                <button id="btn-config" class="bg-white/20 p-2 rounded-full">⚙️</button>
-                <button id="btn-logout" class="text-[8px] bg-black/40 px-3 py-2 rounded-full font-bold">SAIR</button>
-            </div>
+            <button id="btn-config" class="bg-white/20 p-2 rounded-full">⚙️</button>
         </nav>
 
         <main class="p-4 max-w-xl mx-auto w-full space-y-5">
             <div id="gaveta-config" class="hidden bg-slate-800 p-6 rounded-3xl text-white space-y-4">
-                <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações</h2>
-                <button id="btn-ativar-push" class="w-full bg-purple-600 p-3 rounded-xl font-black uppercase text-[9px]">🔔 Ativar Notificações neste Celular</button>
+                <button id="btn-ativar-push" class="w-full bg-purple-600 p-3 rounded-xl font-black uppercase text-[9px]">🔔 Ativar Alertas neste Celular</button>
             </div>
-
-            <div id="repositor-form" class="bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
-                <input type="text" id="p-nome" placeholder="PRODUTO" class="w-full p-4 border rounded-2xl uppercase font-bold">
-                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold">
-                <button id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase">Salvar</button>
-            </div>
-
             <div id="lista" class="space-y-3 pb-8"></div>
         </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
 
         const firebaseConfig = {
@@ -85,7 +63,7 @@
         const db = getFirestore(app);
         const messaging = getMessaging(app);
 
-        // REGISTRO DE TOKEN (CRIA A COLEÇÃO QUE FALTA)
+        // REGISTRO DE TOKEN (CRIA A COLEÇÃO NO FIREBASE)
         document.getElementById('btn-ativar-push').onclick = async () => {
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
@@ -99,15 +77,13 @@
                             usuario: auth.currentUser.email,
                             atualizadoEm: serverTimestamp()
                         });
-                        showToast("NOTIFICAÇÕES ATIVADAS!", "#10b981");
+                        alert("SUCESSO! Seu celular agora receberá os alertas.");
                     }
-                } catch (e) { showToast("Erro ao ativar", "#dc2626"); }
+                } catch (e) { alert("Erro ao ativar: " + e.message); }
             }
         };
 
-        // ... lógica de login e carregamento (mesma do seu código anterior) ...
         onAuthStateChanged(auth, (user) => {
-            document.getElementById('loading-screen').style.display = 'none';
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
@@ -120,15 +96,8 @@
 
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
-            try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
-            catch (err) { showToast("Erro no Login", "#dc2626"); }
+            await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
         };
-
-        function showToast(msg, color) {
-            const t = document.getElementById("toast");
-            t.innerText = msg; t.style.backgroundColor = color; t.className = "show";
-            setTimeout(() => t.className = "", 3000);
-        }
 
         function carregar() {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
@@ -138,20 +107,13 @@
                     const item = d.data();
                     const div = document.createElement('div');
                     div.className = "p-4 bg-white rounded-2xl shadow-sm mb-3 border-l-8 border-blue-600";
-                    div.innerHTML = `<h3 class="font-black uppercase">${item.produto}</h3><p class="text-xs">Venc: ${item.vencimento}</p>`;
+                    div.innerHTML = `<h3 class="font-black uppercase">${item.produto}</h3><p class="text-xs">Vencimento: ${item.vencimento}</p>`;
                     lista.appendChild(div);
                 });
             });
         }
 
-        document.getElementById('btn-salvar').onclick = async () => {
-            const data = { produto: document.getElementById('p-nome').value.toUpperCase(), vencimento: document.getElementById('p-data').value, criadoEm: serverTimestamp() };
-            await addDoc(collection(db, "validades"), data);
-            showToast("Salvo!", "#10b981");
-        };
-
         document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
-        document.getElementById('btn-logout').onclick = () => signOut(auth);
     </script>
 </body>
 </html>
