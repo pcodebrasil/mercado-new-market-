@@ -15,46 +15,57 @@
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
 </head>
-<body class="bg-slate-100 flex flex-col min-h-screen">
+<body class="bg-slate-100 flex flex-col min-h-screen font-sans">
     <div id="toast"></div>
 
     <div id="login-screen" class="flex-grow flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-t-8 border-blue-800 text-center">
             <h1 class="text-3xl font-black uppercase italic text-blue-800">New Market</h1>
-            <form id="login-form" class="space-y-4 mt-8">
-                <input type="email" id="email" class="w-full p-4 border rounded-2xl outline-none" placeholder="E-mail" required>
-                <input type="password" id="password" class="w-full p-4 border rounded-2xl outline-none" placeholder="Senha" required>
-                <button type="submit" class="w-full bg-blue-800 text-white p-4 rounded-2xl font-black uppercase">Entrar</button>
+            <p class="text-[10px] font-bold text-slate-400 mb-6">SISTEMA DE VALIDADES</p>
+            <form id="login-form" class="space-y-4">
+                <input type="email" id="email" class="w-full p-4 border rounded-2xl outline-none focus:ring-2 ring-blue-500" placeholder="E-mail" required>
+                <input type="password" id="password" class="w-full p-4 border rounded-2xl outline-none focus:ring-2 ring-blue-500" placeholder="Senha" required>
+                <button type="submit" class="w-full bg-blue-800 text-white p-4 rounded-2xl font-black uppercase shadow-lg hover:bg-blue-900 transition-all">Entrar</button>
             </form>
         </div>
     </div>
 
     <div id="main-panel" class="flex-grow flex flex-col">
-        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50">
-            <span class="font-black italic uppercase">New Market</span>
-            <button id="btn-config" class="bg-white/20 p-2 rounded-full">⚙️</button>
+        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
+            <span class="font-black italic uppercase tracking-tighter text-xl">New Market</span>
+            <div class="flex gap-2">
+                <button id="btn-config" class="bg-white/20 p-2 rounded-full hover:bg-white/40">⚙️</button>
+                <button id="btn-logout" class="bg-red-600/80 p-2 rounded-full text-[10px] font-bold">SAIR</button>
+            </div>
         </nav>
 
-        <main class="p-4 max-w-xl mx-auto w-full space-y-5">
-            <div id="gaveta-config" class="hidden bg-slate-800 p-6 rounded-3xl text-white space-y-4 shadow-xl">
-                <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações</h2>
-                <button id="btn-ativar-push" class="w-full bg-purple-600 p-3 rounded-xl font-black uppercase text-[9px]">🔔 Ativar Alertas neste Celular</button>
+        <main class="p-4 max-w-xl mx-auto w-full space-y-6">
+            <div id="gaveta-config" class="hidden bg-slate-800 p-6 rounded-3xl text-white space-y-4 shadow-2xl border-2 border-slate-700">
+                <h2 class="font-black uppercase text-yellow-500 text-xs tracking-widest">Configurações do Dispositivo</h2>
+                <button id="btn-ativar-push" class="w-full bg-purple-600 hover:bg-purple-700 p-4 rounded-2xl font-black uppercase text-[10px] shadow-lg transition-all">🔔 Ativar Notificações de Validade</button>
+                <p class="text-[9px] text-slate-400 text-center italic">Ative para receber alertas automáticos de vencimento às 08h.</p>
             </div>
 
             <div class="bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
-                <input type="text" id="p-nome" placeholder="PRODUTO" class="w-full p-4 border rounded-2xl uppercase font-bold">
-                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold">
-                <button id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar Produto</button>
+                <h2 class="font-black uppercase text-blue-800 text-xs">Novo Produto</h2>
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl uppercase font-bold text-slate-700 outline-none focus:ring-2 ring-blue-400">
+                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-slate-700 outline-none focus:ring-2 ring-blue-400">
+                <button id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-md hover:bg-blue-800 transition-all">Salvar no Banco</button>
             </div>
 
-            <div id="lista" class="space-y-3 pb-8"></div>
+            <div class="flex items-center justify-between px-2">
+                <h2 class="font-black uppercase text-slate-500 text-xs tracking-widest">Lista de Validades</h2>
+                <span id="contagem" class="bg-blue-100 text-blue-800 text-[10px] px-2 py-1 rounded-full font-bold">0 itens</span>
+            </div>
+
+            <div id="lista" class="space-y-3 pb-20"></div>
         </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, setDoc, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
 
         const firebaseConfig = {
@@ -71,12 +82,11 @@
         const db = getFirestore(app);
         const messaging = getMessaging(app);
 
-        // FUNÇÃO PARA ATIVAR ALERTAS (Resolve Erro 404 da Foto 890)
+        // ATIVAÇÃO DE ALERTAS (Resolve Erro 404 Foto 890)
         document.getElementById('btn-ativar-push').onclick = async () => {
             try {
                 const permission = await Notification.requestPermission();
                 if (permission === 'granted') {
-                    // Tenta registrar o Service Worker com o nome que você tem no GitHub
                     const reg = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
                     const token = await getToken(messaging, { 
                         vapidKey: 'BNdM1ijQ6x9eFK4Zop7MfUZ6GnyVSFVR_DJJSOwBsXKfs6Q6bouX2o3b5KD44_f5xWXbXCqwHeJWJlcOEo7DrLA',
@@ -89,71 +99,91 @@
                             usuario: auth.currentUser.email,
                             atualizadoEm: serverTimestamp()
                         });
-                        showToast("ALERTA ATIVADO COM SUCESSO!", "#10b981");
+                        showToast("SISTEMA DE ALERTAS ATIVADO!", "#10b981");
                     }
+                } else {
+                    showToast("PERMISSÃO NEGADA PELO CHROME", "#dc2626");
                 }
-            } catch (e) { showToast("Erro: " + e.message, "#dc2626"); }
+            } catch (e) { showToast("ERRO: " + e.message, "#dc2626"); }
         };
 
-        // CONTROLE DE TELAS (Login vs Painel)
+        // SALVAR PRODUTO (Coleção 'validades' Foto 888)
+        document.getElementById('btn-salvar').onclick = async () => {
+            const nome = document.getElementById('p-nome').value.trim().toUpperCase();
+            const data = document.getElementById('p-data').value;
+            
+            if (!nome || !data) return showToast("PREENCHA NOME E DATA!", "#f59e0b");
+            
+            try {
+                await addDoc(collection(db, "validades"), {
+                    produto: nome,
+                    vencimento: data,
+                    cadastradoPor: auth.currentUser.email,
+                    criadoEm: serverTimestamp()
+                });
+                document.getElementById('p-nome').value = "";
+                document.getElementById('p-data').value = "";
+                showToast("PRODUTO SALVO COM SUCESSO!", "#10b981");
+            } catch (e) { showToast("ERRO AO SALVAR", "#dc2626"); }
+        };
+
+        // CARREGAR LISTA EM TEMPO REAL
+        function carregarLista() {
+            onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
+                const lista = document.getElementById('lista');
+                document.getElementById('contagem').innerText = `${snap.size} itens`;
+                lista.innerHTML = "";
+                
+                snap.forEach(d => {
+                    const item = d.data();
+                    const card = document.createElement('div');
+                    card.className = "p-4 bg-white rounded-2xl shadow-sm border-l-8 border-blue-600 flex justify-between items-center";
+                    card.innerHTML = `
+                        <div>
+                            <h3 class="font-black uppercase text-blue-900 text-sm">${item.produto}</h3>
+                            <p class="text-[10px] font-bold text-slate-500">VENCE EM: ${item.vencimento}</p>
+                        </div>
+                        <button onclick="window.excluirItem('${d.id}')" class="text-slate-300 hover:text-red-500">✕</button>
+                    `;
+                    lista.appendChild(card);
+                });
+            });
+        }
+
+        // LOGIN E LOGOUT
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                carregarProdutos();
+                carregarLista();
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-panel').style.display = 'none';
             }
         });
 
-        // LOGIN
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try {
                 await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
-            } catch (err) { showToast("Usuário ou Senha incorretos", "#dc2626"); }
+            } catch (err) { showToast("ERRO DE LOGIN", "#dc2626"); }
         };
 
-        // SALVAR PRODUTO NO FIREBASE (Foto 888)
-        document.getElementById('btn-salvar').onclick = async () => {
-            const nome = document.getElementById('p-nome').value.toUpperCase();
-            const data = document.getElementById('p-data').value;
-            if(!nome || !data) return showToast("Preencha tudo!", "#f59e0b");
-            
-            try {
-                await addDoc(collection(db, "validades"), {
-                    produto: nome,
-                    vencimento: data,
-                    criadoEm: serverTimestamp()
-                });
-                document.getElementById('p-nome').value = "";
-                showToast("PRODUTO SALVO!", "#10b981");
-            } catch (e) { showToast("Erro ao salvar", "#dc2626"); }
+        document.getElementById('btn-logout').onclick = () => signOut(auth);
+        document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
+        
+        // FUNÇÃO GLOBAL DE EXCLUSÃO
+        window.excluirItem = async (id) => {
+            if(confirm("Excluir este produto?")) {
+                await deleteDoc(doc(db, "validades", id));
+            }
         };
-
-        // CARREGAR LISTA
-        function carregarProdutos() {
-            onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
-                const lista = document.getElementById('lista');
-                lista.innerHTML = "";
-                snap.forEach(d => {
-                    const item = d.data();
-                    const div = document.createElement('div');
-                    div.className = "p-4 bg-white rounded-2xl shadow-sm border-l-8 border-blue-600";
-                    div.innerHTML = `<h3 class="font-black uppercase text-sm">${item.produto}</h3><p class="text-[10px] text-slate-500 font-bold">VENCIMENTO: ${item.vencimento}</p>`;
-                    lista.appendChild(div);
-                });
-            });
-        }
 
         function showToast(msg, color) {
             const t = document.getElementById("toast");
             t.innerText = msg; t.style.backgroundColor = color; t.className = "show";
             setTimeout(() => t.className = "", 3000);
         }
-
-        document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
     </script>
 </body>
 </html>
