@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - Gestão de Validade</title>
+    <title>New Market - Sistema de Validade</title>
 
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignal.js" defer></script>
     <script>
@@ -17,73 +17,71 @@
       });
     </script>
 
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-
     <style>
-        :root { --primary: #2563eb; --danger: #dc2626; --warning: #f59e0b; --success: #16a34a; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background: var(--bg); color: var(--text); padding-bottom: 80px; }
-        #login-screen { position: fixed; inset: 0; background: var(--primary); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .login-card { background: white; padding: 2rem; border-radius: 1rem; width: 90%; max-width: 400px; text-align: center; }
-        input { width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 0.5rem; outline: none; }
-        button { width: 100%; padding: 0.8rem; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: bold; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-purple { background: #6b21a8; color: white; margin-top: 1rem; }
-        header { background: var(--primary); color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        .container { padding: 1rem; max-width: 800px; margin: 0 auto; }
-        .card { background: var(--card); padding: 1.2rem; border-radius: 0.75rem; margin-bottom: 1rem; border-left: 5px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 200; }
-        .modal-content { background: white; padding: 1.5rem; border-radius: 1rem; width: 90%; max-width: 500px; }
-        nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 1rem; border-top: 1px solid #ddd; }
+        :root { --p: #2563eb; --d: #dc2626; --w: #f59e0b; --s: #16a34a; --bg: #f8fafc; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background: var(--bg); padding-bottom: 70px; }
+        #login-screen { position: fixed; inset: 0; background: var(--p); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .card-login { background: white; padding: 2rem; border-radius: 1rem; width: 90%; max-width: 350px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-p { background: var(--p); color: white; }
+        header { background: var(--p); color: white; padding: 1rem; display: flex; justify-content: space-between; }
+        .container { padding: 15px; }
+        .prod-card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #ddd; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 20px; border-radius: 15px; width: 90%; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <div class="login-card">
-            <h2 style="color:var(--primary); margin-bottom:1.5rem;">New Market</h2>
+        <div class="card-login">
+            <h2>New Market</h2><br>
             <input type="email" id="email" placeholder="E-mail">
-            <input type="password" id="password" placeholder="Senha">
-            <button class="btn-primary" onclick="login()">Entrar no Sistema</button>
+            <input type="password" id="pass" placeholder="Senha">
+            <button class="btn-p" id="btnLogin">Entrar</button>
         </div>
     </div>
 
     <header>
-        <span id="user-display">New Market</span>
-        <button onclick="document.getElementById('modal-config').style.display='flex'" style="background:none; font-size: 1.5rem;">⚙️</button>
+        <span id="user-name">New Market</span>
+        <button onclick="document.getElementById('m-conf').style.display='flex'" style="background:none; color:white; font-size:20px;">⚙️</button>
     </header>
 
-    <div class="container" id="lista-produtos"></div>
+    <div class="container" id="lista"></div>
 
     <nav>
-        <button onclick="carregarProdutos()" style="background:none;">📋 Lista</button>
-        <button onclick="document.getElementById('modal-add').style.display='flex'" style="background:none;">➕ Lançar</button>
-        <button onclick="logout()" style="background:none;">🚪 Sair</button>
+        <button onclick="location.reload()" style="background:none;">📋 Lista</button>
+        <button onclick="document.getElementById('m-add').style.display='flex'" style="background:none;">➕ Lançar</button>
+        <button id="btnLogout" style="background:none; color:red;">🚪 Sair</button>
     </nav>
 
-    <div id="modal-add" class="modal">
+    <div id="m-add" class="modal">
         <div class="modal-content">
-            <h3>Lançar Produto</h3><br>
-            <input type="text" id="prod-nome" placeholder="Nome do Produto">
-            <input type="date" id="prod-validade">
-            <input type="text" id="prod-setor" placeholder="Setor">
-            <button class="btn-primary" onclick="salvarProduto()">Salvar</button>
-            <button onclick="this.parentElement.parentElement.style.display='none'" style="margin-top:0.5rem; background:none; color:gray;">Cancelar</button>
+            <h3>Novo Produto</h3><br>
+            <input type="text" id="p-nome" placeholder="Nome">
+            <input type="date" id="p-data">
+            <input type="text" id="p-setor" placeholder="Setor">
+            <button class="btn-p" id="btnSalvar">Salvar</button>
+            <button onclick="this.parentElement.parentElement.style.display='none'" style="background:none; margin-top:10px;">Fechar</button>
         </div>
     </div>
 
-    <div id="modal-config" class="modal">
+    <div id="m-conf" class="modal">
         <div class="modal-content">
             <h3>Configurações</h3><br>
-            <button class="btn-purple" onclick="ativarNotificacoes()">🔔 Ativar Alertas no Celular</button>
-            <button onclick="this.parentElement.parentElement.style.display='none'" style="margin-top:1rem; background:#ddd;">Fechar</button>
+            <button class="btn-p" style="background:purple;" onclick="OneSignalDeferred.push(function(o){o.showNativePrompt()})">🔔 Ativar Notificações</button>
+            <button onclick="this.parentElement.parentElement.style.display='none'" style="background:none; margin-top:20px;">Fechar</button>
         </div>
     </div>
 
-    <script>
-        // CONFIGURAÇÃO COM A SUA CHAVE CORRETA
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -93,64 +91,60 @@
             appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c"
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        function login() {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            auth.signInWithEmailAndPassword(email, pass).catch(err => {
-                alert("Erro: " + err.message);
-            });
-        }
+        // Login
+        document.getElementById('btnLogin').onclick = () => {
+            const e = document.getElementById('email').value;
+            const s = document.getElementById('pass').value;
+            signInWithEmailAndPassword(auth, e, s).catch(err => alert("Erro: " + err.message));
+        };
 
-        function logout() { auth.signOut().then(() => location.reload()); }
+        // Sair
+        document.getElementById('btnLogout').onclick = () => signOut(auth).then(() => location.reload());
 
-        function ativarNotificacoes() {
-            OneSignalDeferred.push(function(OneSignal) { OneSignal.showNativePrompt(); });
-        }
-
-        function salvarProduto() {
-            const nome = document.getElementById('prod-nome').value;
-            const validade = document.getElementById('prod-validade').value;
-            const setor = document.getElementById('prod-setor').value;
-            if(!nome || !validade) return alert("Preencha os campos!");
-
-            db.collection("produtos").add({
-                nome, validade, setor,
-                usuario: auth.currentUser.email,
+        // Salvar
+        document.getElementById('btnSalvar').onclick = async () => {
+            const nome = document.getElementById('p-nome').value;
+            const data = document.getElementById('p-data').value;
+            const setor = document.getElementById('p-setor').value;
+            if(!nome || !data) return alert("Preencha tudo!");
+            
+            await addDoc(collection(db, "produtos"), {
+                nome, data, setor,
                 criadoEm: new Date().getTime()
-            }).then(() => {
-                document.getElementById('modal-add').style.display = 'none';
-                carregarProdutos();
             });
-        }
+            document.getElementById('m-add').style.display = 'none';
+        };
 
-        function carregarProdutos() {
-            db.collection("produtos").orderBy("validade", "asc").onSnapshot(snap => {
-                const lista = document.getElementById('lista-produtos');
-                lista.innerHTML = "";
-                snap.forEach(doc => {
-                    const p = doc.data();
-                    lista.innerHTML += `
-                        <div class="card">
-                            <strong>${p.nome}</strong><br>
-                            <small>Setor: ${p.setor}</small><br>
-                            <span style="color:red; font-weight:bold;">${p.validade}</span>
-                            <button onclick="db.collection('produtos').doc('${doc.id}').delete()" style="float:right; background:none; color:red;">🗑️</button>
-                        </div>`;
-                });
-            });
-        }
-
-        auth.onAuthStateChanged(user => {
-            if(user) {
+        // Listar
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
                 document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('user-display').innerText = user.email.split('@')[0];
-                carregarProdutos();
+                document.getElementById('user-name').innerText = user.email.split('@')[0];
+                
+                const q = query(collection(db, "produtos"), orderBy("data", "asc"));
+                onSnapshot(q, (snap) => {
+                    const lista = document.getElementById('lista');
+                    lista.innerHTML = "";
+                    snap.forEach((d) => {
+                        const p = d.data();
+                        const card = document.createElement('div');
+                        card.className = 'prod-card';
+                        card.innerHTML = `<strong>${p.nome}</strong><br><small>${p.setor}</small><br>
+                                          <span style="color:red; font-weight:bold">${p.data}</span>
+                                          <button style="float:right; background:none; color:red" onclick="window.excluir('${d.id}')">🗑️</button>`;
+                        lista.appendChild(card);
+                    });
+                });
             }
         });
+
+        window.excluir = async (id) => {
+            if(confirm("Excluir produto?")) await deleteDoc(doc(db, "produtos", id));
+        };
     </script>
 </body>
 </html>
