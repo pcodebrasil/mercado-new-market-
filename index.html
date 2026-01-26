@@ -9,7 +9,7 @@
     <style>
         #login-screen, #main-panel { display: none; }
         #loading-screen { position: fixed; inset: 0; background: white; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .filter-active { border-width: 4px !important; opacity: 1 !important; transform: scale(1.05); transition: 0.3s; }
+        .filter-active { border-width: 4px !important; opacity: 1 !important; transform: scale(1.05); transition: 0.3s; border-color: inherit; }
         .filter-inactive { opacity: 0.6; }
         .card-critico { border-left: 8px solid #ef4444; }
         .card-atencao { border-left: 8px solid #f59e0b; }
@@ -66,13 +66,11 @@
                     <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações</h2>
                     <button id="btn-fechar-config" class="text-white font-black text-xs">X</button>
                 </div>
-                
                 <div class="border-t border-slate-700 pt-4">
                     <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Mudar Minha Senha</p>
                     <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-3 border-none rounded-xl font-bold outline-none text-xs bg-slate-700 text-white mb-2">
                     <button id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Confirmar e Sair</button>
                 </div>
-
                 <div class="border-t border-slate-700 pt-4">
                     <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Acessos da Equipe</p>
                     <button id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Abrir Gerenciador Firebase</button>
@@ -80,10 +78,10 @@
             </div>
 
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
-                <h2 class="font-black uppercase text-blue-800 text-[10px]">Lançar Validade</h2>
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50">
+                <h2 class="font-black uppercase text-blue-800 text-[10px]">Lançar Validade por Produto</h2>
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO (Ex: Leite Integral)" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50">
                 <div class="grid grid-cols-4 gap-2">
-                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
+                    <input type="number" id="p-ean" placeholder="EAN (Opcional)" class="col-span-3 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
                     <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
                 </div>
                 <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50 text-sm outline-none">
@@ -93,7 +91,7 @@
                     <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
                 <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-sm bg-slate-50">
-                <button id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar Produto</button>
+                <button id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar No Estoque</button>
             </div>
 
             <div class="space-y-4">
@@ -104,7 +102,7 @@
                 </div>
 
                 <div class="flex gap-2">
-                    <input type="text" id="busca" placeholder="🔍 Buscar..." class="flex-grow p-4 rounded-2xl bg-white shadow-sm font-bold outline-none border">
+                    <input type="text" id="busca" placeholder="🔍 Buscar por Nome do Produto..." class="flex-grow p-4 rounded-2xl bg-white shadow-sm font-bold outline-none border">
                     <button id="btn-selecionar-criticos" class="bg-blue-600 text-white px-4 rounded-2xl font-black text-[9px] uppercase shadow-md">Marcar Críticos</button>
                 </div>
 
@@ -122,6 +120,7 @@
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Configuração Firebase (Mantida a sua original)
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -134,7 +133,8 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        try { enableIndexedDbPersistence(db); } catch (e) {}
+        
+        try { enableIndexedDbPersistence(db); } catch (e) { console.warn("Persistência offline não disponível"); }
         
         const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         const gerentesOCULTOS = ['paulo@newmarket.com']; 
@@ -148,6 +148,7 @@
             setTimeout(() => { t.className = ""; }, 3000);
         }
 
+        // --- Monitoramento de Auth ---
         onAuthStateChanged(auth, (user) => {
             document.getElementById('loading-screen').style.display = 'none';
             if (user) {
@@ -157,9 +158,9 @@
                 const isGerenteReal = gerentesREAIS.includes(user.email);
                 const isPaulo = gerentesOCULTOS.includes(user.email);
                 
-                document.getElementById('user-display').innerText = (isGerenteReal) ? `ADMIN: ${user.email.split('@')[0]}` : `REPO: ${user.email.split('@')[0]}`;
+                document.getElementById('user-display').innerText = (isGerenteReal || isPaulo) ? `ADMIN: ${user.email.split('@')[0]}` : `REPO: ${user.email.split('@')[0]}`;
                 document.getElementById('btn-config').classList.toggle('hidden', !(isGerenteReal || isPaulo));
-                document.getElementById('repositor-form').classList.toggle('hidden', isGerenteReal);
+                document.getElementById('repositor-form').classList.remove('hidden'); // Repositores e Admins podem lançar
                 
                 carregar(isGerenteReal || isPaulo);
             } else {
@@ -168,6 +169,7 @@
             }
         });
 
+        // --- Funções de Login / Logout ---
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
@@ -177,32 +179,56 @@
         document.getElementById('btn-logout').onclick = () => signOut(auth);
         document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
         document.getElementById('btn-fechar-config').onclick = () => document.getElementById('gaveta-config').classList.add('hidden');
-        document.getElementById('btn-cadastrar-user').onclick = () => window.open('https://console.firebase.google.com/project/mercado-c3e95/authentication/users', '_blank');
 
-        document.getElementById('btn-confirmar-senha').onclick = async () => {
-            const ns = document.getElementById('nova-senha').value;
-            if (ns.length < 6) return showToast("Mínimo 6 caracteres!", "#f59e0b");
-            try { await updatePassword(auth.currentUser, ns); showToast("Senha alterada! Relogue.", "#10b981"); setTimeout(()=>signOut(auth), 2000); } 
-            catch (e) { showToast("Relogue para mudar a senha", "#dc2626"); }
-        };
-
+        // --- Carregamento de Dados (Foco no Nome do Produto) ---
         function carregar(podeApagar) {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista');
                 lista.innerHTML = ""; dadosAtuais = [];
                 let counts = {critico: 0, atencao: 0};
+                
                 snap.forEach(d => {
                     const item = { id: d.id, ...d.data() };
                     const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
+                    
                     let cat = "normal", estilo = "card-normal", corTxt = "text-green-600";
                     if(diff <= 7) { estilo="card-critico"; corTxt="text-red-600 animate-pulse font-black"; counts.critico++; cat="critico"; }
                     else if(diff <= 15) { estilo="card-atencao"; corTxt="text-yellow-600 font-black"; counts.atencao++; cat="atencao"; }
+                    
                     dadosAtuais.push({...item, dias: diff, cat});
+                    
                     const div = document.createElement('div');
                     div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 border border-slate-100`;
-                    div.dataset.id = item.id; div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
-                    div.onclick = (e) => { if(e.target.tagName !== 'BUTTON') { const cb = div.querySelector('.item-check'); cb.checked = !cb.checked; div.classList.toggle('card-checked', cb.checked); } };
-                    div.innerHTML = `<div class="flex gap-3"><input type="checkbox" class="item-check mt-1 scale-150 accent-blue-600 pointer-events-none"><div class="flex-grow"><div class="flex justify-between text-[7px] font-black text-slate-400"><span>${item.setor}</span><span class="${corTxt}">${diff} DIAS</span></div><h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3><div class="my-2 bg-white border rounded-lg p-1 text-center"><svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35"></svg></div><div class="flex justify-between items-end text-[9px] font-bold text-slate-500"><span>QTD: ${item.quantidade} | VENC: ${item.vencimento.split('-').reverse().join('/')}</span>${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-600 bg-red-50 px-3 py-2 rounded-lg font-black text-[8px]">Excluir</button>` : ''}</div></div></div>`;
+                    div.dataset.id = item.id; 
+                    div.dataset.cat = cat; 
+                    div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
+                    
+                    div.onclick = (e) => { 
+                        if(e.target.tagName !== 'BUTTON') { 
+                            const cb = div.querySelector('.item-check'); 
+                            cb.checked = !cb.checked; 
+                            div.classList.toggle('card-checked', cb.checked); 
+                        } 
+                    };
+
+                    div.innerHTML = `
+                        <div class="flex gap-3">
+                            <input type="checkbox" class="item-check mt-1 scale-150 accent-blue-600 pointer-events-none">
+                            <div class="flex-grow">
+                                <div class="flex justify-between text-[7px] font-black text-slate-400">
+                                    <span>${item.setor}</span>
+                                    <span class="${corTxt}">${diff <= 0 ? 'VENCIDO' : diff + ' DIAS'}</span>
+                                </div>
+                                <h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3>
+                                <div class="my-2 bg-white border rounded-lg p-1 text-center">
+                                    <svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35"></svg>
+                                </div>
+                                <div class="flex justify-between items-end text-[9px] font-bold text-slate-500">
+                                    <span>QTD: ${item.quantidade} | VENC: ${item.vencimento.split('-').reverse().join('/')}</span>
+                                    ${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-600 bg-red-50 px-3 py-2 rounded-lg font-black text-[8px]">Excluir</button>` : ''}
+                                </div>
+                            </div>
+                        </div>`;
                     lista.appendChild(div);
                 });
                 JsBarcode(".barcode").init();
@@ -213,14 +239,30 @@
             });
         }
 
+        // --- Salvar Produto ---
         document.getElementById('btn-salvar').onclick = async () => {
-            const data = { produto: document.getElementById('p-nome').value.toUpperCase(), codigo: document.getElementById('p-ean').value || "0000000000000", quantidade: document.getElementById('p-qtd').value, setor: document.getElementById('p-setor-add').value, vencimento: document.getElementById('p-data').value, criadoEm: serverTimestamp() };
+            const data = { 
+                produto: document.getElementById('p-nome').value.toUpperCase(), 
+                codigo: document.getElementById('p-ean').value || "0000000000000", 
+                quantidade: document.getElementById('p-qtd').value, 
+                setor: document.getElementById('p-setor-add').value, 
+                vencimento: document.getElementById('p-data').value, 
+                criadoEm: serverTimestamp() 
+            };
             if(!data.produto || !data.vencimento || !data.quantidade) return showToast("Preencha Nome, Data e Qtd!", "#dc2626");
-            await addDoc(collection(db, "validades"), data);
-            showToast("Produto Salvo!", "#10b981");
-            document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = ""; document.getElementById('p-qtd').value = "";
+            
+            try {
+                await addDoc(collection(db, "validades"), data);
+                showToast(`Produto ${data.produto} Salvo!`, "#10b981");
+                document.getElementById('p-nome').value = ""; 
+                document.getElementById('p-ean').value = ""; 
+                document.getElementById('p-qtd').value = "";
+            } catch (e) {
+                showToast("Erro ao salvar", "#dc2626");
+            }
         };
 
+        // --- Lógica de Filtros e Busca ---
         function filtrar() {
             const busca = document.getElementById('busca').value.toLowerCase();
             document.querySelectorAll('.card').forEach(c => {
@@ -229,7 +271,9 @@
                 c.style.display = (matchStatus && matchBusca) ? "block" : "none";
             });
         }
+
         document.getElementById('busca').oninput = () => filtrar();
+        
         ['f-critico', 'f-atencao', 'f-todos'].forEach(id => {
             document.getElementById(id).onclick = () => {
                 filtroStatus = id.split('-')[1];
@@ -239,21 +283,31 @@
             };
         });
 
+        // --- Relatório WhatsApp ---
         document.getElementById('btn-whatsapp').onclick = () => {
             const cards = document.querySelectorAll('.card-checked');
             if(cards.length === 0) return showToast("Marque os itens primeiro!", "#f59e0b");
             const ids = Array.from(cards).map(c => c.dataset.id);
             const itens = dadosAtuais.filter(d => ids.includes(d.id));
             let msg = `*📊 RELATÓRIO NEW MARKET*\n\n`;
-            itens.forEach(p => msg += `${p.dias <= 7 ? '🚨':'⚠️'} *${p.produto}*\nVenc: ${p.vencimento.split('-').reverse().join('/')}\nFaltam: ${p.dias} dias | Qtd: ${p.quantidade}\n\n`);
+            itens.forEach(p => {
+                msg += `${p.cat === 'critico' ? '🚨':'⚠️'} *${p.produto}*\n`;
+                msg += `Venc: ${p.vencimento.split('-').reverse().join('/')}\n`;
+                msg += `Qtd: ${p.quantidade} | Setor: ${p.setor}\n\n`;
+            });
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
         document.getElementById('btn-selecionar-criticos').onclick = () => {
-            document.querySelectorAll('.card').forEach(c => { if(c.dataset.cat === 'critico') { c.querySelector('.item-check').checked = true; c.classList.add('card-checked'); } });
+            document.querySelectorAll('.card').forEach(c => { 
+                if(c.dataset.cat === 'critico') { 
+                    c.querySelector('.item-check').checked = true; 
+                    c.classList.add('card-checked'); 
+                } 
+            });
         };
 
-        window.apagarItem = async (id) => { if(confirm("Deseja realmente excluir este produto?")) await deleteDoc(doc(db, "validades", id)); };
-    </script>
-</body>
-</html>
+        window.apagarItem = async (id) => { 
+            if(confirm("Deseja realmente excluir este produto?")) await deleteDoc(doc(db, "validades", id)); 
+        };
+    </scri
