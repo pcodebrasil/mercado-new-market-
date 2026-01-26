@@ -15,7 +15,6 @@
         .card-normal { border-left: 10px solid #10b981; background-color: #ffffff !important; }
         .card-checked { opacity: 0.4 !important; filter: grayscale(1); transform: scale(0.96); }
         
-        /* Gradiente Amarelo solicitado para o Login */
         .text-gradient-yellow {
             background: linear-gradient(to right, #1e40af, #dc2626, #facc15);
             -webkit-background-clip: text;
@@ -24,8 +23,7 @@
 
         .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
         .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; }
-        .btn-newmarket:hover { background-position: right center; }
-
+        
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 12px; position: fixed; z-index: 1100; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
@@ -49,9 +47,9 @@
             <h1 class="text-4xl font-black uppercase italic text-gradient-yellow">New Market</h1>
             <p class="text-[11px] text-slate-400 font-black tracking-widest mt-2 mb-8 uppercase">Gestão de Validades 2026</p>
             <form class="space-y-4" onsubmit="return false;">
-                <input type="email" id="email" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 transition-all" placeholder="E-mail">
-                <input type="password" id="password" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 transition-all" placeholder="Senha">
-                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-5 rounded-2xl font-black uppercase shadow-lg transform active:scale-95 transition-all">Acessar Painel</button>
+                <input type="email" id="email" class="w-full p-4 border-2 rounded-2xl outline-none" placeholder="E-mail">
+                <input type="password" id="password" class="w-full p-4 border-2 rounded-2xl outline-none" placeholder="Senha">
+                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-5 rounded-2xl font-black uppercase shadow-lg">Acessar Painel</button>
             </form>
         </div>
     </div>
@@ -62,10 +60,7 @@
                 <span class="font-black italic uppercase text-lg">New Market</span><br>
                 <span id="user-display" class="text-[8px] font-black text-yellow-200 uppercase tracking-widest">...</span>
             </div>
-            <div class="flex gap-2">
-                <button type="button" id="btn-config" class="hidden bg-white/20 p-2 rounded-full">⚙️</button>
-                <button type="button" id="btn-logout" class="text-[9px] bg-black/40 px-4 py-2 rounded-full font-bold border border-white/20 uppercase">Sair</button>
-            </div>
+            <button type="button" id="btn-logout" class="text-[9px] bg-black/40 px-4 py-2 rounded-full font-bold border border-white/20 uppercase">Sair</button>
         </nav>
 
         <main class="p-4 max-w-xl mx-auto w-full space-y-6 flex-grow">
@@ -77,7 +72,7 @@
                     <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl outline-none">
                     <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl outline-none">
                 </div>
-                <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50">
+                <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-black uppercase bg-yellow-50 text-blue-900 border-yellow-200">
                     <option value="Estoque Central">Estoque Central (João)</option>
                     <option value="Corredor do Paulo">Corredor do Paulo</option>
                     <option value="Corredor do Leandro">Corredor do Leandro</option>
@@ -129,6 +124,16 @@
         const pauloADM = 'paulo@newmarket.com';
         let filtroAtual = 'todos';
         let currentUserEmail = "";
+
+        // Função de Mapeamento de Setores por Usuário
+        function configurarSetorAutomatico(email) {
+            const seletor = document.getElementById('p-setor-add');
+            if (email.includes('paulo')) seletor.value = "Corredor do Paulo";
+            else if (email.includes('leandro')) seletor.value = "Corredor do Leandro";
+            else if (email.includes('pedro')) seletor.value = "Corredor do Pedro";
+            else if (email.includes('edmar')) seletor.value = "Corredor do Edmar";
+            else if (email.includes('joao')) seletor.value = "Estoque Central";
+        }
 
         function showToast(msg) {
             const t = document.getElementById("toast");
@@ -192,20 +197,15 @@
                                     <span>Cod: ${item.codigo}</span>
                                 </div>
                                 <h3 class="font-black text-base uppercase text-slate-800 leading-tight">${item.produto}</h3>
-                                <p class="text-[10px] font-bold text-slate-500 mb-2">Quantidade: ${item.quantidade}</p>
-                                
-                                <div class="my-3 bg-white border-2 rounded-xl p-2 text-center">
-                                    <svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto"></svg>
-                                </div>
-
+                                <p class="text-[10px] font-bold text-slate-500 mb-2">Qtd: ${item.quantidade}</p>
+                                <div class="my-3 bg-white border-2 rounded-xl p-2 text-center"><svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto"></svg></div>
                                 <div class="flex justify-between items-center mt-2">
                                     <div class="flex flex-col">
                                         <span class="text-[9px] uppercase font-black text-slate-400">Vencimento:</span>
-                                        <span class="text-lg font-black text-slate-900 bg-white px-2 rounded-lg border-2">
+                                        <span class="text-xl font-black text-slate-900 bg-white px-2 rounded-lg border-2 border-slate-200">
                                             ${item.vencimento.split('-').reverse().join('/')}
                                         </span>
                                     </div>
-                                    
                                     ${podeApagar ? `<button type="button" class="btn-excluir text-[10px] text-red-600 bg-red-50 px-3 py-2 rounded-xl font-black border-2 border-red-200" data-id="${item.id}">EXCLUIR</button>` : ''}
                                 </div>
                                 <p class="text-[10px] font-black uppercase mt-2 ${cat === 'critico' ? 'text-red-600' : 'text-slate-500'}">${textoVenc}</p>
@@ -213,7 +213,6 @@
                         </div>`;
                     lista.appendChild(div);
                 });
-                
                 JsBarcode(".barcode").init();
                 document.getElementById('c-total').innerText = snap.size;
                 document.getElementById('c-critico').innerText = counts.critico;
@@ -223,7 +222,7 @@
                 document.querySelectorAll('.btn-excluir').forEach(btn => {
                     btn.onclick = async (e) => { 
                         e.stopPropagation(); 
-                        if(confirm("Deseja apagar este item permanentemente?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); 
+                        if(confirm("Confirmar exclusão?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); 
                     };
                 });
             });
@@ -235,6 +234,10 @@
                 currentUserEmail = user.email;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
+                
+                // Configura o setor baseado no e-mail de quem logou
+                configurarSetorAutomatico(user.email);
+                
                 const isGerente = gerentesREAIS.includes(user.email);
                 const isPaulo = user.email === pauloADM;
                 document.getElementById('user-display').innerText = user.email;
@@ -249,7 +252,7 @@
         document.getElementById('btn-entrar').onclick = async () => {
             const e = document.getElementById('email').value.trim().toLowerCase();
             const s = document.getElementById('password').value;
-            try { await signInWithEmailAndPassword(auth, e, s); } catch (err) { showToast("Login ou Senha Incorretos!"); }
+            try { await signInWithEmailAndPassword(auth, e, s); } catch (err) { showToast("Erro no Login!"); }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
@@ -258,28 +261,27 @@
             const p = { 
                 produto: document.getElementById('p-nome').value.toUpperCase().trim(), 
                 codigo: document.getElementById('p-ean').value || "0", 
-                quantidade: document.getElementById('p-qtd').value || "0", 
+                quantidade: document.getElementById('p-qtd').value || "1", 
                 setor: document.getElementById('p-setor-add').value, 
                 vencimento: document.getElementById('p-data').value, 
                 criadoEm: serverTimestamp() 
             };
-            if(!p.produto || !p.vencimento) return showToast("Preencha todos os campos!");
+            if(!p.produto || !p.vencimento) return showToast("Faltam dados!");
             await addDoc(collection(db, "validades"), p);
-            showToast("Item salvo com sucesso!");
-            document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
+            showToast("Salvo com sucesso!");
+            document.getElementById('p-nome').value = ""; 
+            document.getElementById('p-ean').value = "";
         };
 
         document.getElementById('btn-whatsapp').onclick = () => {
             const sel = document.querySelectorAll('.card-checked');
-            if(sel.length === 0) return showToast("Selecione itens na lista!");
-            let msg = "*⚠️ NEW MARKET - RELATÓRIO DE VENCIMENTOS*\n\n";
+            if(sel.length === 0) return showToast("Selecione itens primeiro!");
+            let msg = "*⚠️ NEW MARKET - RELATÓRIO*\n\n";
             sel.forEach(c => {
                 const nome = c.querySelector('h3').innerText;
-                const setor = c.querySelector('.text-slate-400 span').innerText;
-                const data = c.querySelector('.text-lg').innerText;
-                msg += `📌 *${nome}*\n📍 Setor: ${setor}\n📅 Vencimento: ${data}\n\n`;
+                const data = c.querySelector('.text-xl').innerText;
+                msg += `📌 *${nome}*\n📅 Vencimento: ${data}\n\n`;
             });
-            msg += "_Enviado via Sistema 2026_";
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
         };
 
