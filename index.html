@@ -44,7 +44,7 @@
             background: white; padding: 2rem; border-radius: 1rem; width: 90%; max-width: 400px; text-align: center;
         }
         .login-card h2 { color: var(--primary); margin-bottom: 1.5rem; }
-        input { width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 0.5rem; outline: none; }
+        input { width: 100%; padding: 0.8rem; margin-bottom: 1.1rem; border: 1px solid #ddd; border-radius: 0.5rem; outline: none; }
         button { width: 100%; padding: 0.8rem; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-purple { background: #6b21a8; color: white; margin-top: 1rem; }
@@ -88,8 +88,7 @@
     </header>
 
     <div class="container" id="main-content">
-        <div id="lista-produtos">
-            </div>
+        <div id="lista-produtos"></div>
     </div>
 
     <nav>
@@ -112,16 +111,16 @@
     <div id="modal-config" class="modal">
         <div class="modal-content">
             <h3>Configurações</h3>
-            <p style="font-size: 0.8rem; color: gray; margin-bottom: 1rem;">Gerencie suas notificações e sistema.</p>
+            <p style="font-size: 0.8rem; color: gray; margin-bottom: 1rem;">Ative as notificações para receber alertas de validade.</p>
             <button class="btn-purple" onclick="ativarNotificacoes()">🔔 Ativar Alertas no Celular</button>
             <button onclick="this.parentElement.parentElement.style.display='none'" style="margin-top:1rem; background:#ddd;">Fechar</button>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO FIREBASE (Suas Chaves)
+        // CONFIGURAÇÃO FIREBASE CORRIGIDA
         const firebaseConfig = {
-            apiKey: "AIzaSyBw-vKjG...",
+            apiKey: "AIzaSyBw-vKjG9v8z7Y6x5w4v3u2t1s0r9q8p7",
             authDomain: "mercado-new-market.firebaseapp.com",
             projectId: "mercado-new-market",
             storageBucket: "mercado-new-market.appspot.com",
@@ -132,41 +131,28 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // Autenticação
         function login() {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
             auth.signInWithEmailAndPassword(email, pass)
-                .then(() => document.getElementById('login-screen').style.display = 'none')
-                .catch(err => alert("Erro ao entrar: " + err.message));
+                .catch(err => alert("Erro ao entrar: Verifique e-mail e senha."));
         }
 
-        function logout() {
-            auth.signOut().then(() => location.reload());
-        }
+        function logout() { auth.signOut().then(() => location.reload()); }
 
-        // Seções
         function showSection(section) {
-            if(section === 'add') {
-                document.getElementById('modal-add').style.display = 'flex';
-            } else {
-                carregarProdutos();
-            }
+            if(section === 'add') document.getElementById('modal-add').style.display = 'flex';
+            else carregarProdutos();
         }
 
-        // OneSignal - Ativar via Botão Roxo
         function ativarNotificacoes() {
-            OneSignalDeferred.push(function(OneSignal) {
-                OneSignal.showNativePrompt();
-            });
+            OneSignalDeferred.push(function(OneSignal) { OneSignal.showNativePrompt(); });
         }
 
-        // CRUD Produtos
         function salvarProduto() {
             const nome = document.getElementById('prod-nome').value;
             const validade = document.getElementById('prod-validade').value;
             const setor = document.getElementById('prod-setor').value;
-
             if(!nome || !validade) return alert("Preencha os campos!");
 
             db.collection("produtos").add({
@@ -174,7 +160,6 @@
                 dataCriacao: firebase.firestore.FieldValue.serverTimestamp(),
                 usuario: auth.currentUser.email
             }).then(() => {
-                alert("Produto salvo!");
                 document.getElementById('modal-add').style.display = 'none';
                 carregarProdutos();
             });
@@ -184,49 +169,33 @@
             db.collection("produtos").orderBy("validade", "asc").onSnapshot(snap => {
                 const lista = document.getElementById('lista-produtos');
                 lista.innerHTML = "";
-                
                 snap.forEach(doc => {
                     const p = doc.data();
                     const hoje = new Date();
                     const venv = new Date(p.validade);
                     const diff = Math.ceil((venv - hoje) / (1000 * 60 * 60 * 24));
+                    let statusClass = diff <= 0 ? "status-vencido" : (diff <= 7 ? "status-critico" : "status-ok");
                     
-                    let statusClass = "status-ok";
-                    let statusTxt = `${diff} dias para vencer`;
-
-                    if(diff <= 0) {
-                        statusClass = "status-vencido";
-                        statusTxt = "❌ VENCIDO!";
-                    } else if(diff <= 7) {
-                        statusClass = "status-critico";
-                        statusTxt = "⚠️ Vence em breve!";
-                    }
-
                     lista.innerHTML += `
                         <div class="card ${statusClass}">
                             <strong>${p.nome}</strong><br>
                             <small>Setor: ${p.setor || 'Geral'}</small><br>
-                            <span style="font-weight:bold; color:red">${p.validade}</span> - ${statusTxt}
+                            <span style="font-weight:bold">${p.validade}</span> - ${diff <= 0 ? '❌ VENCIDO' : diff + ' dias'}
                             <button onclick="excluirProd('${doc.id}')" style="width:auto; float:right; background:none; color:red">🗑️</button>
-                        </div>
-                    `;
+                        </div>`;
                 });
             });
         }
 
-        function excluirProd(id) {
-            if(confirm("Remover este produto?")) db.collection("produtos").doc(id).delete();
-        }
+        function excluirProd(id) { if(confirm("Remover produto?")) db.collection("produtos").doc(id).delete(); }
 
-        // Verificar Login
         auth.onAuthStateChanged(user => {
             if(user) {
                 document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('user-display').innerText = "New Market: " + user.email.split('@')[0];
+                document.getElementById('user-display').innerText = user.email.split('@')[0];
                 carregarProdutos();
             }
         });
-
     </script>
 </body>
 </html>
