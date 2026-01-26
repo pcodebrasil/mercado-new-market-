@@ -1,0 +1,16 @@
+name: Disparar Alerta Diário New Market
+
+on:
+  schedule:
+    # O horário é em UTC. 11:00 UTC = 08:00 Horário de Brasília
+    - cron: '0 11 * * *'
+  workflow_dispatch: # Permite que você dispare manualmente pelo botão no GitHub
+
+jobs:
+  disparar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chamada do Gatilho de Notificação
+        run: |
+          curl -X GET "https://seu-projeto.web.app/disparar.html"
+          
