@@ -20,8 +20,6 @@
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
         svg.barcode { width: 100%; max-height: 50px; }
-        
-        /* Classe de destaque para os filtros */
         .filtro-ativo { border: 4px solid #1e40af !important; transform: scale(1.05); z-index: 10; }
     </style>
 </head>
@@ -31,7 +29,7 @@
 
     <div id="loading-screen">
         <div class="w-12 h-12 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase text-slate-400">Sincronizando...</p>
+        <p class="text-[10px] font-black uppercase text-slate-400">Carregando Sistema...</p>
     </div>
 
     <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-4">
@@ -40,7 +38,7 @@
             <form class="space-y-4 mt-8" onsubmit="return false;">
                 <input type="email" id="email" class="w-full p-4 border rounded-2xl outline-none" placeholder="E-mail">
                 <input type="password" id="password" class="w-full p-4 border rounded-2xl outline-none" placeholder="Senha">
-                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-4 rounded-2xl font-black uppercase">Acessar</button>
+                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-4 rounded-2xl font-black uppercase">Entrar</button>
             </form>
         </div>
     </div>
@@ -57,19 +55,19 @@
             </div>
         </nav>
 
-        <main class="p-4 max-w-xl mx-auto w-full space-y-5">
+        <main class="p-4 max-w-xl mx-auto w-full space-y-5 flex-grow">
             <div id="gaveta-config" class="hidden bg-slate-800 p-6 rounded-3xl shadow-xl border-b-8 border-yellow-500 space-y-4 text-white">
                 <div class="flex justify-between font-black text-[10px] uppercase"><span>Administração</span><button type="button" id="btn-fechar-config">X</button></div>
                 <div id="area-admin-firebase" class="hidden border-t border-slate-700 pt-4">
                     <button type="button" id="btn-cadastrar-user" class="w-full bg-blue-600 p-3 rounded-xl font-black uppercase text-[9px]">Gerenciar Usuários</button>
                 </div>
                 <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-3 rounded-xl bg-slate-700 outline-none border border-slate-600">
-                <button type="button" id="btn-confirmar-senha" class="w-full bg-yellow-600 p-3 rounded-xl font-black uppercase text-[9px]">Confirmar Senha</button>
+                <button type="button" id="btn-confirmar-senha" class="w-full bg-yellow-600 p-3 rounded-xl font-black uppercase text-[9px]">Mudar Senha</button>
             </div>
 
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
-                <h2 class="font-black uppercase text-blue-800 text-[10px]">Novo Registro</h2>
-                <input type="text" id="p-nome" placeholder="PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none bg-slate-50">
+                <h2 class="font-black uppercase text-blue-800 text-[10px] tracking-widest">Lançar Validade</h2>
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none bg-slate-50">
                 <div class="grid grid-cols-4 gap-2">
                     <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl outline-none">
                     <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl outline-none">
@@ -82,7 +80,7 @@
                     <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
                 <input type="date" id="p-data" class="w-full p-4 border rounded-2xl outline-none">
-                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar</button>
+                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar Registro</button>
             </div>
 
             <div class="space-y-4">
@@ -93,14 +91,18 @@
                 </div>
                 
                 <div class="flex gap-2">
-                    <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Buscar..." class="flex-grow p-4 rounded-2xl bg-white border outline-none">
+                    <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Buscar..." class="flex-grow p-4 rounded-2xl bg-white border outline-none font-bold">
                     <button type="button" id="btn-selecionar-criticos" class="bg-red-600 text-white px-4 rounded-2xl font-black text-[9px] uppercase">Marcar Críticos</button>
                 </div>
                 
-                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px]">Relatório WhatsApp (Gerentes)</button>
+                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md">Enviar Relatório WhatsApp</button>
                 <div id="lista" class="space-y-3 pb-8"></div>
             </div>
         </main>
+
+        <footer class="p-4 text-center">
+            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 italic">Desenvolvido por Paulo by 2026</p>
+        </footer>
     </div>
 
     <script type="module">
@@ -134,19 +136,11 @@
             setTimeout(() => t.className = "", 3000);
         }
 
-        // LÓGICA DE FILTROS CORRIGIDA
         window.aplicarFiltro = (tipo) => {
             filtroAtual = tipo;
             const bts = { critico: 'f-critico', atencao: 'f-atencao', todos: 'f-todos' };
-            
-            // Remove o destaque de todos
-            Object.values(bts).forEach(id => {
-                document.getElementById(id).classList.remove('filtro-ativo');
-            });
-            
-            // Adiciona destaque apenas no clicado
+            Object.values(bts).forEach(id => document.getElementById(id).classList.remove('filtro-ativo'));
             document.getElementById(bts[tipo]).classList.add('filtro-ativo');
-            
             processarLista();
         };
 
@@ -200,7 +194,7 @@
                 document.getElementById('c-atencao').innerText = counts.atencao;
                 processarLista();
                 document.querySelectorAll('.btn-excluir').forEach(btn => {
-                    btn.onclick = async (e) => { e.stopPropagation(); if(confirm("Apagar Registro?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); };
+                    btn.onclick = async (e) => { e.stopPropagation(); if(confirm("Apagar?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); };
                 });
             });
         }
@@ -211,15 +205,12 @@
                 currentUserEmail = user.email;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                
                 const isGerenteReal = gerentesREAIS.includes(user.email);
                 const isPaulo = user.email === pauloADM;
-                
                 document.getElementById('user-display').innerText = user.email;
                 document.getElementById('btn-config').classList.toggle('hidden', !(isGerenteReal || isPaulo));
                 document.getElementById('area-admin-firebase').classList.toggle('hidden', !isGerenteReal);
                 document.getElementById('repositor-form').classList.toggle('hidden', isGerenteReal);
-                
                 carregar(isPaulo || isGerenteReal);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
@@ -239,7 +230,7 @@
             const p = { produto: document.getElementById('p-nome').value.toUpperCase().trim(), codigo: document.getElementById('p-ean').value || "0", quantidade: document.getElementById('p-qtd').value || "0", setor: document.getElementById('p-setor-add').value, vencimento: document.getElementById('p-data').value, criadoEm: serverTimestamp() };
             if(!p.produto || !p.vencimento) return showToast("Dados incompletos!");
             await addDoc(collection(db, "validades"), p);
-            showToast("Salvo!");
+            showToast("Item Salvo!");
             document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
         };
 
@@ -255,23 +246,19 @@
 
         document.getElementById('btn-whatsapp').onclick = () => {
             const sel = document.querySelectorAll('.card-checked');
-            if(sel.length === 0) return showToast("Selecione os itens!");
-            
+            if(sel.length === 0) return showToast("Selecione itens!");
             let msg = "*⚠️ ATENÇÃO GERÊNCIA - NEW MARKET*\n";
             msg += "_Verificação de validades pendente:_\n\n";
             msg += "--------------------------------\n\n";
-
             sel.forEach(c => {
                 const nome = c.querySelector('h3').innerText;
                 const setor = c.querySelector('.text-slate-400 span').innerText;
                 const vencText = c.querySelector('.venc-text').innerText;
                 msg += `📦 *${nome}*\n📍 LOCAL: ${setor}\n📅 ${vencText}\n\n`;
             });
-
             msg += "--------------------------------\n";
             msg += `*Enviado por:* ${currentUserEmail}\n`;
             msg += "_Sistema New Market 2026_";
-            
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
         };
 
