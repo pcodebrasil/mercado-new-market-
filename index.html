@@ -4,25 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>New Market - Sistema 2026</title>
+    
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignal.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "c18c2225-11e7-4130-a842-5d850fb11d23",
+          safari_web_id: "web.onesignal.auto.63584824-3450-4886-9818-875654",
+          notifyButton: { enable: false }, 
+        });
+      });
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
         #login-screen, #main-panel { display: none; }
         #loading-screen { position: fixed; inset: 0; background: white; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .filter-active { border-width: 4px !important; opacity: 1 !important; transform: scale(1.05); transition: 0.3s; }
-        .filter-inactive { opacity: 0.6; }
+        .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
         .card-critico { border-left: 8px solid #ef4444; }
         .card-atencao { border-left: 8px solid #f59e0b; }
         .card-normal { border-left: 8px solid #10b981; }
-        .card-checked { opacity: 0.4; filter: grayscale(1); background-color: #f1f5f9 !important; border-left-color: #94a3b8 !important; transform: scale(0.96); }
-        .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
-        .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; }
-        
-        /* Alerta Visual Superior */
-        #alert-banner { display: none; position: fixed; top: 0; left: 0; width: 100%; background: #ef4444; color: white; padding: 15px; text-align: center; z-index: 9999; font-weight: 900; text-transform: uppercase; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-        .animate-flash { animation: flash 0.5s infinite; }
-        @keyframes flash { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; font-size: 10px; }
         #toast.show { visibility: visible; animation: fadein 0.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
@@ -30,11 +33,6 @@
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
-
-    <div id="alert-banner" class="animate-flash">
-        🚨 ATENÇÃO: ITENS CRÍTICOS IDENTIFICADOS! 🚨
-        <button onclick="document.getElementById('alert-banner').style.display='none'" class="ml-4 bg-white text-red-600 px-3 py-1 rounded-lg text-xs font-black">FECHAR</button>
-    </div>
 
     <div id="toast"></div>
 
@@ -50,22 +48,21 @@
             <form id="login-form" class="space-y-4 mt-8">
                 <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="E-mail" required>
                 <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="Senha" required>
-                <button type="submit" class="w-full btn-newmarket text-white p-4 rounded-2xl font-black uppercase shadow-lg">Entrar</button>
+                <button type="submit" class="w-full bg-blue-800 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Acessar Sistema</button>
             </form>
         </div>
     </div>
 
     <div id="main-panel" class="flex-grow flex flex-col">
-        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
+        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50">
             <div class="leading-none">
-                <span class="font-black italic uppercase text-lg text-white">New Market</span><br>
+                <span class="font-black italic uppercase text-lg">New Market</span><br>
                 <span id="user-display" class="text-[8px] font-black uppercase text-yellow-200">...</span>
             </div>
             <button id="btn-logout" class="text-[8px] bg-black/40 px-4 py-2 rounded-full font-bold uppercase">Sair</button>
         </nav>
 
         <main class="p-4 max-w-xl mx-auto w-full space-y-5">
-            
             <div id="repositor-form" class="bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
                 <h2 class="font-black uppercase text-blue-800 text-[10px]">Lançar Validade</h2>
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50">
@@ -80,7 +77,7 @@
                     <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
                 <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-sm bg-slate-50">
-                <button id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar Produto</button>
+                <button id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar</button>
             </div>
 
             <div class="space-y-4">
@@ -91,8 +88,8 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
-                    <button id="btn-whatsapp" class="bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md flex items-center justify-center gap-2">📱 WhatsApp</button>
-                    <button id="btn-notificar" class="bg-red-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md flex items-center justify-center gap-2">🔔 Notificar</button>
+                    <button id="btn-whatsapp" class="bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md">📱 WhatsApp</button>
+                    <button id="btn-notificar-equipe" class="bg-purple-700 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md">🔔 Ativar Notificações</button>
                 </div>
                 
                 <div id="lista" class="space-y-3 pb-8"></div>
@@ -120,18 +117,12 @@
 
         let dadosAtuais = [];
 
-        // NOTIFICAÇÃO LOCAL (GARANTE FUNCIONAMENTO)
-        document.getElementById('btn-notificar').onclick = () => {
-            const numCriticos = dadosAtuais.filter(d => d.cat === 'critico').length;
-            const banner = document.getElementById('alert-banner');
-            banner.style.display = 'block';
-            banner.innerHTML = `🚨 URGENTE: ${numCriticos} ITENS CRÍTICOS IDENTIFICADOS! <button onclick="this.parentElement.style.display='none'" class="ml-4 bg-white text-red-600 px-3 py-1 rounded-lg text-xs font-black">OK</button>`;
-            
-            // Tenta tocar som
-            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-            audio.play().catch(() => console.log("Som aguardando interação"));
-            
-            showToast("ALERTA VISUAL ATIVADO NO PAINEL");
+        // PEDIR PERMISSÃO PARA A EQUIPE
+        document.getElementById('btn-notificar-equipe').onclick = () => {
+            OneSignalDeferred.push(function(OneSignal) {
+                OneSignal.showNativePrompt();
+            });
+            showToast("CLIQUE EM 'PERMITIR' NA JANELA QUE APARECER!");
         };
 
         function showToast(msg) {
@@ -156,7 +147,7 @@
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
-            catch (err) { alert("Usuário ou Senha Inválidos"); }
+            catch (err) { alert("Erro ao entrar"); }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
@@ -166,36 +157,16 @@
                 const lista = document.getElementById('lista');
                 lista.innerHTML = ""; dadosAtuais = [];
                 let counts = {critico: 0, atencao: 0};
-                
                 snap.forEach(d => {
                     const item = { id: d.id, ...d.data() };
                     const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
                     let cat = "normal", estilo = "card-normal", corTxt = "text-green-600";
-                    
                     if(diff <= 7) { estilo="card-critico"; corTxt="text-red-600 animate-pulse font-black"; counts.critico++; cat="critico"; }
                     else if(diff <= 15) { estilo="card-atencao"; corTxt="text-yellow-600 font-black"; counts.atencao++; cat="atencao"; }
-                    
                     dadosAtuais.push({...item, dias: diff, cat});
-                    
                     const div = document.createElement('div');
                     div.className = `p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 border border-slate-100`;
-                    div.innerHTML = `
-                        <div class="flex gap-3">
-                            <div class="flex-grow">
-                                <div class="flex justify-between text-[7px] font-black text-slate-400 uppercase">
-                                    <span>${item.setor}</span>
-                                    <span class="${corTxt}">${diff} DIAS</span>
-                                </div>
-                                <h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3>
-                                <div class="my-2 bg-white border rounded-lg p-1 text-center">
-                                    <svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35"></svg>
-                                </div>
-                                <div class="flex justify-between items-end text-[9px] font-bold text-slate-500">
-                                    <span>QTD: ${item.quantidade} | VAL: ${item.vencimento.split('-').reverse().join('/')}</span>
-                                    <button onclick="window.apagarItem('${item.id}')" class="bg-red-50 text-red-600 px-3 py-1 rounded-lg font-black">APAGAR</button>
-                                </div>
-                            </div>
-                        </div>`;
+                    div.innerHTML = `<div class="flex gap-3"><div class="flex-grow"><div class="flex justify-between text-[7px] font-black text-slate-400 uppercase"><span>${item.setor}</span><span class="${corTxt}">${diff} DIAS</span></div><h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3><div class="my-2 bg-white border rounded-lg p-1 text-center"><svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35"></svg></div><div class="flex justify-between items-end text-[9px] font-bold text-slate-500"><span>QTD: ${item.quantidade} | VAL: ${item.vencimento.split('-').reverse().join('/')}</span><button onclick="window.apagarItem('${item.id}')" class="text-red-600 font-black uppercase">Excluir</button></div></div></div>`;
                     lista.appendChild(div);
                 });
                 JsBarcode(".barcode").init();
@@ -206,21 +177,14 @@
         }
 
         document.getElementById('btn-salvar').onclick = async () => {
-            const data = { 
-                produto: document.getElementById('p-nome').value.toUpperCase(), 
-                codigo: document.getElementById('p-ean').value || "0", 
-                quantidade: document.getElementById('p-qtd').value, 
-                setor: document.getElementById('p-setor-add').value, 
-                vencimento: document.getElementById('p-data').value, 
-                criadoEm: serverTimestamp() 
-            };
-            if(!data.produto || !data.vencimento) return showToast("NOME E DATA OBRIGATÓRIOS!");
+            const data = { produto: document.getElementById('p-nome').value.toUpperCase(), codigo: document.getElementById('p-ean').value || "0", quantidade: document.getElementById('p-qtd').value, setor: document.getElementById('p-setor-add').value, vencimento: document.getElementById('p-data').value, criadoEm: serverTimestamp() };
+            if(!data.produto || !data.vencimento) return showToast("DADOS INCOMPLETOS!");
             await addDoc(collection(db, "validades"), data);
-            showToast("PRODUTO CADASTRADO!");
-            document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = ""; document.getElementById('p-qtd').value = "";
+            showToast("SALVO!");
+            document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
         };
 
-        window.apagarItem = async (id) => { if(confirm("EXCLUIR ESTE ITEM?")) await deleteDoc(doc(db, "validades", id)); };
+        window.apagarItem = async (id) => { if(confirm("APAGAR?")) await deleteDoc(doc(db, "validades", id)); };
     </script>
 </body>
 </html>
