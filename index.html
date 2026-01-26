@@ -8,63 +8,73 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
         :root {
-            --azul-new: #1e40af;
-            --vermelho-new: #dc2626;
-            --amarelo-new: #facc15;
+            --n-azul: #0066ff;
+            --n-vermelho: #dc2626;
+            --n-amarelo: #facc15;
         }
 
         #login-screen, #main-panel { display: none; }
         
-        /* Animação de Entrada Superior */
+        /* --- EFEITO DE ENTRADA PREMIUM --- */
         #loading-screen { 
-            position: fixed; inset: 0; background: white; z-index: 999; 
+            position: fixed; inset: 0; background: white; z-index: 9999; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
         }
-
-        /* Efeito de Vidro e Elevação na Área de Registro */
-        .area-registro-animada {
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .nome-entrada {
+            font-weight: 900; font-style: italic; font-size: 1.8rem; color: #1e293b;
+            animation: subirOpacidade 1.2s ease-out forwards;
+            letter-spacing: -1.5px;
         }
-        .area-registro-animada:focus-within {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border-color: var(--azul-new);
-        }
-
-        /* Animação dos Cards da Lista */
-        .card-entry {
-            animation: slideUp 0.5s ease-out forwards;
-        }
-        @keyframes slideUp {
+        @keyframes subirOpacidade {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .linha-carregamento { width: 40px; height: 3px; background: var(--n-amarelo); margin-top: 10px; border-radius: 10px; animation: expandir 1.5s infinite; }
+        @keyframes expandir { 0%, 100% { width: 20px; } 50% { width: 60px; } }
 
-        /* Feedback de Botão */
-        .btn-press:active { transform: scale(0.95); }
+        /* --- ÁREA DE REGISTRO COM ELEVAÇÃO --- */
+        .area-registro {
+            background: white; border-radius: 24px; border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .area-registro:focus-within {
+            border-color: var(--n-azul);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
 
-        .card-critico { border-left: 10px solid #ef4444; background-color: #fff1f2 !important; }
-        .card-atencao { border-left: 10px solid #f59e0b; background-color: #fffbeb !important; }
-        .card-normal { border-left: 10px solid #10b981; background-color: #ffffff !important; }
+        /* --- ESTILOS DE CARDS E LISTA --- */
+        .card-entry { animation: slideUp 0.5s ease-out forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card-critico { border-left: 8px solid var(--n-vermelho); background-color: #fff1f2 !important; }
+        .card-atencao { border-left: 8px solid #f59e0b; background-color: #fffbeb !important; }
+        .card-normal { border-left: 8px solid #10b981; background-color: #ffffff !important; }
         .card-checked { opacity: 0.5 !important; filter: grayscale(1); transform: scale(0.96); border-style: dashed; }
         
+        /* Botão Gravar Azul Vibrante */
+        .btn-acao { 
+            @apply w-full p-4 rounded-2xl font-black uppercase text-sm tracking-wider text-white transition-all active:scale-95 shadow-lg;
+            background: var(--n-azul);
+        }
+
         .text-gradient-yellow {
             background: linear-gradient(to right, #1e40af, #dc2626, #facc15);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
-        .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; }
-        .btn-newmarket:hover { background-position: right center; }
-        
-        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 1100; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; box-shadow: 0 10px 15px rgba(0,0,0,0.2); }
-        #toast.show { visibility: visible; animation: popUp 0.4s ease-out; }
-        @keyframes popUp { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+        #toast { 
+            visibility: hidden; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
+            background: #1e293b; color: white; padding: 12px 24px; border-radius: 50px;
+            font-size: 12px; font-weight: 800; z-index: 10000; box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+        }
+        #toast.show { visibility: visible; animation: popUp 0.3s forwards; }
+        @keyframes popUp { from { opacity: 0; bottom: 10px; } to { opacity: 1; bottom: 30px; } }
 
-        .barcode-container { background: white; border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 80px; width: 100%; }
-        
-        .filtro-ativo { border: 4px solid #1e40af !important; transform: scale(1.05); box-shadow: 0 10px 15px -3px rgba(30, 64, 175, 0.2); }
+        .barcode-container { background: white; border: 1px solid #e2e8f0; border-radius: 12px; height: 60px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .filtro-ativo { border: 4px solid var(--n-azul) !important; transform: scale(1.05); }
     </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-900 flex flex-col min-h-screen">
@@ -72,43 +82,49 @@
     <div id="toast"></div>
 
     <div id="loading-screen">
-        <div class="w-16 h-16 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Iniciando New Market...</p>
+        <div class="nome-entrada">NEW <span style="color:var(--n-azul)">MARKET</span></div>
+        <div class="linha-carregamento"></div>
     </div>
 
     <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-6">
-        <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md border-b-8 border-yellow-400 text-center animate-fade-in">
+        <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md border-b-8 border-yellow-400 text-center">
             <h1 class="text-4xl font-black uppercase italic text-gradient-yellow leading-none">New Market</h1>
-            <p class="text-lg font-bold text-blue-900 uppercase tracking-tighter -mt-1">Supermercados</p>
-            <form class="space-y-4 mt-8" onsubmit="return false;">
+            <p class="text-[10px] text-slate-400 font-black tracking-[0.3em] mt-4 mb-8 uppercase">Controle de Validade 2026</p>
+            <form class="space-y-4" onsubmit="return false;">
                 <input type="email" id="email" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 transition-all" placeholder="E-mail">
                 <input type="password" id="password" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 transition-all" placeholder="Senha">
-                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-5 rounded-2xl font-black uppercase shadow-lg btn-press">Entrar</button>
+                <button type="button" id="btn-entrar" class="btn-acao">Acessar Painel</button>
             </form>
         </div>
     </div>
 
     <div id="main-panel" class="flex-grow flex flex-col">
-        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
-            <div class="leading-none text-left">
-                <span class="font-black italic uppercase text-lg">New Market</span><br>
-                <span id="user-display" class="text-[8px] font-black text-yellow-200 uppercase tracking-widest">...</span>
+        <nav class="bg-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-sm border-b">
+            <div class="text-left leading-none">
+                <span class="font-black italic uppercase text-blue-800">New Market</span><br>
+                <span id="user-display" class="text-[7px] font-bold text-slate-400 uppercase tracking-widest">...</span>
             </div>
-            <button type="button" id="btn-logout" class="text-[9px] bg-black/40 px-4 py-2 rounded-full font-bold border border-white/20 uppercase btn-press">Sair</button>
+            <button type="button" id="btn-logout" class="text-[9px] font-black text-red-500 uppercase border border-red-100 px-3 py-1 rounded-full">Sair</button>
         </nav>
 
-        <main class="p-4 max-w-xl mx-auto w-full space-y-6 flex-grow">
+        <main class="p-4 max-w-xl mx-auto w-full space-y-6">
             
-            <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4 area-registro-animada">
+            <div id="repositor-form" class="hidden area-registro p-6 space-y-4">
                 <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
-                    <h2 class="font-black uppercase text-blue-800 text-xs tracking-widest">Novo Lançamento</h2>
+                    <div class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                    </div>
+                    <h2 class="font-black uppercase text-blue-800 text-xs tracking-widest">Sistema de Gravação Ativo</h2>
                 </div>
+
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50 focus:bg-white outline-none transition-all">
+                
                 <div class="grid grid-cols-4 gap-2">
-                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl outline-none focus:border-blue-400">
-                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl outline-none focus:border-blue-400">
+                    <input type="number" id="p-ean" placeholder="CÓD. BARRAS" class="col-span-3 w-full p-4 border rounded-2xl outline-none">
+                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl outline-none">
                 </div>
+
                 <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-black uppercase bg-yellow-50 text-blue-900 border-yellow-200 outline-none">
                     <option value="Estoque Central">Estoque Central</option>
                     <option value="Corredor do Paulo">Corredor do Paulo</option>
@@ -116,42 +132,41 @@
                     <option value="Corredor do Pedro">Corredor do Pedro</option>
                     <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
-                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-blue-700 outline-none focus:ring-2 ring-blue-100">
-                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg btn-press">Salvar Registro</button>
+
+                <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-2xl border">
+                    <span class="text-[9px] font-black text-slate-400 uppercase pl-2">Vencimento:</span>
+                    <input type="date" id="p-data" class="flex-grow bg-transparent p-2 font-bold text-blue-700 outline-none">
+                </div>
+
+                <button type="button" id="btn-salvar" class="btn-acao">Gravar no Sistema</button>
             </div>
 
             <div class="space-y-4">
-                <div class="grid grid-cols-3 gap-2 text-center font-black">
-                    <button type="button" id="f-critico" class="bg-white p-3 rounded-2xl text-red-600 border-2 transition-all" onclick="aplicarFiltro('critico')">
-                        <p class="text-[8px]">🚨 Crítico</p>
-                        <p id="c-critico" class="text-xl">0</p>
+                <div class="grid grid-cols-3 gap-2 text-center">
+                    <button type="button" id="f-critico" class="bg-white p-3 rounded-2xl text-red-600 border shadow-sm" onclick="aplicarFiltro('critico')">
+                        <p class="text-[8px] font-black uppercase">Crítico</p>
+                        <p id="c-critico" class="text-xl font-black">0</p>
                     </button>
-                    <button type="button" id="f-atencao" class="bg-white p-3 rounded-2xl text-yellow-600 border-2 transition-all" onclick="aplicarFiltro('atencao')">
-                        <p class="text-[8px]">⚠️ Atenção</p>
-                        <p id="c-atencao" class="text-xl">0</p>
+                    <button type="button" id="f-atencao" class="bg-white p-3 rounded-2xl text-yellow-600 border shadow-sm" onclick="aplicarFiltro('atencao')">
+                        <p class="text-[8px] font-black uppercase">Alerta</p>
+                        <p id="c-atencao" class="text-xl font-black">0</p>
                     </button>
-                    <button type="button" id="f-todos" class="bg-white p-3 rounded-2xl text-blue-600 border-2 filtro-ativo transition-all" onclick="aplicarFiltro('todos')">
-                        <p class="text-[8px]">📦 Total</p>
-                        <p id="c-total" class="text-xl">0</p>
+                    <button type="button" id="f-todos" class="bg-white p-3 rounded-2xl text-blue-600 border-2 filtro-ativo shadow-sm" onclick="aplicarFiltro('todos')">
+                        <p class="text-[8px] font-black uppercase">Total</p>
+                        <p id="c-total" class="text-xl font-black">0</p>
                     </button>
                 </div>
+                
+                <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Pesquisar mercadoria..." class="w-full p-4 rounded-2xl bg-white border outline-none font-bold shadow-sm focus:border-blue-500 transition-all">
                 
                 <div class="flex gap-2">
-                    <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Buscar mercadoria..." class="flex-grow p-4 rounded-2xl bg-white border-2 outline-none font-bold focus:border-blue-500 transition-all">
+                    <button type="button" id="btn-selecionar-criticos" class="flex-1 bg-slate-800 text-white p-3 rounded-2xl font-black text-[9px] uppercase">Marcar Críticos</button>
+                    <button type="button" id="btn-whatsapp" class="flex-1 bg-green-600 text-white p-3 rounded-2xl font-black uppercase text-[9px]">Relatório WhatsApp</button>
                 </div>
                 
-                <div class="grid grid-cols-2 gap-2">
-                    <button type="button" id="btn-selecionar-criticos" class="bg-slate-800 text-white p-3 rounded-2xl font-black text-[9px] uppercase btn-press">Marcar Críticos</button>
-                    <button type="button" id="btn-whatsapp" class="bg-green-600 text-white p-3 rounded-2xl font-black uppercase text-[9px] shadow-md btn-press">Enviar WhatsApp</button>
-                </div>
-                
-                <div id="lista" class="space-y-4 pb-10"></div>
+                <div id="lista" class="space-y-3 pb-20"></div>
             </div>
         </main>
-
-        <footer class="p-6 text-center">
-            <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 italic">Dev Paulo Souza by 2026</p>
-        </footer>
     </div>
 
     <script type="module">
@@ -172,30 +187,28 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
-        const pauloADM = 'paulo@newmarket.com';
+        const adms = ['paulo@newmarket.com', 'adriano@newmarket.com', 'adrielle@newmarket.com'];
         let filtroAtual = 'todos';
 
-        function showToast(msg) {
-            const t = document.getElementById("toast");
-            t.innerText = msg; t.classList.add("show");
-            setTimeout(() => t.classList.remove("show"), 3000);
+        function msg(t) {
+            const el = document.getElementById("toast");
+            el.innerText = t; el.className = "show";
+            setTimeout(() => el.className = "", 3000);
         }
 
-        window.aplicarFiltro = (tipo) => {
-            filtroAtual = tipo;
-            const bts = { critico: 'f-critico', atencao: 'f-atencao', todos: 'f-todos' };
-            Object.values(bts).forEach(id => document.getElementById(id).classList.remove('filtro-ativo'));
-            document.getElementById(bts[tipo]).classList.add('filtro-ativo');
+        window.aplicarFiltro = (t) => {
+            filtroAtual = t;
+            document.querySelectorAll('[onclick^="aplicarFiltro"]').forEach(b => b.classList.remove('filtro-ativo', 'border-2'));
+            document.getElementById(`f-${t}`).classList.add('filtro-ativo');
             processarLista();
         };
 
         window.processarLista = () => {
-            const busca = document.getElementById('busca').value.toLowerCase();
+            const b = document.getElementById('busca').value.toLowerCase();
             document.querySelectorAll('.card').forEach(c => {
-                const matchF = filtroAtual === 'todos' || c.dataset.cat === filtroAtual;
-                const matchB = c.dataset.search.includes(busca);
-                c.style.display = (matchF && matchB) ? "block" : "none";
+                const mF = filtroAtual === 'todos' || c.dataset.cat === filtroAtual;
+                const mB = c.dataset.search.includes(b);
+                c.style.display = (mF && mB) ? "block" : "none";
             });
         };
 
@@ -204,85 +217,67 @@
             onSnapshot(q, (snap) => {
                 const lista = document.getElementById('lista');
                 lista.innerHTML = "";
-                let counts = { critico: 0, atencao: 0 };
-                const hoje = new Date(); hoje.setHours(0,0,0,0);
+                let n = { c: 0, a: 0 };
+                const hj = new Date(); hj.setHours(0,0,0,0);
 
-                snap.forEach((d, index) => {
-                    const item = { id: d.id, ...d.data() };
-                    const dataVenc = new Date(item.vencimento + "T12:00:00");
-                    const diff = Math.ceil((dataVenc - hoje) / 86400000);
+                snap.forEach((d, idx) => {
+                    const i = { id: d.id, ...d.data() };
+                    const dV = new Date(i.vencimento + "T12:00:00");
+                    const diff = Math.ceil((dV - hj) / 86400000);
                     
-                    let cat = "normal", estilo = "card-normal", textoVenc = `Vence em ${diff} dias`;
-                    if(diff <= 0) { estilo="card-critico"; cat="critico"; textoVenc = "🚨 VENCIDO!"; counts.critico++; }
-                    else if(diff <= 7) { estilo="card-critico"; cat="critico"; counts.critico++; }
-                    else if(diff <= 15) { estilo="card-atencao"; cat="atencao"; counts.atencao++; }
+                    let cat = "normal", estilo = "card-normal", info = `${diff} dias`;
+                    if(diff <= 0) { estilo="card-critico"; cat="critico"; info="VENCIDO"; n.c++; }
+                    else if(diff <= 7) { estilo="card-critico"; cat="critico"; info="CRÍTICO"; n.c++; }
+                    else if(diff <= 15) { estilo="card-atencao"; cat="atencao"; info="ALERTA"; n.a++; }
                     
                     const div = document.createElement('div');
-                    div.className = `card card-entry p-5 rounded-3xl shadow-sm ${estilo} mb-3 border-2 transition-all`;
-                    div.style.animationDelay = `${index * 0.05}s`; // Efeito cascata
-                    div.dataset.id = item.id; div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
+                    div.className = `card card-entry p-4 rounded-3xl shadow-sm ${estilo} border-2 transition-all`;
+                    div.style.animationDelay = `${idx * 0.05}s`;
+                    div.dataset.cat = cat; div.dataset.search = `${i.produto} ${i.codigo}`.toLowerCase();
                     
                     div.onclick = (e) => { 
-                        if(e.target.tagName !== 'BUTTON') { 
-                            const cb = div.querySelector('.item-check'); 
-                            cb.checked = !cb.checked; 
-                            div.classList.toggle('card-checked', cb.checked); 
-                        } 
+                        if(e.target.tagName !== 'BUTTON') {
+                            div.classList.toggle('card-checked');
+                        }
                     };
 
                     div.innerHTML = `
-                        <div class="flex gap-4">
-                            <input type="checkbox" class="item-check scale-[1.5] pointer-events-none">
-                            <div class="flex-grow">
-                                <div class="flex justify-between text-[8px] font-black uppercase text-slate-400 mb-1">
-                                    <span>${item.setor}</span>
-                                    <span>EAN: ${item.codigo}</span>
-                                </div>
-                                <h3 class="font-black text-sm uppercase text-slate-800 leading-tight">${item.produto}</h3>
-                                <div class="flex justify-between items-end mt-4">
-                                    <div class="flex flex-col">
-                                        <span class="text-[10px] font-black text-slate-900 bg-white px-2 py-1 rounded-lg border-2">
-                                            ${item.vencimento.split('-').reverse().join('/')}
-                                        </span>
-                                        <p class="text-[9px] font-black uppercase mt-1 ${cat === 'critico' ? 'text-red-600' : 'text-slate-500'}">${textoVenc}</p>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-[9px] font-bold text-slate-400">QTD: ${item.quantidade}</p>
-                                        ${podeApagar ? `<button type="button" class="btn-excluir text-[8px] text-red-600 font-black mt-2 underline" data-id="${item.id}">APAGAR</button>` : ''}
-                                    </div>
-                                </div>
-                                <div class="barcode-container mt-3">
-                                    <svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-displayValue="false" jsbarcode-height="40"></svg>
-                                </div>
+                        <div class="flex justify-between text-[7px] font-black uppercase text-slate-400 mb-1">
+                            <span>${i.setor}</span>
+                            <span class="${cat === 'critico' ? 'text-red-600' : 'text-blue-600'}">${info}</span>
+                        </div>
+                        <h3 class="font-black text-sm uppercase text-slate-800 truncate">${i.produto}</h3>
+                        <div class="flex justify-between items-end mt-3">
+                            <div class="bg-white border px-2 py-1 rounded-xl text-center">
+                                <p class="text-[10px] font-black text-slate-900">${i.vencimento.split('-').reverse().join('/')}</p>
                             </div>
-                        </div>`;
+                            <div class="barcode-container w-24">
+                                <svg class="barcode" jsbarcode-value="${i.codigo}" jsbarcode-format="auto" jsbarcode-displayValue="false" jsbarcode-height="30" jsbarcode-width="1"></svg>
+                            </div>
+                            ${podeApagar ? `<button onclick="apagar('${i.id}')" class="text-[8px] font-bold text-red-400 underline uppercase">Apagar</button>` : ''}
+                        </div>
+                    `;
                     lista.appendChild(div);
                 });
                 JsBarcode(".barcode").init();
                 document.getElementById('c-total').innerText = snap.size;
-                document.getElementById('c-critico').innerText = counts.critico;
-                document.getElementById('c-atencao').innerText = counts.atencao;
+                document.getElementById('c-critico').innerText = n.c;
+                document.getElementById('c-atencao').innerText = n.a;
                 processarLista();
-
-                document.querySelectorAll('.btn-excluir').forEach(btn => {
-                    btn.onclick = async (e) => { 
-                        e.stopPropagation(); 
-                        if(confirm("Apagar registro?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); 
-                    };
-                });
             });
         }
 
-        onAuthStateChanged(auth, (user) => {
+        window.apagar = async (id) => { if(confirm("Remover item?")) await deleteDoc(doc(db, "validades", id)); };
+
+        onAuthStateChanged(auth, (u) => {
             document.getElementById('loading-screen').style.display = 'none';
-            if (user) {
+            if (u) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                document.getElementById('user-display').innerText = user.email;
-                const isGerente = gerentesREAIS.includes(user.email);
-                const isPaulo = user.email === pauloADM;
-                document.getElementById('repositor-form').classList.toggle('hidden', isGerente);
-                carregar(isPaulo || isGerente);
+                document.getElementById('user-display').innerText = u.email;
+                const isAdm = adms.includes(u.email);
+                document.getElementById('repositor-form').classList.toggle('hidden', isAdm && u.email !== 'paulo@newmarket.com');
+                carregar(isAdm);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-panel').style.display = 'none';
@@ -291,7 +286,7 @@
 
         document.getElementById('btn-entrar').onclick = async () => {
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
-            catch { showToast("Usuário ou senha inválidos!"); }
+            catch { msg("Erro: Verifique os dados"); }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
@@ -305,28 +300,23 @@
                 vencimento: document.getElementById('p-data').value, 
                 criadoEm: serverTimestamp() 
             };
-            if(!p.produto || !p.vencimento) return showToast("Falta o nome ou data!");
+            if(!p.produto || !p.vencimento) return msg("Nome e Data obrigatórios!");
             await addDoc(collection(db, "validades"), p);
-            showToast("✅ Gravado com sucesso!");
+            msg("✅ Gravado com sucesso!");
             document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
         };
 
         document.getElementById('btn-whatsapp').onclick = () => {
             const sel = document.querySelectorAll('.card-checked');
-            if(sel.length === 0) return showToast("Selecione os itens primeiro!");
-            let msg = "*⚠️ RELATÓRIO DE VENCIMENTOS - NEW MARKET*\n\n";
-            sel.forEach(c => {
-                msg += `📌 *${c.querySelector('h3').innerText}*\n📅 Vencimento: ${c.querySelector('.text-slate-900').innerText}\n\n`;
-            });
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+            if(!sel.length) return msg("Selecione os itens clicando neles");
+            let txt = "*Relatório New Market 2026*\n\n";
+            sel.forEach(c => { txt += `• ${c.querySelector('h3').innerText} (${c.querySelector('.text-slate-900').innerText})\n`; });
+            window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`);
         };
 
         document.getElementById('btn-selecionar-criticos').onclick = () => {
             document.querySelectorAll('.card').forEach(c => {
-                if(c.dataset.cat === 'critico') {
-                    c.querySelector('.item-check').checked = true;
-                    c.classList.add('card-checked');
-                }
+                if(c.dataset.cat === 'critico') c.classList.add('card-checked');
             });
         };
     </script>
