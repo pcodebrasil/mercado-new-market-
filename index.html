@@ -8,17 +8,17 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
         #login-screen { 
             display: flex; 
             background: url('https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1374&q=80') no-repeat center center fixed;
             background-size: cover;
         }
         .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
         }
         .market-gradient {
             background: linear-gradient(135deg, #1e3a8a 0%, #dc2626 100%);
@@ -28,16 +28,17 @@
         #main-panel { display: none; }
         #loading-screen { position: fixed; inset: 0; background: white; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        /* Estilos do Painel */
         .card-critico { border-left: 8px solid #ef4444; }
         .card-atencao { border-left: 8px solid #f59e0b; }
         .card-normal { border-left: 8px solid #10b981; }
-        .card-checked { opacity: 0.5; transform: scale(0.98); filter: grayscale(1); }
+        .card-checked { opacity: 0.5; transform: scale(0.97); filter: grayscale(1); background: #f1f5f9 !important; }
         
-        #toast { visibility: hidden; min-width: 250px; background: #1e293b; color: #fff; text-align: center; border-radius: 1rem; padding: 1rem; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; }
+        #toast { visibility: hidden; min-width: 250px; background: #1e293b; color: #fff; text-align: center; border-radius: 1rem; padding: 1rem; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; text-transform: uppercase; font-size: 10px; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        
+        svg.barcode { width: 100%; max-height: 50px; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 flex flex-col min-h-screen">
@@ -46,69 +47,64 @@
 
     <div id="loading-screen">
         <div class="w-16 h-16 border-4 border-blue-900 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-xs font-bold uppercase tracking-widest text-slate-500">New Market Intelligence</p>
+        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Sincronizando New Market</p>
     </div>
 
     <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-6">
         <div class="glass-card p-10 rounded-[3rem] w-full max-w-md text-center">
-            <div class="mb-6">
-                <div class="bg-blue-900 w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
-                    <span class="text-white text-3xl">🛒</span>
+            <div class="mb-8">
+                <div class="bg-blue-900 w-20 h-20 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-2xl">
+                    <span class="text-white text-4xl">🛒</span>
                 </div>
-                <h1 class="text-4xl font-black italic tracking-tighter market-gradient">NEW MARKET</h1>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">Nazaré Paulista | Gestão 2026</p>
+                <h1 class="text-4xl font-black italic tracking-tighter market-gradient uppercase">New Market</h1>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mt-2">Nazaré Paulista</p>
             </div>
 
-            <form id="login-form" class="space-y-4">
-                <div class="relative text-left">
-                    <label class="text-[10px] font-black uppercase ml-4 text-slate-500">Acesso Colaborador</label>
-                    <input type="email" id="email" class="w-full p-4 bg-slate-100 rounded-2xl border-none focus:ring-2 focus:ring-blue-900 outline-none font-medium transition-all" placeholder="seu@email.com" required>
+            <form id="login-form" class="space-y-5 text-left">
+                <div>
+                    <label class="text-[9px] font-black uppercase ml-4 text-slate-500 tracking-widest">E-mail de Acesso</label>
+                    <input type="email" id="email" class="w-full p-5 bg-white rounded-2xl border-none shadow-inner focus:ring-2 focus:ring-blue-900 outline-none font-bold" placeholder="exemplo@newmarket.com" required>
                 </div>
-                <div class="relative text-left">
-                    <label class="text-[10px] font-black uppercase ml-4 text-slate-500">Senha de Segurança</label>
-                    <input type="password" id="password" class="w-full p-4 bg-slate-100 rounded-2xl border-none focus:ring-2 focus:ring-blue-900 outline-none font-medium transition-all" placeholder="••••••••" required>
+                <div>
+                    <label class="text-[9px] font-black uppercase ml-4 text-slate-500 tracking-widest">Senha Operacional</label>
+                    <input type="password" id="password" class="w-full p-5 bg-white rounded-2xl border-none shadow-inner focus:ring-2 focus:ring-blue-900 outline-none font-bold" placeholder="••••••••" required>
                 </div>
-                <button type="submit" class="w-full bg-blue-900 hover:bg-red-700 text-white p-5 rounded-2xl font-black uppercase tracking-widest shadow-xl transition-all active:scale-95 mt-4">
-                    Entrar no Sistema
+                <button type="submit" class="w-full bg-blue-900 hover:bg-red-700 text-white p-5 rounded-2xl font-black uppercase tracking-[0.2em] shadow-2xl transition-all active:scale-95">
+                    Acessar Painel
                 </button>
             </form>
-            <p class="mt-8 text-[9px] text-slate-400 font-bold uppercase tracking-tighter">Powered by Paulo Souza & Gemini AI</p>
+            <p class="mt-10 text-[10px] text-slate-500 font-black uppercase tracking-widest">Powered by Paulo Souza</p>
         </div>
     </div>
 
     <div id="main-panel" class="flex-grow flex flex-col">
-        <nav class="bg-blue-900 text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-xl border-b-4 border-red-600">
+        <nav class="bg-blue-900 text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-2xl border-b-4 border-red-600">
             <div class="leading-none">
                 <span class="font-black italic uppercase text-xl">New Market</span><br>
-                <span id="user-display" class="text-[8px] font-bold opacity-80 tracking-widest uppercase">...</span>
+                <span id="user-display" class="text-[8px] font-black text-yellow-400 tracking-widest uppercase">...</span>
             </div>
-            <button id="btn-logout" class="text-[10px] bg-white/10 px-4 py-2 rounded-xl font-black border border-white/20 uppercase">Sair</button>
+            <button id="btn-logout" class="text-[9px] bg-black/30 px-4 py-2 rounded-xl font-black border border-white/20 uppercase">Sair</button>
         </nav>
 
         <main class="p-4 max-w-xl mx-auto w-full space-y-6">
-            <div id="repositor-form" class="hidden bg-white p-6 rounded-[2rem] shadow-lg border-b-4 border-blue-900">
-                <h2 class="font-black uppercase text-blue-900 text-xs mb-4 flex items-center gap-2">
-                    <span>📝</span> Novo Registro de Validade
-                </h2>
-                <div class="space-y-3">
-                    <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-xl font-bold uppercase text-sm border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-900">
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="number" id="p-ean" placeholder="EAN (CÓDIGO)" class="p-4 bg-slate-50 rounded-xl font-bold text-sm border-none ring-1 ring-slate-200">
-                        <input type="number" id="p-qtd" placeholder="QTD" class="p-4 bg-slate-50 rounded-xl font-bold text-sm border-none ring-1 ring-slate-200">
-                    </div>
-                    <select id="p-setor-add" class="w-full p-4 bg-slate-50 rounded-xl font-bold uppercase text-sm border-none ring-1 ring-slate-200">
-                        <option value="Corredor do Paulo">Corredor do Paulo</option>
-                        <option value="Corredor do Leandro">Corredor do Leandro</option>
-                        <option value="Corredor do Pedro">Corredor do Pedro</option>
-                        <option value="Corredor do Edmar">Corredor do Edmar</option>
-                    </select>
-                    <input type="date" id="p-data" class="w-full p-4 bg-slate-50 rounded-xl font-bold text-sm border-none ring-1 ring-slate-200">
-                    <button id="btn-salvar" class="w-full bg-blue-900 text-white p-4 rounded-xl font-black uppercase shadow-lg">Registrar</button>
+            <div id="repositor-form" class="bg-white p-6 rounded-[2.5rem] shadow-xl border-b-8 border-blue-900 space-y-4">
+                <h2 class="font-black uppercase text-blue-900 text-[10px] tracking-widest">Lançamento de Validade</h2>
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase text-sm border-none ring-1 ring-slate-100">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="p-ean" placeholder="CÓDIGO EAN" class="p-4 bg-slate-50 rounded-2xl font-black text-sm border-none ring-1 ring-slate-100">
+                    <input type="number" id="p-qtd" placeholder="QTD" class="p-4 bg-slate-50 rounded-2xl font-black text-sm border-none ring-1 ring-slate-100">
                 </div>
+                <select id="p-setor-add" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase text-sm border-none ring-1 ring-slate-100">
+                    <option value="Corredor do Paulo">Corredor do Paulo</option>
+                    <option value="Corredor do Leandro">Corredor do Leandro</option>
+                    <option value="Corredor do Pedro">Corredor do Pedro</option>
+                    <option value="Corredor do Edmar">Corredor do Edmar</option>
+                </select>
+                <input type="date" id="p-data" class="w-full p-4 bg-slate-50 rounded-2xl font-black text-sm border-none ring-1 ring-slate-100">
+                <button id="btn-salvar" class="w-full bg-blue-900 text-white p-5 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-all">Salvar Registro</button>
             </div>
 
-            <div id="lista" class="space-y-4 pb-20">
-                </div>
+            <div id="lista" class="space-y-4 pb-20"></div>
         </main>
     </div>
 
@@ -130,14 +126,18 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Estado do App
+        function showToast(msg) {
+            const t = document.getElementById("toast");
+            t.innerText = msg; t.className = "show";
+            setTimeout(() => { t.className = ""; }, 3000);
+        }
+
         onAuthStateChanged(auth, (user) => {
             document.getElementById('loading-screen').style.display = 'none';
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
                 document.getElementById('user-display').innerText = user.email.split('@')[0].toUpperCase();
-                document.getElementById('repositor-form').classList.remove('hidden');
                 carregar();
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
@@ -145,20 +145,32 @@
             }
         });
 
-        // Login
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { 
                 await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); 
             } catch (err) { 
-                alert("Acesso negado. Verifique e-mail e senha."); 
+                showToast("ACESSO NEGADO"); 
             }
         };
 
-        // Logout
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
-        // Carregar Itens
+        document.getElementById('btn-salvar').onclick = async () => {
+            const data = { 
+                produto: document.getElementById('p-nome').value.toUpperCase(), 
+                codigo: document.getElementById('p-ean').value || "0000000000000", 
+                quantidade: document.getElementById('p-qtd').value, 
+                setor: document.getElementById('p-setor-add').value, 
+                vencimento: document.getElementById('p-data').value, 
+                criadoEm: serverTimestamp() 
+            };
+            if(!data.produto || !data.vencimento) return showToast("DADOS INCOMPLETOS");
+            await addDoc(collection(db, "validades"), data);
+            showToast("PRODUTO SALVO!");
+            document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = ""; document.getElementById('p-qtd').value = "";
+        };
+
         function carregar() {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista');
@@ -166,11 +178,22 @@
                 snap.forEach(d => {
                     const item = d.data();
                     const div = document.createElement('div');
-                    div.className = "card-normal bg-white p-5 rounded-3xl shadow-md border border-slate-100 mb-3";
-                    div.innerHTML = `<h3 class="font-black text-slate-800 uppercase">${item.produto}</h3>
-                                     <p class="text-[10px] font-bold text-slate-400">Vence em: ${item.vencimento}</p>`;
+                    div.className = "bg-white p-5 rounded-[2rem] shadow-md card-normal mb-3 border border-slate-100 transition-all";
+                    div.innerHTML = `
+                        <div class="flex flex-col gap-2">
+                            <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest">${item.setor}</span>
+                            <h3 class="font-black text-slate-800 uppercase text-sm">${item.produto}</h3>
+                            <div class="bg-slate-50 p-2 rounded-xl border border-dashed border-slate-200">
+                                <svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto"></svg>
+                            </div>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-[10px] font-black text-blue-900 uppercase">Qtd: ${item.quantidade}</span>
+                                <span class="text-[10px] font-black text-red-600 uppercase">Venc: ${item.vencimento.split('-').reverse().join('/')}</span>
+                            </div>
+                        </div>`;
                     lista.appendChild(div);
                 });
+                JsBarcode(".barcode").init();
             });
         }
     </script>
