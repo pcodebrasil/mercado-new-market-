@@ -30,16 +30,23 @@
     </div>
 
     <div id="main-panel" class="flex-grow flex flex-col">
-        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
+        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50">
             <span class="font-black italic uppercase">New Market</span>
             <button id="btn-config" class="bg-white/20 p-2 rounded-full">⚙️</button>
         </nav>
 
         <main class="p-4 max-w-xl mx-auto w-full space-y-5">
             <div id="gaveta-config" class="hidden bg-slate-800 p-6 rounded-3xl text-white space-y-4 shadow-xl">
-                <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações de Alerta</h2>
+                <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações</h2>
                 <button id="btn-ativar-push" class="w-full bg-purple-600 p-3 rounded-xl font-black uppercase text-[9px]">🔔 Ativar Alertas neste Celular</button>
             </div>
+
+            <div class="bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
+                <input type="text" id="p-nome" placeholder="PRODUTO" class="w-full p-4 border rounded-2xl uppercase font-bold">
+                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold">
+                <button id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar Produto</button>
+            </div>
+
             <div id="lista" class="space-y-3 pb-8"></div>
         </main>
     </div>
@@ -47,7 +54,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, query, orderBy, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
 
         const firebaseConfig = {
@@ -64,12 +71,12 @@
         const db = getFirestore(app);
         const messaging = getMessaging(app);
 
-        // FUNÇÃO PARA SALVAR O TOKEN NO FIREBASE (FOTO 888)
+        // FUNÇÃO PARA ATIVAR ALERTAS (Resolve Erro 404 da Foto 890)
         document.getElementById('btn-ativar-push').onclick = async () => {
             try {
                 const permission = await Notification.requestPermission();
                 if (permission === 'granted') {
-                    // RESOLVE O ERRO 404 DA FOTO 890
+                    // Tenta registrar o Service Worker com o nome que você tem no GitHub
                     const reg = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
                     const token = await getToken(messaging, { 
                         vapidKey: 'BNdM1ijQ6x9eFK4Zop7MfUZ6GnyVSFVR_DJJSOwBsXKfs6Q6bouX2o3b5KD44_f5xWXbXCqwHeJWJlcOEo7DrLA',
@@ -82,29 +89,63 @@
                             usuario: auth.currentUser.email,
                             atualizadoEm: serverTimestamp()
                         });
-                        showToast("CELULAR CADASTRADO!", "#10b981");
+                        showToast("ALERTA ATIVADO COM SUCESSO!", "#10b981");
                     }
                 }
             } catch (e) { showToast("Erro: " + e.message, "#dc2626"); }
         };
 
+        // CONTROLE DE TELAS (Login vs Painel)
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                carregar();
+                carregarProdutos();
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-panel').style.display = 'none';
             }
         });
 
+        // LOGIN
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try {
                 await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
-            } catch (err) { showToast("Acesso Negado", "#dc2626"); }
+            } catch (err) { showToast("Usuário ou Senha incorretos", "#dc2626"); }
         };
+
+        // SALVAR PRODUTO NO FIREBASE (Foto 888)
+        document.getElementById('btn-salvar').onclick = async () => {
+            const nome = document.getElementById('p-nome').value.toUpperCase();
+            const data = document.getElementById('p-data').value;
+            if(!nome || !data) return showToast("Preencha tudo!", "#f59e0b");
+            
+            try {
+                await addDoc(collection(db, "validades"), {
+                    produto: nome,
+                    vencimento: data,
+                    criadoEm: serverTimestamp()
+                });
+                document.getElementById('p-nome').value = "";
+                showToast("PRODUTO SALVO!", "#10b981");
+            } catch (e) { showToast("Erro ao salvar", "#dc2626"); }
+        };
+
+        // CARREGAR LISTA
+        function carregarProdutos() {
+            onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
+                const lista = document.getElementById('lista');
+                lista.innerHTML = "";
+                snap.forEach(d => {
+                    const item = d.data();
+                    const div = document.createElement('div');
+                    div.className = "p-4 bg-white rounded-2xl shadow-sm border-l-8 border-blue-600";
+                    div.innerHTML = `<h3 class="font-black uppercase text-sm">${item.produto}</h3><p class="text-[10px] text-slate-500 font-bold">VENCIMENTO: ${item.vencimento}</p>`;
+                    lista.appendChild(div);
+                });
+            });
+        }
 
         function showToast(msg, color) {
             const t = document.getElementById("toast");
@@ -112,19 +153,6 @@
             setTimeout(() => t.className = "", 3000);
         }
 
-        function carregar() {
-            onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
-                const lista = document.getElementById('lista');
-                lista.innerHTML = "";
-                snap.forEach(d => {
-                    const item = d.data();
-                    const div = document.createElement('div');
-                    div.className = "p-4 bg-white rounded-2xl shadow-sm mb-3 border-l-8 border-blue-600";
-                    div.innerHTML = `<h3 class="font-black uppercase">${item.produto}</h3><p class="text-xs">Vencimento: ${item.vencimento}</p>`;
-                    lista.appendChild(div);
-                });
-            });
-        }
         document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
     </script>
 </body>
