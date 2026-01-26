@@ -3,87 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - Gestão de Validades</title>
+    <title>New Market - Sistema 2026</title>
     <link rel="manifest" href="./manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
         #login-screen, #main-panel { display: none; }
         .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
-        .card-critico { border-left: 12px solid #ef4444; background: #fff1f2; }
-        .card-atencao { border-left: 12px solid #f59e0b; background: #fffbeb; }
-        .card-normal { border-left: 12px solid #10b981; background: #f0fdf4; }
-        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .card-critico { border-left: 10px solid #ef4444; }
+        .card-atencao { border-left: 10px solid #f59e0b; }
+        .card-normal { border-left: 10px solid #10b981; }
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-        input:focus { transform: scale(1.01); transition: 0.2s; }
     </style>
 </head>
-<body class="bg-slate-100 flex flex-col min-h-screen font-sans antialiased">
+<body class="bg-slate-100 flex flex-col min-h-screen font-sans">
     <div id="toast"></div>
 
-    <div id="login-screen" class="flex-grow flex items-center justify-center p-6">
-        <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md border-t-[12px] border-blue-900 text-center">
-            <h1 class="text-4xl font-black uppercase italic text-blue-900 tracking-tighter">New Market</h1>
-            <p class="text-[10px] font-black text-slate-400 mb-8 tracking-[0.3em] uppercase">Security System 2026</p>
-            <form id="login-form" class="space-y-5">
-                <input type="email" id="email" class="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-3xl outline-none focus:border-blue-500 font-bold" placeholder="E-MAIL DE ACESSO" required>
-                <input type="password" id="password" class="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-3xl outline-none focus:border-blue-500 font-bold" placeholder="SENHA" required>
-                <button type="submit" class="w-full bg-blue-900 text-white p-5 rounded-3xl font-black uppercase shadow-xl hover:bg-blue-800 transition-all active:scale-95">Entrar no Sistema</button>
+    <div id="login-screen" class="flex-grow flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-t-8 border-blue-800 text-center">
+            <h1 class="text-3xl font-black uppercase italic text-blue-800">New Market</h1>
+            <p class="text-[10px] font-bold text-slate-400 mb-6 tracking-widest text-center uppercase">Controle de Validades</p>
+            <form id="login-form" class="space-y-4">
+                <input type="email" id="email" class="w-full p-4 border rounded-2xl outline-none focus:ring-2 ring-blue-500 font-bold" placeholder="E-MAIL" required>
+                <input type="password" id="password" class="w-full p-4 border rounded-2xl outline-none focus:ring-2 ring-blue-500 font-bold" placeholder="SENHA" required>
+                <button type="submit" class="w-full bg-blue-800 text-white p-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-all">Entrar</button>
             </form>
         </div>
     </div>
 
     <div id="main-panel" class="flex-grow flex flex-col">
-        <nav class="bg-newmarket text-white p-5 flex justify-between items-center sticky top-0 z-50 shadow-lg">
+        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
             <div class="flex flex-col">
-                <span class="font-black italic uppercase text-2xl leading-none">New Market</span>
-                <span id="user-info" class="text-[8px] font-bold opacity-70 mt-1">SISTEMA ONLINE</span>
+                <span class="font-black italic uppercase tracking-tighter text-xl">New Market</span>
+                <span id="txt-user" class="text-[8px] font-bold opacity-70 uppercase"></span>
             </div>
-            <div class="flex gap-3">
-                <button id="btn-config" class="bg-white/20 p-2.5 rounded-2xl backdrop-blur-md">⚙️</button>
-                <button id="btn-logout" class="bg-black/20 p-2.5 rounded-2xl text-[9px] font-black uppercase">Sair</button>
+            <div class="flex gap-2">
+                <button id="btn-config" class="bg-white/20 p-2 rounded-full">⚙️</button>
+                <button id="btn-logout" class="bg-red-600 px-3 py-1 rounded-full text-[10px] font-black uppercase shadow-sm">Sair</button>
             </div>
         </nav>
 
-        <main class="p-5 max-w-2xl mx-auto w-full space-y-6">
-            <div id="gaveta-config" class="hidden bg-slate-900 p-8 rounded-[2.5rem] text-white space-y-5 shadow-2xl border-2 border-blue-500/30">
-                <div class="flex items-center gap-3">
-                    <span class="text-2xl">🔔</span>
-                    <div>
-                        <h2 class="font-black uppercase text-sm text-blue-400">Notificações Push</h2>
-                        <p class="text-[9px] text-slate-400 uppercase font-bold">Ative para receber avisos às 08h</p>
-                    </div>
-                </div>
-                <button id="btn-ativar-push" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 p-5 rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95 transition-all">Ativar Alertas Diários</button>
+        <main class="p-4 max-w-xl mx-auto w-full space-y-6">
+            <div id="gaveta-config" class="hidden bg-slate-800 p-6 rounded-3xl text-white space-y-4 shadow-2xl border-2 border-slate-700">
+                <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações</h2>
+                <button id="btn-ativar-push" class="w-full bg-purple-600 hover:bg-purple-700 p-4 rounded-2xl font-black uppercase text-[10px] shadow-lg transition-all">🔔 Ativar Notificações de Validade</button>
+                <p class="text-[8px] text-slate-400 text-center uppercase italic">Obrigatório para receber o alerta diário às 08h.</p>
             </div>
 
             <div class="relative group">
-                <input type="text" id="campo-busca" placeholder="PESQUISAR PRODUTO NA LISTA..." class="w-full p-5 pl-14 rounded-[2rem] shadow-md border-none uppercase font-black text-sm outline-none focus:ring-4 ring-blue-500/20 bg-white transition-all">
-                <span class="absolute left-6 top-5 opacity-40 text-lg group-focus-within:opacity-100 transition-all">🔍</span>
+                <input type="text" id="campo-busca" placeholder="PROCURAR PRODUTO..." class="w-full p-4 pl-12 rounded-2xl shadow-sm border-none uppercase font-bold text-sm outline-none focus:ring-2 ring-blue-500 bg-white">
+                <span class="absolute left-4 top-4 opacity-30 font-bold">🔍</span>
             </div>
 
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl border-b-[12px] border-blue-900 space-y-5">
-                <div class="flex justify-between items-center">
-                    <h2 class="font-black uppercase text-blue-900 text-xs tracking-widest">Novo Lançamento</h2>
-                    <span id="data-atual" class="text-[10px] font-black text-slate-300"></span>
+            <div class="bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
+                <div class="flex justify-between items-center px-1">
+                    <h2 class="font-black uppercase text-blue-800 text-xs">Novo Produto</h2>
+                    <span id="txt-data-hoje" class="text-[9px] font-bold text-slate-400"></span>
                 </div>
-                <div class="space-y-3">
-                    <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl uppercase font-black text-slate-700 outline-none focus:border-blue-400">
-                    <div class="flex gap-3">
-                        <input type="date" id="p-data" class="w-1/2 p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-slate-700 outline-none focus:border-blue-400">
-                        <button id="btn-salvar" class="w-1/2 bg-blue-900 text-white p-5 rounded-2xl font-black uppercase shadow-lg hover:bg-blue-800 transition-all active:scale-95">Salvar</button>
-                    </div>
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl uppercase font-black text-slate-700 outline-none focus:border-blue-500">
+                <div class="flex gap-2">
+                    <input type="date" id="p-data" class="w-1/2 p-4 border rounded-2xl font-black text-slate-700 outline-none focus:border-blue-500">
+                    <button id="btn-salvar" class="w-1/2 bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-md hover:bg-blue-800 transition-all active:scale-95">Salvar</button>
                 </div>
             </div>
 
-            <div class="flex items-center justify-between px-4">
-                <h2 class="font-black uppercase text-slate-400 text-[10px] tracking-[0.2em]">Inventário de Validades</h2>
-                <span id="contador-itens" class="bg-blue-900 text-white text-[10px] px-3 py-1 rounded-full font-black">0 ITENS</span>
+            <div class="flex items-center justify-between px-2">
+                <h2 class="font-black uppercase text-slate-400 text-[10px] tracking-widest">Lista de Controle</h2>
+                <span id="contagem-itens" class="bg-blue-900 text-white text-[9px] px-2 py-1 rounded-full font-bold">0 ITENS</span>
             </div>
 
-            <div id="lista" class="space-y-4 pb-28"></div>
+            <div id="lista" class="space-y-4 pb-24"></div>
         </main>
     </div>
 
@@ -107,7 +99,7 @@
         const db = getFirestore(app);
         const messaging = getMessaging(app);
 
-        // CONFIGURAÇÕES DE PUSH (FOTO 890 CORREÇÃO)
+        // ATIVAÇÃO DE ALERTAS (RESOLVE ERRO 404 FOTO 890)
         document.getElementById('btn-ativar-push').onclick = async () => {
             try {
                 const permission = await Notification.requestPermission();
@@ -119,21 +111,23 @@
                     });
                     if (token) {
                         await setDoc(doc(db, "tokens_notificacao", auth.currentUser.uid), {
-                            token: token, usuario: auth.currentUser.email, data: serverTimestamp()
+                            token: token,
+                            usuario: auth.currentUser.email,
+                            atualizadoEm: serverTimestamp()
                         });
-                        showToast("🔔 ALERTAS CONFIGURADOS!", "#10b981");
+                        showToast("NOTIFICAÇÕES ATIVADAS!", "#10b981");
                     }
                 }
-            } catch (e) { showToast("ERRO AO ATIVAR", "#ef4444"); }
+            } catch (e) { showToast("ERRO: " + e.message, "#dc2626"); }
         };
 
-        // GESTÃO DE ESTADO (LOGIN)
+        // LOGIN / LOGOUT
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                document.getElementById('user-info').innerText = `LOGADO COMO: ${user.email.toUpperCase()}`;
-                carregarDados();
+                document.getElementById('txt-user').innerText = `Usuário: ${user.email}`;
+                carregarProdutos();
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-panel').style.display = 'none';
@@ -143,82 +137,86 @@
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); }
-            catch (err) { showToast("ACESSO NEGADO", "#ef4444"); }
+            catch (err) { showToast("ACESSO NEGADO", "#dc2626"); }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
         document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
 
-        // CRUD FIREBASE
+        // SALVAR NO FIREBASE
         document.getElementById('btn-salvar').onclick = async () => {
-            const n = document.getElementById('p-nome').value.trim().toUpperCase();
-            const d = document.getElementById('p-data').value;
-            if (!n || !d) return showToast("PREENCHA OS CAMPOS!", "#f59e0b");
+            const nome = document.getElementById('p-nome').value.toUpperCase().trim();
+            const data = document.getElementById('p-data').value;
+            if(!nome || !data) return showToast("PREENCHA TUDO!", "#f59e0b");
             
             await addDoc(collection(db, "validades"), {
-                produto: n, vencimento: d, user: auth.currentUser.email, timestamp: serverTimestamp()
+                produto: nome,
+                vencimento: data,
+                criadoEm: serverTimestamp(),
+                usuario: auth.currentUser.email
             });
             document.getElementById('p-nome').value = "";
-            showToast("PRODUTO REGISTRADO!", "#10b981");
+            showToast("SALVO COM SUCESSO!", "#10b981");
         };
 
-        function carregarDados() {
+        // CARREGAR, FILTRAR E GERAR BARRAS
+        function carregarProdutos() {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
-                const render = (docs) => {
+                const render = (documentos) => {
                     const lista = document.getElementById('lista');
-                    document.getElementById('contador-itens').innerText = `${docs.length} ITENS`;
+                    document.getElementById('contagem-itens').innerText = `${documentos.length} ITENS`;
                     lista.innerHTML = "";
                     
-                    docs.forEach(docSnap => {
-                        const item = docSnap.data();
+                    documentos.forEach(d => {
+                        const item = d.data();
                         const hoje = new Date();
                         const venci = new Date(item.vencimento + "T12:00:00");
                         const dif = Math.ceil((venci - hoje) / (1000 * 60 * 60 * 24));
                         
-                        let classe = "card-normal";
-                        if (dif <= 5) classe = "card-critico";
-                        else if (dif <= 15) classe = "card-atencao";
+                        let cor = "card-normal";
+                        if(dif <= 5) cor = "card-critico";
+                        else if(dif <= 15) cor = "card-atencao";
 
                         const card = document.createElement('div');
-                        card.className = `p-6 rounded-[2rem] shadow-sm flex flex-col gap-4 relative overflow-hidden ${classe}`;
+                        card.className = `p-4 bg-white rounded-[2rem] shadow-sm flex flex-col gap-2 ${cor}`;
                         card.innerHTML = `
                             <div class="flex justify-between items-start">
-                                <div class="max-w-[70%]">
-                                    <h3 class="font-black uppercase text-blue-900 text-lg leading-tight break-words">${item.produto}</h3>
-                                    <p class="text-[9px] font-black text-slate-400 mt-1 uppercase">Vencimento: ${item.vencimento}</p>
+                                <div>
+                                    <h3 class="font-black uppercase text-blue-900 text-sm leading-tight">${item.produto}</h3>
+                                    <p class="text-[9px] font-bold text-slate-400">VENCE EM: ${item.vencimento}</p>
                                 </div>
                                 <div class="text-right flex flex-col items-end">
-                                    <span class="text-[11px] font-black p-1 px-2 rounded-lg ${dif <= 5 ? 'bg-red-600 text-white' : 'bg-slate-200 text-slate-500'}">
-                                        ${dif} DIAS
-                                    </span>
-                                    <button onclick="apagar('${docSnap.id}')" class="mt-2 opacity-20 hover:opacity-100 text-red-600 font-bold">EXCLUIR</button>
+                                    <span class="text-[10px] font-black ${dif <= 5 ? 'text-red-600' : 'text-slate-500'}">${dif} DIAS</span>
+                                    <button onclick="excluirItem('${d.id}')" class="text-slate-300 hover:text-red-600 text-xs mt-1">✕</button>
                                 </div>
                             </div>
-                            <canvas id="bc-${docSnap.id}" class="w-full h-10"></canvas>
+                            <canvas id="barcode-${d.id}" class="w-full h-10"></canvas>
                         `;
                         lista.appendChild(card);
                         try {
-                            JsBarcode(`#bc-${docSnap.id}`, item.produto.substring(0, 12), { format: "CODE128", height: 35, displayValue: false, margin: 0 });
+                            JsBarcode(`#barcode-${d.id}`, item.produto.substring(0, 10), { format: "CODE128", height: 30, displayValue: false });
                         } catch(e) {}
                     });
                 };
 
                 render(snap.docs);
                 document.getElementById('campo-busca').oninput = (e) => {
-                    const t = e.target.value.toUpperCase();
-                    render(snap.docs.filter(d => d.data().produto.includes(t)));
+                    const termo = e.target.value.toUpperCase();
+                    const filtrados = snap.docs.filter(d => d.data().produto.includes(termo));
+                    render(filtrados);
                 };
             });
         }
 
-        window.apagar = async (id) => { if (confirm("DESEJA EXCLUIR ESTE ITEM?")) await deleteDoc(doc(db, "validades", id)); };
+        window.excluirItem = async (id) => { if(confirm("EXCLUIR ESTE ITEM?")) await deleteDoc(doc(db, "validades", id)); };
 
-        function showToast(m, c) {
+        function showToast(msg, color) {
             const t = document.getElementById("toast");
-            t.innerText = m; t.style.backgroundColor = c; t.className = "show";
+            t.innerText = msg; t.style.backgroundColor = color; t.className = "show";
             setTimeout(() => t.className = "", 3000);
         }
-        document.getElementById('data-atual').innerText = new Date().toLocaleDateString('pt-BR');
+
+        document.getElementById('txt-data-hoje').innerText = new Date().toLocaleDateString('pt-BR');
     </script>
 </body>
 </html>
