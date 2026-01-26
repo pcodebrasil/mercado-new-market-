@@ -73,7 +73,7 @@
                     <button id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Confirmar e Sair</button>
                 </div>
 
-                <div class="border-t border-slate-700 pt-4">
+                <div id="area-admin-firebase" class="border-t border-slate-700 pt-4">
                     <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Acessos da Equipe</p>
                     <button id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Abrir Gerenciador Firebase</button>
                 </div>
@@ -157,8 +157,13 @@
                 const isGerenteReal = gerentesREAIS.includes(user.email);
                 const isPaulo = gerentesOCULTOS.includes(user.email);
                 
-                document.getElementById('user-display').innerText = (isGerenteReal) ? `ADMIN: ${user.email.split('@')[0]}` : `REPO: ${user.email.split('@')[0]}`;
+                document.getElementById('user-display').innerText = (isGerenteReal || isPaulo) ? `ADMIN: ${user.email.split('@')[0]}` : `REPO: ${user.email.split('@')[0]}`;
+                
+                // Paulo vê a engrenagem, mas não o botão de cadastro de equipe
                 document.getElementById('btn-config').classList.toggle('hidden', !(isGerenteReal || isPaulo));
+                document.getElementById('area-admin-firebase').classList.toggle('hidden', !isGerenteReal);
+                
+                // Formulário de lançamento oculto para gerentes reais
                 document.getElementById('repositor-form').classList.toggle('hidden', isGerenteReal);
                 
                 carregar(isGerenteReal || isPaulo);
