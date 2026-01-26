@@ -3,151 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEW MARKET | Vigia</title>
+    <title>NEW MARKET</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
         :root {
-            --n-azul: #0066ff;
-            --n-azul-hover: #0052cc;
+            --n-azul: #0066ff; /* Azul Royal Vibrante */
             --n-amarelo: #ffc107;
-            --n-vermelho: #ef4444;
-            --n-fundo: #f8fafc;
+            --n-vermelho: #e11d48;
         }
 
-        body { background-color: var(--n-fundo); color: #334155; font-family: 'Inter', system-ui, sans-serif; }
+        body { background-color: #f8fafc; color: #334155; font-family: 'Inter', -apple-system, sans-serif; }
         #tela-login, #painel-principal { display: none; }
         
-        /* Entrada Elegante */
+        /* Efeito de Entrada */
         #tela-carregamento { 
             position: fixed; inset: 0; background: white; z-index: 9999; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
         }
-        .logo-animada {
-            font-weight: 900; font-style: italic; font-size: 1.8rem; color: #1e293b;
-            animation: entradaSuave 1s ease-out forwards;
-            letter-spacing: -1.5px;
+        .nome-entrada {
+            font-weight: 900; font-style: italic; font-size: 1.5rem; color: #1e293b;
+            animation: subirOpacidade 1.2s ease-out forwards;
+            letter-spacing: -1px;
         }
-        @keyframes entradaSuave {
-            from { opacity: 0; transform: translateY(10px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+        @keyframes subirOpacidade {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+        .linha-carregamento { width: 40px; height: 3px; background: var(--n-amarelo); margin-top: 10px; border-radius: 10px; animation: expandir 1.5s infinite; }
+        @keyframes expandir { 0%, 100% { width: 20px; } 50% { width: 60px; } }
 
-        /* Cartões e Inputs */
-        .cartao { background: white; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
-        .input-focado { 
-            @apply w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all text-sm font-medium; 
+        /* Estilo Compacto */
+        .cartao-clean { background: white; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .input-clean { 
+            @apply w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:bg-white transition-all text-sm font-semibold; 
         }
         
-        /* Botão Gravar - Ajustado para ser mais vivo */
-        .btn-gravar { 
-            @apply w-full p-4 rounded-xl font-bold text-sm uppercase tracking-wider text-white transition-all shadow-md active:scale-95;
-            background: linear-gradient(135deg, #0070f3 0%, #005ecb 100%);
+        /* Botão Gravar Ajustado (Mais vivo) */
+        .btn-acao { 
+            @apply w-full p-3 rounded-xl font-bold text-sm uppercase tracking-wider text-white transition-all active:scale-95 shadow-md;
+            background: var(--n-azul);
         }
-        .btn-gravar:hover { background: var(--n-azul-hover); shadow-lg; }
+        .btn-acao:hover { background: #0052cc; }
 
-        /* Estilo da Lista */
-        .item-card { @apply cartao p-4 mb-3 border-l-4 transition-all cursor-pointer; }
-        .border-critico { border-l-color: var(--n-vermelho); }
-        .border-alerta { border-l-color: var(--n-amarelo); }
-        .border-normal { border-l-color: var(--n-azul); }
-        .marcado { background-color: #f1f5f9; border-style: dashed; opacity: 0.7; }
+        /* Itens da Lista */
+        .item-lista { @apply cartao-clean p-4 mb-3 border-l-4 transition-all; }
+        .item-critico { border-l-color: var(--n-vermelho); }
+        .item-alerta { border-l-color: var(--n-amarelo); }
+        .item-ok { border-l-color: var(--n-azul); }
+        .selecionado { background: #f1f5f9; opacity: 0.6; }
 
-        #aviso-flutuante { 
-            visibility: hidden; position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); 
-            background: #1e293b; color: white; padding: 12px 28px; border-radius: 50px;
-            font-size: 11px; font-weight: 700; z-index: 10000; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+        #aviso { 
+            visibility: hidden; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
+            background: #1e293b; color: white; padding: 10px 24px; border-radius: 12px;
+            font-size: 12px; font-weight: 600; z-index: 10000;
         }
-        #aviso-flutuante.show { visibility: visible; animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes pop { from { transform: translate(-50%, 50px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+        #aviso.show { visibility: visible; animation: subir 0.3s ease-out; }
+        @keyframes subir { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
     </style>
 </head>
 <body>
 
-    <div id="aviso-flutuante">MENSAGEM</div>
+    <div id="aviso"></div>
 
     <div id="tela-carregamento">
-        <div class="logo-animada">NEW <span class="text-blue-600">MARKET</span></div>
-        <div class="w-8 h-1 bg-amber-400 mt-2 rounded-full"></div>
+        <div class="nome-entrada">NEW <span style="color:var(--n-azul)">MARKET</span></div>
+        <div class="linha-carregamento"></div>
     </div>
 
-    <div id="tela-login" class="min-h-screen flex items-center justify-center p-6 bg-slate-50">
-        <div class="cartao p-8 w-full max-w-xs">
-            <h1 class="text-center font-black text-slate-800 mb-6 uppercase tracking-widest text-xs">Identificação</h1>
-            <form class="space-y-4" onsubmit="return false;">
-                <input type="email" id="email" class="input-focado" placeholder="E-mail profissional">
-                <input type="password" id="senha" class="input-focado" placeholder="Sua senha">
-                <button type="button" id="btn-entrar" class="btn-gravar">Entrar no Sistema</button>
+    <div id="tela-login" class="min-h-screen flex items-center justify-center p-6">
+        <div class="cartao-clean p-8 w-full max-w-xs text-center">
+            <h1 class="text-xl font-black italic text-slate-800 mb-6 uppercase tracking-tighter">Acesso</h1>
+            <form class="space-y-3" onsubmit="return false;">
+                <input type="email" id="email" class="input-clean" placeholder="E-mail">
+                <input type="password" id="senha" class="input-clean" placeholder="Senha">
+                <button type="button" id="btn-entrar" class="btn-acao">Entrar</button>
             </form>
         </div>
     </div>
 
     <div id="painel-principal" class="flex flex-col min-h-screen">
-        <nav class="bg-white/80 backdrop-blur-md p-4 sticky top-0 z-50 flex justify-between items-center border-b border-slate-200">
-            <span class="font-black italic text-slate-800 text-sm tracking-tighter uppercase">New Market <span class="text-blue-600">Vigia</span></span>
-            <button id="btn-sair" class="text-[10px] font-bold text-slate-400 hover:text-red-500 transition-colors uppercase">Sair</button>
+        <nav class="bg-white p-4 sticky top-0 z-50 flex justify-between items-center border-b border-slate-100">
+            <div class="text-left">
+                <span class="font-black italic text-blue-800 text-sm uppercase">New Market</span>
+            </div>
+            <button id="btn-sair" class="text-[10px] font-bold text-red-500 uppercase">Sair</button>
         </nav>
 
         <main class="p-4 max-w-md mx-auto w-full space-y-6">
             
-            <div class="grid grid-cols-3 gap-3">
-                <div onclick="setFiltro('critico')" id="f-critico" class="cartao p-3 text-center cursor-pointer">
-                    <span class="text-[8px] font-bold text-slate-400 block uppercase mb-1">Crítico</span>
-                    <span id="q-critico" class="text-xl font-black text-red-500">0</span>
-                </div>
-                <div onclick="setFiltro('atencao')" id="f-atencao" class="cartao p-3 text-center cursor-pointer">
-                    <span class="text-[8px] font-bold text-slate-400 block uppercase mb-1">Alerta</span>
-                    <span id="q-atencao" class="text-xl font-black text-amber-500">0</span>
-                </div>
-                <div onclick="setFiltro('todos')" id="f-todos" class="cartao p-3 text-center cursor-pointer border-blue-500 ring-2 ring-blue-50">
-                    <span class="text-[8px] font-bold text-slate-400 block uppercase mb-1">Total</span>
-                    <span id="q-total" class="text-xl font-black text-blue-600">0</span>
-                </div>
+            <div class="grid grid-cols-3 gap-2">
+                <button onclick="filtrar('critico')" id="f-critico" class="cartao-clean p-3 text-center">
+                    <span class="text-[9px] font-bold text-slate-400 block uppercase">Crítico</span>
+                    <span id="c-critico" class="text-lg font-black text-red-500">0</span>
+                </button>
+                <button onclick="filtrar('atencao')" id="f-atencao" class="cartao-clean p-3 text-center">
+                    <span class="text-[9px] font-bold text-slate-400 block uppercase">Alerta</span>
+                    <span id="c-atencao" class="text-lg font-black text-amber-500">0</span>
+                </button>
+                <button onclick="filtrar('todos')" id="f-todos" class="cartao-clean p-3 text-center border-blue-500">
+                    <span class="text-[9px] font-bold text-slate-400 block uppercase">Total</span>
+                    <span id="c-total" class="text-lg font-black text-blue-600">0</span>
+                </button>
             </div>
 
-            <div id="bloco-registro" class="hidden cartao p-6 space-y-4">
-                <div class="flex items-center gap-2">
-                    <div class="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></div>
-                    <h2 class="text-[11px] font-black text-slate-700 uppercase tracking-wider">Novo Lançamento</h2>
+            <div id="box-registro" class="hidden cartao-clean p-5 space-y-3">
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="w-1 h-4 bg-blue-600 rounded-full"></div>
+                    <h2 class="text-xs font-black text-slate-800 uppercase">Novo Registro</h2>
                 </div>
                 
-                <div class="space-y-3">
-                    <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="input-focado uppercase">
-                    
-                    <div class="grid grid-cols-3 gap-3">
-                        <input type="number" id="p-ean" placeholder="CÓDIGO EAN" class="col-span-2 input-focado">
-                        <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 input-focado">
-                    </div>
-
-                    <select id="p-setor" class="input-focado text-slate-500">
-                        <option value="Estoque Central">Estoque Central</option>
-                        <option value="Corredor: Paulo">Corredor: Paulo</option>
-                        <option value="Corredor: Leandro">Corredor: Leandro</option>
-                        <option value="Corredor: Pedro">Corredor: Pedro</option>
-                        <option value="Corredor: Edmar">Corredor: Edmar</option>
-                    </select>
-
-                    <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <span class="text-[9px] font-bold text-slate-400 uppercase">Validade:</span>
-                        <input type="date" id="p-data" class="flex-1 bg-transparent text-sm font-bold text-blue-700 outline-none">
-                    </div>
+                <input type="text" id="p-nome" placeholder="Nome do Produto" class="input-clean uppercase">
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="p-ean" placeholder="Código de Barras" class="input-clean">
+                    <input type="number" id="p-qtd" placeholder="Qtd" class="input-clean">
                 </div>
 
-                <button id="btn-salvar" class="btn-gravar">Gravar no Sistema</button>
+                <select id="p-setor" class="input-clean">
+                    <option value="Estoque Central">Estoque Central</option>
+                    <option value="Corredor: Paulo">Corredor: Paulo</option>
+                    <option value="Corredor: Leandro">Corredor: Leandro</option>
+                    <option value="Corredor: Pedro">Corredor: Pedro</option>
+                    <option value="Corredor: Edmar">Corredor: Edmar</option>
+                </select>
+
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase w-20">Vencimento:</span>
+                    <input type="date" id="p-data" class="input-clean">
+                </div>
+
+                <button id="btn-salvar" class="btn-acao mt-2">Gravar no Sistema</button>
             </div>
 
-            <div class="space-y-4">
-                <div class="relative">
-                    <input type="text" id="caixa-busca" oninput="filtrar()" placeholder="Procurar mercadoria..." class="input-focado pr-10 shadow-sm">
-                    <span class="absolute right-4 top-3.5 opacity-20">🔍</span>
-                </div>
+            <div class="space-y-3">
+                <input type="text" id="busca" oninput="processar()" placeholder="Pesquisar..." class="input-clean shadow-sm">
                 
                 <div class="flex gap-2">
-                    <button id="btn-wpp" class="flex-1 bg-green-50 text-green-700 p-2.5 rounded-xl font-bold text-[10px] uppercase border border-green-100 hover:bg-green-100 transition-colors">Relatório WhatsApp</button>
-                    <button id="btn-selecao" class="flex-1 bg-slate-100 text-slate-600 p-2.5 rounded-xl font-bold text-[10px] uppercase border border-slate-200 hover:bg-slate-200 transition-colors">Selecionar Críticos</button>
+                    <button id="btn-whatsapp" class="flex-1 bg-green-50 text-green-700 p-2 rounded-xl font-bold text-[10px] uppercase border border-green-100">WhatsApp</button>
+                    <button id="btn-marcar" class="flex-1 bg-slate-50 text-slate-600 p-2 rounded-xl font-bold text-[10px] uppercase border border-slate-100">Selecionar Críticos</button>
                 </div>
                 
-                <div id="lista-vencimentos" class="space-y-3 pb-24"></div>
+                <div id="lista" class="space-y-3 pb-20"></div>
             </div>
         </main>
     </div>
@@ -173,79 +170,77 @@
         const adms = ['paulo@newmarket.com', 'adriano@newmarket.com', 'adrielle@newmarket.com'];
         let fAtual = 'todos';
 
-        function toast(txt) {
-            const el = document.getElementById("aviso-flutuante");
-            el.innerText = txt; el.className = "show";
-            setTimeout(() => el.className = "", 2500);
+        function msg(t) {
+            const a = document.getElementById("aviso");
+            a.innerText = t; a.className = "show";
+            setTimeout(() => a.className = "", 2500);
         }
 
-        window.setFiltro = (f) => {
+        window.filtrar = (f) => {
             fAtual = f;
-            document.querySelectorAll('[onclick^="setFiltro"]').forEach(d => d.className = "cartao p-3 text-center cursor-pointer");
-            document.getElementById(`f-${f}`).className = "cartao p-3 text-center cursor-pointer border-blue-500 ring-2 ring-blue-50";
-            filtrar();
+            document.querySelectorAll('[id^="f-"]').forEach(b => b.style.borderColor = "#e2e8f0");
+            document.getElementById(`f-${f}`).style.borderColor = "var(--n-azul)";
+            processar();
         };
 
-        window.filtrar = () => {
-            const b = document.getElementById('caixa-busca').value.toLowerCase();
-            document.querySelectorAll('.item-card').forEach(c => {
-                const matchF = fAtual === 'todos' || c.dataset.cat === fAtual;
-                const matchB = c.dataset.txt.includes(b);
-                c.style.display = (matchF && matchB) ? "block" : "none";
+        window.processar = () => {
+            const b = document.getElementById('busca').value.toLowerCase();
+            document.querySelectorAll('.item-lista').forEach(c => {
+                const mF = fAtual === 'todos' || c.dataset.cat === fAtual;
+                const mB = c.dataset.txt.includes(b);
+                c.style.display = (mF && mB) ? "block" : "none";
             });
         };
 
-        function monitorar(isAdm) {
+        function carregar(isAdm) {
             const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
             onSnapshot(q, (snap) => {
-                const box = document.getElementById('lista-vencimentos');
-                box.innerHTML = "";
-                let count = { c: 0, a: 0 };
-                const hoje = new Date(); hoje.setHours(0,0,0,0);
+                const lista = document.getElementById('lista');
+                lista.innerHTML = "";
+                let n = { c: 0, a: 0 };
+                const hj = new Date(); hj.setHours(0,0,0,0);
 
                 snap.forEach(d => {
-                    const data = { id: d.id, ...d.data() };
-                    const dVenc = new Date(data.vencimento + "T12:00:00");
-                    const diff = Math.ceil((dVenc - hoje) / 86400000);
+                    const i = { id: d.id, ...d.data() };
+                    const dV = new Date(i.vencimento + "T12:00:00");
+                    const diff = Math.ceil((dV - hj) / 86400000);
                     
-                    let cat = "ok", border = "border-normal", statusTxt = `${diff} dias`;
-                    if(diff <= 0) { border="border-critico"; cat="critico"; statusTxt="Vencido"; count.c++; }
-                    else if(diff <= 7) { border="border-critico"; cat="critico"; statusTxt="Crítico"; count.c++; }
-                    else if(diff <= 15) { border="border-alerta"; cat="atencao"; statusTxt="Atenção"; count.a++; }
+                    let cat = "ok", est = "item-ok", txt = `${diff} dias`;
+                    if(diff <= 0) { est="item-critico"; cat="critico"; txt="Vencido"; n.c++; }
+                    else if(diff <= 7) { est="item-critico"; cat="critico"; txt="Crítico"; n.c++; }
+                    else if(diff <= 15) { est="item-alerta"; cat="atencao"; txt="Atenção"; n.a++; }
                     
-                    const el = document.createElement('div');
-                    el.className = `item-card ${border}`;
-                    el.dataset.cat = cat; el.dataset.txt = `${data.produto} ${data.codigo}`.toLowerCase();
-                    el.onclick = () => el.classList.toggle('marcado');
+                    const div = document.createElement('div');
+                    div.className = `item-lista ${est}`;
+                    div.dataset.cat = cat; div.dataset.txt = `${i.produto} ${i.codigo}`.toLowerCase();
+                    div.onclick = () => div.classList.toggle('selecionado');
 
-                    el.innerHTML = `
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[7px] font-bold text-slate-400 uppercase tracking-widest">${data.setor}</span>
-                            <span class="text-[9px] font-black ${diff <= 7 ? 'text-red-500' : 'text-blue-600'} uppercase">${statusTxt}</span>
+                    div.innerHTML = `
+                        <div class="flex justify-between text-[8px] font-bold text-slate-400 uppercase mb-1">
+                            <span>${i.setor}</span>
+                            <span class="${diff <= 7 ? 'text-red-500' : 'text-blue-500'}">${txt}</span>
                         </div>
-                        <h3 class="text-sm font-bold text-slate-800 uppercase truncate">${data.produto}</h3>
-                        <div class="flex justify-between items-end mt-2">
+                        <h3 class="text-sm font-bold text-slate-800 uppercase truncate">${i.produto}</h3>
+                        <div class="flex justify-between items-center mt-2">
                             <div>
-                                <p class="text-xs font-black text-slate-900">${data.vencimento.split('-').reverse().join('/')}</p>
-                                <p class="text-[9px] text-slate-400 font-medium">Qtd: ${data.quantidade}</p>
+                                <p class="text-[10px] font-black text-slate-900">${i.vencimento.split('-').reverse().join('/')}</p>
+                                <p class="text-[8px] text-slate-400">Qtd: ${i.quantidade}</p>
                             </div>
-                            <div class="flex flex-col items-end gap-1">
-                                <svg class="barcode-mini" jsbarcode-value="${data.codigo}" jsbarcode-format="auto" jsbarcode-displayValue="false" jsbarcode-height="15" jsbarcode-width="1"></svg>
-                                ${isAdm ? `<button class="text-[8px] text-red-300 font-bold hover:text-red-500" onclick="deletar('${data.id}')">Excluir</button>` : ''}
-                            </div>
+                            <svg class="barcode" jsbarcode-value="${i.codigo}" jsbarcode-format="auto" jsbarcode-displayValue="false" jsbarcode-height="20" jsbarcode-width="1"></svg>
+                            ${isAdm ? `<button class="text-[8px] text-red-400 font-bold" onclick="apagar('${i.id}')">Excluir</button>` : ''}
                         </div>`;
-                    box.appendChild(el);
+                    lista.appendChild(div);
                 });
-                JsBarcode(".barcode-mini").init();
-                document.getElementById('q-total').innerText = snap.size;
-                document.getElementById('q-critico').innerText = count.c;
-                document.getElementById('q-atencao').innerText = count.a;
-                filtrar();
+                JsBarcode(".barcode").init();
+                document.getElementById('c-total').innerText = snap.size;
+                document.getElementById('c-critico').innerText = n.c;
+                document.getElementById('c-atencao').innerText = n.a;
+                processar();
             });
         }
 
-        window.deletar = async (id) => {
-            if(confirm("Deseja mesmo excluir?")) await deleteDoc(doc(db, "validades", id));
+        window.apagar = async (id) => {
+            if(confirm("Excluir?")) await deleteDoc(doc(db, "validades", id));
         };
 
         onAuthStateChanged(auth, (u) => {
@@ -253,9 +248,9 @@
             if (u) {
                 document.getElementById('tela-login').style.display = 'none';
                 document.getElementById('painel-principal').style.display = 'flex';
-                const isAdm = adms.includes(u.email);
-                document.getElementById('bloco-registro').classList.toggle('hidden', isAdm && u.email !== 'paulo@newmarket.com');
-                monitorar(isAdm);
+                const isA = adms.includes(u.email);
+                document.getElementById('box-registro').classList.toggle('hidden', isA && u.email !== 'paulo@newmarket.com');
+                carregar(isA);
             } else {
                 document.getElementById('tela-login').style.display = 'flex';
                 document.getElementById('painel-principal').style.display = 'none';
@@ -263,15 +258,14 @@
         });
 
         document.getElementById('btn-entrar').onclick = async () => {
-            const e = document.getElementById('email').value;
-            const s = document.getElementById('senha').value;
-            try { await signInWithEmailAndPassword(auth, e, s); } catch { toast("Erro no login"); }
+            try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('senha').value); } 
+            catch { msg("Erro de acesso"); }
         };
 
         document.getElementById('btn-sair').onclick = () => signOut(auth);
         
         document.getElementById('btn-salvar').onclick = async () => {
-            const prod = { 
+            const p = { 
                 produto: document.getElementById('p-nome').value.toUpperCase(), 
                 codigo: document.getElementById('p-ean').value || "0", 
                 quantidade: document.getElementById('p-qtd').value || "1", 
@@ -279,23 +273,23 @@
                 vencimento: document.getElementById('p-data').value, 
                 criadoEm: serverTimestamp() 
             };
-            if(!prod.produto || !prod.vencimento) return toast("Preencha o nome e data");
-            await addDoc(collection(db, "validades"), prod);
-            toast("Produto registrado!");
+            if(!p.produto || !p.vencimento) return msg("Preencha tudo");
+            await addDoc(collection(db, "validades"), p);
+            msg("Salvo!");
             document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
         };
 
-        document.getElementById('btn-wpp').onclick = () => {
-            const s = document.querySelectorAll('.marcado');
-            if(!s.length) return toast("Marque itens primeiro");
+        document.getElementById('btn-whatsapp').onclick = () => {
+            const sel = document.querySelectorAll('.selecionado');
+            if(!sel.length) return msg("Selecione itens");
             let t = "*RELATÓRIO NEW MARKET*\n\n";
-            s.forEach(c => { t += `• ${c.querySelector('h3').innerText} (${c.querySelector('.text-xs').innerText})\n`; });
+            sel.forEach(c => { t += `• ${c.querySelector('h3').innerText} (${c.querySelector('.text-red-500, .text-slate-900').innerText})\n`; });
             window.open(`https://wa.me/?text=${encodeURIComponent(t)}`);
         };
 
-        document.getElementById('btn-selecao').onclick = () => {
-            document.querySelectorAll('.item-card').forEach(c => {
-                if(c.dataset.cat === 'critico') c.classList.add('marcado');
+        document.getElementById('btn-marcar').onclick = () => {
+            document.querySelectorAll('.item-lista').forEach(c => {
+                if(c.dataset.cat === 'critico') c.classList.add('selecionado');
             });
         };
     </script>
