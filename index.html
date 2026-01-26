@@ -66,17 +66,11 @@
                     <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações Administrativas</h2>
                     <button id="btn-fechar-config" class="text-white font-black text-xs">X</button>
                 </div>
-                
                 <div class="border-t border-slate-700 pt-4">
-                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Segurança da Conta</p>
                     <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-3 border-none rounded-xl font-bold outline-none text-xs bg-slate-700 text-white mb-2">
                     <button id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Alterar Senha e Sair</button>
                 </div>
-
-                <div class="border-t border-slate-700 pt-4">
-                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Gestão de Equipe</p>
-                    <button id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Acessar Console Firebase</button>
-                </div>
+                <button id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Acessar Console Firebase</button>
             </div>
 
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
@@ -136,8 +130,9 @@
         const db = getFirestore(app);
         try { enableIndexedDbPersistence(db); } catch (e) {}
         
-        // ADMINS EXCLUSIVOS COM OPÇÃO DE EXCLUSÃO E CONFIG
         const ADM_LIST = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
+        let dadosAtuais = [];
+        let filtroStatus = 'todos';
 
         function showToast(msg, color = "#333") {
             const t = document.getElementById("toast");
@@ -145,31 +140,23 @@
             setTimeout(() => { t.className = ""; }, 3000);
         }
 
-        const timeoutId = setTimeout(() => {
-            if (document.getElementById('loading-screen').style.display !== 'none') {
-                document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('login-screen').style.display = 'flex';
-                showToast("Erro de sincronização. Tente novamente.", "#dc2626");
+        // Funções Globais para acesso via HTML
+        window.apagarItem = async (id) => {
+            if(confirm("Deseja realmente excluir este item?")) {
+                await deleteDoc(doc(db, "validades", id));
+                showToast("Item removido!");
             }
-        }, 8000);
+        };
 
         onAuthStateChanged(auth, (user) => {
-            clearTimeout(timeoutId);
             document.getElementById('loading-screen').style.display = 'none';
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                
                 const isAdm = ADM_LIST.includes(user.email);
-                
                 document.getElementById('user-display').innerText = (isAdm) ? `ADMIN: ${user.email.split('@')[0].toUpperCase()}` : `REPO: ${user.email.split('@')[0].toUpperCase()}`;
-                
-                // Apenas Admins veem o botão de engrenagem
                 document.getElementById('btn-config').classList.toggle('hidden', !isAdm);
-                
-                // Repositores veem o formulário; Admins veem a lista limpa (ou você pode ajustar isso)
                 document.getElementById('repositor-form').classList.toggle('hidden', isAdm);
-                
                 carregar(isAdm);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
@@ -186,7 +173,6 @@
         document.getElementById('btn-logout').onclick = () => signOut(auth);
         document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
         document.getElementById('btn-fechar-config').onclick = () => document.getElementById('gaveta-config').classList.add('hidden');
-        document.getElementById('btn-cadastrar-user').onclick = () => window.open('https://console.firebase.google.com/project/mercado-c3e95/authentication/users', '_blank');
 
         function carregar(isAdmin) {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
@@ -198,18 +184,12 @@
                 snap.forEach(d => {
                     const item = { id: d.id, ...d.data() };
                     const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
-                    
                     let cat = "normal", estilo = "card-normal", corTxt = "text-green-600", textoPrazo = `${diff} DIAS`;
                     
-                    if(diff < 0) { 
-                        estilo="card-critico"; corTxt="text-red-600 animate-pulse font-black"; counts.critico++; cat="critico"; textoPrazo = "VENCIDO";
-                    } else if(diff === 0) {
-                        estilo="card-critico"; corTxt="text-red-600 font-black"; counts.critico++; cat="critico"; textoPrazo = "VENCE HOJE";
-                    } else if(diff <= 7) { 
-                        estilo="card-critico"; corTxt="text-red-600 font-black"; counts.critico++; cat="critico"; 
-                    } else if(diff <= 15) { 
-                        estilo="card-atencao"; corTxt="text-yellow-600 font-black"; counts.atencao++; cat="atencao"; 
-                    }
+                    if(diff < 0) { estilo="card-critico"; corTxt="text-red-600 animate-pulse font-black"; counts.critico++; cat="critico"; textoPrazo = "VENCIDO"; }
+                    else if(diff === 0) { estilo="card-critico"; corTxt="text-red-600 font-black"; counts.critico++; cat="critico"; textoPrazo = "VENCE HOJE"; }
+                    else if(diff <= 7) { estilo="card-critico"; corTxt="text-red-600 font-black"; counts.critico++; cat="critico"; }
+                    else if(diff <= 15) { estilo="card-atencao"; corTxt="text-yellow-600 font-black"; counts.atencao++; cat="atencao"; }
 
                     novosDados.push({...item, dias: diff, cat});
                     
@@ -230,8 +210,7 @@
                             <input type="checkbox" class="item-check mt-1 scale-150 accent-blue-600 pointer-events-none">
                             <div class="flex-grow">
                                 <div class="flex justify-between text-[7px] font-black text-slate-400">
-                                    <span>${item.setor}</span>
-                                    <span class="${corTxt}">${textoPrazo}</span>
+                                    <span>${item.setor}</span><span class="${corTxt}">${textoPrazo}</span>
                                 </div>
                                 <h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3>
                                 <div class="my-2 bg-white border rounded-lg p-1 text-center">
@@ -266,7 +245,7 @@
             };
             if(!data.produto || !data.vencimento || !data.quantidade) return showToast("Preencha Nome, Data e Qtd!", "#dc2626");
             await addDoc(collection(db, "validades"), data);
-            showToast("Produto Salvo!", "#10b981");
+            showToast("Salvo!", "#10b981");
             document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = ""; document.getElementById('p-qtd').value = "";
         };
 
@@ -290,6 +269,17 @@
             };
         });
 
+        document.getElementById('btn-selecionar-criticos').onclick = () => {
+            document.querySelectorAll('.card').forEach(c => {
+                if(c.dataset.cat === 'critico') {
+                    const cb = c.querySelector('.item-check');
+                    cb.checked = true;
+                    c.classList.add('card-checked');
+                }
+            });
+            showToast("Críticos Marcados!");
+        };
+
         document.getElementById('btn-whatsapp').onclick = () => {
             const cards = document.querySelectorAll('.card-checked');
             if(cards.length === 0) return showToast("Marque os itens primeiro!", "#f59e0b");
@@ -302,5 +292,6 @@
             });
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         };
-
-        document.getElementById('btn-selecionar-criticos').onclick = 
+    </script>
+</body>
+</html>
