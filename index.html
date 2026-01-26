@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>New Market - Sistema 2026</title>
+    <link rel="manifest" href="./manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
@@ -31,7 +32,7 @@
 
     <div id="loading-screen">
         <div class="w-12 h-12 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">New Market Cloud 2026</p>
+        <p class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Sincronizando New Market</p>
     </div>
 
     <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-4">
@@ -68,19 +69,19 @@
                 </div>
                 
                 <div class="border-t border-slate-700 pt-4">
-                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Mudar Minha Senha</p>
+                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Segurança</p>
                     <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-3 border-none rounded-xl font-bold outline-none text-xs bg-slate-700 text-white mb-2">
-                    <button id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Confirmar e Sair</button>
+                    <button id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Alterar Senha e Sair</button>
                 </div>
 
                 <div class="border-t border-slate-700 pt-4">
-                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Notificações Push</p>
-                    <button id="btn-ativar-push" class="w-full bg-purple-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">🔔 Ativar Alertas no Celular</button>
+                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Sistema de Alertas</p>
+                    <button id="btn-ativar-push" class="w-full bg-purple-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">🔔 Ativar Notificações no Celular</button>
                 </div>
 
                 <div class="border-t border-slate-700 pt-4">
-                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Acessos da Equipe</p>
-                    <button id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Gerenciar E-mails (Firebase)</button>
+                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Gerenciamento</p>
+                    <button id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Acessos Firebase</button>
                 </div>
             </div>
 
@@ -145,7 +146,7 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SW Ativo!', reg.scope))
+                    .then(reg => console.log('SW Registrado:', reg.scope))
                     .catch(err => console.log('Erro SW:', err));
             });
         }
@@ -179,12 +180,12 @@
             }
         });
 
-        // ATIVAR NOTIFICAÇÕES NO CLIQUE
+        // BOTÃO NOTIFICAÇÕES
         document.getElementById('btn-ativar-push').onclick = async () => {
+            if (!('Notification' in window)) return showToast("Navegador não suporta alertas", "#dc2626");
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
-                showToast("Notificações Ativadas!", "#10b981");
-                // Futuramente salvaremos o token do FCM aqui
+                showToast("Alertas Ativados!", "#10b981");
             } else {
                 showToast("Permissão Negada", "#dc2626");
             }
@@ -237,9 +238,9 @@
 
         document.getElementById('btn-salvar').onclick = async () => {
             const data = { produto: document.getElementById('p-nome').value.toUpperCase(), codigo: document.getElementById('p-ean').value || "0000000000000", quantidade: document.getElementById('p-qtd').value, setor: document.getElementById('p-setor-add').value, vencimento: document.getElementById('p-data').value, criadoEm: serverTimestamp() };
-            if(!data.produto || !data.vencimento || !data.quantidade) return showToast("Preencha Nome, Data e Qtd!", "#dc2626");
+            if(!data.produto || !data.vencimento || !data.quantidade) return showToast("Preencha os campos!", "#dc2626");
             await addDoc(collection(db, "validades"), data);
-            showToast("Produto Salvo!", "#10b981");
+            showToast("Salvo!", "#10b981");
             document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = ""; document.getElementById('p-qtd').value = "";
         };
 
