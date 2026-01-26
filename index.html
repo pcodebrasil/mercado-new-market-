@@ -17,18 +17,12 @@
         .card-checked { opacity: 0.4; filter: grayscale(1); background-color: #f1f5f9 !important; border-left-color: #94a3b8 !important; transform: scale(0.96); }
         .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
         .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; }
-        
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; text-transform: uppercase; font-size: 10px; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-        
         svg.barcode { width: 100%; max-height: 55px; }
         .dev-footer { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-top: 20px; padding-bottom: 10px; }
-        
-        /* Estilo para Notificação Ativa */
-        .btn-notif { background: #5b21b6; transition: 0.3s; }
-        .btn-notif:hover { background: #7c3aed; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
@@ -72,10 +66,8 @@
                     <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações</h2>
                     <button id="btn-fechar-config" class="text-white font-black text-xs">X</button>
                 </div>
+                
                 <div class="border-t border-slate-700 pt-4">
-                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Ativar Notificações no Navegador</p>
-                    <button id="btn-request-notif" class="w-full bg-purple-700 text-white p-3 rounded-xl font-black uppercase text-[9px] mb-4">🔔 Permitir Alertas</button>
-                    
                     <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Mudar Minha Senha</p>
                     <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-3 border-none rounded-xl font-bold outline-none text-xs bg-slate-700 text-white mb-2">
                     <button id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Confirmar e Sair</button>
@@ -112,11 +104,11 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
-                    <button id="btn-whatsapp" class="bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[9px] shadow-md flex items-center justify-center gap-2">
+                    <button id="btn-whatsapp" class="bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md flex items-center justify-center gap-2">
                         <span>📱 WhatsApp</span>
                     </button>
-                    <button id="btn-enviar-notificacao" class="bg-purple-800 text-white p-4 rounded-2xl font-black uppercase text-[9px] shadow-md flex items-center justify-center gap-2">
-                        <span>🔔 Notificar Equipe</span>
+                    <button id="btn-notificar" class="bg-purple-700 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md flex items-center justify-center gap-2">
+                        <span>🔔 Notificar</span>
                     </button>
                 </div>
                 
@@ -129,7 +121,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
@@ -143,8 +134,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const messaging = getMessaging(app);
-
         try { enableIndexedDbPersistence(db); } catch (e) {}
         
         const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
@@ -159,24 +148,18 @@
             setTimeout(() => { t.className = ""; }, 3000);
         }
 
-        // --- LÓGICA DE NOTIFICAÇÃO ---
-        document.getElementById('btn-request-notif').onclick = async () => {
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                showToast("Notificações Ativadas!", "#10b981");
-            }
-        };
-
-        document.getElementById('btn-enviar-notificacao').onclick = () => {
-            const criticos = dadosAtuais.filter(d => d.cat === 'critico').length;
-            if (criticos > 0) {
-                new Notification("New Market - Nazaré Paulista", {
-                    body: `Atenção Equipe! Temos ${criticos} produtos em estado CRÍTICO. Favor verificar no painel.`,
-                    icon: 'https://cdn-icons-png.flaticon.com/512/564/564619.png'
+        // FUNÇÃO DE NOTIFICAÇÃO CORRIGIDA
+        document.getElementById('btn-notificar').onclick = async () => {
+            const perm = await Notification.requestPermission();
+            if (perm === "granted") {
+                const criticos = dadosAtuais.filter(d => d.cat === 'critico').length;
+                new Notification("New Market Alerta", {
+                    body: `Atenção! Temos ${criticos} produtos CRÍTICOS na lista hoje.`,
+                    icon: "https://cdn-icons-png.flaticon.com/512/564/564619.png"
                 });
-                showToast("Alerta enviado para o dispositivo!", "#5b21b6");
+                showToast("NOTIFICAÇÃO ENVIADA!", "#10b981");
             } else {
-                showToast("Sem itens críticos para notificar.", "#f59e0b");
+                showToast("PERMITA AS NOTIFICAÇÕES!", "#f59e0b");
             }
         };
 
@@ -185,14 +168,11 @@
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                
                 const isGerenteReal = gerentesREAIS.includes(user.email);
                 const isPaulo = gerentesOCULTOS.includes(user.email);
-                
                 document.getElementById('user-display').innerText = (isGerenteReal) ? `ADMIN: ${user.email.split('@')[0]}` : `REPO: ${user.email.split('@')[0]}`;
                 document.getElementById('btn-config').classList.toggle('hidden', !(isGerenteReal || isPaulo));
                 document.getElementById('repositor-form').classList.toggle('hidden', isGerenteReal);
-                
                 carregar(isGerenteReal || isPaulo);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
@@ -228,31 +208,12 @@
                     let cat = "normal", estilo = "card-normal", corTxt = "text-green-600";
                     if(diff <= 7) { estilo="card-critico"; corTxt="text-red-600 animate-pulse font-black"; counts.critico++; cat="critico"; }
                     else if(diff <= 15) { estilo="card-atencao"; corTxt="text-yellow-600 font-black"; counts.atencao++; cat="atencao"; }
-                    
                     dadosAtuais.push({...item, dias: diff, cat});
-                    
                     const div = document.createElement('div');
                     div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 border border-slate-100`;
                     div.dataset.id = item.id; div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
                     div.onclick = (e) => { if(e.target.tagName !== 'BUTTON') { const cb = div.querySelector('.item-check'); cb.checked = !cb.checked; div.classList.toggle('card-checked', cb.checked); } };
-                    div.innerHTML = `
-                        <div class="flex gap-3">
-                            <input type="checkbox" class="item-check mt-1 scale-150 accent-blue-600 pointer-events-none">
-                            <div class="flex-grow">
-                                <div class="flex justify-between text-[7px] font-black text-slate-400 uppercase">
-                                    <span>${item.setor}</span>
-                                    <span class="${corTxt}">${diff} DIAS</span>
-                                </div>
-                                <h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3>
-                                <div class="my-2 bg-white border rounded-lg p-1 text-center">
-                                    <svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35"></svg>
-                                </div>
-                                <div class="flex justify-between items-end text-[9px] font-bold text-slate-500">
-                                    <span>QTD: ${item.quantidade} | VENC: ${item.vencimento.split('-').reverse().join('/')}</span>
-                                    ${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-600 bg-red-50 px-3 py-2 rounded-lg font-black text-[8px]">Excluir</button>` : ''}
-                                </div>
-                            </div>
-                        </div>`;
+                    div.innerHTML = `<div class="flex gap-3"><input type="checkbox" class="item-check mt-1 scale-150 accent-blue-600 pointer-events-none"><div class="flex-grow"><div class="flex justify-between text-[7px] font-black text-slate-400"><span>${item.setor}</span><span class="${corTxt}">${diff} DIAS</span></div><h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3><div class="my-2 bg-white border rounded-lg p-1 text-center"><svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35"></svg></div><div class="flex justify-between items-end text-[9px] font-bold text-slate-500"><span>QTD: ${item.quantidade} | VENC: ${item.vencimento.split('-').reverse().join('/')}</span>${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-600 bg-red-50 px-3 py-2 rounded-lg font-black text-[8px]">Excluir</button>` : ''}</div></div></div>`;
                     lista.appendChild(div);
                 });
                 JsBarcode(".barcode").init();
@@ -293,4 +254,17 @@
             const cards = document.querySelectorAll('.card-checked');
             if(cards.length === 0) return showToast("Marque os itens primeiro!", "#f59e0b");
             const ids = Array.from(cards).map(c => c.dataset.id);
-            const itens = dadosAtua
+            const itens = dadosAtuais.filter(d => ids.includes(d.id));
+            let msg = `*📊 RELATÓRIO NEW MARKET*\n\n`;
+            itens.forEach(p => msg += `${p.dias <= 7 ? '🚨':'⚠️'} *${p.produto}*\nVenc: ${p.vencimento.split('-').reverse().join('/')}\nFaltam: ${p.dias} dias | Qtd: ${p.quantidade}\n\n`);
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+        };
+
+        document.getElementById('btn-selecionar-criticos').onclick = () => {
+            document.querySelectorAll('.card').forEach(c => { if(c.dataset.cat === 'critico') { c.querySelector('.item-check').checked = true; c.classList.add('card-checked'); } });
+        };
+
+        window.apagarItem = async (id) => { if(confirm("Deseja realmente excluir este produto?")) await deleteDoc(doc(db, "validades", id)); };
+    </script>
+</body>
+</html>
