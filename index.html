@@ -10,20 +10,14 @@
     <style>
         #login-screen, #main-panel { display: none; }
         #loading-screen { position: fixed; inset: 0; background: white; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .filter-active { border-width: 4px !important; opacity: 1 !important; transform: scale(1.05); transition: 0.3s; }
-        .filter-inactive { opacity: 0.6; }
+        .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
         .card-critico { border-left: 8px solid #ef4444; }
         .card-atencao { border-left: 8px solid #f59e0b; }
         .card-normal { border-left: 8px solid #10b981; }
-        .card-checked { opacity: 0.4; filter: grayscale(1); background-color: #f1f5f9 !important; border-left-color: #94a3b8 !important; transform: scale(0.96); }
-        .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
-        .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; }
-        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; text-transform: uppercase; font-size: 10px; }
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-        svg.barcode { width: 100%; max-height: 55px; }
-        .dev-footer { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-top: 20px; padding-bottom: 10px; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
@@ -32,74 +26,49 @@
 
     <div id="loading-screen">
         <div class="w-12 h-12 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Sincronizando New Market</p>
+        <p class="text-[10px] font-black uppercase text-slate-400">Sincronizando New Market</p>
     </div>
 
     <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-4">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-t-8 border-blue-800 text-center">
             <h1 class="text-3xl font-black uppercase italic text-blue-800">New <span class="text-red-600">Market</span></h1>
-            <p class="text-[10px] text-yellow-600 font-black uppercase tracking-widest mt-1">Nazaré Paulista</p>
             <form id="login-form" class="space-y-4 mt-8">
-                <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="E-mail" required>
-                <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="Senha" required>
-                <button type="submit" class="w-full btn-newmarket text-white p-4 rounded-2xl font-black uppercase shadow-lg">Acessar Painel</button>
+                <input type="email" id="email" class="w-full p-4 border rounded-2xl outline-none" placeholder="E-mail" required>
+                <input type="password" id="password" class="w-full p-4 border rounded-2xl outline-none" placeholder="Senha" required>
+                <button type="submit" class="w-full bg-blue-800 text-white p-4 rounded-2xl font-black uppercase">Acessar</button>
             </form>
         </div>
-        <footer class="dev-footer">Desenvolvido por Paulo Souza by 2026</footer>
     </div>
 
     <div id="main-panel" class="flex-grow flex flex-col">
-        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
-            <div class="leading-none">
-                <span class="font-black italic uppercase text-lg text-white">New Market</span><br>
-                <span id="user-display" class="text-[8px] font-black uppercase tracking-widest text-yellow-200">...</span>
-            </div>
+        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50">
+            <span class="font-black italic uppercase">New Market</span>
             <div class="flex gap-2">
-                <button id="btn-config" class="hidden bg-white/20 p-2 rounded-full border border-white/20">⚙️</button>
-                <button id="btn-logout" class="text-[8px] bg-black/40 px-3 py-2 rounded-full uppercase font-bold border border-white/20">Sair</button>
+                <button id="btn-config" class="bg-white/20 p-2 rounded-full">⚙️</button>
+                <button id="btn-logout" class="text-[8px] bg-black/40 px-3 py-2 rounded-full font-bold">SAIR</button>
             </div>
         </nav>
 
-        <main class="p-4 max-w-xl mx-auto w-full flex-grow space-y-5">
-            
-            <div id="gaveta-config" class="hidden bg-slate-800 p-6 rounded-3xl shadow-xl border-b-8 border-yellow-500 space-y-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações</h2>
-                    <button id="btn-fechar-config" class="text-white font-black text-xs">X</button>
-                </div>
-                
-                <div class="border-t border-slate-700 pt-4">
-                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Alertas</p>
-                    <button id="btn-ativar-push" class="w-full bg-purple-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">🔔 Ativar Notificações neste Celular</button>
-                </div>
+        <main class="p-4 max-w-xl mx-auto w-full space-y-5">
+            <div id="gaveta-config" class="hidden bg-slate-800 p-6 rounded-3xl text-white space-y-4">
+                <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações</h2>
+                <button id="btn-ativar-push" class="w-full bg-purple-600 p-3 rounded-xl font-black uppercase text-[9px]">🔔 Ativar Notificações neste Celular</button>
             </div>
 
-            <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
-                <h2 class="font-black uppercase text-blue-800 text-[10px]">Lançar Validade</h2>
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50">
-                <div class="grid grid-cols-4 gap-2">
-                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
-                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
-                </div>
-                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-sm bg-slate-50">
-                <button id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar Produto</button>
+            <div id="repositor-form" class="bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
+                <input type="text" id="p-nome" placeholder="PRODUTO" class="w-full p-4 border rounded-2xl uppercase font-bold">
+                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold">
+                <button id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase">Salvar</button>
             </div>
 
-            <div class="space-y-4">
-                <div class="grid grid-cols-3 gap-2 text-center font-black">
-                    <button id="f-critico" class="bg-white p-3 rounded-2xl border-2 border-red-500 text-red-600 filter-inactive"><p class="text-[8px]">🚨 Crítico</p><p id="c-critico" class="text-xl">0</p></button>
-                    <button id="f-atencao" class="bg-white p-3 rounded-2xl border-2 border-yellow-500 text-yellow-600 filter-inactive"><p class="text-[8px]">⚠️ Atenção</p><p id="c-atencao" class="text-xl">0</p></button>
-                    <button id="f-todos" class="bg-white p-3 rounded-2xl border-2 border-blue-500 text-blue-600 filter-active"><p class="text-[8px]">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
-                </div>
-                <div id="lista" class="space-y-3 pb-8"></div>
-            </div>
+            <div id="lista" class="space-y-3 pb-8"></div>
         </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
 
         const firebaseConfig = {
@@ -116,44 +85,32 @@
         const db = getFirestore(app);
         const messaging = getMessaging(app);
 
-        // REGISTRO SW
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); });
-        }
-
-        // LÓGICA DE TOKEN (PARA AS NOTIFICAÇÕES)
+        // REGISTRO DE TOKEN (CRIA A COLEÇÃO QUE FALTA)
         document.getElementById('btn-ativar-push').onclick = async () => {
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
                 try {
-                    const token = await getToken(messaging, { vapidKey: 'BNdM1ijQ6x9eFK4Zop7MfUZ6GnyVSFVR_DJJSOwBsXKfs6Q6bouX2o3b5KD44_f5xWXbXCqwHeJWJlcOEo7DrLA' });
+                    const token = await getToken(messaging, { 
+                        vapidKey: 'BNdM1ijQ6x9eFK4Zop7MfUZ6GnyVSFVR_DJJSOwBsXKfs6Q6bouX2o3b5KD44_f5xWXbXCqwHeJWJlcOEo7DrLA' 
+                    });
                     if (token) {
                         await setDoc(doc(db, "tokens_notificacao", auth.currentUser.uid), {
                             token: token,
-                            email: auth.currentUser.email,
-                            atualizado: serverTimestamp()
+                            usuario: auth.currentUser.email,
+                            atualizadoEm: serverTimestamp()
                         });
-                        showToast("NOTIFICAÇÕES ATIVAS!", "#10b981");
+                        showToast("NOTIFICAÇÕES ATIVADAS!", "#10b981");
                     }
                 } catch (e) { showToast("Erro ao ativar", "#dc2626"); }
             }
         };
 
-        // --- SISTEMA ---
-        function showToast(msg, color = "#333") {
-            const t = document.getElementById("toast");
-            t.innerText = msg; t.style.backgroundColor = color; t.className = "show";
-            setTimeout(() => { t.className = ""; }, 3000);
-        }
-
+        // ... lógica de login e carregamento (mesma do seu código anterior) ...
         onAuthStateChanged(auth, (user) => {
             document.getElementById('loading-screen').style.display = 'none';
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                document.getElementById('user-display').innerText = user.email;
-                document.getElementById('btn-config').classList.remove('hidden');
-                document.getElementById('repositor-form').classList.remove('hidden');
                 carregar();
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
@@ -164,41 +121,37 @@
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
-            catch (err) { showToast("Acesso negado", "#dc2626"); }
+            catch (err) { showToast("Erro no Login", "#dc2626"); }
         };
 
-        document.getElementById('btn-logout').onclick = () => signOut(auth);
-        document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
-        document.getElementById('btn-fechar-config').onclick = () => document.getElementById('gaveta-config').classList.add('hidden');
+        function showToast(msg, color) {
+            const t = document.getElementById("toast");
+            t.innerText = msg; t.style.backgroundColor = color; t.className = "show";
+            setTimeout(() => t.className = "", 3000);
+        }
 
         function carregar() {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista');
                 lista.innerHTML = "";
-                let counts = {critico: 0, atencao: 0};
                 snap.forEach(d => {
-                    const item = { id: d.id, ...d.data() };
-                    const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
-                    let cat = "normal", estilo = "card-normal";
-                    if(diff <= 7) { estilo="card-critico"; counts.critico++; }
-                    else if(diff <= 15) { estilo="card-atencao"; counts.atencao++; }
+                    const item = d.data();
                     const div = document.createElement('div');
-                    div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 border`;
-                    div.innerHTML = `<h3 class="font-black text-sm uppercase">${item.produto}</h3><p class="text-[10px]">Venc: ${item.vencimento} | Faltam ${diff} dias</p>`;
+                    div.className = "p-4 bg-white rounded-2xl shadow-sm mb-3 border-l-8 border-blue-600";
+                    div.innerHTML = `<h3 class="font-black uppercase">${item.produto}</h3><p class="text-xs">Venc: ${item.vencimento}</p>`;
                     lista.appendChild(div);
                 });
-                document.getElementById('c-total').innerText = snap.size;
-                document.getElementById('c-critico').innerText = counts.critico;
-                document.getElementById('c-atencao').innerText = counts.atencao;
             });
         }
 
         document.getElementById('btn-salvar').onclick = async () => {
-            const data = { produto: document.getElementById('p-nome').value.toUpperCase(), codigo: document.getElementById('p-ean').value || "0", quantidade: document.getElementById('p-qtd').value, vencimento: document.getElementById('p-data').value, criadoEm: serverTimestamp() };
-            if(!data.produto || !data.vencimento) return showToast("Preencha tudo", "#dc2626");
+            const data = { produto: document.getElementById('p-nome').value.toUpperCase(), vencimento: document.getElementById('p-data').value, criadoEm: serverTimestamp() };
             await addDoc(collection(db, "validades"), data);
             showToast("Salvo!", "#10b981");
         };
+
+        document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
+        document.getElementById('btn-logout').onclick = () => signOut(auth);
     </script>
 </body>
 </html>
