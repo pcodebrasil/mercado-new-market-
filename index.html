@@ -63,19 +63,19 @@
             
             <div id="gaveta-config" class="hidden bg-slate-800 p-6 rounded-3xl shadow-xl border-b-8 border-yellow-500 space-y-4">
                 <div class="flex justify-between items-center">
-                    <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações</h2>
+                    <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações Administrativas</h2>
                     <button id="btn-fechar-config" class="text-white font-black text-xs">X</button>
                 </div>
                 
                 <div class="border-t border-slate-700 pt-4">
-                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Mudar Minha Senha</p>
+                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Segurança da Conta</p>
                     <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-3 border-none rounded-xl font-bold outline-none text-xs bg-slate-700 text-white mb-2">
-                    <button id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Confirmar e Sair</button>
+                    <button id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Alterar Senha e Sair</button>
                 </div>
 
                 <div class="border-t border-slate-700 pt-4">
-                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Acessos da Equipe</p>
-                    <button id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Abrir Gerenciador Firebase</button>
+                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Gestão de Equipe</p>
+                    <button id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Acessar Console Firebase</button>
                 </div>
             </div>
 
@@ -136,11 +136,8 @@
         const db = getFirestore(app);
         try { enableIndexedDbPersistence(db); } catch (e) {}
         
-        const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
-        const gerentesOCULTOS = ['paulo@newmarket.com']; 
-
-        let dadosAtuais = [];
-        let filtroStatus = 'todos';
+        // ADMINS EXCLUSIVOS COM OPÇÃO DE EXCLUSÃO E CONFIG
+        const ADM_LIST = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
 
         function showToast(msg, color = "#333") {
             const t = document.getElementById("toast");
@@ -148,27 +145,32 @@
             setTimeout(() => { t.className = ""; }, 3000);
         }
 
-        // --- MELHORIA: FIM DO LOOP INFINITO ---
-        const segurancaLoading = setTimeout(() => {
+        const timeoutId = setTimeout(() => {
             if (document.getElementById('loading-screen').style.display !== 'none') {
                 document.getElementById('loading-screen').style.display = 'none';
                 document.getElementById('login-screen').style.display = 'flex';
-                showToast("Conexão lenta ou erro de rede.", "#f59e0b");
+                showToast("Erro de sincronização. Tente novamente.", "#dc2626");
             }
         }, 8000);
 
         onAuthStateChanged(auth, (user) => {
-            clearTimeout(segurancaLoading);
+            clearTimeout(timeoutId);
             document.getElementById('loading-screen').style.display = 'none';
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                const isGerenteReal = gerentesREAIS.includes(user.email);
-                const isPaulo = gerentesOCULTOS.includes(user.email);
-                document.getElementById('user-display').innerText = (isGerenteReal) ? `ADMIN: ${user.email.split('@')[0]}` : `REPO: ${user.email.split('@')[0]}`;
-                document.getElementById('btn-config').classList.toggle('hidden', !(isGerenteReal || isPaulo));
-                document.getElementById('repositor-form').classList.toggle('hidden', isGerenteReal);
-                carregar(isGerenteReal || isPaulo);
+                
+                const isAdm = ADM_LIST.includes(user.email);
+                
+                document.getElementById('user-display').innerText = (isAdm) ? `ADMIN: ${user.email.split('@')[0].toUpperCase()}` : `REPO: ${user.email.split('@')[0].toUpperCase()}`;
+                
+                // Apenas Admins veem o botão de engrenagem
+                document.getElementById('btn-config').classList.toggle('hidden', !isAdm);
+                
+                // Repositores veem o formulário; Admins veem a lista limpa (ou você pode ajustar isso)
+                document.getElementById('repositor-form').classList.toggle('hidden', isAdm);
+                
+                carregar(isAdm);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-panel').style.display = 'none';
@@ -178,7 +180,7 @@
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } 
-            catch (err) { showToast("Usuário ou Senha Inválidos", "#dc2626"); }
+            catch (err) { showToast("Credenciais Inválidas", "#dc2626"); }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
@@ -186,16 +188,17 @@
         document.getElementById('btn-fechar-config').onclick = () => document.getElementById('gaveta-config').classList.add('hidden');
         document.getElementById('btn-cadastrar-user').onclick = () => window.open('https://console.firebase.google.com/project/mercado-c3e95/authentication/users', '_blank');
 
-        function carregar(podeApagar) {
+        function carregar(isAdmin) {
             onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
                 const lista = document.getElementById('lista');
-                lista.innerHTML = ""; dadosAtuais = [];
+                lista.innerHTML = ""; 
                 let counts = {critico: 0, atencao: 0};
+                let novosDados = [];
+
                 snap.forEach(d => {
                     const item = { id: d.id, ...d.data() };
                     const diff = Math.ceil((new Date(item.vencimento + "T00:00:00") - new Date().setHours(0,0,0,0)) / 86400000);
                     
-                    // --- MELHORIA: TEXTO VENCIDO ---
                     let cat = "normal", estilo = "card-normal", corTxt = "text-green-600", textoPrazo = `${diff} DIAS`;
                     
                     if(diff < 0) { 
@@ -208,15 +211,43 @@
                         estilo="card-atencao"; corTxt="text-yellow-600 font-black"; counts.atencao++; cat="atencao"; 
                     }
 
-                    dadosAtuais.push({...item, dias: diff, cat});
+                    novosDados.push({...item, dias: diff, cat});
+                    
                     const div = document.createElement('div');
                     div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 border border-slate-100`;
                     div.dataset.id = item.id; div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
-                    div.onclick = (e) => { if(e.target.tagName !== 'BUTTON') { const cb = div.querySelector('.item-check'); cb.checked = !cb.checked; div.classList.toggle('card-checked', cb.checked); } };
-                    div.innerHTML = `<div class="flex gap-3"><input type="checkbox" class="item-check mt-1 scale-150 accent-blue-600 pointer-events-none"><div class="flex-grow"><div class="flex justify-between text-[7px] font-black text-slate-400"><span>${item.setor}</span><span class="${corTxt}">${textoPrazo}</span></div><h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3><div class="my-2 bg-white border rounded-lg p-1 text-center"><svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35"></svg></div><div class="flex justify-between items-end text-[9px] font-bold text-slate-500"><span>QTD: ${item.quantidade} | VENC: ${item.vencimento.split('-').reverse().join('/')}</span>${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-600 bg-red-50 px-3 py-2 rounded-lg font-black text-[8px]">Excluir</button>` : ''}</div></div></div>`;
+                    
+                    div.onclick = (e) => { 
+                        if(e.target.tagName !== 'BUTTON') { 
+                            const cb = div.querySelector('.item-check'); 
+                            cb.checked = !cb.checked; 
+                            div.classList.toggle('card-checked', cb.checked); 
+                        } 
+                    };
+
+                    div.innerHTML = `
+                        <div class="flex gap-3">
+                            <input type="checkbox" class="item-check mt-1 scale-150 accent-blue-600 pointer-events-none">
+                            <div class="flex-grow">
+                                <div class="flex justify-between text-[7px] font-black text-slate-400">
+                                    <span>${item.setor}</span>
+                                    <span class="${corTxt}">${textoPrazo}</span>
+                                </div>
+                                <h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3>
+                                <div class="my-2 bg-white border rounded-lg p-1 text-center">
+                                    <svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35"></svg>
+                                </div>
+                                <div class="flex justify-between items-end text-[9px] font-bold text-slate-500">
+                                    <span>QTD: ${item.quantidade} | VENC: ${item.vencimento.split('-').reverse().join('/')}</span>
+                                    ${isAdmin ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-600 bg-red-50 px-3 py-2 rounded-lg font-black text-[8px]">Excluir</button>` : ''}
+                                </div>
+                            </div>
+                        </div>`;
                     lista.appendChild(div);
                 });
+                
                 JsBarcode(".barcode").init();
+                dadosAtuais = novosDados;
                 document.getElementById('c-total').innerText = snap.size;
                 document.getElementById('c-critico').innerText = counts.critico;
                 document.getElementById('c-atencao').innerText = counts.atencao;
@@ -225,7 +256,14 @@
         }
 
         document.getElementById('btn-salvar').onclick = async () => {
-            const data = { produto: document.getElementById('p-nome').value.toUpperCase(), codigo: document.getElementById('p-ean').value || "0000000000000", quantidade: document.getElementById('p-qtd').value, setor: document.getElementById('p-setor-add').value, vencimento: document.getElementById('p-data').value, criadoEm: serverTimestamp() };
+            const data = { 
+                produto: document.getElementById('p-nome').value.toUpperCase(), 
+                codigo: document.getElementById('p-ean').value || "0000000000000", 
+                quantidade: document.getElementById('p-qtd').value, 
+                setor: document.getElementById('p-setor-add').value, 
+                vencimento: document.getElementById('p-data').value, 
+                criadoEm: serverTimestamp() 
+            };
             if(!data.produto || !data.vencimento || !data.quantidade) return showToast("Preencha Nome, Data e Qtd!", "#dc2626");
             await addDoc(collection(db, "validades"), data);
             showToast("Produto Salvo!", "#10b981");
@@ -240,7 +278,9 @@
                 c.style.display = (matchStatus && matchBusca) ? "block" : "none";
             });
         }
+
         document.getElementById('busca').oninput = () => filtrar();
+        
         ['f-critico', 'f-atencao', 'f-todos'].forEach(id => {
             document.getElementById(id).onclick = () => {
                 filtroStatus = id.split('-')[1];
@@ -263,11 +303,4 @@
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
-        document.getElementById('btn-selecionar-criticos').onclick = () => {
-            document.querySelectorAll('.card').forEach(c => { if(c.dataset.cat === 'critico') { c.querySelector('.item-check').checked = true; c.classList.add('card-checked'); } });
-        };
-
-        window.apagarItem = async (id) => { if(confirm("Deseja realmente excluir este produto?")) await deleteDoc(doc(db, "validades", id)); };
-    </script>
-</body>
-</html>
+        document.getElementById('btn-selecionar-criticos').onclick = 
