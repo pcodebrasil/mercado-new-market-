@@ -39,7 +39,9 @@ svg.barcode{width:100%;max-height:55px}
 
 <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-4">
 <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-t-8 border-blue-800 text-center">
-<h1 class="text-3xl font-black uppercase italic text-blue-800">New <span class="text-red-600">Market</span></h1>
+<h1 class="text-3xl font-black uppercase italic text-blue-800">
+New <span class="text-red-600">Market</span>
+</h1>
 <p class="text-[10px] text-yellow-600 font-black uppercase tracking-widest mt-1">Nazaré Paulista</p>
 
 <form id="login-form" class="space-y-4 mt-8">
@@ -62,6 +64,10 @@ svg.barcode{width:100%;max-height:55px}
 
 <main class="p-4 max-w-xl mx-auto w-full flex-grow space-y-4">
 <div id="lista" class="space-y-3"></div>
+
+<button id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md">
+🟢 Relatório WhatsApp (Marcados)
+</button>
 </main>
 </div>
 
@@ -83,9 +89,13 @@ const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getFirestore(app);
 
+let dadosAtuais=[];
+
 function showToast(msg,color="#333"){
 const t=document.getElementById("toast");
-t.innerText=msg;t.style.backgroundColor=color;t.className="show";
+t.innerText=msg;
+t.style.backgroundColor=color;
+t.className="show";
 setTimeout(()=>t.className="",3000);
 }
 
@@ -104,9 +114,13 @@ document.getElementById("login-screen").style.display="flex";
 document.getElementById("login-form").onsubmit=async e=>{
 e.preventDefault();
 try{
-await signInWithEmailAndPassword(auth,email.value,password.value);
+await signInWithEmailAndPassword(
+auth,
+document.getElementById("email").value,
+document.getElementById("password").value
+);
 }catch{
-showToast("Login inválido","#dc2626");
+showToast("Usuário ou senha inválidos","#dc2626");
 }
 };
 
@@ -116,31 +130,71 @@ function carregar(){
 onSnapshot(query(collection(db,"validades"),orderBy("vencimento","asc")),snap=>{
 const lista=document.getElementById("lista");
 lista.innerHTML="";
+dadosAtuais=[];
+
 snap.forEach(d=>{
 const item=d.data();
-const diff=Math.ceil((new Date(item.vencimento+"T00:00:00")-new Date().setHours(0,0,0,0))/86400000);
+const diff=Math.ceil(
+(new Date(item.vencimento+"T00:00:00")-new Date().setHours(0,0,0,0))/86400000
+);
 
 let estilo="card-normal",cor="text-green-600";
-if(diff<=7){estilo="card-critico";cor="text-red-600 animate-pulse font-black";}
-else if(diff<=15){estilo="card-atencao";cor="text-yellow-600 font-black";}
+let diasTexto=diff+" DIAS";
+
+if(diff<=0){
+estilo="card-critico";
+cor="text-red-600 animate-pulse font-black";
+diasTexto="❌ VENCIDO";
+}else if(diff<=7){
+estilo="card-critico";
+cor="text-red-600 animate-pulse font-black";
+}else if(diff<=15){
+estilo="card-atencao";
+cor="text-yellow-600 font-black";
+}
+
+dadosAtuais.push({...item,dias:diff});
 
 const div=document.createElement("div");
-div.className=`p-4 bg-white rounded-2xl shadow ${estilo}`;
+div.className=`card p-4 bg-white rounded-2xl shadow ${estilo}`;
 div.innerHTML=`
+<div class="flex gap-3">
+<input type="checkbox" class="item-check mt-1 scale-150 accent-blue-600">
+<div class="flex-grow">
 <div class="flex justify-between text-[8px] font-black text-slate-400">
 <span>${item.setor}</span>
-<span class="${cor}">
-${diff<=0 ? '❌ VENCIDO' : diff+' DIAS'}
-</span>
+<span class="${cor}">${diasTexto}</span>
 </div>
-<h3 class="font-black uppercase text-sm mt-1">${item.produto}</h3>
-<p class="text-[9px] font-bold text-slate-500 mt-1">
-Qtd: ${item.quantidade} | Venc: ${item.vencimento.split('-').reverse().join('/')}
-</p>`;
+<h3 class="font-black uppercase text-sm my-1">${item.produto}</h3>
+<div class="my-2 bg-white border rounded-lg p-1 text-center">
+<svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-height="35"></svg>
+</div>
+<p class="text-[9px] font-bold text-slate-500">
+Qtd: ${item.quantidade} | Venc: ${item.vencimento.split("-").reverse().join("/")}
+</p>
+</div>
+</div>
+`;
 lista.appendChild(div);
 });
+
+JsBarcode(".barcode").init();
 });
 }
+
+document.getElementById("btn-whatsapp").onclick=()=>{
+const cards=[...document.querySelectorAll(".item-check")].filter(c=>c.checked);
+if(cards.length===0) return showToast("Marque os itens","#f59e0b");
+
+let msg="*📊 RELATÓRIO NEW MARKET*\n\n";
+cards.forEach(c=>{
+const card=c.closest(".card");
+const idx=[...card.parentNode.children].indexOf(card);
+const p=dadosAtuais[idx];
+msg+=`• *${p.produto}*\n${p.dias<=0?"❌ VENCIDO":`Faltam: ${p.dias} dias`}\nQtd: ${p.quantidade}\n\n`;
+});
+window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,"_blank");
+};
 </script>
 </body>
 </html>
