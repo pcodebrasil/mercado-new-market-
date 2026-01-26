@@ -35,14 +35,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100px;
+            height: 80px;
             width: 100%;
         }
-        svg.barcode {
-            width: 100% !important;
-            height: 100% !important;
-        }
-        
+        svg.barcode { width: 100% !important; height: 100% !important; }
         .filtro-ativo { border: 4px solid #1e40af !important; transform: scale(1.05); }
     </style>
 </head>
@@ -123,7 +119,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp, where, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
@@ -141,16 +137,6 @@
         const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         const pauloADM = 'paulo@newmarket.com';
         let filtroAtual = 'todos';
-        let currentUserEmail = "";
-
-        function configurarSetorAutomatico(email) {
-            const seletor = document.getElementById('p-setor-add');
-            if (email.includes('paulo')) seletor.value = "Corredor do Paulo";
-            else if (email.includes('leandro')) seletor.value = "Corredor do Leandro";
-            else if (email.includes('pedro')) seletor.value = "Corredor do Pedro";
-            else if (email.includes('edmar')) seletor.value = "Corredor do Edmar";
-            else if (email.includes('joao')) seletor.value = "Estoque Central";
-        }
 
         function showToast(msg) {
             const t = document.getElementById("toast");
@@ -160,9 +146,8 @@
 
         window.aplicarFiltro = (tipo) => {
             filtroAtual = tipo;
-            const bts = { critico: 'f-critico', atencao: 'f-atencao', todos: 'f-todos' };
-            Object.values(bts).forEach(id => document.getElementById(id).classList.remove('filtro-ativo'));
-            document.getElementById(bts[tipo]).classList.add('filtro-ativo');
+            ['f-critico', 'f-atencao', 'f-todos'].forEach(id => document.getElementById(id).classList.remove('filtro-ativo'));
+            document.getElementById('f-' + tipo).classList.add('filtro-ativo');
             processarLista();
         };
 
@@ -175,7 +160,7 @@
             });
         };
 
-        function carregar(podeApagar) {
+        function carregar(podeGerenciar) {
             const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
             onSnapshot(q, (snap) => {
                 const lista = document.getElementById('lista');
@@ -189,7 +174,7 @@
                     const diff = Math.ceil((dataVenc - hoje) / 86400000);
                     
                     let cat = "normal", estilo = "card-normal", textoVenc = `Vence em ${diff} dias`;
-                    if(diff <= 0) { estilo="card-critico"; cat="critico"; textoVenc = "🚨 VENCIDO HOJE!"; counts.critico++; }
+                    if(diff <= 0) { estilo="card-critico"; cat="critico"; textoVenc = "🚨 VENCIDO!"; counts.critico++; }
                     else if(diff <= 7) { estilo="card-critico"; cat="critico"; counts.critico++; }
                     else if(diff <= 15) { estilo="card-atencao"; cat="atencao"; counts.atencao++; }
                     
@@ -198,7 +183,7 @@
                     div.dataset.id = item.id; div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
                     
                     div.onclick = (e) => { 
-                        if(e.target.tagName !== 'BUTTON') { 
+                        if(!['BUTTON', 'INPUT'].includes(e.target.tagName)) { 
                             const cb = div.querySelector('.item-check'); 
                             cb.checked = !cb.checked; 
                             div.classList.toggle('card-checked', cb.checked); 
@@ -207,50 +192,59 @@
 
                     div.innerHTML = `
                         <div class="flex gap-4">
-                            <input type="checkbox" class="item-check scale-[2] pointer-events-none">
+                            <input type="checkbox" class="item-check scale-[1.8] pointer-events-none">
                             <div class="flex-grow">
                                 <div class="flex justify-between text-[8px] font-black uppercase text-slate-400 mb-1">
                                     <span>${item.setor}</span>
                                     <span>Cod: ${item.codigo}</span>
                                 </div>
                                 <h3 class="font-black text-base uppercase text-slate-800 leading-tight">${item.produto}</h3>
-                                <p class="text-[10px] font-bold text-slate-500 mb-2">Qtd: ${item.quantidade}</p>
+                                <p class="text-xs font-bold text-blue-700 bg-blue-50 inline-block px-2 rounded-full mb-2">Qtd: ${item.quantidade}</p>
                                 
-                                <div class="barcode-container my-3">
-                                    <svg class="barcode" 
-                                        jsbarcode-value="${item.codigo}" 
-                                        jsbarcode-format="auto"
-                                        jsbarcode-displayValue="true"
-                                        jsbarcode-fontSize="18"
-                                        jsbarcode-margin="0"
-                                        jsbarcode-height="80">
-                                    </svg>
+                                <div class="barcode-container my-2">
+                                    <svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-displayValue="true" jsbarcode-fontSize="16" jsbarcode-height="50"></svg>
                                 </div>
 
-                                <div class="flex justify-between items-center mt-2">
+                                <div class="flex justify-between items-end mt-2">
                                     <div class="flex flex-col">
                                         <span class="text-[9px] uppercase font-black text-slate-400">Vencimento:</span>
                                         <span class="text-xl font-black text-slate-900 bg-white px-2 rounded-lg border-2 border-slate-200">
                                             ${item.vencimento.split('-').reverse().join('/')}
                                         </span>
                                     </div>
-                                    ${podeApagar ? `<button type="button" class="btn-excluir text-[10px] text-red-600 bg-red-50 px-3 py-2 rounded-xl font-black border-2 border-red-200" data-id="${item.id}">EXCLUIR</button>` : ''}
+                                    <div class="flex gap-1">
+                                        <button type="button" class="btn-editar text-[9px] text-blue-600 bg-blue-50 px-3 py-2 rounded-xl font-black border-2 border-blue-200" data-id="${item.id}" data-nome="${item.produto}" data-qtd="${item.quantidade}">EDITAR QTD</button>
+                                        ${podeGerenciar ? `<button type="button" class="btn-excluir text-[9px] text-red-600 bg-red-50 px-3 py-2 rounded-xl font-black border-2 border-red-200" data-id="${item.id}">EXCLUIR</button>` : ''}
+                                    </div>
                                 </div>
                                 <p class="text-[10px] font-black uppercase mt-2 ${cat === 'critico' ? 'text-red-600' : 'text-slate-500'}">${textoVenc}</p>
                             </div>
                         </div>`;
                     lista.appendChild(div);
                 });
+
                 JsBarcode(".barcode").init();
                 document.getElementById('c-total').innerText = snap.size;
                 document.getElementById('c-critico').innerText = counts.critico;
                 document.getElementById('c-atencao').innerText = counts.atencao;
                 processarLista();
 
+                // Listeners para Editar e Excluir
+                document.querySelectorAll('.btn-editar').forEach(btn => {
+                    btn.onclick = async (e) => {
+                        e.stopPropagation();
+                        const novaQtd = prompt(`Nova quantidade para ${btn.dataset.nome}:`, btn.dataset.qtd);
+                        if (novaQtd !== null && novaQtd !== "") {
+                            await updateDoc(doc(db, "validades", btn.dataset.id), { quantidade: novaQtd });
+                            showToast("Quantidade atualizada!");
+                        }
+                    };
+                });
+
                 document.querySelectorAll('.btn-excluir').forEach(btn => {
                     btn.onclick = async (e) => { 
                         e.stopPropagation(); 
-                        if(confirm("Deseja apagar este item?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); 
+                        if(confirm("Apagar este registro?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); 
                     };
                 });
             });
@@ -259,13 +253,13 @@
         onAuthStateChanged(auth, (user) => {
             document.getElementById('loading-screen').style.display = 'none';
             if (user) {
-                currentUserEmail = user.email;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                configurarSetorAutomatico(user.email);
+                document.getElementById('user-display').innerText = user.email;
+                
                 const isGerente = gerentesREAIS.includes(user.email);
                 const isPaulo = user.email === pauloADM;
-                document.getElementById('user-display').innerText = user.email;
+                
                 document.getElementById('repositor-form').classList.toggle('hidden', isGerente);
                 carregar(isPaulo || isGerente);
             } else {
@@ -283,19 +277,45 @@
         document.getElementById('btn-logout').onclick = () => signOut(auth);
         
         document.getElementById('btn-salvar').onclick = async () => {
-            const p = { 
-                produto: document.getElementById('p-nome').value.toUpperCase().trim(), 
-                codigo: document.getElementById('p-ean').value || "0", 
-                quantidade: document.getElementById('p-qtd').value || "1", 
-                setor: document.getElementById('p-setor-add').value, 
-                vencimento: document.getElementById('p-data').value, 
-                criadoEm: serverTimestamp() 
-            };
-            if(!p.produto || !p.vencimento) return showToast("Preencha os campos!");
-            await addDoc(collection(db, "validades"), p);
-            showToast("Item salvo!");
-            document.getElementById('p-nome').value = ""; 
-            document.getElementById('p-ean').value = "";
+            const nome = document.getElementById('p-nome').value.toUpperCase().trim();
+            const ean = document.getElementById('p-ean').value || "0";
+            const qtdInput = document.getElementById('p-qtd').value || "1";
+            const setor = document.getElementById('p-setor-add').value;
+            const data = document.getElementById('p-data').value;
+
+            if(!nome || !data) return showToast("Preencha Nome e Data!");
+
+            try {
+                // VERIFICA SE JÁ EXISTE NO MESMO DIA (UNIFICAÇÃO)
+                const qExistente = query(collection(db, "validades"), 
+                    where("produto", "==", nome),
+                    where("codigo", "==", ean),
+                    where("vencimento", "==", data)
+                );
+                
+                const snapExistente = await getDocs(qExistente);
+
+                if(!snapExistente.empty) {
+                    const docRef = snapExistente.docs[0];
+                    const qtdAtual = parseInt(docRef.data().quantidade) || 0;
+                    const novaQtd = qtdAtual + parseInt(qtdInput);
+                    await updateDoc(doc(db, "validades", docRef.id), { quantidade: novaQtd.toString() });
+                    showToast("Quantidade somada ao item existente!");
+                } else {
+                    await addDoc(collection(db, "validades"), { 
+                        produto: nome, codigo: ean, quantidade: qtdInput, 
+                        setor: setor, vencimento: data, criadoEm: serverTimestamp() 
+                    });
+                    showToast("Item salvo!");
+                }
+                
+                document.getElementById('p-nome').value = ""; 
+                document.getElementById('p-ean').value = "";
+                document.getElementById('p-qtd').value = "";
+            } catch (err) {
+                console.error(err);
+                showToast("Erro ao salvar.");
+            }
         };
 
         document.getElementById('btn-whatsapp').onclick = () => {
@@ -305,21 +325,12 @@
             sel.forEach(c => {
                 const nome = c.querySelector('h3').innerText;
                 const data = c.querySelector('.text-xl').innerText;
-                msg += `📌 *${nome}*\n📅 Vencimento: ${data}\n\n`;
+                const qtd = c.querySelector('.text-xs').innerText;
+                msg += `📌 *${nome}*\n📊 ${qtd}\n📅 Vencimento: ${data}\n\n`;
             });
-            msg += "_Desenvolvido por Paulo Souza_";
+            msg += "_Sistema New Market 2026_";
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
         };
 
         document.getElementById('btn-selecionar-criticos').onclick = () => {
-            const criticos = Array.from(document.querySelectorAll('.card')).filter(c => c.dataset.cat === 'critico');
-            const todosMarcados = criticos.every(c => c.querySelector('.item-check').checked);
-            criticos.forEach(c => {
-                const cb = c.querySelector('.item-check');
-                cb.checked = !todosMarcados;
-                c.classList.toggle('card-checked', !todosMarcados);
-            });
-        };
-    </script>
-</body>
-</html>
+            const 
