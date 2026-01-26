@@ -4,126 +4,159 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>New Market - Sistema 2026</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    animation: { 'spin-slow': 'spin 3s linear infinite' }
+                }
+            }
+        }
+    </script>
+
     <style>
+        /* Apenas animações complexas que o Tailwind CDN padrão não cobre facilmente sem config */
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        
+        .toast-show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        
+        /* Ocultar elementos iniciais */
         #login-screen, #main-panel { display: none; }
-        #loading-screen { position: fixed; inset: 0; background: white; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        .card-critico { border-left: 10px solid #ef4444; background-color: #fff1f2 !important; }
-        .card-atencao { border-left: 10px solid #f59e0b; background-color: #fffbeb !important; }
-        .card-normal { border-left: 10px solid #10b981; background-color: #ffffff !important; }
-        .card-checked { opacity: 0.4 !important; filter: grayscale(1); transform: scale(0.96); }
-        
-        .text-gradient-yellow {
-            background: linear-gradient(to right, #1e40af, #dc2626, #facc15);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
-        .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; }
-        
-        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 12px; position: fixed; z-index: 1100; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; }
-        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-
-        .barcode-container {
-            background: white;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100px;
-            width: 100%;
-        }
-        svg.barcode {
-            width: 100% !important;
-            height: 100% !important;
-        }
-        
-        .filtro-ativo { border: 4px solid #1e40af !important; transform: scale(1.05); }
+        /* Checkbox customizado hack para visual limpo */
+        .custom-checkbox:checked + div { opacity: 0.5; filter: grayscale(1); transform: scale(0.98); }
     </style>
 </head>
-<body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
+<body class="bg-slate-100 text-slate-900 flex flex-col min-h-screen select-none">
 
-    <div id="toast"></div>
-
-    <div id="loading-screen">
-        <div class="w-12 h-12 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase text-slate-400">Carregando...</p>
+    <div id="toast" class="invisible fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] bg-slate-800 text-white px-6 py-3 rounded-xl shadow-2xl font-bold text-sm min-w-[200px] text-center transition-all">
+        Notificação
     </div>
 
-    <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-6">
-        <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md border-b-8 border-yellow-400 text-center">
-            <h1 class="text-4xl font-black uppercase italic text-gradient-yellow leading-none">New Market</h1>
-            <p class="text-lg font-bold text-blue-900 uppercase tracking-tighter -mt-1">Supermercados</p>
-            <p class="text-[10px] text-slate-400 font-black tracking-[0.3em] mt-4 mb-8 uppercase border-t pt-2">Sistema de Validade 2026</p>
+    <div id="loading-screen" class="fixed inset-0 bg-white z-[999] flex flex-col items-center justify-center">
+        <div class="w-16 h-16 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
+        <p class="text-xs font-black uppercase text-slate-400 tracking-[0.3em] animate-pulse">Carregando Sistema...</p>
+    </div>
+
+    <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-6 bg-slate-50">
+        <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl w-full max-w-md border-b-8 border-yellow-400 text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-800 via-red-600 to-yellow-500"></div>
+
+            <h1 class="text-5xl font-black uppercase italic tracking-tighter leading-none mb-1">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-800 via-red-600 to-yellow-500">New Market</span>
+            </h1>
+            <p class="text-xl font-bold text-blue-900 uppercase tracking-tight">Supermercados</p>
+            
+            <p class="text-[10px] text-slate-400 font-black tracking-[0.3em] mt-6 mb-8 uppercase border-t pt-4">Sistema Integrado 2026</p>
+            
             <form class="space-y-4" onsubmit="return false;">
-                <input type="email" id="email" class="w-full p-4 border-2 rounded-2xl outline-none" placeholder="E-mail">
-                <input type="password" id="password" class="w-full p-4 border-2 rounded-2xl outline-none" placeholder="Senha">
-                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-5 rounded-2xl font-black uppercase shadow-lg">Entrar</button>
+                <div>
+                    <input type="email" id="email" class="w-full p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl outline-none focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all font-bold text-slate-700" placeholder="E-mail Corporativo">
+                </div>
+                <div>
+                    <input type="password" id="password" class="w-full p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl outline-none focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all font-bold text-slate-700" placeholder="Senha de Acesso">
+                </div>
+                <button type="button" id="btn-entrar" class="w-full py-4 rounded-2xl font-black uppercase shadow-lg text-white tracking-widest bg-gradient-to-r from-blue-800 via-red-600 to-yellow-500 hover:scale-[1.02] active:scale-95 transition-all duration-300">
+                    Acessar Painel
+                </button>
             </form>
         </div>
+        <p class="mt-8 text-[10px] text-slate-400 font-bold uppercase">Versão 3.0 &bull; Tailwind CSS Native</p>
     </div>
 
     <div id="main-panel" class="flex-grow flex flex-col">
-        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
-            <div class="leading-none text-left">
-                <span class="font-black italic uppercase text-lg">New Market</span><br>
-                <span id="user-display" class="text-[8px] font-black text-yellow-200 uppercase tracking-widest">...</span>
+        
+        <nav class="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white p-4 flex justify-between items-center sticky top-0 z-40 shadow-xl border-b-4 border-yellow-400">
+            <div class="leading-tight text-left">
+                <span class="font-black italic uppercase text-lg tracking-tight">New Market</span><br>
+                <span id="user-display" class="text-[9px] font-black text-yellow-300 uppercase tracking-widest opacity-80">...</span>
             </div>
-            <button type="button" id="btn-logout" class="text-[9px] bg-black/40 px-4 py-2 rounded-full font-bold border border-white/20 uppercase">Sair</button>
+            <button type="button" id="btn-logout" class="text-[10px] bg-white/10 hover:bg-white/20 backdrop-blur-sm px-5 py-2 rounded-full font-bold border border-white/30 uppercase transition-all">
+                Sair
+            </button>
         </nav>
 
-        <main class="p-4 max-w-xl mx-auto w-full space-y-6 flex-grow">
+        <main class="p-4 max-w-xl mx-auto w-full space-y-6 flex-grow pb-20">
             
-            <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
-                <h2 class="font-black uppercase text-blue-800 text-xs tracking-widest">Novo Lançamento</h2>
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50">
-                <div class="grid grid-cols-4 gap-2">
-                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl outline-none">
-                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl outline-none">
+            <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-l-[12px] border-blue-700 space-y-4 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-5">
+                    <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 20 20"><path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V7a1 1 0 00-.553-.894l-4-2a1 1 0 00-1.447.894v.268l-3.553-1.777a1 1 0 00-.894 0L2.553 5.34a1 1 0 00-.553.894v8a1 1 0 00.553.894l4 2A1 1 0 007 17v-4.268l4 2V17z"/></svg>
                 </div>
-                <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-black uppercase bg-yellow-50 text-blue-900 border-yellow-200">
-                    <option value="Estoque Central">Estoque Central (João)</option>
+                
+                <h2 class="font-black uppercase text-blue-800 text-xs tracking-[0.2em] mb-2 flex items-center gap-2">
+                    <span class="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></span> Novo Lançamento
+                </h2>
+                
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border-2 border-slate-200 rounded-2xl font-bold uppercase bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-50 outline-none transition-all placeholder:text-slate-300">
+                
+                <div class="grid grid-cols-4 gap-3">
+                    <input type="number" id="p-ean" placeholder="EAN (CÓDIGO)" class="col-span-3 w-full p-4 border-2 border-slate-200 rounded-2xl font-bold outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-50 transition-all">
+                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border-2 border-slate-200 rounded-2xl font-bold outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-50 transition-all text-center">
+                </div>
+                
+                <select id="p-setor-add" class="w-full p-4 border-2 border-yellow-200 rounded-2xl font-black uppercase bg-yellow-50 text-blue-900 outline-none focus:border-yellow-400 transition-all cursor-pointer">
+                    <option value="Estoque Central">Estoque Central</option>
                     <option value="Corredor do Paulo">Corredor do Paulo</option>
                     <option value="Corredor do Leandro">Corredor do Leandro</option>
                     <option value="Corredor do Pedro">Corredor do Pedro</option>
                     <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
-                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-blue-700">
-                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar Registro</button>
+                
+                <input type="date" id="p-data" class="w-full p-4 border-2 border-slate-200 rounded-2xl font-bold text-blue-800 outline-none focus:border-blue-600 transition-all cursor-pointer">
+                
+                <button type="button" id="btn-salvar" class="w-full bg-blue-700 hover:bg-blue-800 text-white p-4 rounded-2xl font-black uppercase shadow-lg transition-all active:scale-95 flex justify-center items-center gap-2">
+                    <span>💾</span> Salvar Registro
+                </button>
             </div>
 
             <div class="space-y-4">
-                <div class="grid grid-cols-3 gap-2 text-center font-black">
-                    <button type="button" id="f-critico" class="bg-white p-3 rounded-2xl text-red-600 border-2" onclick="aplicarFiltro('critico')"><p class="text-[8px]">🚨 Crítico</p><p id="c-critico" class="text-xl">0</p></button>
-                    <button type="button" id="f-atencao" class="bg-white p-3 rounded-2xl text-yellow-600 border-2" onclick="aplicarFiltro('atencao')"><p class="text-[8px]">⚠️ Atenção</p><p id="c-atencao" class="text-xl">0</p></button>
-                    <button type="button" id="f-todos" class="bg-white p-3 rounded-2xl text-blue-600 border-2 filtro-ativo" onclick="aplicarFiltro('todos')"><p class="text-[8px]">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
+                <div class="grid grid-cols-3 gap-3">
+                    <button type="button" id="f-critico" class="group bg-white hover:bg-red-50 p-3 rounded-2xl border-2 border-transparent hover:border-red-200 shadow-sm transition-all" onclick="aplicarFiltro('critico')">
+                        <p class="text-[9px] font-black uppercase text-red-400 group-hover:text-red-600">🚨 Crítico</p>
+                        <p id="c-critico" class="text-2xl font-black text-red-600">0</p>
+                    </button>
+                    <button type="button" id="f-atencao" class="group bg-white hover:bg-yellow-50 p-3 rounded-2xl border-2 border-transparent hover:border-yellow-200 shadow-sm transition-all" onclick="aplicarFiltro('atencao')">
+                        <p class="text-[9px] font-black uppercase text-yellow-500 group-hover:text-yellow-600">⚠️ Atenção</p>
+                        <p id="c-atencao" class="text-2xl font-black text-yellow-600">0</p>
+                    </button>
+                    <button type="button" id="f-todos" class="group bg-white p-3 rounded-2xl border-4 border-blue-800 shadow-md scale-105 transition-all" onclick="aplicarFiltro('todos')">
+                        <p class="text-[9px] font-black uppercase text-blue-400 group-hover:text-blue-600">📦 Total</p>
+                        <p id="c-total" class="text-2xl font-black text-blue-800">0</p>
+                    </button>
                 </div>
                 
-                <div class="flex gap-2">
-                    <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Buscar..." class="flex-grow p-4 rounded-2xl bg-white border-2 outline-none font-bold">
-                    <button type="button" id="btn-selecionar-criticos" class="bg-red-600 text-white px-4 rounded-2xl font-black text-[9px] uppercase">Selecionar Críticos</button>
+                <div class="flex gap-2 bg-white p-2 rounded-3xl shadow-sm border border-slate-200">
+                    <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Buscar produto..." class="flex-grow p-3 bg-transparent outline-none font-bold text-slate-600 placeholder:text-slate-300">
+                    <button type="button" id="btn-selecionar-criticos" class="bg-red-100 hover:bg-red-200 text-red-700 px-4 rounded-2xl font-black text-[9px] uppercase transition-colors">
+                        Marcar Críticos
+                    </button>
                 </div>
                 
-                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs shadow-md">📱 Enviar Relatório via WhatsApp</button>
+                <button type="button" id="btn-whatsapp" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white p-4 rounded-2xl font-black uppercase text-xs shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 border-b-4 border-emerald-700">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.463 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                    Enviar Relatório WhatsApp
+                </button>
                 
-                <div id="lista" class="space-y-4 pb-10"></div>
+                <div id="lista" class="space-y-3 pb-10"></div>
             </div>
         </main>
 
         <footer class="p-6 text-center">
-            <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 italic">Dev Paulo Souza by 2026</p>
+            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 italic">Dev Paulo Souza by 2026</p>
         </footer>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp, where, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
@@ -141,41 +174,46 @@
         const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         const pauloADM = 'paulo@newmarket.com';
         let filtroAtual = 'todos';
-        let currentUserEmail = "";
-
-        function configurarSetorAutomatico(email) {
-            const seletor = document.getElementById('p-setor-add');
-            if (email.includes('paulo')) seletor.value = "Corredor do Paulo";
-            else if (email.includes('leandro')) seletor.value = "Corredor do Leandro";
-            else if (email.includes('pedro')) seletor.value = "Corredor do Pedro";
-            else if (email.includes('edmar')) seletor.value = "Corredor do Edmar";
-            else if (email.includes('joao')) seletor.value = "Estoque Central";
-        }
 
         function showToast(msg) {
             const t = document.getElementById("toast");
-            t.innerText = msg; t.className = "show";
-            setTimeout(() => t.className = "", 3000);
+            t.innerText = msg; 
+            t.classList.remove("invisible");
+            t.classList.add("toast-show");
+            setTimeout(() => {
+                t.classList.remove("toast-show");
+                t.classList.add("invisible");
+            }, 3000);
         }
 
         window.aplicarFiltro = (tipo) => {
             filtroAtual = tipo;
-            const bts = { critico: 'f-critico', atencao: 'f-atencao', todos: 'f-todos' };
-            Object.values(bts).forEach(id => document.getElementById(id).classList.remove('filtro-ativo'));
-            document.getElementById(bts[tipo]).classList.add('filtro-ativo');
+            
+            // Resetar estilos dos botões
+            ['f-critico', 'f-atencao', 'f-todos'].forEach(id => {
+                const btn = document.getElementById(id);
+                btn.className = "group bg-white p-3 rounded-2xl border-2 border-transparent shadow-sm transition-all opacity-50 hover:opacity-100";
+            });
+
+            // Ativar botão selecionado
+            const btnAtivo = document.getElementById('f-' + tipo);
+            if(tipo === 'critico') btnAtivo.className = "group bg-red-50 p-3 rounded-2xl border-4 border-red-500 shadow-md transform scale-105 transition-all";
+            if(tipo === 'atencao') btnAtivo.className = "group bg-yellow-50 p-3 rounded-2xl border-4 border-yellow-500 shadow-md transform scale-105 transition-all";
+            if(tipo === 'todos') btnAtivo.className = "group bg-blue-50 p-3 rounded-2xl border-4 border-blue-800 shadow-md transform scale-105 transition-all";
+
             processarLista();
         };
 
         window.processarLista = () => {
             const busca = document.getElementById('busca').value.toLowerCase();
-            document.querySelectorAll('.card').forEach(c => {
+            document.querySelectorAll('.card-wrapper').forEach(c => {
                 const matchF = filtroAtual === 'todos' || c.dataset.cat === filtroAtual;
                 const matchB = c.dataset.search.includes(busca);
                 c.style.display = (matchF && matchB) ? "block" : "none";
             });
         };
 
-        function carregar(podeApagar) {
+        function carregar(podeGerenciar) {
             const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
             onSnapshot(q, (snap) => {
                 const lista = document.getElementById('lista');
@@ -188,138 +226,64 @@
                     const dataVenc = new Date(item.vencimento + "T12:00:00");
                     const diff = Math.ceil((dataVenc - hoje) / 86400000);
                     
-                    let cat = "normal", estilo = "card-normal", textoVenc = `Vence em ${diff} dias`;
-                    if(diff <= 0) { estilo="card-critico"; cat="critico"; textoVenc = "🚨 VENCIDO HOJE!"; counts.critico++; }
-                    else if(diff <= 7) { estilo="card-critico"; cat="critico"; counts.critico++; }
-                    else if(diff <= 15) { estilo="card-atencao"; cat="atencao"; counts.atencao++; }
+                    // Lógica de Cores via Tailwind Classes
+                    let cat = "normal";
+                    let classesCartao = "bg-white border-l-[10px] border-emerald-500";
+                    let classesVencimento = "text-slate-500";
+                    let textoVenc = `Vence em ${diff} dias`;
+
+                    if(diff <= 0) { 
+                        classesCartao = "bg-red-50 border-l-[10px] border-red-500"; 
+                        classesVencimento = "text-red-600 font-black animate-pulse";
+                        cat="critico"; textoVenc = "🚨 VENCIDO!"; counts.critico++; 
+                    }
+                    else if(diff <= 7) { 
+                        classesCartao = "bg-red-50 border-l-[10px] border-red-500"; 
+                        classesVencimento = "text-red-600 font-bold";
+                        cat="critico"; counts.critico++; 
+                    }
+                    else if(diff <= 15) { 
+                        classesCartao = "bg-yellow-50 border-l-[10px] border-yellow-500"; 
+                        classesVencimento = "text-yellow-600 font-bold";
+                        cat="atencao"; counts.atencao++; 
+                    }
                     
                     const div = document.createElement('div');
-                    div.className = `card p-5 rounded-3xl shadow-sm ${estilo} mb-3 border-2 transition-all`;
+                    // Container Label
+                    div.className = `card-wrapper relative group`;
                     div.dataset.id = item.id; div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
-                    
-                    div.onclick = (e) => { 
-                        if(e.target.tagName !== 'BUTTON') { 
-                            const cb = div.querySelector('.item-check'); 
-                            cb.checked = !cb.checked; 
-                            div.classList.toggle('card-checked', cb.checked); 
-                        } 
-                    };
 
                     div.innerHTML = `
-                        <div class="flex gap-4">
-                            <input type="checkbox" class="item-check scale-[2] pointer-events-none">
-                            <div class="flex-grow">
-                                <div class="flex justify-between text-[8px] font-black uppercase text-slate-400 mb-1">
-                                    <span>${item.setor}</span>
-                                    <span>Cod: ${item.codigo}</span>
-                                </div>
-                                <h3 class="font-black text-base uppercase text-slate-800 leading-tight">${item.produto}</h3>
-                                <p class="text-[10px] font-bold text-slate-500 mb-2">Qtd: ${item.quantidade}</p>
-                                
-                                <div class="barcode-container my-3">
-                                    <svg class="barcode" 
-                                        jsbarcode-value="${item.codigo}" 
-                                        jsbarcode-format="auto"
-                                        jsbarcode-displayValue="true"
-                                        jsbarcode-fontSize="18"
-                                        jsbarcode-margin="0"
-                                        jsbarcode-height="80">
-                                    </svg>
-                                </div>
+                        <label class="block relative cursor-pointer">
+                            <input type="checkbox" class="custom-checkbox absolute opacity-0 w-0 h-0 item-check">
+                            
+                            <div class="card-content p-5 rounded-3xl shadow-sm hover:shadow-lg transition-all duration-300 border-2 border-slate-100 ${classesCartao}">
+                                <div class="flex gap-4">
+                                    <div class="flex-grow">
+                                        <div class="flex justify-between text-[9px] font-black uppercase text-slate-400 mb-1 tracking-wider">
+                                            <span>${item.setor}</span>
+                                            <span class="bg-slate-200 px-2 rounded-md text-slate-600">COD: ${item.codigo}</span>
+                                        </div>
+                                        
+                                        <h3 class="font-black text-lg uppercase text-slate-800 leading-tight mb-2">${item.produto}</h3>
+                                        
+                                        <div class="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full mb-3">
+                                            <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                                            <p class="text-xs font-bold text-blue-800">Qtd: ${item.quantidade}</p>
+                                        </div>
 
-                                <div class="flex justify-between items-center mt-2">
-                                    <div class="flex flex-col">
-                                        <span class="text-[9px] uppercase font-black text-slate-400">Vencimento:</span>
-                                        <span class="text-xl font-black text-slate-900 bg-white px-2 rounded-lg border-2 border-slate-200">
-                                            ${item.vencimento.split('-').reverse().join('/')}
-                                        </span>
-                                    </div>
-                                    ${podeApagar ? `<button type="button" class="btn-excluir text-[10px] text-red-600 bg-red-50 px-3 py-2 rounded-xl font-black border-2 border-red-200" data-id="${item.id}">EXCLUIR</button>` : ''}
-                                </div>
-                                <p class="text-[10px] font-black uppercase mt-2 ${cat === 'critico' ? 'text-red-600' : 'text-slate-500'}">${textoVenc}</p>
-                            </div>
-                        </div>`;
-                    lista.appendChild(div);
-                });
-                JsBarcode(".barcode").init();
-                document.getElementById('c-total').innerText = snap.size;
-                document.getElementById('c-critico').innerText = counts.critico;
-                document.getElementById('c-atencao').innerText = counts.atencao;
-                processarLista();
+                                        <div class="barcode-container bg-white border-2 border-slate-200 rounded-xl overflow-hidden flex items-center justify-center h-16 w-full mb-3">
+                                            <svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-displayValue="false" jsbarcode-height="40"></svg>
+                                        </div>
 
-                document.querySelectorAll('.btn-excluir').forEach(btn => {
-                    btn.onclick = async (e) => { 
-                        e.stopPropagation(); 
-                        if(confirm("Deseja apagar este item?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); 
-                    };
-                });
-            });
-        }
-
-        onAuthStateChanged(auth, (user) => {
-            document.getElementById('loading-screen').style.display = 'none';
-            if (user) {
-                currentUserEmail = user.email;
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-panel').style.display = 'flex';
-                configurarSetorAutomatico(user.email);
-                const isGerente = gerentesREAIS.includes(user.email);
-                const isPaulo = user.email === pauloADM;
-                document.getElementById('user-display').innerText = user.email;
-                document.getElementById('repositor-form').classList.toggle('hidden', isGerente);
-                carregar(isPaulo || isGerente);
-            } else {
-                document.getElementById('login-screen').style.display = 'flex';
-                document.getElementById('main-panel').style.display = 'none';
-            }
-        });
-
-        document.getElementById('btn-entrar').onclick = async () => {
-            const e = document.getElementById('email').value.trim().toLowerCase();
-            const s = document.getElementById('password').value;
-            try { await signInWithEmailAndPassword(auth, e, s); } catch (err) { showToast("Login Inválido!"); }
-        };
-
-        document.getElementById('btn-logout').onclick = () => signOut(auth);
-        
-        document.getElementById('btn-salvar').onclick = async () => {
-            const p = { 
-                produto: document.getElementById('p-nome').value.toUpperCase().trim(), 
-                codigo: document.getElementById('p-ean').value || "0", 
-                quantidade: document.getElementById('p-qtd').value || "1", 
-                setor: document.getElementById('p-setor-add').value, 
-                vencimento: document.getElementById('p-data').value, 
-                criadoEm: serverTimestamp() 
-            };
-            if(!p.produto || !p.vencimento) return showToast("Preencha os campos!");
-            await addDoc(collection(db, "validades"), p);
-            showToast("Item salvo!");
-            document.getElementById('p-nome').value = ""; 
-            document.getElementById('p-ean').value = "";
-        };
-
-        document.getElementById('btn-whatsapp').onclick = () => {
-            const sel = document.querySelectorAll('.card-checked');
-            if(sel.length === 0) return showToast("Marque os itens!");
-            let msg = "*⚠️ NEW MARKET - RELATÓRIO DE VENCIMENTOS*\n\n";
-            sel.forEach(c => {
-                const nome = c.querySelector('h3').innerText;
-                const data = c.querySelector('.text-xl').innerText;
-                msg += `📌 *${nome}*\n📅 Vencimento: ${data}\n\n`;
-            });
-            msg += "_Desenvolvido por Paulo Souza_";
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
-        };
-
-        document.getElementById('btn-selecionar-criticos').onclick = () => {
-            const criticos = Array.from(document.querySelectorAll('.card')).filter(c => c.dataset.cat === 'critico');
-            const todosMarcados = criticos.every(c => c.querySelector('.item-check').checked);
-            criticos.forEach(c => {
-                const cb = c.querySelector('.item-check');
-                cb.checked = !todosMarcados;
-                c.classList.toggle('card-checked', !todosMarcados);
-            });
-        };
-    </script>
-</body>
-</html>
+                                        <div class="flex justify-between items-end border-t border-black/5 pt-3">
+                                            <div class="flex flex-col">
+                                                <span class="text-[9px] uppercase font-black text-slate-400">Vencimento</span>
+                                                <span class="text-xl font-black text-slate-800">
+                                                    ${item.vencimento.split('-').reverse().join('/')}
+                                                </span>
+                                                <span class="text-[10px] uppercase mt-1 ${classesVencimento}">${textoVenc}</span>
+                                            </div>
+                                            
+                                            <div class="flex flex-col gap-2">
+                                                <button ty
