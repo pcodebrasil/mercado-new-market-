@@ -3,120 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - Sistema 2026</title>
+    <title>VIGIA MARKET | Intelligence 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
+        /* Estética VIGIA - Dark Mode & Glassmorphism */
+        :root {
+            --vigia-blue: #3b82f6;
+            --vigia-red: #ef4444;
+            --vigia-yellow: #f59e0b;
+        }
+
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
         #login-screen, #main-panel { display: none; }
-        #loading-screen { position: fixed; inset: 0; background: white; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        .card-critico { border-left: 10px solid #ef4444; background-color: #fff1f2 !important; }
-        .card-atencao { border-left: 10px solid #f59e0b; background-color: #fffbeb !important; }
-        .card-normal { border-left: 10px solid #10b981; background-color: #ffffff !important; }
-        .card-checked { opacity: 0.4 !important; filter: grayscale(1); transform: scale(0.96); }
-        
-        .text-gradient-yellow {
-            background: linear-gradient(to right, #1e40af, #dc2626, #facc15);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        /* Animação Scanner de Inicialização */
+        #loading-screen { 
+            position: fixed; inset: 0; background: #0f172a; z-index: 9999; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        }
+        .scanner-bar { 
+            width: 200px; height: 3px; background: var(--vigia-blue); 
+            box-shadow: 0 0 15px var(--vigia-blue); animation: scan 2s infinite ease-in-out; 
+        }
+        @keyframes scan { 0%, 100% { transform: translateY(-40px); opacity: 0.2; } 50% { transform: translateY(40px); opacity: 1; } }
+
+        /* Estilização de Componentes */
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+        .input-vigia { 
+            @apply w-full p-4 bg-slate-900/50 border border-slate-700 rounded-xl outline-none focus:border-blue-500 transition-all font-bold text-white; 
+        }
+        .btn-vigia { 
+            @apply w-full p-4 rounded-xl font-black uppercase tracking-widest text-white transition-all active:scale-95;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
         }
 
-        .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
-        .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; }
-        
-        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 12px; position: fixed; z-index: 1100; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; }
-        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        /* Cards Dinâmicos */
+        .card-vigia { @apply glass p-5 rounded-3xl mb-4 border-l-[8px] transition-all; }
+        .card-critico { border-l-color: var(--vigia-red); background: rgba(239, 68, 68, 0.05) !important; }
+        .card-atencao { border-l-color: var(--vigia-yellow); background: rgba(245, 158, 11, 0.05) !important; }
+        .card-normal { border-l-color: #10b981; }
+        .card-checked { opacity: 0.3; filter: grayscale(1); transform: scale(0.97); }
 
-        .barcode-container {
-            background: white;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100px;
-            width: 100%;
+        #toast { 
+            visibility: hidden; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
+            background: var(--vigia-blue); color: white; padding: 12px 30px; border-radius: 50px; 
+            font-weight: 900; z-index: 10000; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
         }
-        svg.barcode {
-            width: 100% !important;
-            height: 100% !important;
-        }
-        
-        .filtro-ativo { border: 4px solid #1e40af !important; transform: scale(1.05); }
+        #toast.show { visibility: visible; animation: fadeInUp 0.5s; }
+        @keyframes fadeInUp { from { opacity: 0; bottom: 0; } to { opacity: 1; bottom: 30px; } }
+
+        .barcode-container { background: white; border-radius: 12px; padding: 8px; margin: 12px 0; }
+        .filtro-ativo { border: 2px solid var(--vigia-blue) !important; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
     </style>
 </head>
-<body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
+<body>
 
-    <div id="toast"></div>
+    <div id="toast">SISTEMA ATUALIZADO</div>
 
     <div id="loading-screen">
-        <div class="w-12 h-12 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase text-slate-400">Carregando...</p>
+        <div class="scanner-bar mb-6"></div>
+        <h2 class="text-xs font-black tracking-[0.5em] text-blue-500 uppercase animate-pulse">Vigia Intelligence</h2>
     </div>
 
-    <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-6">
-        <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md border-b-8 border-yellow-400 text-center">
-            <h1 class="text-4xl font-black uppercase italic text-gradient-yellow leading-none">New Market</h1>
-            <p class="text-lg font-bold text-blue-900 uppercase tracking-tighter -mt-1">Supermercados</p>
-            <p class="text-[10px] text-slate-400 font-black tracking-[0.3em] mt-4 mb-8 uppercase border-t pt-2">Sistema de Validade 2026</p>
+    <div id="login-screen" class="min-h-screen flex items-center justify-center p-6">
+        <div class="glass p-8 w-full max-w-md rounded-[2.5rem] text-center border-t-4 border-blue-500 shadow-2xl">
+            <h1 class="text-4xl font-black italic tracking-tighter text-white">VIGIA <span class="text-blue-500">MARKET</span></h1>
+            <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-2 mb-8">Data Guard & Validation 2026</p>
             <form class="space-y-4" onsubmit="return false;">
-                <input type="email" id="email" class="w-full p-4 border-2 rounded-2xl outline-none" placeholder="E-mail">
-                <input type="password" id="password" class="w-full p-4 border-2 rounded-2xl outline-none" placeholder="Senha">
-                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-5 rounded-2xl font-black uppercase shadow-lg">Entrar</button>
+                <input type="email" id="email" class="input-vigia" placeholder="OPERADOR (E-MAIL)">
+                <input type="password" id="password" class="input-vigia" placeholder="TOKEN DE ACESSO">
+                <button type="button" id="btn-entrar" class="btn-vigia shadow-lg shadow-blue-500/30">Inicializar Sistema</button>
             </form>
         </div>
     </div>
 
-    <div id="main-panel" class="flex-grow flex flex-col">
-        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
-            <div class="leading-none text-left">
-                <span class="font-black italic uppercase text-lg">New Market</span><br>
-                <span id="user-display" class="text-[8px] font-black text-yellow-200 uppercase tracking-widest">...</span>
+    <div id="main-panel" class="flex flex-col min-h-screen">
+        <nav class="glass p-4 sticky top-0 z-50 flex justify-between items-center border-b border-white/5">
+            <div class="leading-none">
+                <span class="font-black italic text-lg tracking-tighter text-white">VIGIA MARKET</span>
+                <span id="user-display" class="block text-[8px] font-mono text-blue-400 uppercase tracking-tighter mt-1">...</span>
             </div>
-            <button type="button" id="btn-logout" class="text-[9px] bg-black/40 px-4 py-2 rounded-full font-bold border border-white/20 uppercase">Sair</button>
+            <button id="btn-logout" class="text-[9px] font-black border border-red-500/50 text-red-500 px-4 py-2 rounded-full hover:bg-red-500/10 transition">DESCONECTAR</button>
         </nav>
 
-        <main class="p-4 max-w-xl mx-auto w-full space-y-6 flex-grow">
+        <main class="p-4 max-w-xl mx-auto w-full space-y-6">
             
-            <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
-                <h2 class="font-black uppercase text-blue-800 text-xs tracking-widest">Novo Lançamento</h2>
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50">
-                <div class="grid grid-cols-4 gap-2">
-                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl outline-none">
-                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl outline-none">
+            <div class="grid grid-cols-3 gap-3 font-black">
+                <button onclick="aplicarFiltro('critico')" id="f-critico" class="glass p-4 rounded-2xl border-b-4 border-red-500">
+                    <span class="text-[8px] text-slate-400 block mb-1">CRÍTICO</span>
+                    <span id="c-critico" class="text-2xl text-red-500">0</span>
+                </button>
+                <button onclick="aplicarFiltro('atencao')" id="f-atencao" class="glass p-4 rounded-2xl border-b-4 border-yellow-500">
+                    <span class="text-[8px] text-slate-400 block mb-1">ALERTA</span>
+                    <span id="c-atencao" class="text-2xl text-yellow-500">0</span>
+                </button>
+                <button onclick="aplicarFiltro('todos')" id="f-todos" class="glass p-4 rounded-2xl border-b-4 border-blue-500 filtro-ativo">
+                    <span class="text-[8px] text-slate-400 block mb-1">TOTAL</span>
+                    <span id="c-total" class="text-2xl text-blue-500">0</span>
+                </button>
+            </div>
+
+            <div id="repositor-form" class="hidden glass p-6 rounded-[2rem] border-l-8 border-blue-600 space-y-4 shadow-xl">
+                <h2 class="text-xs font-black uppercase tracking-widest text-blue-400">Novo Registro de Carga</h2>
+                <input type="text" id="p-nome" placeholder="DESCRIÇÃO DO PRODUTO" class="input-vigia uppercase">
+                <div class="grid grid-cols-3 gap-2">
+                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-2 input-vigia">
+                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 input-vigia">
                 </div>
-                <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-black uppercase bg-yellow-50 text-blue-900 border-yellow-200">
-                    <option value="Estoque Central">Estoque Central (João)</option>
-                    <option value="Corredor do Paulo">Corredor do Paulo</option>
-                    <option value="Corredor do Leandro">Corredor do Leandro</option>
-                    <option value="Corredor do Pedro">Corredor do Pedro</option>
-                    <option value="Corredor do Edmar">Corredor do Edmar</option>
+                <select id="p-setor-add" class="input-vigia bg-slate-800 border-none">
+                    <option value="Estoque Central">Estoque Central</option>
+                    <option value="Corredor do Paulo">Corredor: Paulo</option>
+                    <option value="Corredor do Leandro">Corredor: Leandro</option>
+                    <option value="Corredor do Pedro">Corredor: Pedro</option>
+                    <option value="Corredor do Edmar">Corredor: Edmar</option>
                 </select>
-                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-blue-700">
-                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar Registro</button>
+                <input type="date" id="p-data" class="input-vigia text-blue-400">
+                <button id="btn-salvar" class="btn-vigia">Gravar Registro</button>
             </div>
 
             <div class="space-y-4">
-                <div class="grid grid-cols-3 gap-2 text-center font-black">
-                    <button type="button" id="f-critico" class="bg-white p-3 rounded-2xl text-red-600 border-2" onclick="aplicarFiltro('critico')"><p class="text-[8px]">🚨 Crítico</p><p id="c-critico" class="text-xl">0</p></button>
-                    <button type="button" id="f-atencao" class="bg-white p-3 rounded-2xl text-yellow-600 border-2" onclick="aplicarFiltro('atencao')"><p class="text-[8px]">⚠️ Atenção</p><p id="c-atencao" class="text-xl">0</p></button>
-                    <button type="button" id="f-todos" class="bg-white p-3 rounded-2xl text-blue-600 border-2 filtro-ativo" onclick="aplicarFiltro('todos')"><p class="text-[8px]">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
-                </div>
-                
+                <input type="text" id="busca" oninput="processarLista()" placeholder="Filtrar por nome ou código..." class="input-vigia shadow-inner">
                 <div class="flex gap-2">
-                    <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Buscar..." class="flex-grow p-4 rounded-2xl bg-white border-2 outline-none font-bold">
-                    <button type="button" id="btn-selecionar-criticos" class="bg-red-600 text-white px-4 rounded-2xl font-black text-[9px] uppercase">Selecionar Críticos</button>
+                    <button id="btn-selecionar-criticos" class="flex-1 bg-red-600/10 text-red-500 p-4 rounded-xl font-black text-[10px] uppercase border border-red-500/20">Marcar Críticos</button>
+                    <button id="btn-whatsapp" class="flex-1 bg-green-600/10 text-green-500 p-4 rounded-xl font-black text-[10px] uppercase border border-green-500/20">Relatório WhatsApp</button>
                 </div>
                 
-                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs shadow-md">📱 Enviar Relatório via WhatsApp</button>
-                
-                <div id="lista" class="space-y-4 pb-10"></div>
+                <div id="lista" class="space-y-4 pb-20"></div>
             </div>
         </main>
 
-        <footer class="p-6 text-center">
-            <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 italic">Dev Paulo Souza by 2026</p>
+        <footer class="p-8 text-center opacity-40">
+            <p class="text-[10px] font-black uppercase tracking-[0.4em]">Intelligence Powered by Paulo Souza 2026</p>
         </footer>
     </div>
 
@@ -125,6 +143,7 @@
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Mantenha suas credenciais originais para sincronizar os dados
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -141,16 +160,6 @@
         const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         const pauloADM = 'paulo@newmarket.com';
         let filtroAtual = 'todos';
-        let currentUserEmail = "";
-
-        function configurarSetorAutomatico(email) {
-            const seletor = document.getElementById('p-setor-add');
-            if (email.includes('paulo')) seletor.value = "Corredor do Paulo";
-            else if (email.includes('leandro')) seletor.value = "Corredor do Leandro";
-            else if (email.includes('pedro')) seletor.value = "Corredor do Pedro";
-            else if (email.includes('edmar')) seletor.value = "Corredor do Edmar";
-            else if (email.includes('joao')) seletor.value = "Estoque Central";
-        }
 
         function showToast(msg) {
             const t = document.getElementById("toast");
@@ -160,15 +169,14 @@
 
         window.aplicarFiltro = (tipo) => {
             filtroAtual = tipo;
-            const bts = { critico: 'f-critico', atencao: 'f-atencao', todos: 'f-todos' };
-            Object.values(bts).forEach(id => document.getElementById(id).classList.remove('filtro-ativo'));
-            document.getElementById(bts[tipo]).classList.add('filtro-ativo');
+            ['f-critico', 'f-atencao', 'f-todos'].forEach(id => document.getElementById(id).classList.remove('filtro-ativo'));
+            document.getElementById(`f-${tipo}`).classList.add('filtro-ativo');
             processarLista();
         };
 
         window.processarLista = () => {
             const busca = document.getElementById('busca').value.toLowerCase();
-            document.querySelectorAll('.card').forEach(c => {
+            document.querySelectorAll('.card-vigia').forEach(c => {
                 const matchF = filtroAtual === 'todos' || c.dataset.cat === filtroAtual;
                 const matchB = c.dataset.search.includes(busca);
                 c.style.display = (matchF && matchB) ? "block" : "none";
@@ -188,55 +196,38 @@
                     const dataVenc = new Date(item.vencimento + "T12:00:00");
                     const diff = Math.ceil((dataVenc - hoje) / 86400000);
                     
-                    let cat = "normal", estilo = "card-normal", textoVenc = `Vence em ${diff} dias`;
-                    if(diff <= 0) { estilo="card-critico"; cat="critico"; textoVenc = "🚨 VENCIDO HOJE!"; counts.critico++; }
-                    else if(diff <= 7) { estilo="card-critico"; cat="critico"; counts.critico++; }
-                    else if(diff <= 15) { estilo="card-atencao"; cat="atencao"; counts.atencao++; }
+                    let cat = "normal", estilo = "card-normal", statusText = `${diff} dias para o vencimento`;
+                    if(diff <= 0) { estilo="card-critico"; cat="critico"; statusText = "🚨 PRODUTO VENCIDO"; counts.critico++; }
+                    else if(diff <= 7) { estilo="card-critico"; cat="critico"; statusText = "⚠️ RISCO IMEDIATO"; counts.critico++; }
+                    else if(diff <= 15) { estilo="card-atencao"; cat="atencao"; statusText = "⚡ ATENÇÃO LOGÍSTICA"; counts.atencao++; }
                     
                     const div = document.createElement('div');
-                    div.className = `card p-5 rounded-3xl shadow-sm ${estilo} mb-3 border-2 transition-all`;
-                    div.dataset.id = item.id; div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
+                    div.className = `card-vigia ${estilo}`;
+                    div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
                     
                     div.onclick = (e) => { 
-                        if(e.target.tagName !== 'BUTTON') { 
-                            const cb = div.querySelector('.item-check'); 
-                            cb.checked = !cb.checked; 
-                            div.classList.toggle('card-checked', cb.checked); 
-                        } 
+                        if(e.target.tagName !== 'BUTTON') div.classList.toggle('card-checked'); 
                     };
 
                     div.innerHTML = `
-                        <div class="flex gap-4">
-                            <input type="checkbox" class="item-check scale-[2] pointer-events-none">
-                            <div class="flex-grow">
-                                <div class="flex justify-between text-[8px] font-black uppercase text-slate-400 mb-1">
-                                    <span>${item.setor}</span>
-                                    <span>Cod: ${item.codigo}</span>
-                                </div>
-                                <h3 class="font-black text-base uppercase text-slate-800 leading-tight">${item.produto}</h3>
-                                <p class="text-[10px] font-bold text-slate-500 mb-2">Qtd: ${item.quantidade}</p>
-                                
-                                <div class="barcode-container my-3">
-                                    <svg class="barcode" 
-                                        jsbarcode-value="${item.codigo}" 
-                                        jsbarcode-format="auto"
-                                        jsbarcode-displayValue="true"
-                                        jsbarcode-fontSize="18"
-                                        jsbarcode-margin="0"
-                                        jsbarcode-height="80">
-                                    </svg>
-                                </div>
+                        <div class="flex flex-col">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-[7px] font-black text-slate-500 uppercase tracking-widest">${item.setor} // COD: ${item.codigo}</span>
+                                <span class="text-[8px] font-bold text-blue-400 uppercase">${statusText}</span>
+                            </div>
+                            <h3 class="font-black text-lg uppercase text-white leading-tight mb-1">${item.produto}</h3>
+                            <p class="text-[10px] font-bold text-slate-400 mb-3 uppercase">QUANTIDADE: ${item.quantidade}</p>
+                            
+                            <div class="barcode-container flex justify-center">
+                                <svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-displayValue="true" jsbarcode-height="45" jsbarcode-width="2"></svg>
+                            </div>
 
-                                <div class="flex justify-between items-center mt-2">
-                                    <div class="flex flex-col">
-                                        <span class="text-[9px] uppercase font-black text-slate-400">Vencimento:</span>
-                                        <span class="text-xl font-black text-slate-900 bg-white px-2 rounded-lg border-2 border-slate-200">
-                                            ${item.vencimento.split('-').reverse().join('/')}
-                                        </span>
-                                    </div>
-                                    ${podeApagar ? `<button type="button" class="btn-excluir text-[10px] text-red-600 bg-red-50 px-3 py-2 rounded-xl font-black border-2 border-red-200" data-id="${item.id}">EXCLUIR</button>` : ''}
+                            <div class="flex justify-between items-end mt-2">
+                                <div>
+                                    <p class="text-[7px] font-black text-slate-500 uppercase">Data de Expiração</p>
+                                    <p class="text-xl font-black text-white tracking-tighter">${item.vencimento.split('-').reverse().join('/')}</p>
                                 </div>
-                                <p class="text-[10px] font-black uppercase mt-2 ${cat === 'critico' ? 'text-red-600' : 'text-slate-500'}">${textoVenc}</p>
+                                ${podeApagar ? `<button class="btn-excluir text-[9px] text-red-500 bg-red-500/10 px-4 py-2 rounded-xl font-black border border-red-500/20" data-id="${item.id}">DELETAR</button>` : ''}
                             </div>
                         </div>`;
                     lista.appendChild(div);
@@ -250,7 +241,7 @@
                 document.querySelectorAll('.btn-excluir').forEach(btn => {
                     btn.onclick = async (e) => { 
                         e.stopPropagation(); 
-                        if(confirm("Deseja apagar este item?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); 
+                        if(confirm("CONFIRMAR EXCLUSÃO?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); 
                     };
                 });
             });
@@ -259,14 +250,14 @@
         onAuthStateChanged(auth, (user) => {
             document.getElementById('loading-screen').style.display = 'none';
             if (user) {
-                currentUserEmail = user.email;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                configurarSetorAutomatico(user.email);
+                document.getElementById('user-display').innerText = `NODE://AUTH_${user.email}`;
+                
                 const isGerente = gerentesREAIS.includes(user.email);
                 const isPaulo = user.email === pauloADM;
-                document.getElementById('user-display').innerText = user.email;
-                document.getElementById('repositor-form').classList.toggle('hidden', isGerente);
+                
+                document.getElementById('repositor-form').classList.toggle('hidden', isGerente && !isPaulo);
                 carregar(isPaulo || isGerente);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
@@ -275,9 +266,9 @@
         });
 
         document.getElementById('btn-entrar').onclick = async () => {
-            const e = document.getElementById('email').value.trim().toLowerCase();
+            const e = document.getElementById('email').value.trim();
             const s = document.getElementById('password').value;
-            try { await signInWithEmailAndPassword(auth, e, s); } catch (err) { showToast("Login Inválido!"); }
+            try { await signInWithEmailAndPassword(auth, e, s); } catch { showToast("CREDENCIAIS INVÁLIDAS"); }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
@@ -285,42 +276,35 @@
         document.getElementById('btn-salvar').onclick = async () => {
             const p = { 
                 produto: document.getElementById('p-nome').value.toUpperCase().trim(), 
-                codigo: document.getElementById('p-ean').value || "0", 
+                codigo: document.getElementById('p-ean').value || "000000", 
                 quantidade: document.getElementById('p-qtd').value || "1", 
                 setor: document.getElementById('p-setor-add').value, 
                 vencimento: document.getElementById('p-data').value, 
                 criadoEm: serverTimestamp() 
             };
-            if(!p.produto || !p.vencimento) return showToast("Preencha os campos!");
+            if(!p.produto || !p.vencimento) return showToast("DADOS INCOMPLETOS");
             await addDoc(collection(db, "validades"), p);
-            showToast("Item salvo!");
-            document.getElementById('p-nome').value = ""; 
-            document.getElementById('p-ean').value = "";
+            showToast("REGISTRO EFETUADO");
+            document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
         };
 
         document.getElementById('btn-whatsapp').onclick = () => {
             const sel = document.querySelectorAll('.card-checked');
-            if(sel.length === 0) return showToast("Marque os itens!");
-            let msg = "*⚠️ NEW MARKET - RELATÓRIO DE VENCIMENTOS*\n\n";
+            if(sel.length === 0) return showToast("SELECIONE ITENS PRIMEIRO");
+            let msg = "*👁️ VIGIA MARKET - RELATÓRIO DE MONITORAMENTO*\n\n";
             sel.forEach(c => {
                 const nome = c.querySelector('h3').innerText;
                 const data = c.querySelector('.text-xl').innerText;
-                msg += `📌 *${nome}*\n📅 Vencimento: ${data}\n\n`;
+                msg += `📌 *${nome}*\n📅 EXPIRA EM: ${data}\n\n`;
             });
-            msg += "_Desenvolvido por Paulo Souza_";
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
         };
 
         document.getElementById('btn-selecionar-criticos').onclick = () => {
-            const criticos = Array.from(document.querySelectorAll('.card')).filter(c => c.dataset.cat === 'critico');
-            const todosMarcados = criticos.every(c => c.querySelector('.item-check').checked);
-            criticos.forEach(c => {
-                const cb = c.querySelector('.item-check');
-                cb.checked = !todosMarcados;
-                c.classList.toggle('card-checked', !todosMarcados);
+            document.querySelectorAll('.card-vigia').forEach(c => {
+                if(c.dataset.cat === 'critico') c.classList.add('card-checked');
             });
         };
     </script>
 </body>
-    </html>
-    
+</html>
