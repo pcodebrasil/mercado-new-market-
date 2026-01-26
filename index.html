@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEW MARKET</title>
+    <title>NEW MARKET | Vigia 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
         :root {
-            --n-azul: #0066ff; /* Azul Royal Vibrante */
+            --n-azul: #0066ff;
             --n-amarelo: #ffc107;
             --n-vermelho: #e11d48;
         }
 
-        body { background-color: #f8fafc; color: #334155; font-family: 'Inter', -apple-system, sans-serif; }
-        #tela-login, #painel-principal { display: none; }
+        body { background-color: #f8fafc; color: #334155; font-family: 'Inter', sans-serif; }
+        #login-screen, #main-panel { display: none; }
         
-        /* Efeito de Entrada */
-        #tela-carregamento { 
+        /* --- EFEITO DE ENTRADA QUE VOCÊ GOSTOU --- */
+        #loading-screen { 
             position: fixed; inset: 0; background: white; z-index: 9999; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
         }
         .nome-entrada {
-            font-weight: 900; font-style: italic; font-size: 1.5rem; color: #1e293b;
+            font-weight: 900; font-style: italic; font-size: 1.8rem; color: #1e293b;
             animation: subirOpacidade 1.2s ease-out forwards;
-            letter-spacing: -1px;
+            letter-spacing: -1.5px;
         }
         @keyframes subirOpacidade {
             from { opacity: 0; transform: translateY(20px); }
@@ -33,115 +33,122 @@
         .linha-carregamento { width: 40px; height: 3px; background: var(--n-amarelo); margin-top: 10px; border-radius: 10px; animation: expandir 1.5s infinite; }
         @keyframes expandir { 0%, 100% { width: 20px; } 50% { width: 60px; } }
 
-        /* Estilo Compacto */
-        .cartao-clean { background: white; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .input-clean { 
-            @apply w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:bg-white transition-all text-sm font-semibold; 
+        /* --- ANIMAÇÃO NA ÁREA DE REGISTRO --- */
+        .area-registro {
+            background: white; border-radius: 16px; border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
         }
-        
-        /* Botão Gravar Ajustado (Mais vivo) */
-        .btn-acao { 
+        .area-registro:focus-within {
+            border-color: var(--n-azul);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Botão Gravar - Azul Vibrante */
+        .btn-gravar { 
             @apply w-full p-3 rounded-xl font-bold text-sm uppercase tracking-wider text-white transition-all active:scale-95 shadow-md;
             background: var(--n-azul);
         }
-        .btn-acao:hover { background: #0052cc; }
+        .btn-gravar:hover { background: #0052cc; }
 
-        /* Itens da Lista */
-        .item-lista { @apply cartao-clean p-4 mb-3 border-l-4 transition-all; }
-        .item-critico { border-l-color: var(--n-vermelho); }
-        .item-alerta { border-l-color: var(--n-amarelo); }
-        .item-ok { border-l-color: var(--n-azul); }
-        .selecionado { background: #f1f5f9; opacity: 0.6; }
+        /* Estilo da Lista Compacta */
+        .item-lista { @apply bg-white p-4 mb-3 border-l-4 rounded-xl border-slate-200 border-solid transition-all; border-left-width: 6px; }
+        .item-critico { border-left-color: var(--n-vermelho); }
+        .item-alerta { border-left-color: var(--n-amarelo); }
+        .item-ok { border-left-color: var(--n-azul); }
+        .selecionado { background: #f1f5f9; opacity: 0.6; transform: scale(0.98); }
 
-        #aviso { 
+        #toast { 
             visibility: hidden; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
             background: #1e293b; color: white; padding: 10px 24px; border-radius: 12px;
             font-size: 12px; font-weight: 600; z-index: 10000;
         }
-        #aviso.show { visibility: visible; animation: subir 0.3s ease-out; }
-        @keyframes subir { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+        #toast.show { visibility: visible; animation: pop 0.3s forwards; }
+        @keyframes pop { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
     </style>
 </head>
 <body>
 
-    <div id="aviso"></div>
+    <div id="toast"></div>
 
-    <div id="tela-carregamento">
+    <div id="loading-screen">
         <div class="nome-entrada">NEW <span style="color:var(--n-azul)">MARKET</span></div>
         <div class="linha-carregamento"></div>
     </div>
 
-    <div id="tela-login" class="min-h-screen flex items-center justify-center p-6">
-        <div class="cartao-clean p-8 w-full max-w-xs text-center">
-            <h1 class="text-xl font-black italic text-slate-800 mb-6 uppercase tracking-tighter">Acesso</h1>
+    <div id="login-screen" class="min-h-screen flex items-center justify-center p-6">
+        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-xs text-center border-b-4 border-yellow-400">
+            <h1 class="text-xl font-black italic text-slate-800 mb-6 uppercase">Acesso Restrito</h1>
             <form class="space-y-3" onsubmit="return false;">
-                <input type="email" id="email" class="input-clean" placeholder="E-mail">
-                <input type="password" id="senha" class="input-clean" placeholder="Senha">
-                <button type="button" id="btn-entrar" class="btn-acao">Entrar</button>
+                <input type="email" id="email" class="w-full p-3 bg-slate-50 border rounded-xl outline-none text-sm" placeholder="E-mail">
+                <input type="password" id="password" class="w-full p-3 bg-slate-50 border rounded-xl outline-none text-sm" placeholder="Senha">
+                <button type="button" id="btn-entrar" class="btn-gravar">Entrar</button>
             </form>
         </div>
     </div>
 
-    <div id="painel-principal" class="flex flex-col min-h-screen">
+    <div id="main-panel" class="flex flex-col min-h-screen">
         <nav class="bg-white p-4 sticky top-0 z-50 flex justify-between items-center border-b border-slate-100">
-            <div class="text-left">
+            <div class="leading-none">
                 <span class="font-black italic text-blue-800 text-sm uppercase">New Market</span>
+                <p id="user-display" class="text-[8px] font-bold text-slate-400">...</p>
             </div>
-            <button id="btn-sair" class="text-[10px] font-bold text-red-500 uppercase">Sair</button>
+            <button id="btn-logout" class="text-[10px] font-bold text-red-500 uppercase">Sair</button>
         </nav>
 
         <main class="p-4 max-w-md mx-auto w-full space-y-6">
             
             <div class="grid grid-cols-3 gap-2">
-                <button onclick="filtrar('critico')" id="f-critico" class="cartao-clean p-3 text-center">
-                    <span class="text-[9px] font-bold text-slate-400 block uppercase">Crítico</span>
+                <button onclick="setFiltro('critico')" id="f-critico" class="bg-white p-3 rounded-xl border text-center">
+                    <span class="text-[8px] font-bold text-slate-400 block uppercase">Crítico</span>
                     <span id="c-critico" class="text-lg font-black text-red-500">0</span>
                 </button>
-                <button onclick="filtrar('atencao')" id="f-atencao" class="cartao-clean p-3 text-center">
-                    <span class="text-[9px] font-bold text-slate-400 block uppercase">Alerta</span>
+                <button onclick="setFiltro('atencao')" id="f-atencao" class="bg-white p-3 rounded-xl border text-center">
+                    <span class="text-[8px] font-bold text-slate-400 block uppercase">Alerta</span>
                     <span id="c-atencao" class="text-lg font-black text-amber-500">0</span>
                 </button>
-                <button onclick="filtrar('todos')" id="f-todos" class="cartao-clean p-3 text-center border-blue-500">
-                    <span class="text-[9px] font-bold text-slate-400 block uppercase">Total</span>
+                <button onclick="setFiltro('todos')" id="f-todos" class="bg-white p-3 rounded-xl border-2 border-blue-500 text-center">
+                    <span class="text-[8px] font-bold text-slate-400 block uppercase">Total</span>
                     <span id="c-total" class="text-lg font-black text-blue-600">0</span>
                 </button>
             </div>
 
-            <div id="box-registro" class="hidden cartao-clean p-5 space-y-3">
+            <div id="repositor-form" class="hidden area-registro p-5 space-y-3">
                 <div class="flex items-center gap-2 mb-1">
                     <div class="w-1 h-4 bg-blue-600 rounded-full"></div>
                     <h2 class="text-xs font-black text-slate-800 uppercase">Novo Registro</h2>
                 </div>
                 
-                <input type="text" id="p-nome" placeholder="Nome do Produto" class="input-clean uppercase">
+                <input type="text" id="p-nome" placeholder="Nome do Produto" class="w-full p-3 bg-slate-50 border rounded-xl outline-none text-sm font-semibold uppercase">
                 
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="number" id="p-ean" placeholder="Código de Barras" class="input-clean">
-                    <input type="number" id="p-qtd" placeholder="Qtd" class="input-clean">
+                <div class="grid grid-cols-3 gap-2">
+                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-2 w-full p-3 bg-slate-50 border rounded-xl outline-none text-sm">
+                    <input type="number" id="p-qtd" placeholder="Qtd" class="col-span-1 w-full p-3 bg-slate-50 border rounded-xl outline-none text-sm">
                 </div>
 
-                <select id="p-setor" class="input-clean">
+                <select id="p-setor-add" class="w-full p-3 bg-slate-50 border rounded-xl outline-none text-sm font-semibold">
                     <option value="Estoque Central">Estoque Central</option>
-                    <option value="Corredor: Paulo">Corredor: Paulo</option>
-                    <option value="Corredor: Leandro">Corredor: Leandro</option>
-                    <option value="Corredor: Pedro">Corredor: Pedro</option>
-                    <option value="Corredor: Edmar">Corredor: Edmar</option>
+                    <option value="Corredor do Paulo">Corredor do Paulo</option>
+                    <option value="Corredor do Leandro">Corredor do Leandro</option>
+                    <option value="Corredor do Pedro">Corredor do Pedro</option>
+                    <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
 
-                <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase w-20">Vencimento:</span>
-                    <input type="date" id="p-data" class="input-clean">
+                <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase w-20 px-2">Data:</span>
+                    <input type="date" id="p-data" class="bg-transparent text-sm font-bold text-blue-600 outline-none w-full">
                 </div>
 
-                <button id="btn-salvar" class="btn-acao mt-2">Gravar no Sistema</button>
+                <button id="btn-salvar" class="btn-gravar">Gravar Registro</button>
             </div>
 
             <div class="space-y-3">
-                <input type="text" id="busca" oninput="processar()" placeholder="Pesquisar..." class="input-clean shadow-sm">
+                <input type="text" id="busca" oninput="filtrarLista()" placeholder="Pesquisar no banco..." class="w-full p-3 bg-white border rounded-xl outline-none text-sm shadow-sm">
                 
                 <div class="flex gap-2">
                     <button id="btn-whatsapp" class="flex-1 bg-green-50 text-green-700 p-2 rounded-xl font-bold text-[10px] uppercase border border-green-100">WhatsApp</button>
-                    <button id="btn-marcar" class="flex-1 bg-slate-50 text-slate-600 p-2 rounded-xl font-bold text-[10px] uppercase border border-slate-100">Selecionar Críticos</button>
+                    <button id="btn-marcar-criticos" class="flex-1 bg-slate-50 text-slate-600 p-2 rounded-xl font-bold text-[10px] uppercase border border-slate-100">Selecionar Críticos</button>
                 </div>
                 
                 <div id="lista" class="space-y-3 pb-20"></div>
@@ -168,35 +175,35 @@
         const db = getFirestore(app);
         
         const adms = ['paulo@newmarket.com', 'adriano@newmarket.com', 'adrielle@newmarket.com'];
-        let fAtual = 'todos';
+        let filtroAtivo = 'todos';
 
-        function msg(t) {
-            const a = document.getElementById("aviso");
-            a.innerText = t; a.className = "show";
-            setTimeout(() => a.className = "", 2500);
+        function notify(txt) {
+            const t = document.getElementById("toast");
+            t.innerText = txt; t.className = "show";
+            setTimeout(() => t.className = "", 2500);
         }
 
-        window.filtrar = (f) => {
-            fAtual = f;
-            document.querySelectorAll('[id^="f-"]').forEach(b => b.style.borderColor = "#e2e8f0");
-            document.getElementById(`f-${f}`).style.borderColor = "var(--n-azul)";
-            processar();
+        window.setFiltro = (f) => {
+            filtroAtivo = f;
+            document.querySelectorAll('[onclick^="setFiltro"]').forEach(b => b.classList.remove('border-2', 'border-blue-500'));
+            document.getElementById(`f-${f}`).classList.add('border-2', 'border-blue-500');
+            filtrarLista();
         };
 
-        window.processar = () => {
+        window.filtrarLista = () => {
             const b = document.getElementById('busca').value.toLowerCase();
             document.querySelectorAll('.item-lista').forEach(c => {
-                const mF = fAtual === 'todos' || c.dataset.cat === fAtual;
+                const mF = filtroAtivo === 'todos' || c.dataset.cat === filtroAtivo;
                 const mB = c.dataset.txt.includes(b);
                 c.style.display = (mF && mB) ? "block" : "none";
             });
         };
 
-        function carregar(isAdm) {
+        function iniciar(podeExcluir) {
             const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
             onSnapshot(q, (snap) => {
-                const lista = document.getElementById('lista');
-                lista.innerHTML = "";
+                const container = document.getElementById('lista');
+                container.innerHTML = "";
                 let n = { c: 0, a: 0 };
                 const hj = new Date(); hj.setHours(0,0,0,0);
 
@@ -205,89 +212,91 @@
                     const dV = new Date(i.vencimento + "T12:00:00");
                     const diff = Math.ceil((dV - hj) / 86400000);
                     
-                    let cat = "ok", est = "item-ok", txt = `${diff} dias`;
-                    if(diff <= 0) { est="item-critico"; cat="critico"; txt="Vencido"; n.c++; }
-                    else if(diff <= 7) { est="item-critico"; cat="critico"; txt="Crítico"; n.c++; }
-                    else if(diff <= 15) { est="item-alerta"; cat="atencao"; txt="Atenção"; n.a++; }
+                    let cat = "ok", estilo = "item-ok", txt = `${diff} dias`;
+                    if(diff <= 0) { estilo="item-critico"; cat="critico"; txt="Vencido"; n.c++; }
+                    else if(diff <= 7) { estilo="item-critico"; cat="critico"; txt="Crítico"; n.c++; }
+                    else if(diff <= 15) { estilo="item-alerta"; cat="atencao"; txt="Alerta"; n.a++; }
                     
                     const div = document.createElement('div');
-                    div.className = `item-lista ${est}`;
+                    div.className = `item-lista ${estilo}`;
                     div.dataset.cat = cat; div.dataset.txt = `${i.produto} ${i.codigo}`.toLowerCase();
                     div.onclick = () => div.classList.toggle('selecionado');
 
                     div.innerHTML = `
-                        <div class="flex justify-between text-[8px] font-bold text-slate-400 uppercase mb-1">
+                        <div class="flex justify-between text-[7px] font-bold text-slate-400 uppercase mb-1">
                             <span>${i.setor}</span>
                             <span class="${diff <= 7 ? 'text-red-500' : 'text-blue-500'}">${txt}</span>
                         </div>
                         <h3 class="text-sm font-bold text-slate-800 uppercase truncate">${i.produto}</h3>
-                        <div class="flex justify-between items-center mt-2">
+                        <div class="flex justify-between items-end mt-2">
                             <div>
                                 <p class="text-[10px] font-black text-slate-900">${i.vencimento.split('-').reverse().join('/')}</p>
                                 <p class="text-[8px] text-slate-400">Qtd: ${i.quantidade}</p>
                             </div>
                             <svg class="barcode" jsbarcode-value="${i.codigo}" jsbarcode-format="auto" jsbarcode-displayValue="false" jsbarcode-height="20" jsbarcode-width="1"></svg>
-                            ${isAdm ? `<button class="text-[8px] text-red-400 font-bold" onclick="apagar('${i.id}')">Excluir</button>` : ''}
+                            ${podeExcluir ? `<button class="text-[8px] text-red-400 font-bold" onclick="apagarItem('${i.id}')">Excluir</button>` : ''}
                         </div>`;
-                    lista.appendChild(div);
+                    container.appendChild(div);
                 });
                 JsBarcode(".barcode").init();
                 document.getElementById('c-total').innerText = snap.size;
                 document.getElementById('c-critico').innerText = n.c;
                 document.getElementById('c-atencao').innerText = n.a;
-                processar();
+                filtrarLista();
             });
         }
 
-        window.apagar = async (id) => {
-            if(confirm("Excluir?")) await deleteDoc(doc(db, "validades", id));
+        window.apagarItem = async (id) => {
+            if(confirm("Excluir registro?")) await deleteDoc(doc(db, "validades", id));
         };
 
         onAuthStateChanged(auth, (u) => {
-            document.getElementById('tela-carregamento').style.display = 'none';
+            document.getElementById('loading-screen').style.display = 'none';
             if (u) {
-                document.getElementById('tela-login').style.display = 'none';
-                document.getElementById('painel-principal').style.display = 'flex';
-                const isA = adms.includes(u.email);
-                document.getElementById('box-registro').classList.toggle('hidden', isA && u.email !== 'paulo@newmarket.com');
-                carregar(isA);
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-panel').style.display = 'flex';
+                document.getElementById('user-display').innerText = u.email;
+                const isAdm = adms.includes(u.email);
+                document.getElementById('repositor-form').classList.toggle('hidden', isAdm && u.email !== 'paulo@newmarket.com');
+                iniciar(isAdm);
             } else {
-                document.getElementById('tela-login').style.display = 'flex';
-                document.getElementById('painel-principal').style.display = 'none';
+                document.getElementById('login-screen').style.display = 'flex';
+                document.getElementById('main-panel').style.display = 'none';
             }
         });
 
         document.getElementById('btn-entrar').onclick = async () => {
-            try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('senha').value); } 
-            catch { msg("Erro de acesso"); }
+            const e = document.getElementById('email').value;
+            const s = document.getElementById('password').value;
+            try { await signInWithEmailAndPassword(auth, e, s); } catch { notify("Acesso negado"); }
         };
 
-        document.getElementById('btn-sair').onclick = () => signOut(auth);
+        document.getElementById('btn-logout').onclick = () => signOut(auth);
         
         document.getElementById('btn-salvar').onclick = async () => {
             const p = { 
                 produto: document.getElementById('p-nome').value.toUpperCase(), 
                 codigo: document.getElementById('p-ean').value || "0", 
                 quantidade: document.getElementById('p-qtd').value || "1", 
-                setor: document.getElementById('p-setor').value, 
+                setor: document.getElementById('p-setor-add').value, 
                 vencimento: document.getElementById('p-data').value, 
                 criadoEm: serverTimestamp() 
             };
-            if(!p.produto || !p.vencimento) return msg("Preencha tudo");
+            if(!p.produto || !p.vencimento) return notify("Preencha os campos!");
             await addDoc(collection(db, "validades"), p);
-            msg("Salvo!");
+            notify("Salvo!");
             document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
         };
 
         document.getElementById('btn-whatsapp').onclick = () => {
-            const sel = document.querySelectorAll('.selecionado');
-            if(!sel.length) return msg("Selecione itens");
+            const s = document.querySelectorAll('.selecionado');
+            if(!s.length) return notify("Selecione itens");
             let t = "*RELATÓRIO NEW MARKET*\n\n";
-            sel.forEach(c => { t += `• ${c.querySelector('h3').innerText} (${c.querySelector('.text-red-500, .text-slate-900').innerText})\n`; });
+            s.forEach(c => { t += `• ${c.querySelector('h3').innerText} (${c.querySelector('.text-slate-900').innerText})\n`; });
             window.open(`https://wa.me/?text=${encodeURIComponent(t)}`);
         };
 
-        document.getElementById('btn-marcar').onclick = () => {
+        document.getElementById('btn-marcar-criticos').onclick = () => {
             document.querySelectorAll('.item-lista').forEach(c => {
                 if(c.dataset.cat === 'critico') c.classList.add('selecionado');
             });
