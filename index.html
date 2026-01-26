@@ -22,60 +22,32 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
     <style>
-        :root {
-            --primary: #2563eb;
-            --danger: #dc2626;
-            --warning: #f59e0b;
-            --success: #16a34a;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --text: #1e293b;
-        }
-
+        :root { --primary: #2563eb; --danger: #dc2626; --warning: #f59e0b; --success: #16a34a; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background: var(--bg); color: var(--text); padding-bottom: 80px; }
-
-        /* Login */
-        #login-screen {
-            position: fixed; inset: 0; background: var(--primary);
-            display: flex; align-items: center; justify-content: center; z-index: 1000;
-        }
-        .login-card {
-            background: white; padding: 2rem; border-radius: 1rem; width: 90%; max-width: 400px; text-align: center;
-        }
-        .login-card h2 { color: var(--primary); margin-bottom: 1.5rem; }
-        input { width: 100%; padding: 0.8rem; margin-bottom: 1.1rem; border: 1px solid #ddd; border-radius: 0.5rem; outline: none; }
+        #login-screen { position: fixed; inset: 0; background: var(--primary); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .login-card { background: white; padding: 2rem; border-radius: 1rem; width: 90%; max-width: 400px; text-align: center; }
+        input { width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 0.5rem; outline: none; }
         button { width: 100%; padding: 0.8rem; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-purple { background: #6b21a8; color: white; margin-top: 1rem; }
-
-        /* Header */
         header { background: var(--primary); color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        
-        /* Containers */
         .container { padding: 1rem; max-width: 800px; margin: 0 auto; }
         .card { background: var(--card); padding: 1rem; border-radius: 0.75rem; margin-bottom: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ddd; }
-        
-        /* Status Validade */
         .status-vencido { border-left-color: var(--danger); background: #fef2f2; }
         .status-critico { border-left-color: var(--warning); background: #fffbeb; }
         .status-ok { border-left-color: var(--success); }
-
-        /* Modal */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 200; }
         .modal-content { background: white; padding: 1.5rem; border-radius: 1rem; width: 90%; max-width: 500px; }
-
-        /* Navegação */
         nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 1rem; border-top: 1px solid #ddd; }
         nav button { background: none; color: #64748b; font-size: 0.8rem; }
-        nav button.active { color: var(--primary); }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <div class="login-card">
-            <h2>New Market</h2>
+            <h2 style="color:var(--primary); margin-bottom:1rem;">New Market</h2>
             <input type="email" id="email" placeholder="E-mail">
             <input type="password" id="password" placeholder="Senha">
             <button class="btn-primary" onclick="login()">Entrar no Sistema</button>
@@ -83,17 +55,15 @@
     </div>
 
     <header>
-        <span id="user-display">New Market</span>
+        <span id="user-display">Carregando...</span>
         <button onclick="document.getElementById('modal-config').style.display='flex'" style="background:none; font-size: 1.5rem;">⚙️</button>
     </header>
 
-    <div class="container" id="main-content">
-        <div id="lista-produtos"></div>
-    </div>
+    <div class="container" id="lista-produtos"></div>
 
     <nav>
-        <button onclick="showSection('lista')" id="nav-lista" class="active">📋 Lista</button>
-        <button onclick="showSection('add')">➕ Lançar</button>
+        <button onclick="carregarProdutos()">📋 Lista</button>
+        <button onclick="document.getElementById('modal-add').style.display='flex'">➕ Lançar</button>
         <button onclick="logout()">🚪 Sair</button>
     </nav>
 
@@ -102,31 +72,31 @@
             <h3>Lançar Produto</h3><br>
             <input type="text" id="prod-nome" placeholder="Nome do Produto">
             <input type="date" id="prod-validade">
-            <input type="text" id="prod-setor" placeholder="Setor (ex: Laticínios)">
-            <button class="btn-primary" onclick="salvarProduto()">Salvar no Sistema</button>
-            <button onclick="this.parentElement.parentElement.style.display='none'" style="margin-top:0.5rem; background:none; color: gray;">Cancelar</button>
+            <input type="text" id="prod-setor" placeholder="Setor">
+            <button class="btn-primary" onclick="salvarProduto()">Salvar</button>
+            <button onclick="this.parentElement.parentElement.style.display='none'" style="margin-top:0.5rem; background:none;">Cancelar</button>
         </div>
     </div>
 
     <div id="modal-config" class="modal">
         <div class="modal-content">
-            <h3>Configurações</h3>
-            <p style="font-size: 0.8rem; color: gray; margin-bottom: 1rem;">Ative as notificações para receber alertas de validade.</p>
-            <button class="btn-purple" onclick="ativarNotificacoes()">🔔 Ativar Alertas no Celular</button>
+            <h3>Configurações</h3><br>
+            <button class="btn-purple" onclick="OneSignalDeferred.push(function(o){o.showNativePrompt()})">🔔 Ativar Alertas no Celular</button>
             <button onclick="this.parentElement.parentElement.style.display='none'" style="margin-top:1rem; background:#ddd;">Fechar</button>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO FIREBASE CORRIGIDA
+        // DADOS REAIS DA SUA FOTO 910.JPG
         const firebaseConfig = {
-            apiKey: "AIzaSyBw-vKjG9v8z7Y6x5w4v3u2t1s0r9q8p7",
-            authDomain: "mercado-new-market.firebaseapp.com",
-            projectId: "mercado-new-market",
-            storageBucket: "mercado-new-market.appspot.com",
-            messagingSenderId: "305139046648",
-            appId: "1:305139046648:web:7417e30d170f86230f6063"
+            apiKey: "AIzaSyAJaG7s34jBoU61fNNZIeeV3...", // Copiado da sua foto
+            authDomain: "mercado-c3e95.firebaseapp.com",
+            projectId: "mercado-c3e95",
+            storageBucket: "mercado-c3e95.firebasestorage.app",
+            messagingSenderId: "883539091925",
+            appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c"
         };
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
@@ -134,31 +104,19 @@
         function login() {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
-            auth.signInWithEmailAndPassword(email, pass)
-                .catch(err => alert("Erro ao entrar: Verifique e-mail e senha."));
+            auth.signInWithEmailAndPassword(email, pass).catch(err => alert("Erro: " + err.message));
         }
 
         function logout() { auth.signOut().then(() => location.reload()); }
-
-        function showSection(section) {
-            if(section === 'add') document.getElementById('modal-add').style.display = 'flex';
-            else carregarProdutos();
-        }
-
-        function ativarNotificacoes() {
-            OneSignalDeferred.push(function(OneSignal) { OneSignal.showNativePrompt(); });
-        }
 
         function salvarProduto() {
             const nome = document.getElementById('prod-nome').value;
             const validade = document.getElementById('prod-validade').value;
             const setor = document.getElementById('prod-setor').value;
-            if(!nome || !validade) return alert("Preencha os campos!");
-
             db.collection("produtos").add({
                 nome, validade, setor,
-                dataCriacao: firebase.firestore.FieldValue.serverTimestamp(),
-                usuario: auth.currentUser.email
+                usuario: auth.currentUser.email,
+                data: new Date().toISOString()
             }).then(() => {
                 document.getElementById('modal-add').style.display = 'none';
                 carregarProdutos();
@@ -171,28 +129,15 @@
                 lista.innerHTML = "";
                 snap.forEach(doc => {
                     const p = doc.data();
-                    const hoje = new Date();
-                    const venv = new Date(p.validade);
-                    const diff = Math.ceil((venv - hoje) / (1000 * 60 * 60 * 24));
-                    let statusClass = diff <= 0 ? "status-vencido" : (diff <= 7 ? "status-critico" : "status-ok");
-                    
-                    lista.innerHTML += `
-                        <div class="card ${statusClass}">
-                            <strong>${p.nome}</strong><br>
-                            <small>Setor: ${p.setor || 'Geral'}</small><br>
-                            <span style="font-weight:bold">${p.validade}</span> - ${diff <= 0 ? '❌ VENCIDO' : diff + ' dias'}
-                            <button onclick="excluirProd('${doc.id}')" style="width:auto; float:right; background:none; color:red">🗑️</button>
-                        </div>`;
+                    lista.innerHTML += `<div class="card"><strong>${p.nome}</strong><br>${p.validade} <button onclick="db.collection('produtos').doc('${doc.id}').delete()" style="float:right; background:none;">🗑️</button></div>`;
                 });
             });
         }
 
-        function excluirProd(id) { if(confirm("Remover produto?")) db.collection("produtos").doc(id).delete(); }
-
         auth.onAuthStateChanged(user => {
             if(user) {
                 document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('user-display').innerText = user.email.split('@')[0];
+                document.getElementById('user-display').innerText = user.email;
                 carregarProdutos();
             }
         });
