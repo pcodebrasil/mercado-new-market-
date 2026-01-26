@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
-        /* Estética VIGIA - Modo Escuro & Glassmorphism */
         :root {
             --vigia-blue: #3b82f6;
             --vigia-red: #ef4444;
@@ -17,7 +16,6 @@
         body { background-color: #0f172a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
         #login-screen, #main-panel { display: none; }
         
-        /* Animação Scanner de Inicialização */
         #loading-screen { 
             position: fixed; inset: 0; background: #0f172a; z-index: 9999; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
@@ -28,7 +26,6 @@
         }
         @keyframes scan { 0%, 100% { transform: translateY(-40px); opacity: 0.2; } 50% { transform: translateY(40px); opacity: 1; } }
 
-        /* Estilização de Componentes */
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
         .input-vigia { 
             @apply w-full p-4 bg-slate-900/50 border border-slate-700 rounded-xl outline-none focus:border-blue-500 transition-all font-bold text-white; 
@@ -38,7 +35,6 @@
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
         }
 
-        /* Cards Dinâmicos */
         .card-vigia { @apply glass p-5 rounded-3xl mb-4 border-l-[8px] transition-all; }
         .card-critico { border-l-color: var(--vigia-red); background: rgba(239, 68, 68, 0.05) !important; }
         .card-atencao { border-l-color: var(--vigia-yellow); background: rgba(245, 158, 11, 0.05) !important; }
@@ -59,7 +55,7 @@
 </head>
 <body>
 
-    <div id="toast">SISTEMA ATUALIZADO</div>
+    <div id="toast"></div>
 
     <div id="loading-screen">
         <div class="scanner-bar mb-6"></div>
@@ -91,15 +87,15 @@
             
             <div class="grid grid-cols-3 gap-3 font-black">
                 <button onclick="aplicarFiltro('critico')" id="f-critico" class="glass p-4 rounded-2xl border-b-4 border-red-500">
-                    <span class="text-[8px] text-slate-400 block mb-1 uppercase">Crítico</span>
+                    <span class="text-[8px] text-slate-400 block mb-1">CRÍTICO</span>
                     <span id="c-critico" class="text-2xl text-red-500">0</span>
                 </button>
                 <button onclick="aplicarFiltro('atencao')" id="f-atencao" class="glass p-4 rounded-2xl border-b-4 border-yellow-500">
-                    <span class="text-[8px] text-slate-400 block mb-1 uppercase">Alerta</span>
+                    <span class="text-[8px] text-slate-400 block mb-1">ALERTA</span>
                     <span id="c-atencao" class="text-2xl text-yellow-500">0</span>
                 </button>
                 <button onclick="aplicarFiltro('todos')" id="f-todos" class="glass p-4 rounded-2xl border-b-4 border-blue-500 filtro-ativo">
-                    <span class="text-[8px] text-slate-400 block mb-1 uppercase">Total</span>
+                    <span class="text-[8px] text-slate-400 block mb-1">TOTAL</span>
                     <span id="c-total" class="text-2xl text-blue-500">0</span>
                 </button>
             </div>
@@ -108,7 +104,7 @@
                 <h2 class="text-xs font-black uppercase tracking-widest text-blue-400">Novo Registro de Carga</h2>
                 <input type="text" id="p-nome" placeholder="DESCRIÇÃO DO PRODUTO" class="input-vigia uppercase">
                 <div class="grid grid-cols-3 gap-2">
-                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-2 input-vigia">
+                    <input type="number" id="p-ean" placeholder="DIGITE SEU CÓDIGO" class="col-span-2 input-vigia">
                     <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 input-vigia">
                 </div>
                 <select id="p-setor-add" class="input-vigia bg-slate-800 border-none">
@@ -123,7 +119,7 @@
             </div>
 
             <div class="space-y-4">
-                <input type="text" id="busca" oninput="processarLista()" placeholder="Filtrar por nome ou código..." class="input-vigia shadow-inner">
+                <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Pesquisar no banco de dados..." class="input-vigia shadow-inner">
                 <div class="flex gap-2">
                     <button id="btn-selecionar-criticos" class="flex-1 bg-red-600/10 text-red-500 p-4 rounded-xl font-black text-[10px] uppercase border border-red-500/20">Marcar Críticos</button>
                     <button id="btn-whatsapp" class="flex-1 bg-green-600/10 text-green-500 p-4 rounded-xl font-black text-[10px] uppercase border border-green-500/20">Relatório WhatsApp</button>
@@ -251,7 +247,7 @@
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                document.getElementById('user-display').innerText = `NODE://AUTH_${user.email}`;
+                document.getElementById('user-display').innerText = `ACESSO_ID: ${user.email}`;
                 
                 const isGerente = gerentesREAIS.includes(user.email);
                 const isPaulo = user.email === pauloADM;
@@ -283,7 +279,7 @@
             };
             if(!p.produto || !p.vencimento) return showToast("DADOS INCOMPLETOS");
             await addDoc(collection(db, "validades"), p);
-            showToast("REGISTRO EFETUADO");
+            showToast("REGISTRO SALVO!");
             document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
         };
 
