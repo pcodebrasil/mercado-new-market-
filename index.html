@@ -9,16 +9,24 @@
     <style>
         #login-screen, #main-panel { display: none; }
         #loading-screen { position: fixed; inset: 0; background: white; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        /* Estilização de Cards de Validade */
         .card-critico { border-left: 8px solid #ef4444; background-color: #fff1f2 !important; }
         .card-atencao { border-left: 8px solid #f59e0b; background-color: #fffbeb !important; }
         .card-normal { border-left: 8px solid #10b981; background-color: #ffffff !important; }
         .card-checked { opacity: 0.5 !important; filter: grayscale(1); background-color: #f1f5f9 !important; transform: scale(0.97); border-left-color: #94a3b8 !important; }
+        
+        /* Identidade Visual New Market */
         .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
         .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; cursor: pointer; }
+        .btn-newmarket:hover { background-position: right center; }
+
+        /* Toast Notifications */
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 12px; position: fixed; z-index: 1100; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; font-size: 12px; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        
         svg.barcode { width: 100%; max-height: 50px; }
         .filtro-ativo { border: 4px solid #1e40af !important; transform: scale(1.05); z-index: 10; }
     </style>
@@ -35,18 +43,19 @@
     <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-4">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-t-8 border-blue-800 text-center">
             <h1 class="text-3xl font-black uppercase italic text-blue-800">New <span class="text-red-600">Market</span></h1>
-            <form class="space-y-4 mt-8" onsubmit="return false;">
-                <input type="email" id="email" class="w-full p-4 border rounded-2xl outline-none" placeholder="E-mail">
-                <input type="password" id="password" class="w-full p-4 border rounded-2xl outline-none" placeholder="Senha">
-                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-4 rounded-2xl font-black uppercase">Entrar</button>
+            <p class="text-[10px] text-slate-400 font-bold mb-6">CONTROLE DE VALIDADE 2026</p>
+            <form class="space-y-4" onsubmit="return false;">
+                <input type="email" id="email" class="w-full p-4 border rounded-2xl outline-none focus:ring-2 ring-blue-500" placeholder="E-mail">
+                <input type="password" id="password" class="w-full p-4 border rounded-2xl outline-none focus:ring-2 ring-blue-500" placeholder="Senha">
+                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-4 rounded-2xl font-black uppercase shadow-lg">Entrar no Sistema</button>
             </form>
         </div>
     </div>
 
     <div id="main-panel" class="flex-grow flex flex-col">
-        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50">
+        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-lg">
             <div class="leading-none text-left">
-                <span class="font-black italic uppercase">New Market</span><br>
+                <span class="font-black italic uppercase text-lg">New Market</span><br>
                 <span id="user-display" class="text-[8px] font-black text-yellow-200 uppercase tracking-widest">...</span>
             </div>
             <div class="flex gap-2">
@@ -62,14 +71,14 @@
                     <button type="button" id="btn-cadastrar-user" class="w-full bg-blue-600 p-3 rounded-xl font-black uppercase text-[9px]">Gerenciar Usuários</button>
                 </div>
                 <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-3 rounded-xl bg-slate-700 outline-none border border-slate-600">
-                <button type="button" id="btn-confirmar-senha" class="w-full bg-yellow-600 p-3 rounded-xl font-black uppercase text-[9px]">Mudar Senha</button>
+                <button type="button" id="btn-confirmar-senha" class="w-full bg-yellow-600 p-3 rounded-xl font-black uppercase text-[9px]">Mudar Minha Senha</button>
             </div>
 
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
-                <h2 class="font-black uppercase text-blue-800 text-[10px] tracking-widest">Lançar Validade</h2>
+                <h2 class="font-black uppercase text-blue-800 text-[10px] tracking-widest">Novo Lançamento</h2>
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none bg-slate-50">
                 <div class="grid grid-cols-4 gap-2">
-                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl outline-none">
+                    <input type="number" id="p-ean" placeholder="EAN (Cód. Barras)" class="col-span-3 w-full p-4 border rounded-2xl outline-none">
                     <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl outline-none">
                 </div>
                 <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50">
@@ -91,25 +100,30 @@
                 </div>
                 
                 <div class="flex gap-2">
-                    <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Buscar..." class="flex-grow p-4 rounded-2xl bg-white border outline-none font-bold">
+                    <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Buscar produto ou código..." class="flex-grow p-4 rounded-2xl bg-white border outline-none font-bold">
                     <button type="button" id="btn-selecionar-criticos" class="bg-red-600 text-white px-4 rounded-2xl font-black text-[9px] uppercase">Marcar Críticos</button>
                 </div>
                 
-                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md">Enviar Relatório WhatsApp</button>
-                <div id="lista" class="space-y-3 pb-8"></div>
+                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md flex items-center justify-center gap-2">
+                    <span>📱 Enviar Relatório WhatsApp</span>
+                </button>
+                
+                <div id="lista" class="space-y-3 pb-8">
+                    </div>
             </div>
         </main>
 
         <footer class="p-4 text-center">
-            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 italic">Desenvolvido por Paulo by 2026</p>
+            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 italic">Desenvolvido por Paulo & AI • 2026</p>
         </footer>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Configurações do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -123,13 +137,13 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
+        // Definição de Permissões
         const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         const pauloADM = 'paulo@newmarket.com';
-        const joaoESTOQUE = 'joao@newmarket.com';
-
         let filtroAtual = 'todos';
         let currentUserEmail = "";
 
+        // UI Utils
         function showToast(msg) {
             const t = document.getElementById("toast");
             t.innerText = msg; t.className = "show";
@@ -153,6 +167,7 @@
             });
         };
 
+        // Carregar Dados em Tempo Real
         function carregar(podeApagar) {
             const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
             onSnapshot(q, (snap) => {
@@ -165,73 +180,118 @@
                     const item = { id: d.id, ...d.data() };
                     const dataVenc = new Date(item.vencimento + "T12:00:00");
                     const diff = Math.ceil((dataVenc - hoje) / 86400000);
+                    
                     let cat = "normal", estilo = "card-normal";
                     if(diff <= 7) { estilo="card-critico"; counts.critico++; cat="critico"; }
                     else if(diff <= 15) { estilo="card-atencao"; counts.atencao++; cat="atencao"; }
                     
                     const div = document.createElement('div');
                     div.className = `card p-4 rounded-2xl shadow-sm ${estilo} mb-3 border transition-all`;
-                    div.dataset.id = item.id; div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
-                    div.onclick = (e) => { if(e.target.tagName !== 'BUTTON') { const cb = div.querySelector('.item-check'); cb.checked = !cb.checked; div.classList.toggle('card-checked', cb.checked); } };
+                    div.dataset.id = item.id; 
+                    div.dataset.cat = cat; 
+                    div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
+                    
+                    div.onclick = (e) => { 
+                        if(e.target.tagName !== 'BUTTON') { 
+                            const cb = div.querySelector('.item-check'); 
+                            cb.checked = !cb.checked; 
+                            div.classList.toggle('card-checked', cb.checked); 
+                        } 
+                    };
+
                     div.innerHTML = `
                         <div class="flex gap-3">
                             <input type="checkbox" class="item-check mt-1 scale-150 pointer-events-none">
                             <div class="flex-grow">
-                                <div class="flex justify-between text-[7px] font-black uppercase text-slate-400"><span>${item.setor}</span></div>
-                                <h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3>
-                                <div class="my-2 bg-white border rounded-lg p-1 text-center"><svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35"></svg></div>
+                                <div class="flex justify-between text-[7px] font-black uppercase text-slate-400">
+                                    <span>${item.setor}</span>
+                                    <span>#${item.codigo}</span>
+                                </div>
+                                <h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto} (Qtd: ${item.quantidade || 0})</h3>
+                                <div class="my-2 bg-white border rounded-lg p-1 text-center">
+                                    <svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto"></svg>
+                                </div>
                                 <div class="flex justify-between items-end text-[9px] font-bold text-slate-500">
-                                    <span class="venc-text">VENC: ${item.vencimento.split('-').reverse().join('/')} (${diff <= 0 ? 'HOJE' : diff + ' dias'})</span>
+                                    <span class="venc-text">VENC: ${item.vencimento.split('-').reverse().join('/')} (${diff <= 0 ? 'VENCIDO' : diff + ' dias'})</span>
                                     ${podeApagar ? `<button type="button" class="btn-excluir text-red-600 bg-red-50 px-2 py-1 rounded font-black border border-red-100" data-id="${item.id}">APAGAR</button>` : ''}
                                 </div>
                             </div>
                         </div>`;
                     lista.appendChild(div);
                 });
+                
                 JsBarcode(".barcode").init();
                 document.getElementById('c-total').innerText = snap.size;
                 document.getElementById('c-critico').innerText = counts.critico;
                 document.getElementById('c-atencao').innerText = counts.atencao;
                 processarLista();
+
+                // Delegar evento de exclusão
                 document.querySelectorAll('.btn-excluir').forEach(btn => {
-                    btn.onclick = async (e) => { e.stopPropagation(); if(confirm("Apagar?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); };
+                    btn.onclick = async (e) => { 
+                        e.stopPropagation(); 
+                        if(confirm("Deseja realmente apagar este registro?")) {
+                            await deleteDoc(doc(db, "validades", btn.dataset.id));
+                            showToast("Removido!");
+                        }
+                    };
                 });
             });
         }
 
+        // Monitor de Autenticação
         onAuthStateChanged(auth, (user) => {
             document.getElementById('loading-screen').style.display = 'none';
             if (user) {
                 currentUserEmail = user.email;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
-                const isGerenteReal = gerentesREAIS.includes(user.email);
+                
+                const isGerente = gerentesREAIS.includes(user.email);
                 const isPaulo = user.email === pauloADM;
+                
                 document.getElementById('user-display').innerText = user.email;
-                document.getElementById('btn-config').classList.toggle('hidden', !(isGerenteReal || isPaulo));
-                document.getElementById('area-admin-firebase').classList.toggle('hidden', !isGerenteReal);
-                document.getElementById('repositor-form').classList.toggle('hidden', isGerenteReal);
-                carregar(isPaulo || isGerenteReal);
+                document.getElementById('btn-config').classList.toggle('hidden', !(isGerente || isPaulo));
+                document.getElementById('area-admin-firebase').classList.toggle('hidden', !isGerente);
+                
+                // Repositores (quem não é gerente) veem o formulário de cadastro
+                document.getElementById('repositor-form').classList.toggle('hidden', isGerente);
+                
+                carregar(isPaulo || isGerente);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-panel').style.display = 'none';
             }
         });
 
+        // Botões de Ação
         document.getElementById('btn-entrar').onclick = async () => {
             const e = document.getElementById('email').value.trim().toLowerCase();
             const s = document.getElementById('password').value;
-            try { await signInWithEmailAndPassword(auth, e, s); } catch (err) { showToast("Login Inválido!"); }
+            try { 
+                await signInWithEmailAndPassword(auth, e, s); 
+            } catch (err) { 
+                showToast("Erro: Usuário ou senha inválidos."); 
+            }
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
         
         document.getElementById('btn-salvar').onclick = async () => {
-            const p = { produto: document.getElementById('p-nome').value.toUpperCase().trim(), codigo: document.getElementById('p-ean').value || "0", quantidade: document.getElementById('p-qtd').value || "0", setor: document.getElementById('p-setor-add').value, vencimento: document.getElementById('p-data').value, criadoEm: serverTimestamp() };
-            if(!p.produto || !p.vencimento) return showToast("Dados incompletos!");
+            const p = { 
+                produto: document.getElementById('p-nome').value.toUpperCase().trim(), 
+                codigo: document.getElementById('p-ean').value || "0", 
+                quantidade: document.getElementById('p-qtd').value || "1", 
+                setor: document.getElementById('p-setor-add').value, 
+                vencimento: document.getElementById('p-data').value, 
+                criadoEm: serverTimestamp() 
+            };
+            if(!p.produto || !p.vencimento) return showToast("Preencha Nome e Data!");
             await addDoc(collection(db, "validades"), p);
-            showToast("Item Salvo!");
-            document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
+            showToast("Item Registrado!");
+            document.getElementById('p-nome').value = ""; 
+            document.getElementById('p-ean').value = "";
+            document.getElementById('p-qtd').value = "";
         };
 
         document.getElementById('btn-selecionar-criticos').onclick = () => {
@@ -246,24 +306,26 @@
 
         document.getElementById('btn-whatsapp').onclick = () => {
             const sel = document.querySelectorAll('.card-checked');
-            if(sel.length === 0) return showToast("Selecione itens!");
-            let msg = "*⚠️ ATENÇÃO GERÊNCIA - NEW MARKET*\n";
-            msg += "_Verificação de validades pendente:_\n\n";
+            if(sel.length === 0) return showToast("Marque os itens primeiro!");
+            
+            let msg = "*⚠️ RELATÓRIO DE VALIDADES - NEW MARKET*\n";
+            msg += "_Atenção para os seguintes itens marcados:_\n\n";
             msg += "--------------------------------\n\n";
+            
             sel.forEach(c => {
                 const nome = c.querySelector('h3').innerText;
                 const setor = c.querySelector('.text-slate-400 span').innerText;
                 const vencText = c.querySelector('.venc-text').innerText;
                 msg += `📦 *${nome}*\n📍 LOCAL: ${setor}\n📅 ${vencText}\n\n`;
             });
+            
             msg += "--------------------------------\n";
-            msg += `*Enviado por:* ${currentUserEmail}\n`;
-            msg += "_Sistema New Market 2026_";
+            msg += `*Responsável:* ${currentUserEmail}\n`;
+            msg += "_Gerado via Sistema New Market 2026_";
+            
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
         };
 
-        document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
-        document.getElementById('btn-fechar-config').onclick = () => document.getElementById('gaveta-config').classList.add('hidden');
-    </script>
-</body>
-</html>
+        document.getElementById('btn-confirmar-senha').onclick = async () => {
+            const nova = document.getElementById('nova-senha').value;
+            if(nova.length < 6) return showToast("Mínimo 6 caracteres!"
