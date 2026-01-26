@@ -1,0 +1,20 @@
+name: Disparar Alerta Diario New Market
+
+# Define quando o robô vai trabalhar
+on:
+  schedule:
+    # 11:00 UTC corresponde às 08:00 da manhã em Nazaré Paulista
+    - cron: '0 11 * * *'
+  
+  # Esta linha é OBRIGATÓRIA para o botão "Run Workflow" aparecer na tela que você me mostrou
+  workflow_dispatch: 
+
+jobs:
+  disparar_alerta:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chamada do Gatilho de Notificação
+        run: |
+          # O robô "visita" a página que processa os alertas no seu site
+          curl -s -X GET "https://pcodebrasil.github.io/mercado-new-market-/disparar.html"
+          
