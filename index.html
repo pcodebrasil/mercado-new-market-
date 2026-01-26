@@ -17,8 +17,7 @@
         .card-checked { opacity: 0.5; filter: grayscale(0.8); background-color: #f8fafc !important; transform: scale(0.98); transition: 0.2s; }
         .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
         .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; cursor: pointer; }
-        .btn-newmarket:hover { background-position: right center; }
-        #toast { visibility: hidden; min-width: 280px; background-color: #333; color: #fff; text-align: center; border-radius: 16px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; text-transform: uppercase; font-size: 11px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); }
+        #toast { visibility: hidden; min-width: 280px; background-color: #333; color: #fff; text-align: center; border-radius: 16px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; text-transform: uppercase; font-size: 11px; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
@@ -40,9 +39,9 @@
             <h1 class="text-3xl font-black uppercase italic text-blue-800">New <span class="text-red-600">Market</span></h1>
             <p class="text-[10px] text-yellow-600 font-black uppercase tracking-widest mt-1">Nazaré Paulista</p>
             <form id="login-form" class="space-y-4 mt-8" onsubmit="return false;">
-                <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none focus:ring-2 ring-blue-500" placeholder="E-mail" required>
-                <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none focus:ring-2 ring-blue-500" placeholder="Senha" required>
-                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-4 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-transform">Acessar Painel</button>
+                <input type="email" id="email" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="E-mail" required>
+                <input type="password" id="password" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none" placeholder="Senha" required>
+                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-4 rounded-2xl font-black uppercase shadow-lg">Acessar Painel</button>
             </form>
         </div>
         <footer class="dev-footer">Desenvolvido por Paulo Souza by 2026</footer>
@@ -61,40 +60,35 @@
         </nav>
 
         <main class="p-4 max-w-xl mx-auto w-full flex-grow space-y-5">
-            
             <div id="gaveta-config" class="hidden bg-slate-800 p-6 rounded-3xl shadow-xl border-b-8 border-yellow-500 space-y-4">
                 <div class="flex justify-between items-center">
-                    <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações Internas</h2>
-                    <button type="button" id="btn-fechar-config" class="text-white font-black text-xs">FECHAR [X]</button>
+                    <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações</h2>
+                    <button type="button" id="btn-fechar-config" class="text-white font-black text-xs">X</button>
                 </div>
-                
                 <div class="border-t border-slate-700 pt-4">
-                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Mudar Minha Senha</p>
-                    <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-3 border-none rounded-xl font-bold outline-none text-xs bg-slate-700 text-white mb-2">
-                    <button type="button" id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Atualizar Senha</button>
+                    <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-3 rounded-xl bg-slate-700 text-white mb-2 outline-none">
+                    <button type="button" id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Mudar Senha</button>
                 </div>
-
                 <div id="area-admin-firebase" class="border-t border-slate-700 pt-4 hidden">
-                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Acessos da Equipe</p>
-                    <button type="button" id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Abrir Gerenciador Firebase</button>
+                    <button type="button" id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Gerenciar Usuários</button>
                 </div>
             </div>
 
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
                 <h2 class="font-black uppercase text-blue-800 text-[10px]">Lançar Validade</h2>
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none text-sm bg-slate-50">
+                <input type="text" id="p-nome" placeholder="PRODUTO" class="w-full p-4 border rounded-2xl uppercase outline-none">
                 <div class="grid grid-cols-4 gap-2">
-                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
-                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl font-bold outline-none text-sm bg-slate-50">
+                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl outline-none">
+                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl outline-none">
                 </div>
-                <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50 text-sm outline-none">
+                <select id="p-setor-add" class="w-full p-4 border rounded-2xl uppercase outline-none">
                     <option value="Corredor do Paulo">Corredor do Paulo</option>
                     <option value="Corredor do Leandro">Corredor do Leandro</option>
                     <option value="Corredor do Pedro">Corredor do Pedro</option>
                     <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
-                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-sm bg-slate-50">
-                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar Produto</button>
+                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl outline-none">
+                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase">Salvar</button>
             </div>
 
             <div class="space-y-4">
@@ -103,16 +97,9 @@
                     <button type="button" id="f-atencao" class="bg-white p-3 rounded-2xl border-2 text-yellow-600 filter-inactive"><p class="text-[8px]">⚠️ Atenção</p><p id="c-atencao" class="text-xl">0</p></button>
                     <button type="button" id="f-todos" class="bg-white p-3 rounded-2xl border-2 text-blue-600 filter-active"><p class="text-[8px]">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
                 </div>
-
-                <div class="flex gap-2">
-                    <input type="text" id="busca" placeholder="🔍 Buscar..." class="flex-grow p-4 rounded-2xl bg-white shadow-sm font-bold outline-none border">
-                    <button type="button" id="btn-selecionar-criticos" class="bg-blue-600 text-white px-4 rounded-2xl font-black text-[9px] uppercase shadow-md">Marcar Críticos</button>
-                </div>
-
-                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md flex items-center justify-center gap-2">
-                    <span>🟢 Relatório WhatsApp (Marcados)</span>
-                </button>
-                
+                <input type="text" id="busca" placeholder="🔍 Buscar..." class="w-full p-4 rounded-2xl bg-white shadow-sm font-bold border outline-none">
+                <button type="button" id="btn-selecionar-criticos" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Marcar Críticos</button>
+                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md">Relatório WhatsApp</button>
                 <div id="lista" class="space-y-3 pb-8"></div>
             </div>
         </main>
@@ -121,7 +108,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
@@ -135,13 +122,9 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        try { enableIndexedDbPersistence(db); } catch (e) {}
         
         const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
         const gerentesOCULTOS = ['paulo@newmarket.com']; 
-
-        let dadosAtuais = [];
-        let filtroStatus = 'todos';
 
         function showToast(msg, color = "#333") {
             const t = document.getElementById("toast");
@@ -149,67 +132,16 @@
             setTimeout(() => { t.className = ""; }, 3000);
         }
 
-        // Lógica de Autenticação
-        onAuthStateChanged(auth, (user) => {
-            document.getElementById('loading-screen').style.display = 'none';
-            if (user) {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-panel').style.display = 'flex';
-                
-                const isGerenteReal = gerentesREAIS.includes(user.email);
-                const isPaulo = gerentesOCULTOS.includes(user.email);
-                
-                document.getElementById('user-display').innerText = (isGerenteReal || isPaulo) ? `ADMIN: ${user.email.split('@')[0]}` : `REPO: ${user.email.split('@')[0]}`;
-                document.getElementById('btn-config').classList.toggle('hidden', !(isGerenteReal || isPaulo));
-                document.getElementById('area-admin-firebase').classList.toggle('hidden', !isGerenteReal);
-                document.getElementById('repositor-form').classList.toggle('hidden', isGerenteReal);
-                
-                carregar(isGerenteReal || isPaulo);
-            } else {
-                document.getElementById('login-screen').style.display = 'flex';
-                document.getElementById('main-panel').style.display = 'none';
-            }
-        });
-
-        // Botão de Login corrigido (sem recarregar)
-        document.getElementById('btn-entrar').onclick = async () => {
-            const email = document.getElementById('email').value.trim();
-            const pass = document.getElementById('password').value;
-            if(!email || !pass) return showToast("Preencha todos os campos", "#dc2626");
-            try { 
-                await signInWithEmailAndPassword(auth, email, pass); 
-            } catch (err) { 
-                showToast("Erro no acesso!", "#dc2626"); 
-            }
-        };
-
-        document.getElementById('btn-logout').onclick = () => signOut(auth);
-        document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
-        document.getElementById('btn-fechar-config').onclick = () => document.getElementById('gaveta-config').classList.add('hidden');
-        document.getElementById('btn-cadastrar-user').onclick = () => window.open('https://console.firebase.google.com/project/mercado-c3e95/authentication/users', '_blank');
-
-        document.getElementById('btn-confirmar-senha').onclick = async () => {
-            const ns = document.getElementById('nova-senha').value;
-            if (ns.length < 6) return showToast("Mínimo 6 caracteres!", "#f59e0b");
-            try { 
-                await updatePassword(auth.currentUser, ns); 
-                showToast("Senha alterada! Relogue.", "#10b981"); 
-                setTimeout(()=>signOut(auth), 2000); 
-            } catch (e) { 
-                showToast("Erro: Relogue para alterar", "#dc2626"); 
-            }
-        };
-
-        // Função de Carregamento
+        // FUNÇÃO DE CARREGAMENTO PRINCIPAL
+        let unsubscribe = null;
         function carregar(podeApagar) {
-            onSnapshot(query(collection(db, "validades"), orderBy("vencimento", "asc")), (snap) => {
+            if (unsubscribe) unsubscribe();
+            const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
+            unsubscribe = onSnapshot(q, (snap) => {
                 const lista = document.getElementById('lista');
                 lista.innerHTML = ""; 
-                dadosAtuais = [];
                 let counts = {critico: 0, atencao: 0};
-                
-                const hoje = new Date();
-                hoje.setHours(0,0,0,0);
+                const hoje = new Date(); hoje.setHours(0,0,0,0);
 
                 snap.forEach(d => {
                     const item = { id: d.id, ...d.data() };
@@ -217,97 +149,108 @@
                     const diff = Math.ceil((dataVenc - hoje) / 86400000);
                     
                     let cat = "normal", estilo = "card-normal", corTxt = "text-green-600";
-                    if(diff <= 7) { estilo="card-critico"; corTxt="text-red-600 animate-pulse font-black"; counts.critico++; cat="critico"; }
+                    if(diff <= 7) { estilo="card-critico"; corTxt="text-red-600 font-black animate-pulse"; counts.critico++; cat="critico"; }
                     else if(diff <= 15) { estilo="card-atencao"; corTxt="text-yellow-600 font-black"; counts.atencao++; cat="atencao"; }
                     
-                    dadosAtuais.push({...item, dias: diff, cat});
-
                     const div = document.createElement('div');
                     div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 border border-slate-100`;
-                    div.dataset.id = item.id; 
-                    div.dataset.cat = cat; 
-                    div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
-                    
-                    div.onclick = (e) => { 
-                        if(e.target.tagName !== 'BUTTON') { 
-                            const cb = div.querySelector('.item-check'); 
-                            cb.checked = !cb.checked; 
-                            div.classList.toggle('card-checked', cb.checked); 
-                        } 
-                    };
-
+                    div.dataset.id = item.id; div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
+                    div.onclick = (e) => { if(e.target.tagName !== 'BUTTON') { const cb = div.querySelector('.item-check'); cb.checked = !cb.checked; div.classList.toggle('card-checked', cb.checked); } };
                     div.innerHTML = `
                         <div class="flex gap-3">
                             <input type="checkbox" class="item-check mt-1 scale-150 pointer-events-none">
                             <div class="flex-grow">
-                                <div class="flex justify-between text-[7px] font-black text-slate-400">
-                                    <span>${item.setor}</span>
-                                    <span class="${corTxt}">${diff} DIAS</span>
-                                </div>
+                                <div class="flex justify-between text-[7px] font-black text-slate-400"><span>${item.setor}</span><span class="${corTxt}">${diff} DIAS</span></div>
                                 <h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3>
-                                <div class="my-2 bg-white border rounded-lg p-1 text-center">
-                                    <svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35"></svg>
-                                </div>
+                                <div class="my-2 bg-white border rounded-lg p-1 text-center"><svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35"></svg></div>
                                 <div class="flex justify-between items-end text-[9px] font-bold text-slate-500">
                                     <span>QTD: ${item.quantidade} | VENC: ${item.vencimento.split('-').reverse().join('/')}</span>
-                                    ${podeApagar ? `<button onclick="window.apagarItem('${item.id}')" class="text-red-600 bg-red-50 px-3 py-2 rounded-lg font-black text-[8px]">Excluir</button>` : ''}
+                                    ${podeApagar ? `<button type="button" class="btn-excluir text-red-600 bg-red-50 px-3 py-2 rounded-lg font-black text-[8px]" data-id="${item.id}">Excluir</button>` : ''}
                                 </div>
                             </div>
                         </div>`;
                     lista.appendChild(div);
                 });
-                
                 JsBarcode(".barcode").init();
                 document.getElementById('c-total').innerText = snap.size;
                 document.getElementById('c-critico').innerText = counts.critico;
                 document.getElementById('c-atencao').innerText = counts.atencao;
-                filtrar();
+                
+                // Atribuir cliques de exclusão
+                document.querySelectorAll('.btn-excluir').forEach(btn => {
+                    btn.onclick = async (e) => {
+                        e.stopPropagation();
+                        if(confirm("Excluir item?")) await deleteDoc(doc(db, "validades", btn.dataset.id));
+                    };
+                });
             });
         }
 
-        // Salvar sem recarregar
-        document.getElementById('btn-salvar').onclick = async (e) => {
-            e.preventDefault();
-            const data = { 
-                produto: document.getElementById('p-nome').value.toUpperCase(), 
-                codigo: document.getElementById('p-ean').value || "0000000000000", 
-                quantidade: document.getElementById('p-qtd').value, 
-                setor: document.getElementById('p-setor-add').value, 
-                vencimento: document.getElementById('p-data').value, 
-                criadoEm: serverTimestamp() 
-            };
-            if(!data.produto || !data.vencimento || !data.quantidade) return showToast("Campos obrigatórios!", "#dc2626");
+        // MONITOR DE LOGIN
+        onAuthStateChanged(auth, (user) => {
+            // FORÇA A SAÍDA DA TELA DE CARREGAMENTO
+            document.getElementById('loading-screen').style.display = 'none';
             
-            try {
-                await addDoc(collection(db, "validades"), data);
-                showToast("Salvo!", "#10b981");
-                document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = ""; document.getElementById('p-qtd').value = "";
-            } catch (err) {
-                showToast("Erro ao salvar", "#dc2626");
+            if (user) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-panel').style.display = 'flex';
+                const isGerenteReal = gerentesREAIS.includes(user.email);
+                const isPaulo = gerentesOCULTOS.includes(user.email);
+                document.getElementById('user-display').innerText = (isGerenteReal || isPaulo) ? `ADMIN: ${user.email.split('@')[0]}` : `REPO: ${user.email.split('@')[0]}`;
+                document.getElementById('btn-config').classList.toggle('hidden', !(isGerenteReal || isPaulo));
+                document.getElementById('area-admin-firebase').classList.toggle('hidden', !isGerenteReal);
+                document.getElementById('repositor-form').classList.toggle('hidden', isGerenteReal);
+                carregar(isGerenteReal || isPaulo);
+            } else {
+                document.getElementById('login-screen').style.display = 'flex';
+                document.getElementById('main-panel').style.display = 'none';
             }
-        };
-
-        // Funções de Filtro e UI
-        function filtrar() {
-            const busca = document.getElementById('busca').value.toLowerCase();
-            document.querySelectorAll('.card').forEach(c => {
-                const matchStatus = (filtroStatus === 'todos' || c.dataset.cat === filtroStatus);
-                const matchBusca = c.dataset.search.includes(busca);
-                c.style.display = (matchStatus && matchBusca) ? "block" : "none";
-            });
-        }
-
-        document.getElementById('busca').oninput = () => filtrar();
-
-        ['f-critico', 'f-atencao', 'f-todos'].forEach(id => {
-            document.getElementById(id).onclick = () => {
-                filtroStatus = id.split('-')[1];
-                document.querySelectorAll('[id^="f-"]').forEach(b => b.classList.replace('filter-active', 'filter-inactive'));
-                document.getElementById(id).classList.replace('filter-inactive', 'filter-active');
-                filtrar();
-            };
         });
 
+        // BOTÕES E EVENTOS
+        document.getElementById('btn-entrar').onclick = async () => {
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value;
+            try { await signInWithEmailAndPassword(auth, email, pass); } catch (e) { showToast("Erro no login!", "#dc2626"); }
+        };
+
+        document.getElementById('btn-logout').onclick = () => signOut(auth);
+        document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
+        document.getElementById('btn-fechar-config').onclick = () => document.getElementById('gaveta-config').classList.add('hidden');
+        document.getElementById('btn-cadastrar-user').onclick = () => window.open('https://console.firebase.google.com/project/mercado-c3e95/authentication/users');
+
+        document.getElementById('btn-salvar').onclick = async () => {
+            const p = { 
+                produto: document.getElementById('p-nome').value.toUpperCase().trim(),
+                codigo: document.getElementById('p-ean').value || "0",
+                quantidade: document.getElementById('p-qtd').value,
+                setor: document.getElementById('p-setor-add').value,
+                vencimento: document.getElementById('p-data').value,
+                criadoEm: serverTimestamp() 
+            };
+            if(!p.produto || !p.vencimento) return showToast("Dados incompletos!", "#dc2626");
+            await addDoc(collection(db, "validades"), p);
+            showToast("Salvo!", "#10b981");
+            document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = ""; document.getElementById('p-qtd').value = "";
+        };
+
+        // FILTROS
+        document.getElementById('busca').oninput = () => {
+            const b = document.getElementById('busca').value.toLowerCase();
+            document.querySelectorAll('.card').forEach(c => c.style.display = c.dataset.search.includes(b) ? "block" : "none");
+        };
+
         document.getElementById('btn-whatsapp').onclick = () => {
-            const cards = document.querySelectorAll('.card-checked');
-            if(cards.l
+            const sel = document.querySelectorAll('.card-checked');
+            if(sel.length === 0) return showToast("Selecione itens!", "#f59e0b");
+            let msg = "*RELATÓRIO NEW MARKET*\n\n";
+            sel.forEach(c => {
+                const h3 = c.querySelector('h3').innerText;
+                const info = c.querySelector('.text-slate-500 span').innerText;
+                msg += `• *${h3}*\n${info}\n\n`;
+            });
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+        };
+    </script>
+</body>
+</html>
