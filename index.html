@@ -67,7 +67,7 @@
                 <span id="user-display" class="text-[8px] font-black uppercase tracking-widest text-yellow-200">...</span>
             </div>
             <div class="flex gap-2">
-                <button id="btn-config" class="hidden bg-white/20 p-2 rounded-full border border-white/20">⚙️</button>
+                <button id="btn-config" class="bg-white/20 p-2 rounded-full border border-white/20">⚙️</button>
                 <button id="btn-logout" class="text-[8px] bg-black/40 px-3 py-2 rounded-full uppercase font-bold border border-white/20">Sair</button>
             </div>
         </nav>
@@ -87,11 +87,6 @@
                     <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Mudar Minha Senha</p>
                     <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-3 border-none rounded-xl font-bold outline-none text-xs bg-slate-700 text-white mb-2">
                     <button id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Confirmar e Sair</button>
-                </div>
-
-                <div class="border-t border-slate-700 pt-4">
-                    <p class="text-[8px] text-slate-400 font-black mb-2 uppercase">Acessos da Equipe</p>
-                    <button id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Abrir Gerenciador Firebase</button>
                 </div>
             </div>
 
@@ -153,16 +148,12 @@
         try { enableIndexedDbPersistence(db); } catch (e) {}
         
         const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
-        const gerentesOCULTOS = ['paulo@newmarket.com']; 
 
         let dadosAtuais = [];
         let filtroStatus = 'todos';
 
-        // LÓGICA ONESIGNAL (DENTRO DA GAVETA CONFIG)
         document.getElementById('btn-ativar-push').onclick = () => {
-            OneSignalDeferred.push(function(OneSignal) {
-                OneSignal.showNativePrompt();
-            });
+            OneSignalDeferred.push(function(OneSignal) { OneSignal.showNativePrompt(); });
             showToast("PERMITA NA JANELA QUE APARECER!");
         };
 
@@ -177,12 +168,13 @@
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
+                
                 const isGerenteReal = gerentesREAIS.includes(user.email);
-                const isPaulo = gerentesOCULTOS.includes(user.email);
+                
                 document.getElementById('user-display').innerText = (isGerenteReal) ? `ADMIN: ${user.email.split('@')[0]}` : `REPO: ${user.email.split('@')[0]}`;
-                document.getElementById('btn-config').classList.toggle('hidden', !(isGerenteReal || isPaulo));
                 document.getElementById('repositor-form').classList.toggle('hidden', isGerenteReal);
-                carregar(isGerenteReal || isPaulo);
+                
+                carregar(isGerenteReal);
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-panel').style.display = 'none';
@@ -198,7 +190,6 @@
         document.getElementById('btn-logout').onclick = () => signOut(auth);
         document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
         document.getElementById('btn-fechar-config').onclick = () => document.getElementById('gaveta-config').classList.add('hidden');
-        document.getElementById('btn-cadastrar-user').onclick = () => window.open('https://console.firebase.google.com/project/mercado-c3e95/authentication/users', '_blank');
 
         document.getElementById('btn-confirmar-senha').onclick = async () => {
             const ns = document.getElementById('nova-senha').value;
