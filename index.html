@@ -3,134 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VIGIA MARKET | Inteligência 2026</title>
+    <title>NEW MARKET | Vigia 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
         :root {
-            --vigia-blue: #3b82f6;
-            --vigia-red: #ef4444;
-            --vigia-yellow: #f59e0b;
+            /* Paleta New Market */
+            --cor-azul: #0056b3;
+            --cor-amarelo: #ffc107;
+            --cor-vermelho: #dc3545;
+            --cor-fundo: #f4f7f6;
         }
 
-        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
-        #login-screen, #main-panel { display: none; }
+        body { background-color: var(--cor-fundo); color: #212529; font-family: 'Segoe UI', Roboto, sans-serif; }
+        #tela-login, #painel-principal { display: none; }
         
-        #loading-screen { 
-            position: fixed; inset: 0; background: #0f172a; z-index: 9999; 
+        /* Carregamento Temático */
+        #tela-carregamento { 
+            position: fixed; inset: 0; background: white; z-index: 9999; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
         }
-        .scanner-bar { 
-            width: 200px; height: 3px; background: var(--vigia-blue); 
-            box-shadow: 0 0 15px var(--vigia-blue); animation: scan 2s infinite ease-in-out; 
+        .pulso-market { 
+            width: 80px; height: 80px; border: 8px solid var(--cor-amarelo); 
+            border-top-color: var(--cor-azul); border-bottom-color: var(--cor-vermelho);
+            border-radius: 50%; animation: girar 1s linear infinite;
         }
-        @keyframes scan { 0%, 100% { transform: translateY(-40px); opacity: 0.2; } 50% { transform: translateY(40px); opacity: 1; } }
+        @keyframes girar { to { transform: rotate(360deg); } }
 
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
-        .input-vigia { 
-            @apply w-full p-4 bg-slate-900/50 border border-slate-700 rounded-xl outline-none focus:border-blue-500 transition-all font-bold text-white; 
+        /* Estilo dos Componentes */
+        .cartao { background: white; border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #dee2e6; }
+        .campo-entrada { 
+            @apply w-full p-4 bg-white border-2 border-slate-200 rounded-xl outline-none focus:border-yellow-400 transition-all font-bold; 
         }
-        .btn-vigia { 
-            @apply w-full p-4 rounded-xl font-black uppercase tracking-widest text-white transition-all active:scale-95;
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        .botao-principal { 
+            @apply w-full p-4 rounded-xl font-black uppercase tracking-widest text-white transition-all active:scale-95 shadow-lg;
+            background: var(--cor-azul);
         }
 
-        .card-vigia { @apply glass p-5 rounded-3xl mb-4 border-l-[8px] transition-all; }
-        .card-critico { border-l-color: var(--vigia-red); background: rgba(239, 68, 68, 0.05) !important; }
-        .card-atencao { border-l-color: var(--vigia-yellow); background: rgba(245, 158, 11, 0.05) !important; }
-        .card-normal { border-l-color: #10b981; }
-        .card-checked { opacity: 0.3; filter: grayscale(1); transform: scale(0.97); }
+        /* Cards de Validade */
+        .item-lista { @apply cartao p-5 mb-4 border-l-[12px] transition-all relative overflow-hidden; }
+        .vencido { border-l-color: var(--cor-vermelho); background: #fff5f5 !important; }
+        .atencao { border-l-color: var(--cor-amarelo); background: #fffbeb !important; }
+        .ok { border-l-color: var(--cor-azul); }
+        .selecionado { filter: grayscale(1); opacity: 0.5; transform: scale(0.98); }
 
-        #toast { 
+        /* Notificações */
+        #alerta-flutuante { 
             visibility: hidden; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
-            background: var(--vigia-blue); color: white; padding: 12px 30px; border-radius: 50px; 
-            font-weight: 900; z-index: 10000; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            background: #212529; color: white; padding: 15px 35px; border-radius: 12px; 
+            font-weight: 800; z-index: 10000; box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            border-bottom: 4px solid var(--cor-amarelo);
         }
-        #toast.show { visibility: visible; animation: fadeInUp 0.5s; }
-        @keyframes fadeInUp { from { opacity: 0; bottom: 0; } to { opacity: 1; bottom: 30px; } }
+        #alerta-flutuante.ativo { visibility: visible; animation: entrada 0.3s ease-out; }
+        @keyframes entrada { from { opacity: 0; bottom: 0; } to { opacity: 1; bottom: 30px; } }
 
-        .barcode-container { background: white; border-radius: 12px; padding: 8px; margin: 12px 0; }
-        .filtro-ativo { border: 2px solid var(--vigia-blue) !important; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+        .filtro-selecionado { border: 4px solid var(--cor-azul) !important; transform: scale(1.05); }
+        .area-codigo { background: white; border-radius: 12px; padding: 12px; border: 1px dashed #ced4da; }
     </style>
 </head>
 <body>
 
-    <div id="toast"></div>
+    <div id="alerta-flutuante"></div>
 
-    <div id="loading-screen">
-        <div class="scanner-bar mb-6"></div>
-        <h2 class="text-xs font-black tracking-[0.5em] text-blue-500 uppercase animate-pulse">Vigia Intelligence</h2>
+    <div id="tela-carregamento">
+        <div class="pulso-market mb-6"></div>
+        <h1 class="text-3xl font-black italic text-blue-800 uppercase">New Market</h1>
+        <p class="text-[10px] font-bold text-slate-500 mt-2 uppercase tracking-widest">Iniciando Vigia 2026</p>
     </div>
 
-    <div id="login-screen" class="min-h-screen flex items-center justify-center p-6">
-        <div class="glass p-8 w-full max-w-md rounded-[2.5rem] text-center border-t-4 border-blue-500 shadow-2xl">
-            <h1 class="text-4xl font-black italic tracking-tighter text-white">VIGIA <span class="text-blue-500">MARKET</span></h1>
-            <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-2 mb-8">Monitoramento e Controle de Validade 2026</p>
+    <div id="tela-login" class="min-h-screen flex items-center justify-center p-6 bg-slate-100">
+        <div class="cartao p-10 w-full max-w-md text-center">
+            <div class="flex justify-center mb-4">
+                <div class="w-16 h-2 bg-cor-vermelho rounded-full mx-1" style="background:var(--cor-vermelho)"></div>
+                <div class="w-16 h-2 bg-cor-amarelo rounded-full mx-1" style="background:var(--cor-amarelo)"></div>
+                <div class="w-16 h-2 bg-cor-azul rounded-full mx-1" style="background:var(--cor-azul)"></div>
+            </div>
+            <h1 class="text-4xl font-black italic text-blue-900 tracking-tighter">NEW <span class="text-yellow-500">MARKET</span></h1>
+            <p class="text-[11px] text-slate-500 uppercase font-black tracking-widest mt-1 mb-8 italic">Controle de Validade Profissional</p>
             <form class="space-y-4" onsubmit="return false;">
-                <input type="email" id="email" class="input-vigia" placeholder="OPERADOR (E-MAIL)">
-                <input type="password" id="password" class="input-vigia" placeholder="TOKEN DE ACESSO">
-                <button type="button" id="btn-entrar" class="btn-vigia shadow-lg shadow-blue-500/30">Inicializar Sistema</button>
+                <input type="email" id="email" class="campo-entrada" placeholder="USUÁRIO (E-MAIL)">
+                <input type="password" id="senha" class="campo-entrada" placeholder="CHAVE DE ACESSO">
+                <button type="button" id="btn-entrar" class="botao-principal" style="background:var(--cor-azul)">Entrar no Sistema</button>
             </form>
         </div>
     </div>
 
-    <div id="main-panel" class="flex flex-col min-h-screen">
-        <nav class="glass p-4 sticky top-0 z-50 flex justify-between items-center border-b border-white/5">
-            <div class="leading-none">
-                <span class="font-black italic text-lg tracking-tighter text-white">VIGIA MARKET</span>
-                <span id="user-display" class="block text-[8px] font-mono text-blue-400 uppercase tracking-tighter mt-1">...</span>
+    <div id="painel-principal" class="flex flex-col min-h-screen">
+        <nav class="bg-white p-4 sticky top-0 z-50 flex justify-between items-center shadow-md border-b-4 border-yellow-400">
+            <div class="text-left">
+                <span class="font-black italic text-xl text-blue-900 tracking-tighter">NEW MARKET</span>
+                <p id="info-usuario" class="text-[9px] font-bold text-slate-400 uppercase leading-none">...</p>
             </div>
-            <button id="btn-logout" class="text-[9px] font-black border border-red-500/50 text-red-500 px-4 py-2 rounded-full hover:bg-red-500/10 transition">DESCONECTAR</button>
+            <button id="btn-sair" class="text-[10px] font-black bg-red-600 text-white px-5 py-2 rounded-lg uppercase">Sair</button>
         </nav>
 
         <main class="p-4 max-w-xl mx-auto w-full space-y-6">
             
-            <div class="grid grid-cols-3 gap-3 font-black">
-                <button onclick="aplicarFiltro('critico')" id="f-critico" class="glass p-4 rounded-2xl border-b-4 border-red-500">
-                    <span class="text-[8px] text-slate-400 block mb-1">CRÍTICO</span>
-                    <span id="c-critico" class="text-2xl text-red-500">0</span>
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="definirFiltro('critico')" id="card-critico" class="cartao p-4 text-center border-b-4 border-red-600">
+                    <span class="text-[10px] font-black text-red-600 uppercase block">Crítico</span>
+                    <span id="num-critico" class="text-2xl font-black">0</span>
                 </button>
-                <button onclick="aplicarFiltro('atencao')" id="f-atencao" class="glass p-4 rounded-2xl border-b-4 border-yellow-500">
-                    <span class="text-[8px] text-slate-400 block mb-1">ALERTA</span>
-                    <span id="c-atencao" class="text-2xl text-yellow-500">0</span>
+                <button onclick="definirFiltro('atencao')" id="card-atencao" class="cartao p-4 text-center border-b-4 border-yellow-500">
+                    <span class="text-[10px] font-black text-yellow-600 uppercase block">Alerta</span>
+                    <span id="num-atencao" class="text-2xl font-black">0</span>
                 </button>
-                <button onclick="aplicarFiltro('todos')" id="f-todos" class="glass p-4 rounded-2xl border-b-4 border-blue-500 filtro-ativo">
-                    <span class="text-[8px] text-slate-400 block mb-1">TOTAL</span>
-                    <span id="c-total" class="text-2xl text-blue-500">0</span>
+                <button onclick="definirFiltro('todos')" id="card-todos" class="cartao p-4 text-center border-b-4 border-blue-600 filtro-selecionado">
+                    <span class="text-[10px] font-black text-blue-600 uppercase block">Total</span>
+                    <span id="num-total" class="text-2xl font-black">0</span>
                 </button>
             </div>
 
-            <div id="repositor-form" class="hidden glass p-6 rounded-[2rem] border-l-8 border-blue-600 space-y-4 shadow-xl">
-                <h2 class="text-xs font-black uppercase tracking-widest text-blue-400">Novo Registro de Carga</h2>
-                <input type="text" id="p-nome" placeholder="DESCRIÇÃO DO PRODUTO" class="input-vigia uppercase">
-                <div class="grid grid-cols-3 gap-2">
-                    <input type="number" id="p-ean" placeholder="DIGITE SEU CÓDIGO" class="col-span-2 input-vigia">
-                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 input-vigia">
+            <div id="secao-cadastro" class="hidden cartao p-6 border-t-8 border-blue-800 space-y-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <h2 class="text-xs font-black uppercase text-blue-900">Cadastrar Nova Mercadoria</h2>
                 </div>
-                <select id="p-setor-add" class="input-vigia bg-slate-800 border-none">
+                <input type="text" id="cad-nome" placeholder="NOME DO PRODUTO" class="campo-entrada uppercase">
+                <div class="grid grid-cols-3 gap-2">
+                    <input type="number" id="cad-codigo" placeholder="DIGITE SEU CÓDIGO" class="col-span-2 campo-entrada">
+                    <input type="number" id="cad-qtd" placeholder="QTD" class="col-span-1 campo-entrada">
+                </div>
+                <select id="cad-setor" class="campo-entrada">
                     <option value="Estoque Central">Estoque Central</option>
-                    <option value="Corredor do Paulo">Corredor: Paulo</option>
-                    <option value="Corredor do Leandro">Corredor: Leandro</option>
-                    <option value="Corredor do Pedro">Corredor: Pedro</option>
-                    <option value="Corredor do Edmar">Corredor: Edmar</option>
+                    <option value="Corredor do Paulo">Setor: Paulo</option>
+                    <option value="Corredor do Leandro">Setor: Leandro</option>
+                    <option value="Corredor do Pedro">Setor: Pedro</option>
+                    <option value="Corredor do Edmar">Setor: Edmar</option>
                 </select>
-                <input type="date" id="p-data" class="input-vigia text-blue-400">
-                <button id="btn-salvar" class="btn-vigia">Gravar Registro</button>
+                <div class="bg-yellow-50 p-3 rounded-xl border border-yellow-200">
+                    <label class="text-[9px] font-black text-yellow-700 uppercase mb-1 block">Data de Vencimento</label>
+                    <input type="date" id="cad-data" class="w-full bg-transparent font-bold text-blue-900 outline-none">
+                </div>
+                <button id="btn-gravar" class="botao-principal" style="background:var(--cor-azul)">Gravar no Banco de Dados</button>
             </div>
 
             <div class="space-y-4">
-                <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Pesquisar no banco de dados..." class="input-vigia shadow-inner">
-                <div class="flex gap-2">
-                    <button id="btn-selecionar-criticos" class="flex-1 bg-red-600/10 text-red-500 p-4 rounded-xl font-black text-[10px] uppercase border border-red-500/20">Marcar Críticos</button>
-                    <button id="btn-whatsapp" class="flex-1 bg-green-600/10 text-green-500 p-4 rounded-xl font-black text-[10px] uppercase border border-green-500/20">Relatório WhatsApp</button>
+                <div class="relative">
+                    <input type="text" id="busca-rapida" oninput="filtrarLista()" placeholder="Procurar produto ou código..." class="campo-entrada pl-12 shadow-sm">
+                    <span class="absolute left-4 top-4 opacity-30">🔍</span>
                 </div>
                 
-                <div id="lista" class="space-y-4 pb-20"></div>
+                <div class="flex gap-2">
+                    <button id="btn-selecao-critica" class="flex-1 bg-white text-red-600 p-4 rounded-xl font-black text-[10px] uppercase border-2 border-red-600 shadow-sm">Marcar Críticos</button>
+                    <button id="btn-enviar-relatorio" class="flex-1 bg-green-600 text-white p-4 rounded-xl font-black text-[10px] uppercase shadow-md">Relatório WhatsApp</button>
+                </div>
+                
+                <div id="lista-vencimentos" class="space-y-4 pb-24"></div>
             </div>
         </main>
 
-        <footer class="p-8 text-center opacity-40">
-            <p class="text-[10px] font-black uppercase tracking-[0.4em]">Tecnologia Paulo Souza 2026</p>
+        <footer class="p-8 text-center bg-white border-t border-slate-200">
+            <p class="text-[10px] font-black uppercase text-slate-400">Sistema Exclusivo New Market &copy; 2026</p>
+            <p class="text-[8px] font-bold text-blue-900 mt-1">TECNOLOGIA PAULO SOUZA</p>
         </footer>
     </div>
 
@@ -152,152 +177,145 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
-        const pauloADM = 'paulo@newmarket.com';
-        let filtroAtual = 'todos';
+        const adm = ['paulo@newmarket.com', 'adriano@newmarket.com', 'adrielle@newmarket.com'];
+        let filtroGlobal = 'todos';
 
-        function showToast(msg) {
-            const t = document.getElementById("toast");
-            t.innerText = msg; t.className = "show";
-            setTimeout(() => t.className = "", 3000);
+        function notificar(msg) {
+            const div = document.getElementById("alerta-flutuante");
+            div.innerText = msg; div.className = "ativo";
+            setTimeout(() => div.className = "", 3000);
         }
 
-        window.aplicarFiltro = (tipo) => {
-            filtroAtual = tipo;
-            ['f-critico', 'f-atencao', 'f-todos'].forEach(id => document.getElementById(id).classList.remove('filtro-ativo'));
-            document.getElementById(`f-${tipo}`).classList.add('filtro-ativo');
-            processarLista();
+        window.definirFiltro = (t) => {
+            filtroGlobal = t;
+            ['card-critico', 'card-atencao', 'card-todos'].forEach(id => document.getElementById(id).classList.remove('filtro-selecionado'));
+            document.getElementById(`card-${t}`).classList.add('filtro-selecionado');
+            filtrarLista();
         };
 
-        window.processarLista = () => {
-            const busca = document.getElementById('busca').value.toLowerCase();
-            document.querySelectorAll('.card-vigia').forEach(c => {
-                const matchF = filtroAtual === 'todos' || c.dataset.cat === filtroAtual;
-                const matchB = c.dataset.search.includes(busca);
-                c.style.display = (matchF && matchB) ? "block" : "none";
+        window.filtrarLista = () => {
+            const t = document.getElementById('busca-rapida').value.toLowerCase();
+            document.querySelectorAll('.item-lista').forEach(c => {
+                const f = filtroGlobal === 'todos' || c.dataset.categoria === filtroGlobal;
+                const b = c.dataset.busca.includes(t);
+                c.style.display = (f && b) ? "block" : "none";
             });
         };
 
-        function carregar(podeApagar) {
+        function sincronizar(liberado) {
             const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
             onSnapshot(q, (snap) => {
-                const lista = document.getElementById('lista');
-                lista.innerHTML = "";
-                let counts = { critico: 0, atencao: 0 };
+                const box = document.getElementById('lista-vencimentos');
+                box.innerHTML = "";
+                let n = { c: 0, a: 0 };
                 const hoje = new Date(); hoje.setHours(0,0,0,0);
 
                 snap.forEach(d => {
                     const item = { id: d.id, ...d.data() };
-                    const dataVenc = new Date(item.vencimento + "T12:00:00");
-                    const diff = Math.ceil((dataVenc - hoje) / 86400000);
+                    const dataV = new Date(item.vencimento + "T12:00:00");
+                    const diff = Math.ceil((dataV - hoje) / 86400000);
                     
-                    let cat = "normal", estilo = "card-normal", statusText = `${diff} dias restantes`;
-                    if(diff <= 0) { estilo="card-critico"; cat="critico"; statusText = "🚨 PRODUTO VENCIDO"; counts.critico++; }
-                    else if(diff <= 7) { estilo="card-critico"; cat="critico"; statusText = "⚠️ RISCO IMEDIATO"; counts.critico++; }
-                    else if(diff <= 15) { estilo="card-atencao"; cat="atencao"; statusText = "⚡ ATENÇÃO LOGÍSTICA"; counts.atencao++; }
+                    let cat = "ok", estilo = "ok", txt = `${diff} dias`;
+                    if(diff <= 0) { estilo="vencido"; cat="critico"; txt = "🚨 VENCIDO"; n.c++; }
+                    else if(diff <= 7) { estilo="vencido"; cat="critico"; txt = "⚠️ VENCE LOGO"; n.c++; }
+                    else if(diff <= 15) { estilo="atencao"; cat="atencao"; txt = "⚡ ATENÇÃO"; n.a++; }
                     
                     const div = document.createElement('div');
-                    div.className = `card-vigia ${estilo}`;
-                    div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
+                    div.className = `item-lista ${estilo}`;
+                    div.dataset.categoria = cat; div.dataset.busca = `${item.produto} ${item.codigo}`.toLowerCase();
                     
-                    div.onclick = (e) => { 
-                        if(e.target.tagName !== 'BUTTON') div.classList.toggle('card-checked'); 
-                    };
+                    div.onclick = (e) => { if(e.target.tagName !== 'BUTTON') div.classList.toggle('selecionado'); };
 
                     div.innerHTML = `
-                        <div class="flex flex-col">
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="text-[7px] font-black text-slate-500 uppercase tracking-widest">${item.setor} // COD: ${item.codigo}</span>
-                                <span class="text-[8px] font-bold text-blue-400 uppercase">${statusText}</span>
-                            </div>
-                            <h3 class="font-black text-lg uppercase text-white leading-tight mb-1">${item.produto}</h3>
-                            <p class="text-[10px] font-bold text-slate-400 mb-3 uppercase">QUANTIDADE: ${item.quantidade}</p>
-                            
-                            <div class="barcode-container flex justify-center">
-                                <svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-displayValue="true" jsbarcode-height="45" jsbarcode-width="2"></svg>
-                            </div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[8px] font-black text-slate-400 uppercase">${item.setor}</span>
+                            <span class="text-[10px] font-black text-blue-700">${txt}</span>
+                        </div>
+                        <h3 class="font-black text-lg uppercase text-slate-800 mb-1">${item.produto}</h3>
+                        <p class="text-[10px] font-bold text-slate-500 mb-3">QTD: ${item.quantidade}</p>
+                        
+                        <div class="area-codigo flex justify-center mb-3">
+                            <svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-displayValue="true" jsbarcode-height="40"></svg>
+                        </div>
 
-                            <div class="flex justify-between items-end mt-2">
-                                <div>
-                                    <p class="text-[7px] font-black text-slate-500 uppercase">Vencimento</p>
-                                    <p class="text-xl font-black text-white tracking-tighter">${item.vencimento.split('-').reverse().join('/')}</p>
-                                </div>
-                                ${podeApagar ? `<button class="btn-excluir text-[9px] text-red-500 bg-red-500/10 px-4 py-2 rounded-xl font-black border border-red-500/20" data-id="${item.id}">DELETAR</button>` : ''}
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <p class="text-[8px] font-black text-slate-400 uppercase">Validade</p>
+                                <p class="text-xl font-black text-slate-900">${item.vencimento.split('-').reverse().join('/')}</p>
                             </div>
+                            ${liberado ? `<button class="btn-apagar text-[9px] text-red-600 font-black border-2 border-red-100 px-4 py-2 rounded-lg" data-id="${item.id}">APAGAR</button>` : ''}
                         </div>`;
-                    lista.appendChild(div);
+                    box.appendChild(div);
                 });
                 JsBarcode(".barcode").init();
-                document.getElementById('c-total').innerText = snap.size;
-                document.getElementById('c-critico').innerText = counts.critico;
-                document.getElementById('c-atencao').innerText = counts.atencao;
-                processarLista();
+                document.getElementById('num-total').innerText = snap.size;
+                document.getElementById('num-critico').innerText = n.c;
+                document.getElementById('num-atencao').innerText = n.a;
+                filtrarLista();
 
-                document.querySelectorAll('.btn-excluir').forEach(btn => {
-                    btn.onclick = async (e) => { 
+                document.querySelectorAll('.btn-apagar').forEach(b => {
+                    b.onclick = async (e) => { 
                         e.stopPropagation(); 
-                        if(confirm("CONFIRMAR EXCLUSÃO?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); 
+                        if(confirm("Deseja apagar este registro do New Market?")) await deleteDoc(doc(db, "validades", b.dataset.id)); 
                     };
                 });
             });
         }
 
-        onAuthStateChanged(auth, (user) => {
-            document.getElementById('loading-screen').style.display = 'none';
-            if (user) {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-panel').style.display = 'flex';
-                document.getElementById('user-display').innerText = `ACESSO_ID: ${user.email}`;
+        onAuthStateChanged(auth, (u) => {
+            document.getElementById('tela-carregamento').style.display = 'none';
+            if (u) {
+                document.getElementById('tela-login').style.display = 'none';
+                document.getElementById('painel-principal').style.display = 'flex';
+                document.getElementById('info-usuario').innerText = `Operador Autenticado: ${u.email}`;
                 
-                const isGerente = gerentesREAIS.includes(user.email);
-                const isPaulo = user.email === pauloADM;
-                
-                document.getElementById('repositor-form').classList.toggle('hidden', isGerente && !isPaulo);
-                carregar(isPaulo || isGerente);
+                const nivelAdm = adm.includes(u.email);
+                document.getElementById('secao-cadastro').classList.toggle('hidden', nivelAdm && u.email !== 'paulo@newmarket.com');
+                sincronizar(nivelAdm);
             } else {
-                document.getElementById('login-screen').style.display = 'flex';
-                document.getElementById('main-panel').style.display = 'none';
+                document.getElementById('tela-login').style.display = 'flex';
+                document.getElementById('painel-principal').style.display = 'none';
             }
         });
 
         document.getElementById('btn-entrar').onclick = async () => {
             const e = document.getElementById('email').value.trim();
-            const s = document.getElementById('password').value;
-            try { await signInWithEmailAndPassword(auth, e, s); } catch { showToast("ACESSO NEGADO"); }
+            const s = document.getElementById('senha').value;
+            try { await signInWithEmailAndPassword(auth, e, s); } catch { notificar("ACESSO NEGADO"); }
         };
 
-        document.getElementById('btn-logout').onclick = () => signOut(auth);
+        document.getElementById('btn-sair').onclick = () => signOut(auth);
         
-        document.getElementById('btn-salvar').onclick = async () => {
-            const p = { 
-                produto: document.getElementById('p-nome').value.toUpperCase().trim(), 
-                codigo: document.getElementById('p-ean').value || "000000", 
-                quantidade: document.getElementById('p-qtd').value || "1", 
-                setor: document.getElementById('p-setor-add').value, 
-                vencimento: document.getElementById('p-data').value, 
+        document.getElementById('btn-gravar').onclick = async () => {
+            const obj = { 
+                produto: document.getElementById('cad-nome').value.toUpperCase().trim(), 
+                codigo: document.getElementById('cad-codigo').value || "000000", 
+                quantidade: document.getElementById('cad-qtd').value || "1", 
+                setor: document.getElementById('cad-setor').value, 
+                vencimento: document.getElementById('cad-data').value, 
                 criadoEm: serverTimestamp() 
             };
-            if(!p.produto || !p.vencimento) return showToast("DADOS INCOMPLETOS");
-            await addDoc(collection(db, "validades"), p);
-            showToast("REGISTRO SALVO!");
-            document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
+            if(!obj.produto || !obj.vencimento) return notificar("CAMPOS VAZIOS");
+            await addDoc(collection(db, "validades"), obj);
+            notificar("SALVO NO NEW MARKET");
+            document.getElementById('cad-nome').value = ""; document.getElementById('cad-codigo').value = "";
         };
 
-        document.getElementById('btn-whatsapp').onclick = () => {
-            const sel = document.querySelectorAll('.card-checked');
-            if(sel.length === 0) return showToast("SELECIONE ITENS PRIMEIRO");
-            let msg = "*👁️ VIGIA MARKET - RELATÓRIO DE MONITORAMENTO*\n\n";
-            sel.forEach(c => {
-                const nome = c.querySelector('h3').innerText;
-                const data = c.querySelector('.text-xl').innerText;
-                msg += `📌 *${nome}*\n📅 VENCIMENTO: ${data}\n\n`;
+        document.getElementById('btn-enviar-relatorio').onclick = () => {
+            const itens = document.querySelectorAll('.selecionado');
+            if(itens.length === 0) return notificar("SELECIONE ITENS");
+            let t = "*👁️ NEW MARKET - RELATÓRIO DE VIGILÂNCIA*\n\n";
+            itens.forEach(i => {
+                const n = i.querySelector('h3').innerText;
+                const d = i.querySelector('.text-xl').innerText;
+                t += `📌 *${n}* | 📅 ${d}\n`;
             });
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+            window.open(`https://wa.me/?text=${encodeURIComponent(t)}`);
         };
 
-        document.getElementById('btn-selecionar-criticos').onclick = () => {
-            document.querySelectorAll('.card-vigia').forEach(c => {
-                if(c.dataset.cat === 'critico') c.classList.add('card-checked');
+        document.getElementById('btn-selecao-critica').onclick = () => {
+            document.querySelectorAll('.item-lista').forEach(i => {
+                if(i.dataset.categoria === 'critico') i.classList.add('selecionado');
             });
         };
     </script>
