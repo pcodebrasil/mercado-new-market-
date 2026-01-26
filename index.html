@@ -11,18 +11,21 @@
         #loading-screen { position: fixed; inset: 0; background: white; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .filter-active { border: 4px solid #1e40af !important; opacity: 1 !important; transform: scale(1.05); transition: 0.3s; }
         .filter-inactive { opacity: 0.6; border: 2px solid transparent; }
-        .card-critico { border-left: 8px solid #ef4444; }
-        .card-atencao { border-left: 8px solid #f59e0b; }
-        .card-normal { border-left: 8px solid #10b981; }
-        .card-checked { opacity: 0.5; filter: grayscale(0.8); background-color: #f8fafc !important; transform: scale(0.98); transition: 0.2s; }
+        
+        /* Cores de Sobreposição */
+        .card-critico { border-left: 8px solid #ef4444; background-color: #fef2f2; }
+        .card-atencao { border-left: 8px solid #f59e0b; background-color: #fffbeb; }
+        .card-normal { border-left: 8px solid #10b981; background-color: #ffffff; }
+        .card-checked { opacity: 0.5; filter: grayscale(0.8); background-color: #f8fafc !important; transform: scale(0.98); }
+        
         .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
         .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; cursor: pointer; }
         #toast { visibility: hidden; min-width: 280px; background-color: #333; color: #fff; text-align: center; border-radius: 16px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; text-transform: uppercase; font-size: 11px; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-        svg.barcode { width: 100%; max-height: 55px; }
-        .dev-footer { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-top: 20px; padding-bottom: 10px; }
+        svg.barcode { width: 100%; max-height: 50px; }
+        .dev-footer { font-size: 9px; font-weight: 900; text-transform: uppercase; color: #94a3b8; margin-top: 20px; padding-bottom: 10px; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
@@ -61,34 +64,32 @@
 
         <main class="p-4 max-w-xl mx-auto w-full flex-grow space-y-5">
             <div id="gaveta-config" class="hidden bg-slate-800 p-6 rounded-3xl shadow-xl border-b-8 border-yellow-500 space-y-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="font-black uppercase text-yellow-500 text-[10px]">Configurações</h2>
-                    <button type="button" id="btn-fechar-config" class="text-white font-black text-xs">X</button>
+                <div class="flex justify-between items-center text-white font-black text-[10px] uppercase">
+                    <span>Configurações</span>
+                    <button type="button" id="btn-fechar-config">X</button>
                 </div>
-                <div class="border-t border-slate-700 pt-4">
-                    <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-3 rounded-xl bg-slate-700 text-white mb-2 outline-none">
-                    <button type="button" id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Mudar Senha</button>
-                </div>
-                <div id="area-admin-firebase" class="border-t border-slate-700 pt-4 hidden">
+                <input type="password" id="nova-senha" placeholder="NOVA SENHA" class="w-full p-3 rounded-xl bg-slate-700 text-white outline-none">
+                <button type="button" id="btn-confirmar-senha" class="w-full bg-yellow-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Atualizar Senha</button>
+                <div id="area-admin-firebase" class="hidden border-t border-slate-700 pt-4">
                     <button type="button" id="btn-cadastrar-user" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Gerenciar Usuários</button>
                 </div>
             </div>
 
             <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
                 <h2 class="font-black uppercase text-blue-800 text-[10px]">Lançar Validade</h2>
-                <input type="text" id="p-nome" placeholder="PRODUTO" class="w-full p-4 border rounded-2xl uppercase outline-none">
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase outline-none bg-slate-50">
                 <div class="grid grid-cols-4 gap-2">
-                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl outline-none">
-                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl outline-none">
+                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl outline-none bg-slate-50">
+                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl outline-none bg-slate-50">
                 </div>
-                <select id="p-setor-add" class="w-full p-4 border rounded-2xl uppercase outline-none">
+                <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50 outline-none">
                     <option value="Corredor do Paulo">Corredor do Paulo</option>
                     <option value="Corredor do Leandro">Corredor do Leandro</option>
                     <option value="Corredor do Pedro">Corredor do Pedro</option>
                     <option value="Corredor do Edmar">Corredor do Edmar</option>
                 </select>
-                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl outline-none">
-                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase">Salvar</button>
+                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl outline-none bg-slate-50">
+                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Registrar</button>
             </div>
 
             <div class="space-y-4">
@@ -98,8 +99,7 @@
                     <button type="button" id="f-todos" class="bg-white p-3 rounded-2xl border-2 text-blue-600 filter-active"><p class="text-[8px]">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
                 </div>
                 <input type="text" id="busca" placeholder="🔍 Buscar..." class="w-full p-4 rounded-2xl bg-white shadow-sm font-bold border outline-none">
-                <button type="button" id="btn-selecionar-criticos" class="w-full bg-blue-600 text-white p-3 rounded-xl font-black uppercase text-[9px]">Marcar Críticos</button>
-                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md">Relatório WhatsApp</button>
+                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-[10px] shadow-md">Gerar Relatório WhatsApp</button>
                 <div id="lista" class="space-y-3 pb-8"></div>
             </div>
         </main>
@@ -132,15 +132,12 @@
             setTimeout(() => { t.className = ""; }, 3000);
         }
 
-        // FUNÇÃO DE CARREGAMENTO PRINCIPAL
-        let unsubscribe = null;
         function carregar(podeApagar) {
-            if (unsubscribe) unsubscribe();
             const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
-            unsubscribe = onSnapshot(q, (snap) => {
+            onSnapshot(q, (snap) => {
                 const lista = document.getElementById('lista');
-                lista.innerHTML = ""; 
-                let counts = {critico: 0, atencao: 0};
+                lista.innerHTML = "";
+                let counts = { critico: 0, atencao: 0 };
                 const hoje = new Date(); hoje.setHours(0,0,0,0);
 
                 snap.forEach(d => {
@@ -153,19 +150,19 @@
                     else if(diff <= 15) { estilo="card-atencao"; corTxt="text-yellow-600 font-black"; counts.atencao++; cat="atencao"; }
                     
                     const div = document.createElement('div');
-                    div.className = `card p-4 bg-white rounded-2xl shadow-sm ${estilo} mb-3 border border-slate-100`;
+                    div.className = `card p-4 rounded-2xl shadow-sm ${estilo} mb-3 border border-slate-200 transition-all`;
                     div.dataset.id = item.id; div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
                     div.onclick = (e) => { if(e.target.tagName !== 'BUTTON') { const cb = div.querySelector('.item-check'); cb.checked = !cb.checked; div.classList.toggle('card-checked', cb.checked); } };
                     div.innerHTML = `
                         <div class="flex gap-3">
                             <input type="checkbox" class="item-check mt-1 scale-150 pointer-events-none">
                             <div class="flex-grow">
-                                <div class="flex justify-between text-[7px] font-black text-slate-400"><span>${item.setor}</span><span class="${corTxt}">${diff} DIAS</span></div>
+                                <div class="flex justify-between text-[7px] font-black uppercase text-slate-400"><span>${item.setor}</span><span class="${corTxt}">${diff} DIAS</span></div>
                                 <h3 class="font-black text-sm uppercase text-slate-800 my-1">${item.produto}</h3>
                                 <div class="my-2 bg-white border rounded-lg p-1 text-center"><svg class="barcode" jsbarcode-value="${item.codigo}" jsbarcode-format="auto" jsbarcode-height="35"></svg></div>
                                 <div class="flex justify-between items-end text-[9px] font-bold text-slate-500">
                                     <span>QTD: ${item.quantidade} | VENC: ${item.vencimento.split('-').reverse().join('/')}</span>
-                                    ${podeApagar ? `<button type="button" class="btn-excluir text-red-600 bg-red-50 px-3 py-2 rounded-lg font-black text-[8px]" data-id="${item.id}">Excluir</button>` : ''}
+                                    ${podeApagar ? `<button type="button" class="btn-excluir text-red-600 bg-red-50 px-2 py-1 rounded font-black" data-id="${item.id}">X</button>` : ''}
                                 </div>
                             </div>
                         </div>`;
@@ -176,21 +173,14 @@
                 document.getElementById('c-critico').innerText = counts.critico;
                 document.getElementById('c-atencao').innerText = counts.atencao;
                 
-                // Atribuir cliques de exclusão
                 document.querySelectorAll('.btn-excluir').forEach(btn => {
-                    btn.onclick = async (e) => {
-                        e.stopPropagation();
-                        if(confirm("Excluir item?")) await deleteDoc(doc(db, "validades", btn.dataset.id));
-                    };
+                    btn.onclick = async (e) => { e.stopPropagation(); if(confirm("Excluir?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); };
                 });
             });
         }
 
-        // MONITOR DE LOGIN
         onAuthStateChanged(auth, (user) => {
-            // FORÇA A SAÍDA DA TELA DE CARREGAMENTO
             document.getElementById('loading-screen').style.display = 'none';
-            
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
@@ -207,13 +197,10 @@
             }
         });
 
-        // BOTÕES E EVENTOS
         document.getElementById('btn-entrar').onclick = async () => {
-            const email = document.getElementById('email').value.trim();
-            const pass = document.getElementById('password').value;
-            try { await signInWithEmailAndPassword(auth, email, pass); } catch (e) { showToast("Erro no login!", "#dc2626"); }
+            try { await signInWithEmailAndPassword(auth, document.getElementById('email').value.trim(), document.getElementById('password').value); } 
+            catch (e) { showToast("Login inválido!", "#dc2626"); }
         };
-
         document.getElementById('btn-logout').onclick = () => signOut(auth);
         document.getElementById('btn-config').onclick = () => document.getElementById('gaveta-config').classList.toggle('hidden');
         document.getElementById('btn-fechar-config').onclick = () => document.getElementById('gaveta-config').classList.add('hidden');
@@ -231,10 +218,9 @@
             if(!p.produto || !p.vencimento) return showToast("Dados incompletos!", "#dc2626");
             await addDoc(collection(db, "validades"), p);
             showToast("Salvo!", "#10b981");
-            document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = ""; document.getElementById('p-qtd').value = "";
+            document.getElementById('p-nome').value = ""; document.getElementById('p-ean').value = "";
         };
 
-        // FILTROS
         document.getElementById('busca').oninput = () => {
             const b = document.getElementById('busca').value.toLowerCase();
             document.querySelectorAll('.card').forEach(c => c.style.display = c.dataset.search.includes(b) ? "block" : "none");
@@ -244,11 +230,7 @@
             const sel = document.querySelectorAll('.card-checked');
             if(sel.length === 0) return showToast("Selecione itens!", "#f59e0b");
             let msg = "*RELATÓRIO NEW MARKET*\n\n";
-            sel.forEach(c => {
-                const h3 = c.querySelector('h3').innerText;
-                const info = c.querySelector('.text-slate-500 span').innerText;
-                msg += `• *${h3}*\n${info}\n\n`;
-            });
+            sel.forEach(c => msg += `• *${c.querySelector('h3').innerText}*\n${c.querySelector('.text-slate-500 span').innerText}\n\n`);
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
         };
     </script>
