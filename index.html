@@ -42,7 +42,7 @@
                 </div>
                 <button onclick="logout()" class="bg-slate-100 p-3 rounded-2xl text-xl border border-slate-200">🚪</button>
             </div>
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR..." class="w-full bg-slate-50 p-4 rounded-2xl text-sm font-black pl-12 uppercase border-2 border-transparent focus:border-indigo-500 outline-none transition-all">
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR PRODUTO..." class="w-full bg-slate-50 p-4 rounded-2xl text-sm font-black pl-12 uppercase border-2 border-transparent focus:border-indigo-500 outline-none transition-all">
         </header>
 
         <main class="max-w-lg mx-auto p-5 pb-32">
@@ -159,13 +159,13 @@
                 if(abaAtiva !== 'logs') renderizar();
             });
 
-            // v15.3: Fallback caso o índice falhe
+            // v15.3: Inteligência para carregar histórico mesmo sem índice pronto
             db.collection("logs").orderBy("data", "desc").limit(50).onSnapshot(snap => {
                 logsAtividades = [];
                 snap.forEach(doc => logsAtividades.push(doc.data()));
                 if(abaAtiva === 'logs') renderizar();
             }, error => {
-                console.warn("Índice não pronto. Carregando modo simplificado...");
+                console.warn("Firebase Índices pendentes. Usando modo compatibilidade.");
                 db.collection("logs").limit(50).onSnapshot(s => {
                     logsAtividades = [];
                     s.forEach(d => logsAtividades.push(d.data()));
@@ -190,10 +190,13 @@
             const termo = document.getElementById('input-busca').value.toUpperCase();
             
             if (abaAtiva === 'logs') {
-                document.getElementById('contador').innerText = `RASTROS RECENTES (${logsAtividades.length})`;
+                document.getElementById('contador').innerText = `HISTÓRICO (${logsAtividades.length})`;
                 document.getElementById('wrapper-scanner').classList.add('hidden');
                 let html = "";
-                logsAtividades.sort((a,b) => b.data - a.data).forEach(log => {
+                // Ordenação manual caso o Firebase não ordene
+                const logsOrdenados = [...logsAtividades].sort((a,b) => b.data - a.data);
+                
+                logsOrdenados.forEach(log => {
                     const userRef = EQUIPE.find(u => u.nome === log.usuario) || {cor: "text-slate-500 bg-slate-50"};
                     html += `<div class="bg-white p-5 rounded-[2rem] border border-slate-100 mb-3 shadow-sm">
                         <div class="flex justify-between items-center mb-2">
@@ -204,7 +207,7 @@
                         <p class="text-[9px] font-black mt-2 px-3 py-1 rounded-full inline-block ${userRef.cor}">Responsável: ${log.usuario}</p>
                     </div>`;
                 });
-                container.innerHTML = html || '<p class="text-center py-10 font-bold text-slate-300">Sincronizando registros...</p>';
+                container.innerHTML = html || '<div class="text-center py-20"><p class="font-bold text-slate-300 italic">Buscando rastros...</p></div>';
                 return;
             }
 
@@ -219,7 +222,7 @@
                 return m;
             });
 
-            document.getElementById('contador').innerText = `${filtrados.length} ITENS ENCONTRADOS`;
+            document.getElementById('contador').innerText = `${filtrados.length} ITENS NO ESTOQUE`;
             filtrados.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento)).forEach(item => {
                 const d = Math.ceil((new Date(item.vencimento) - new Date()) / (1000*60*60*24));
                 container.innerHTML += `<div class="bg-white p-5 rounded-[2.5rem] shadow-sm flex justify-between items-center ${d < 0 ? 'border-vencido' : (d <= 7 ? 'border-alerta' : 'border-ok')}">
@@ -236,7 +239,6 @@
             });
         }
 
-        // Funções de Controle permanecem as mesmas para estabilidade
         function prepararLogin(nome) { document.getElementById('nome-selecionado').innerText = nome; document.getElementById('modal-senha').classList.remove('hidden'); }
         function fecharSenha() { document.getElementById('modal-senha').classList.add('hidden'); document.getElementById('input-senha').value = ''; }
         function logout() { localStorage.removeItem('sessaoNewMarket'); location.reload(); }
@@ -257,7 +259,7 @@
             abaAtiva = a;
             ['estoque', 'auditoria', 'logs'].forEach(id => {
                 const btn = document.getElementById('btn-' + id);
-                btn.className = (id === a) ? "flex-1 py-3.5 rounded-xl text-[10px] uppercase btn-active" : "flex-1 py-3.5 rounded-xl text-[10px] uppercase btn-inactive";
+                btn.className = (id === a) ? "flex-1 py-3.5 rounded-xl text-[10px] uppercase transition-all btn-active" : "flex-1 py-3.5 rounded-xl text-[10px] uppercase transition-all btn-inactive";
             });
             renderizar();
         }
@@ -319,5 +321,4 @@
         function gerarRelatorio() {
             let msg = `*📢 NEW MARKET - RELATÓRIO*\n\n`;
             let alerta = estoque.filter(i => Math.ceil((new Date(i.vencimento) - new Date()) / (1000*60*60*24)) <= 7);
-            alerta.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento)).forEach(i => {
-                msg += `• *${i.produto}* (${i.vencimento.split('-').rever
+            ale
