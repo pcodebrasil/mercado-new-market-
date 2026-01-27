@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SGV - New Market</title>
+    <title>SGV - New Market v12.7</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -24,9 +24,9 @@
                 <p class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1">Selecione seu Nome</p>
             </div>
             <div id="lista-usuarios" class="space-y-2 text-left"></div>
-            <div class="mt-8 pt-6 border-t border-slate-100">
-                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest text-center">Desenvolvido por</p>
-                <p class="text-[11px] text-slate-600 font-black italic text-center">Paulo Souza by 2026</p>
+            <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Desenvolvido por</p>
+                <p class="text-[11px] text-slate-600 font-black italic">Paulo Souza by 2026</p>
             </div>
         </div>
     </div>
@@ -48,20 +48,20 @@
                 <h1 class="font-black text-lg italic text-slate-800 uppercase">New Market</h1>
                 <p id="user-display" class="text-[9px] font-black text-white bg-indigo-500 px-2 py-0.5 rounded uppercase"></p>
             </div>
-            <button onclick="location.reload()" class="bg-slate-50 p-2 rounded-xl">🚪</button>
+            <button onclick="location.reload()" class="bg-slate-50 p-2 rounded-xl text-lg">🚪</button>
         </header>
 
         <main class="max-w-lg mx-auto p-4 pb-32">
             <div class="flex gap-2 mb-6">
-                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase">Produtos</button>
-                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase">Alertas</button>
-                <button onclick="gerarRelatorio()" class="px-5 py-4 rounded-2xl bg-green-500 text-white shadow-md text-lg">📊</button>
+                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase transition-all">Produtos</button>
+                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase transition-all">Alertas</button>
+                <button onclick="gerarRelatorio()" class="px-5 py-4 rounded-2xl bg-green-500 text-white shadow-md text-lg active:scale-95">📊</button>
             </div>
             <div id="container-produtos" class="space-y-3"></div>
         </main>
 
         <div class="fixed bottom-8 left-0 right-0 flex justify-center z-40 px-6">
-            <button onclick="abrirModalScanner()" class="w-full max-w-sm bg-slate-900 text-white py-5 rounded-full shadow-2xl font-black flex items-center justify-center gap-3 text-xs uppercase tracking-widest border-4 border-white">
+            <button onclick="abrirModalScanner()" class="w-full max-w-sm bg-slate-900 text-white py-5 rounded-full shadow-2xl font-black flex items-center justify-center gap-3 text-xs uppercase tracking-widest border-4 border-white active:scale-95">
                 <span>📸</span> ESCANEAR PRODUTO
             </button>
         </div>
@@ -70,18 +70,18 @@
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-white z-[120] overflow-y-auto p-6">
         <div class="max-w-lg mx-auto">
             <div class="flex justify-between items-center mb-6 pt-4">
-                <h2 class="text-xl font-black italic uppercase text-slate-800">Registro</h2>
+                <h2 class="text-xl font-black italic uppercase text-slate-800">Registro de Lote</h2>
                 <button onclick="fecharModalScanner()" class="text-slate-300 text-5xl">&times;</button>
             </div>
             <div id="reader" class="rounded-[2.5rem] bg-slate-100 overflow-hidden mb-6 min-h-[250px] border-2 border-dashed border-slate-300"></div>
             <div class="space-y-4">
-                <input type="number" id="ean" placeholder="CÓDIGO EAN" class="w-full p-4 bg-slate-50 rounded-2xl text-center font-mono focus:ring-2 ring-indigo-500">
-                <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase focus:ring-2 ring-indigo-500">
+                <input type="number" id="ean" placeholder="CÓDIGO EAN" class="w-full p-4 bg-slate-50 rounded-2xl text-center font-mono focus:ring-2 ring-indigo-500 border-none">
+                <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase focus:ring-2 ring-indigo-500 border-none">
                 <div class="grid grid-cols-2 gap-3">
-                    <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold focus:ring-2 ring-indigo-500 uppercase">
-                    <input type="number" id="qtd" placeholder="QTD" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold focus:ring-2 ring-indigo-500">
+                    <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold focus:ring-2 ring-indigo-500 uppercase border-none">
+                    <input type="number" id="qtd" placeholder="QTD" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold focus:ring-2 ring-indigo-500 border-none">
                 </div>
-                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest mt-4 shadow-lg active:scale-95">Salvar</button>
+                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest mt-4 shadow-lg active:scale-95">Salvar no Sistema</button>
             </div>
         </div>
     </div>
@@ -100,14 +100,14 @@
         const db = firebase.firestore();
 
         const EQUIPE = [
-            { nome: "ADRIANO", cargo: "ADMIN", pass: "2026" },
-            { nome: "ADRIELLE", cargo: "ADMIN", pass: "2026" },
-            { nome: "PAULO", cargo: "USER", pass: "1234" },
-            { nome: "PEDRO", cargo: "USER", pass: "1234" },
-            { nome: "LEANDRO", cargo: "USER", pass: "1234" },
-            { nome: "EDMAR", cargo: "USER", pass: "1234" },
-            { nome: "JOÃO", cargo: "USER", pass: "1234" },
-            { nome: "TAMIRIS", cargo: "USER", pass: "1234" }
+            { nome: "ADRIANO", cargo: "ADMIN", pass: "admin123" },
+            { nome: "ADRIELLE", cargo: "ADMIN", pass: "admin123" },
+            { nome: "PAULO", cargo: "USER", pass: "3015Pa" },
+            { nome: "PEDRO", cargo: "USER", pass: "pedro123" },
+            { nome: "LEANDRO", cargo: "USER", pass: "leandro123" },
+            { nome: "EDMAR", cargo: "USER", pass: "edmar123" },
+            { nome: "JOÃO", cargo: "USER", pass: "joao123" },
+            { nome: "TAMIRIS", cargo: "USER", pass: "tamiris123" }
         ];
 
         let usuarioTemp = null;
@@ -161,7 +161,7 @@
                 const v = i.vencimento || i.data;
                 if(!v) return abaAtiva !== 'auditoria';
                 const d = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
-                return abaAtiva === 'auditoria' ? d <= 7 : true;
+                return abaAtiva === 'auditoria' ? (d <= 7) : true;
             });
 
             lista.sort((a,b) => new Date(a.vencimento || a.data) - new Date(b.vencimento || b.data)).forEach(item => {
@@ -192,6 +192,21 @@
             });
         }
 
+        function mudarAba(a) {
+            abaAtiva = a;
+            const btnEstoque = document.getElementById('btn-estoque');
+            const btnAuditoria = document.getElementById('btn-auditoria');
+
+            if (a === 'estoque') {
+                btnEstoque.className = "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase transition-all";
+                btnAuditoria.className = "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase transition-all";
+            } else {
+                btnEstoque.className = "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase transition-all";
+                btnAuditoria.className = "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase transition-all";
+            }
+            renderizar();
+        }
+
         async function salvarItem() {
             const nome = document.getElementById('nome').value;
             const data = document.getElementById('data').value;
@@ -205,12 +220,12 @@
                     criadoEm: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 fecharModalScanner();
-                document.getElementById('nome').value=''; document.getElementById('data').value='';
+                document.getElementById('nome').value=''; document.getElementById('data').value=''; document.getElementById('qtd').value='';
             } else { alert("Preencha Nome e Data!"); }
         }
 
         async function removerItem(id) {
-            if(confirm("Excluir item?")) { await db.collection("validades").doc(id).delete(); }
+            if(confirm("Excluir item permanentemente?")) { await db.collection("validades").doc(id).delete(); }
         }
 
         function abrirModalScanner() {
@@ -220,22 +235,22 @@
         }
 
         function fecharModalScanner() {
-            if(html5QrCode) { html5QrCode.stop().then(() => { document.getElementById('modal-cadastro').classList.add('hidden'); html5QrCode = null; }); } 
-            else { document.getElementById('modal-cadastro').classList.add('hidden'); }
-        }
-
-        function mudarAba(a) {
-            abaAtiva = a;
-            renderizar();
+            if(html5QrCode) { 
+                html5QrCode.stop().then(() => { 
+                    document.getElementById('modal-cadastro').classList.add('hidden'); 
+                    html5QrCode = null; 
+                }).catch(() => document.getElementById('modal-cadastro').classList.add('hidden')); 
+            } else { document.getElementById('modal-cadastro').classList.add('hidden'); }
         }
 
         function gerarRelatorio() {
-            let msg = `*📢 NEW MARKET - ALERTAS*\n\n`;
+            let msg = `*📢 NEW MARKET - ALERTAS (7 DIAS)*\n\n`;
             let alerta = estoque.filter(i => {
                 const v = i.vencimento || i.data;
                 const d = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
                 return d <= 7;
             });
+            if(alerta.length === 0) return alert("Nenhum item vencendo em 7 dias.");
             alerta.forEach(i => { msg += `*${(i.produto || i.nome).toUpperCase()}*\nVenc: ${(i.vencimento || i.data).split('-').reverse().join('/')}\n\n`; });
             window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
         }
