@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SGV - New Market v12.8</title>
+    <title>SGV - New Market v12.9</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,22 +20,28 @@
 <body class="bg-slate-50 min-h-screen font-sans">
 
     <div id="loginView" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh] no-scrollbar border-b-8 border-indigo-600 text-center">
-            <div class="mb-6">
+        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh] no-scrollbar border-b-8 border-indigo-600">
+            <div class="text-center mb-6">
                 <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-black text-xl shadow-lg">NM</div>
-                <h2 class="text-2xl font-black italic tracking-tighter uppercase">New Market</h2>
+                <h2 class="text-2xl font-black italic tracking-tighter uppercase text-slate-800">New Market</h2>
                 <p class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1">Gestão de Validades</p>
             </div>
-            <div id="lista-usuarios" class="space-y-2 text-left"></div>
+            
+            <div id="lista-usuarios" class="space-y-2"></div>
+
+            <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Desenvolvido por</p>
+                <p class="text-[11px] text-slate-600 font-black italic">Paulo Souza by 2026</p>
+            </div>
         </div>
     </div>
 
     <div id="modal-senha" class="hidden fixed inset-0 bg-slate-900/90 z-[110] flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-xs rounded-[2.5rem] p-8 text-center shadow-2xl">
-            <h3 id="nome-selecionado" class="font-black text-indigo-600 uppercase mb-4"></h3>
-            <input type="password" id="input-senha" placeholder="SENHA" class="w-full p-4 bg-slate-100 rounded-2xl text-center font-black outline-none focus:ring-2 ring-indigo-500 mb-6">
+            <h3 id="nome-selecionado" class="font-black text-indigo-600 uppercase mb-4 text-lg"></h3>
+            <input type="password" id="input-senha" placeholder="SENHA" class="w-full p-4 bg-slate-100 rounded-2xl text-center font-black outline-none focus:ring-2 ring-indigo-500 mb-6 tracking-widest">
             <div class="flex gap-2">
-                <button onclick="fecharSenha()" class="flex-1 py-3 bg-slate-50 text-slate-400 rounded-xl font-bold text-xs uppercase text-slate-800">Sair</button>
+                <button onclick="fecharSenha()" class="flex-1 py-3 bg-slate-50 text-slate-400 rounded-xl font-bold text-xs uppercase">Sair</button>
                 <button onclick="validarAcesso()" class="flex-[2] py-4 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase shadow-lg">Entrar</button>
             </div>
         </div>
@@ -51,7 +57,7 @@
                 <button onclick="location.reload()" class="bg-slate-100 p-2 rounded-xl text-lg">🚪</button>
             </div>
             <div class="relative">
-                <input type="text" id="input-busca" oninput="renderizar()" placeholder="Buscar produto..." class="w-full bg-slate-100 p-4 rounded-2xl border-none text-sm font-bold focus:ring-2 ring-indigo-500 pl-12">
+                <input type="text" id="input-busca" oninput="renderizar()" placeholder="Buscar produto..." class="w-full bg-slate-100 p-4 rounded-2xl border-none text-sm font-bold focus:ring-2 ring-indigo-500 pl-12 shadow-inner">
                 <span class="absolute left-4 top-4 opacity-30">🔍</span>
             </div>
         </header>
@@ -59,10 +65,9 @@
         <main class="max-w-lg mx-auto p-4 pb-32">
             <div class="flex gap-2 mb-4">
                 <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase transition-all">Todos</button>
-                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase transition-all">Críticos</button>
+                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase transition-all">Alertas</button>
                 <button onclick="gerarRelatorio()" class="px-5 py-4 rounded-2xl bg-green-500 text-white shadow-md text-lg active:scale-95">📊</button>
             </div>
-            
             <p id="contador" class="text-[10px] font-bold text-slate-400 uppercase mb-4 ml-2"></p>
             <div id="container-produtos" class="space-y-3"></div>
         </main>
@@ -76,18 +81,18 @@
 
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-white z-[120] overflow-y-auto p-6">
         <div class="max-w-lg mx-auto">
-            <div class="flex justify-between items-center mb-6">
+            <div class="flex justify-between items-center mb-6 pt-4">
                 <h2 class="text-xl font-black italic uppercase text-slate-800">Novo Registro</h2>
                 <button onclick="fecharModalScanner()" class="text-slate-300 text-5xl">&times;</button>
             </div>
-            <div id="reader" class="rounded-[2rem] bg-slate-100 overflow-hidden mb-6 border-2 border-dashed border-slate-300"></div>
+            <div id="reader" class="rounded-[2rem] bg-slate-100 overflow-hidden mb-6 border-2 border-dashed border-slate-300 min-h-[250px]"></div>
             <div class="space-y-4">
                 <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase focus:ring-2 ring-indigo-500 border-none">
                 <div class="grid grid-cols-2 gap-3">
                     <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold focus:ring-2 ring-indigo-500 border-none uppercase">
                     <input type="number" id="qtd" placeholder="QTD" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold focus:ring-2 ring-indigo-500 border-none">
                 </div>
-                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest mt-4 shadow-lg">Salvar no Firebase</button>
+                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest mt-4 shadow-lg active:scale-95">Salvar no Sistema</button>
             </div>
         </div>
     </div>
@@ -116,37 +121,47 @@
             { nome: "TAMIRIS", cargo: "USER", pass: "1234" }
         ];
 
-        let usuarioAtivo = null;
+        let usuarioTemp = null; // Para guardar quem clicou antes da senha
+        let usuarioSessao = null; // Para manter logado
         let estoque = [];
         let abaAtiva = 'estoque';
         let html5QrCode = null;
 
+        // Renderiza lista de usuários no login
         const listaLogin = document.getElementById('lista-usuarios');
         EQUIPE.forEach(u => {
             listaLogin.innerHTML += `
-                <button onclick="pedirSenha('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-600 rounded-2xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-sm flex justify-between px-6 items-center border border-slate-100 mb-2">
+                <button onclick="pedirSenha('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-600 rounded-2xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-sm flex justify-between px-6 items-center border border-slate-100">
                     <span>${u.nome}</span>
-                    <span class="opacity-40 text-[7px]">${u.cargo === 'ADMIN' ? 'GERENTE' : 'EQUIPE'}</span>
+                    <span class="opacity-40 text-[7px] uppercase">${u.cargo === 'ADMIN' ? 'Gerente' : 'Equipe'}</span>
                 </button>`;
         });
 
         function pedirSenha(nome) {
-            usuarioAtivo = EQUIPE.find(u => u.nome === nome);
+            usuarioTemp = EQUIPE.find(u => u.nome === nome);
             document.getElementById('nome-selecionado').innerText = nome;
             document.getElementById('modal-senha').classList.remove('hidden');
+            document.getElementById('input-senha').focus();
         }
 
-        function fecharSenha() { document.getElementById('modal-senha').classList.add('hidden'); }
+        function fecharSenha() { 
+            document.getElementById('modal-senha').classList.add('hidden'); 
+            document.getElementById('input-senha').value = '';
+        }
 
         function validarAcesso() {
             const pass = document.getElementById('input-senha').value;
-            if (usuarioAtivo && usuarioAtivo.pass === pass) {
+            if (usuarioTemp && usuarioTemp.pass === pass) {
+                usuarioSessao = usuarioTemp;
                 fecharSenha();
                 document.getElementById('loginView').classList.add('hidden-app');
                 document.getElementById('appView').classList.remove('hidden-app');
-                document.getElementById('user-display').innerText = usuarioAtivo.nome;
+                document.getElementById('user-display').innerText = usuarioSessao.nome;
                 escutarNuvem();
-            } else { alert("Senha incorreta!"); }
+            } else { 
+                alert("Senha incorreta!"); 
+                document.getElementById('input-senha').value = '';
+            }
         }
 
         function escutarNuvem() {
@@ -159,49 +174,48 @@
 
         function renderizar() {
             const container = document.getElementById('container-produtos');
-            const termoBusca = document.getElementById('input-busca').value.toUpperCase();
+            const termo = document.getElementById('input-busca').value.toUpperCase();
             container.innerHTML = '';
             
-            let listaFiltrada = estoque.filter(i => {
-                const nome = (i.produto || i.nome || "").toUpperCase();
-                const venc = i.vencimento || i.data;
-                const matchesBusca = nome.includes(termoBusca);
-                
+            let filtrados = estoque.filter(i => {
+                const n = (i.produto || i.nome || "").toUpperCase();
+                const v = i.vencimento || i.data;
+                const matches = n.includes(termo);
                 if (abaAtiva === 'auditoria') {
-                    const d = Math.ceil((new Date(venc) - new Date()) / (1000*60*60*24));
-                    return matchesBusca && (d <= 7);
+                    const d = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
+                    return matches && (d <= 7);
                 }
-                return matchesBusca;
+                return matches;
             });
 
-            document.getElementById('contador').innerText = `${listaFiltrada.length} Produtos encontrados`;
+            document.getElementById('contador').innerText = `${filtrados.length} Itens na lista`;
 
-            listaFiltrada.sort((a,b) => new Date(a.vencimento || a.data) - new Date(b.vencimento || b.data)).forEach(item => {
+            filtrados.sort((a,b) => new Date(a.vencimento || a.data) - new Date(b.vencimento || b.data)).forEach(item => {
                 const n = item.produto || item.nome || "SEM NOME";
                 const v = item.vencimento || item.data;
                 const q = item.quantidade || 0;
                 
-                let diasTexto = "SEM DATA";
-                let corClasse = "card-ok";
-                let badgeCor = "bg-green-500";
+                let diasTxt = "---";
+                let corCard = "card-ok";
+                let corBadge = "bg-green-500";
 
                 if(v) {
                     const d = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
-                    if(d < 0) { diasTexto = "VENCIDO"; corClasse = "card-vencido"; badgeCor = "bg-red-500"; }
-                    else if(d <= 7) { diasTexto = `${d} DIAS`; corClasse = "card-alerta"; badgeCor = "bg-amber-500"; }
-                    else { diasTexto = `${d} DIAS`; corClasse = "card-ok"; badgeCor = "bg-green-500"; }
+                    if(d < 0) { diasTxt = "VENCIDO"; corCard = "card-vencido"; corBadge = "bg-red-500"; }
+                    else if(d <= 7) { diasTxt = `${d} DIAS`; corCard = "card-alerta"; corBadge = "bg-amber-500"; }
+                    else { diasTxt = `${d} DIAS`; corCard = "card-ok"; corBadge = "bg-green-500"; }
                 }
 
                 container.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl shadow-sm flex justify-between items-center ${corClasse}">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm flex justify-between items-center ${corCard}">
                         <div>
-                            <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${badgeCor} text-white uppercase mb-1 inline-block">${diasTexto}</span>
+                            <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${corBadge} text-white uppercase mb-1 inline-block">${diasTxt}</span>
                             <h3 class="font-bold text-slate-800 text-sm uppercase leading-tight">${n}</h3>
-                            <p class="text-[9px] text-slate-400 font-bold italic mt-0.5 uppercase">Venc: ${v ? v.split('-').reverse().join('/') : '--/--'}</p>
+                            <p class="text-[9px] text-slate-400 font-bold italic mt-0.5 uppercase tracking-tighter">Val: ${v ? v.split('-').reverse().join('/') : '--/--'}</p>
                         </div>
                         <div class="text-right">
-                            <p class="font-black text-slate-900 font-mono text-sm">${q} UN</p>
-                            ${usuarioAtivo.cargo === 'ADMIN' ? `<button onclick="removerItem('${item.id}')" class="text-red-300 text-[9px] font-black uppercase mt-2">Remover</button>` : ''}
+                            <p class="font-black text-slate-900 font-mono text-sm uppercase">${q} UN</p>
+                            ${usuarioSessao.cargo === 'ADMIN' ? `<button onclick="removerItem('${item.id}')" class="text-red-200 text-[9px] font-black uppercase mt-2">Apagar</button>` : ''}
                         </div>
                     </div>`;
             });
@@ -209,8 +223,15 @@
 
         function mudarAba(a) {
             abaAtiva = a;
-            document.getElementById('btn-estoque').className = a === 'estoque' ? "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase" : "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase";
-            document.getElementById('btn-auditoria').className = a === 'auditoria' ? "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase" : "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase";
+            const btnE = document.getElementById('btn-estoque');
+            const btnA = document.getElementById('btn-auditoria');
+            if (a === 'estoque') {
+                btnE.className = "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase";
+                btnA.className = "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase";
+            } else {
+                btnE.className = "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase";
+                btnA.className = "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase";
+            }
             renderizar();
         }
 
@@ -223,32 +244,32 @@
                     produto: nome.toUpperCase(),
                     vencimento: data,
                     quantidade: qtd,
-                    by: usuarioAtivo.nome,
+                    by: usuarioSessao.nome,
                     criadoEm: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 fecharModalScanner();
-                document.getElementById('nome').value=''; document.getElementById('data').value='';
-            }
+                document.getElementById('nome').value=''; document.getElementById('data').value=''; document.getElementById('qtd').value='';
+            } else { alert("Informe Nome e Data!"); }
         }
 
         async function removerItem(id) {
-            if(confirm("Confirmar exclusão?")) { await db.collection("validades").doc(id).delete(); }
+            if(confirm("Deseja excluir?")) { await db.collection("validades").doc(id).delete(); }
         }
 
         function abrirModalScanner() {
             document.getElementById('modal-cadastro').classList.remove('hidden');
             html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => { 
-                // Futura implementação: buscar nome pelo EAN
+            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {
+                // EAN detectado
             }).catch(()=>{});
         }
 
         function fecharModalScanner() {
-            if(html5QrCode) { 
-                html5QrCode.stop().then(() => { 
-                    document.getElementById('modal-cadastro').classList.add('hidden'); 
-                    html5QrCode = null; 
-                }).catch(() => document.getElementById('modal-cadastro').classList.add('hidden')); 
+            if(html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('modal-cadastro').classList.add('hidden');
+                    html5QrCode = null;
+                }).catch(() => document.getElementById('modal-cadastro').classList.add('hidden'));
             } else { document.getElementById('modal-cadastro').classList.add('hidden'); }
         }
 
@@ -259,7 +280,7 @@
                 const d = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
                 return d <= 7;
             });
-            if(alerta.length === 0) return alert("Nada crítico hoje!");
+            if(alerta.length === 0) return alert("Nada para alertar.");
             alerta.forEach(i => { msg += `*${(i.produto || i.nome).toUpperCase()}*\nVenc: ${(i.vencimento || i.data).split('-').reverse().join('/')}\n\n`; });
             window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
         }
