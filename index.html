@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.2.0 - Laser Ready</title>
+    <title>New Market v16.2.1 - Final</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,7 +18,7 @@
         .border-hoje { border-left: 12px solid #CC0000; background-color: #FFF5F5; }
         .btn-nav-active { background-color: #003366; color: white; font-weight: 900; box-shadow: 0 4px 12px rgba(0,51,102,0.2); }
         .btn-nav-inactive { background-color: #E2E8F0; color: #64748B; font-weight: 700; }
-        .barcode-container svg { width: 100%; height: 40px; }
+        svg { max-width: 100%; }
     </style>
 </head>
 <body>
@@ -26,7 +26,7 @@
     <div id="loginView" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-sm rounded-[3rem] p-10 text-center shadow-2xl border-t-[12px] border-blue-800">
             <div class="w-16 h-16 bg-empresa-azul rounded-2xl flex items-center justify-center mx-auto mb-6 text-empresa-amarelo text-2xl font-black italic">NM</div>
-            <h2 class="text-xl font-black uppercase text-slate-800 italic mb-10">Login Equipe</h2>
+            <h2 class="text-xl font-black uppercase text-slate-800 italic mb-10">Controle de Validades</h2>
             <div id="lista-usuarios" class="space-y-3"></div>
         </div>
     </div>
@@ -35,12 +35,12 @@
         <header class="bg-empresa-azul p-6 sticky top-0 z-30 shadow-lg rounded-b-[2.5rem]">
             <div class="flex justify-between items-center mb-6">
                 <div>
-                    <h1 class="font-black text-2xl italic text-empresa-amarelo uppercase">New Market</h1>
+                    <h1 class="font-black text-2xl italic text-empresa-amarelo uppercase tracking-tighter">New Market</h1>
                     <p id="user-display" class="text-[10px] font-bold text-blue-200 uppercase tracking-widest"></p>
                 </div>
                 <button onclick="logout()" class="bg-white/10 p-3 rounded-2xl text-white border border-white/20">🚪</button>
             </div>
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR..." class="w-full bg-white p-4 rounded-2xl text-sm font-black uppercase outline-none focus:ring-4 ring-yellow-400/50">
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR PRODUTO..." class="w-full bg-white p-4 rounded-2xl text-sm font-black uppercase outline-none shadow-inner">
         </header>
 
         <main class="max-w-lg mx-auto p-5 pb-40">
@@ -60,7 +60,7 @@
             </div>
 
             <div class="flex gap-2 mb-8 bg-white p-1 rounded-2xl shadow-sm">
-                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-4 rounded-xl text-[10px] uppercase transition-all btn-nav-active">Geral</button>
+                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-4 rounded-xl text-[10px] uppercase transition-all btn-nav-active">Estoque</button>
                 <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-4 rounded-xl text-[10px] uppercase transition-all btn-nav-inactive">Alertas</button>
             </div>
 
@@ -68,37 +68,40 @@
         </main>
 
         <button id="btn-wa-float" onclick="gerarRelatorio()" class="hidden fixed bottom-32 right-6 w-16 h-16 bg-emerald-500 text-white rounded-full shadow-2xl flex items-center justify-center text-3xl border-4 border-white z-50">📊</button>
+
         <div class="fixed bottom-8 left-0 right-0 flex justify-center z-40 px-8">
-            <button onclick="abrirModalScanner()" class="w-full max-w-sm bg-empresa-amarelo text-slate-900 py-6 rounded-[2.5rem] shadow-2xl font-black text-xs uppercase border-4 border-white active:scale-95">📸 ESCANEAR</button>
+            <button onclick="abrirModalScanner()" class="w-full max-w-sm bg-empresa-amarelo text-slate-900 py-6 rounded-[2.5rem] shadow-2xl font-black text-xs uppercase border-4 border-white active:scale-95 transition-all flex items-center justify-center gap-2">
+                📸 ESCANEAR PRODUTO
+            </button>
         </div>
     </div>
 
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-white z-[120] overflow-y-auto p-8">
         <div class="max-w-lg mx-auto">
             <div class="flex justify-between items-center mb-8">
-                <h2 class="text-2xl font-black uppercase text-empresa-azul">Cadastro</h2>
-                <button onclick="fecharModalScanner()" class="text-5xl">&times;</button>
+                <h2 class="text-2xl font-black uppercase italic text-empresa-azul">Registro</h2>
+                <button onclick="fecharModalScanner()" class="text-5xl font-light">&times;</button>
             </div>
-            <div id="reader-container" class="mb-8 rounded-[3rem] overflow-hidden bg-black min-h-[250px]"><div id="reader"></div></div>
+            <div id="reader-container" class="mb-8 rounded-[3rem] overflow-hidden border-8 border-slate-50 bg-black min-h-[250px] shadow-inner"><div id="reader"></div></div>
             <div class="space-y-4">
-                <input type="text" id="ean" placeholder="EAN" class="w-full p-5 bg-slate-50 rounded-2xl font-mono text-blue-600 font-bold border-2 border-slate-100">
-                <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-5 bg-slate-50 rounded-2xl font-black uppercase">
+                <input type="text" id="ean" placeholder="CÓDIGO EAN" class="w-full p-5 bg-slate-50 rounded-2xl font-mono text-blue-600 font-bold border-2 border-slate-100 outline-none">
+                <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-5 bg-slate-50 rounded-2xl font-black uppercase outline-none">
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="date" id="data" class="w-full p-5 bg-slate-50 rounded-2xl font-bold">
-                    <input type="tel" id="qtd" placeholder="QTD" class="w-full p-5 bg-slate-50 rounded-2xl font-black text-center text-xl">
+                    <input type="date" id="data" class="w-full p-5 bg-slate-50 rounded-2xl font-bold outline-none">
+                    <input type="tel" id="qtd" placeholder="QTD" class="w-full p-5 bg-slate-50 rounded-2xl font-black outline-none text-center text-xl">
                 </div>
                 <input type="hidden" id="edit-id">
-                <button onclick="salvarItem()" class="w-full py-6 bg-empresa-azul text-white rounded-[2rem] font-black uppercase">Salvar</button>
-                <button id="btn-excluir" onclick="excluirItem()" class="hidden w-full py-3 text-red-500 font-black uppercase text-[10px]">Excluir</button>
+                <button onclick="salvarItem()" class="w-full py-6 bg-empresa-azul text-white rounded-[2rem] font-black uppercase shadow-xl active:scale-95 transition-all">Salvar Dados</button>
+                <button id="btn-excluir" onclick="excluirItem()" class="hidden w-full py-3 text-red-500 font-black uppercase text-[10px] tracking-widest mt-4">Apagar Registro</button>
             </div>
         </div>
     </div>
 
     <div id="modal-senha" class="hidden fixed inset-0 bg-slate-900/95 z-[110] flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-xs rounded-[3rem] p-10 text-center shadow-2xl">
-            <h3 id="nome-selecionado" class="font-black text-empresa-azul uppercase mb-6"></h3>
-            <input type="password" id="input-senha" placeholder="••••" class="w-full p-5 bg-slate-100 rounded-2xl text-center font-black text-3xl tracking-[0.4em] outline-none">
-            <div class="flex gap-3 mt-8">
+            <h3 id="nome-selecionado" class="font-black text-empresa-azul uppercase mb-6 tracking-widest"></h3>
+            <input type="password" id="input-senha" placeholder="••••" class="w-full p-5 bg-slate-100 rounded-2xl text-center font-black outline-none mb-8 text-3xl tracking-[0.4em]">
+            <div class="flex gap-3">
                 <button onclick="fecharSenha()" class="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-[10px] uppercase">Sair</button>
                 <button onclick="validarAcesso()" class="flex-[2] py-4 bg-empresa-azul text-white rounded-2xl font-black text-[10px] uppercase">Entrar</button>
             </div>
@@ -152,7 +155,10 @@
                 lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-5 bg-slate-50 rounded-2xl font-black uppercase text-[11px] flex justify-between px-8 border-2 border-slate-100 mb-3 active:bg-yellow-50"><span>${u.nome}</span><span class="text-empresa-azul opacity-40 font-bold">${u.cargo}</span></button>`;
             });
             const salvo = localStorage.getItem('sessaoNewMarket');
-            if (salvo) { usuarioSessao = EQUIPE.find(u => u.nome === salvo); if (usuarioSessao) entrarNoApp(); }
+            if (salvo) {
+                usuarioSessao = EQUIPE.find(u => u.nome === salvo);
+                if (usuarioSessao) entrarNoApp();
+            }
         };
 
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
@@ -161,7 +167,11 @@
         function validarAcesso() {
             const p = document.getElementById('input-senha').value;
             const u = EQUIPE.find(x => x.nome === document.getElementById('nome-selecionado').innerText);
-            if (u && u.pass === p) { usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome); entrarNoApp(); fecharSenha(); } else alert("Senha incorreta!");
+            if (u && u.pass === p) {
+                usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome);
+                entrarNoApp();
+                fecharSenha();
+            } else alert("Senha Incorreta!");
         }
 
         function escutarNuvem() {
@@ -201,45 +211,47 @@
             filtrados.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento)).forEach(item => {
                 const d = difDias(item.vencimento);
                 let lbl = d + " DIAS", bg = "bg-emerald-500", card = "bg-white border-l-8 border-emerald-500 shadow-sm";
+                
                 if (d < 0) { lbl = "VENCIDO"; card = "bg-white border-l-8 border-red-900"; bg = "bg-red-900"; }
-                else if (d === 0) { lbl = "HOJE"; card = "border-hoje shadow-lg"; bg = "bg-red-600"; }
+                else if (d === 0) { lbl = "VENCE HOJE"; card = "border-hoje shadow-lg"; bg = "bg-red-600"; }
                 else if (d <= 7) { lbl = d + " DIAS"; card = "bg-white border-l-8 border-yellow-400"; bg = "bg-yellow-400 text-slate-900"; }
                 
                 const cardId = `barcode-${item.id}`;
+                const eanExibir = item.ean || `NM-${item.id.substring(0,6)}`;
+
                 container.innerHTML += `
-                    <div class="${card} p-5 rounded-[2.5rem] flex justify-between items-center active:scale-95 transition-all">
+                    <div class="${card} p-5 rounded-[2.5rem] flex justify-between items-center active:scale-95 transition-all mb-4">
                         <div class="max-w-[65%]">
-                            <span class="${bg} text-[8px] font-black px-3 py-1 rounded-full uppercase mb-2 inline-block">${lbl}</span>
+                            <span class="${bg} text-[8px] font-black px-3 py-1 rounded-full uppercase mb-2 inline-block text-white">${lbl}</span>
                             <h3 class="font-black text-slate-800 text-base uppercase leading-tight mb-2">${item.produto}</h3>
                             
-                            <div class="bg-white p-1 rounded-lg border border-slate-100 mb-2">
+                            <div class="bg-white p-1 rounded-lg border border-slate-50 mb-2 flex items-center justify-center min-h-[45px]">
                                 <svg id="${cardId}"></svg>
                             </div>
 
                             <p class="text-[10px] text-slate-900 font-black uppercase">
-                                VENCIMENTO: <span class="text-blue-600 text-sm">${item.vencimento.split('-').reverse().join('/')}</span>
+                                VENCIMENTO: <span class="text-blue-700 text-sm">${item.vencimento.split('-').reverse().join('/')}</span>
                             </p>
                         </div>
-                        <div class="text-right">
-                            <p class="text-[9px] font-black text-slate-400 uppercase">Qtd</p>
-                            <p class="font-black text-empresa-azul text-3xl -mt-1">${item.quantidade}</p>
-                            <button onclick='prepararEdicao(${JSON.stringify(item)})' class="bg-slate-50 px-4 py-2 rounded-xl text-[10px] font-black text-slate-400 mt-4 border border-slate-200">EDITAR</button>
+                        <div class="text-right flex flex-col justify-between h-full">
+                            <div>
+                                <p class="text-[9px] font-black text-slate-400 uppercase">Qtd</p>
+                                <p class="font-black text-empresa-azul text-3xl -mt-1">${item.quantidade}</p>
+                            </div>
+                            <button onclick='prepararEdicao(${JSON.stringify(item)})' class="bg-slate-50 px-4 py-2 rounded-xl text-[10px] font-black text-slate-400 mt-6 border border-slate-200 uppercase">Editar</button>
                         </div>
                     </div>`;
                 
-                // GERA O BARCODE APÓS RENDERIZAR O HTML
                 setTimeout(() => {
-                    if(item.ean) {
-                        JsBarcode(`#${cardId}`, item.ean, {
-                            format: "EAN13",
-                            lineColor: "#334155",
-                            width: 2,
-                            height: 40,
-                            displayValue: true,
-                            fontSize: 14,
-                            fontOptions: "bold"
-                        });
-                    }
+                    JsBarcode(`#${cardId}`, eanExibir, {
+                        format: eanExibir.startsWith("NM-") ? "CODE128" : "EAN13",
+                        lineColor: "#334155",
+                        width: 1.5,
+                        height: 25,
+                        displayValue: true,
+                        fontSize: 10,
+                        fontOptions: "bold"
+                    });
                 }, 0);
             });
         }
@@ -250,7 +262,7 @@
                 const dados = { produto: n, vencimento: d, ean: e, quantidade: q, user: usuarioSessao.nome };
                 id ? await db.collection("validades").doc(id).update(dados) : await db.collection("validades").add(dados);
                 fecharModalScanner();
-            } else alert("Preencha tudo!");
+            } else alert("Preencha todos os campos!");
         }
 
         function prepararEdicao(item) {
@@ -264,7 +276,7 @@
             if(usuarioSessao.nome === 'PAULO' || usuarioSessao.cargo === 'GERENTE') document.getElementById('btn-excluir').classList.remove('hidden');
         }
 
-        async function excluirItem() { if(confirm("Apagar?")) { await db.collection("validades").doc(document.getElementById('edit-id').value).delete(); fecharModalScanner(); } }
+        async function excluirItem() { if(confirm("Excluir definitivamente?")) { await db.collection("validades").doc(document.getElementById('edit-id').value).delete(); fecharModalScanner(); } }
         function fecharSenha() { document.getElementById('modal-senha').classList.add('hidden'); document.getElementById('input-senha').value = ''; }
         function prepararLogin(n) { document.getElementById('nome-selecionado').innerText = n; document.getElementById('modal-senha').classList.remove('hidden'); }
         function difDias(v) { const hoje = new Date(); hoje.setHours(0,0,0,0); const dv = new Date(v + "T12:00:00"); dv.setHours(0,0,0,0); return Math.ceil((dv.getTime() - hoje.getTime()) / (1000 * 3600 * 24)); }
@@ -289,7 +301,7 @@
 
         function gerarRelatorio() {
             let alerta = estoque.filter(i => difDias(i.vencimento) <= 7).sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
-            if(!alerta.length) return alert("Sem alertas!");
+            if(!alerta.length) return alert("Sem alertas para o relatório.");
             let msg = `*📢 NEW MARKET - RELATÓRIO*\n_Gerado por: ${usuarioSessao.nome}_\n\n`;
             alerta.forEach(i => {
                 const d = difDias(i.vencimento);
