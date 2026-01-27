@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v15.1 Gold</title>
+    <title>New Market v15.2 Titanium</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,9 +25,8 @@
         <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 shadow-2xl border-b-[10px] border-indigo-600">
             <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-black text-xl shadow-lg">NM</div>
             <h2 class="text-2xl font-black italic uppercase text-slate-800 tracking-tighter">New Market</h2>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 mb-8">v15.1 | Gold Edition</p>
-            <div id="lista-usuarios" class="space-y-2.5 max-h-[50vh] overflow-y-auto no-scrollbar">
-                </div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 mb-8">v15.2 | Titanium Edition</p>
+            <div id="lista-usuarios" class="space-y-2.5 max-h-[50vh] overflow-y-auto no-scrollbar"></div>
         </div>
     </div>
 
@@ -48,16 +47,14 @@
 
         <main class="max-w-lg mx-auto p-5 pb-32">
             <div class="flex gap-2 mb-6 bg-slate-100 p-1 rounded-2xl">
-                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-3.5 rounded-xl text-[10px] uppercase transition-all btn-active">Estoque</button>
-                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-3.5 rounded-xl text-[10px] uppercase transition-all btn-inactive">Alertas</button>
-                <button onclick="mudarAba('logs')" id="btn-logs" class="flex-1 py-3.5 rounded-xl text-[10px] uppercase transition-all btn-inactive">Histórico</button>
+                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-3.5 rounded-xl text-[10px] uppercase btn-active">Estoque</button>
+                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-3.5 rounded-xl text-[10px] uppercase btn-inactive">Alertas</button>
+                <button onclick="mudarAba('logs')" id="btn-logs" class="flex-1 py-3.5 rounded-xl text-[10px] uppercase btn-inactive">Histórico</button>
             </div>
-            
             <div class="flex justify-between items-center mb-6">
                 <p id="contador" class="text-[11px] font-black text-slate-400 uppercase"></p>
                 <button onclick="gerarRelatorio()" class="bg-emerald-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg">Relatório 📊</button>
             </div>
-
             <div id="container-produtos" class="space-y-4"></div>
         </main>
 
@@ -93,7 +90,7 @@
                 <input type="text" id="ean" placeholder="CÓDIGO EAN" class="w-full p-4 bg-slate-50 rounded-2xl font-mono text-indigo-600 outline-none">
                 <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase outline-none">
                 <div class="grid grid-cols-2 gap-3">
-                    <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl font-bold outline-none uppercase">
+                    <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl font-bold outline-none">
                     <input type="number" id="qtd" placeholder="QTD" class="w-full p-4 bg-slate-50 rounded-2xl font-bold outline-none text-center">
                 </div>
                 <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-[11px] shadow-xl mt-4">Salvar Alterações</button>
@@ -132,11 +129,10 @@
         let html5QrCode = null;
 
         window.onload = function() {
-            // Renderiza lista de usuários IMEDIATAMENTE
             const lista = document.getElementById('lista-usuarios');
             lista.innerHTML = '';
             EQUIPE.forEach(u => {
-                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-700 rounded-2xl font-black uppercase text-[10px] flex justify-between px-6 border border-slate-100 mb-1 active:bg-indigo-50 transition-colors"><span>${u.nome}</span><span class="text-[7px] opacity-50 bg-white px-2 py-0.5 rounded-full">${u.cargo}</span></button>`;
+                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-700 rounded-2xl font-black uppercase text-[10px] flex justify-between px-6 border border-slate-100 mb-1"><span>${u.nome}</span><span class="text-[7px] opacity-50 bg-white px-2 py-0.5 rounded-full">${u.cargo}</span></button>`;
             });
 
             const salvo = localStorage.getItem('sessaoNewMarket');
@@ -151,7 +147,6 @@
             document.getElementById('appView').classList.remove('hidden-app');
             document.getElementById('user-display').innerText = usuarioSessao.nome;
             escutarNuvem();
-            registrarLog('ACESSO', 'ENTROU NO APP'); 
         }
 
         function escutarNuvem() {
@@ -161,14 +156,11 @@
                 if(abaAtiva !== 'logs') renderizar();
             });
 
-            // O Índice deve estar ativo para o orderBy funcionar
             db.collection("logs").orderBy("data", "desc").limit(50).onSnapshot(snap => {
                 logsAtividades = [];
                 snap.forEach(doc => logsAtividades.push(doc.data()));
                 if(abaAtiva === 'logs') renderizar();
-            }, error => {
-                console.warn("Aguardando Índice Firebase...");
-            });
+            }, () => { console.warn("Aguardando índice..."); });
         }
 
         async function registrarLog(acao, detalhe) {
@@ -187,24 +179,21 @@
             const termo = document.getElementById('input-busca').value.toUpperCase();
             
             if (abaAtiva === 'logs') {
-                document.getElementById('contador').innerText = `HISTÓRICO RECENTE (${logsAtividades.length})`;
+                document.getElementById('contador').innerText = `HISTÓRICO (${logsAtividades.length})`;
                 document.getElementById('wrapper-scanner').classList.add('hidden');
-                
                 let html = "";
                 logsAtividades.forEach(log => {
                     const userRef = EQUIPE.find(u => u.nome === log.usuario) || {cor: "text-slate-500 bg-slate-50"};
-                    let corAcao = log.acao === 'CADASTROU' ? 'bg-emerald-500' : (log.acao === 'APAGOU' ? 'bg-red-500' : 'bg-slate-400');
-                    
                     html += `<div class="bg-white p-4 rounded-2xl border border-slate-100 mb-2 shadow-sm">
                         <div class="flex justify-between items-center mb-1">
-                            <span class="text-[7px] font-black px-2 py-0.5 rounded-full text-white ${corAcao}">${log.acao}</span>
+                            <span class="text-[7px] font-black px-2 py-0.5 rounded-full text-white bg-slate-400">${log.acao}</span>
                             <span class="text-[8px] font-bold text-slate-300">${new Date(log.data).toLocaleTimeString()}</span>
                         </div>
                         <h4 class="text-[11px] font-black uppercase text-slate-700">${log.produto}</h4>
                         <p class="text-[9px] font-black mt-1 px-2 py-0.5 rounded-lg inline-block ${userRef.cor}">${log.usuario}</p>
                     </div>`;
                 });
-                container.innerHTML = html || '<p class="text-center text-slate-400 py-10 font-bold">Aguardando dados...</p>';
+                container.innerHTML = html || '<p class="text-center py-10 font-bold text-slate-400">Sem registros.</p>';
                 return;
             }
 
@@ -219,7 +208,7 @@
                 return m;
             });
 
-            document.getElementById('contador').innerText = `${filtrados.length} Itens encontrados`;
+            document.getElementById('contador').innerText = `${filtrados.length} Itens`;
             filtrados.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento)).forEach(item => {
                 const d = Math.ceil((new Date(item.vencimento) - new Date()) / (1000*60*60*24));
                 container.innerHTML += `<div class="bg-white p-5 rounded-3xl shadow-sm flex justify-between items-center ${d < 0 ? 'border-vencido' : (d <= 7 ? 'border-alerta' : 'border-ok')}">
@@ -323,4 +312,6 @@
             });
             window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
         }
-    </scrip
+    </script>
+</body>
+</html>
