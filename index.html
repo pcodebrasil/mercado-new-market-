@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.0.9 - Interactive</title>
+    <title>New Market v16.1.0 - Sound Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,15 +22,14 @@
 
     <div id="manutencaoView" class="hidden-app fixed inset-0 bg-empresa-azul z-[200] flex flex-col items-center justify-center text-center p-6 text-white">
         <div onclick="logout()" class="text-7xl mb-6 cursor-pointer active:scale-90 transition-all">🛠️</div>
-        <h1 class="text-3xl font-black uppercase italic mb-2">Sistema em Manutenção</h1>
-        <p class="text-blue-200 font-bold mb-8">Voltamos em breve!</p>
-        <button onclick="logout()" class="mb-12 text-[10px] font-black bg-white/10 px-6 py-3 rounded-2xl border border-white/20 uppercase active:bg-white active:text-empresa-azul">Voltar ao Login</button>
+        <h1 class="text-3xl font-black uppercase italic mb-2">Manutenção</h1>
+        <button onclick="logout()" class="mt-8 text-[10px] font-black bg-white/10 px-6 py-3 rounded-2xl border border-white/20 uppercase">Voltar ao Login</button>
     </div>
 
-    <div id="loginView" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center p-6 overflow-y-auto">
+    <div id="loginView" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-sm rounded-[3rem] p-10 text-center shadow-2xl border-t-[12px] border-blue-800">
             <div class="w-16 h-16 bg-empresa-azul rounded-2xl flex items-center justify-center mx-auto mb-6 text-empresa-amarelo text-2xl font-black italic">NM</div>
-            <h2 class="text-xl font-black uppercase text-slate-800 italic mb-10">New Market Login</h2>
+            <h2 class="text-xl font-black uppercase text-slate-800 italic mb-10">Acesso Equipe</h2>
             <div id="lista-usuarios" class="space-y-3"></div>
         </div>
     </div>
@@ -49,15 +48,15 @@
 
         <main class="max-w-lg mx-auto p-5 pb-40">
             <div class="grid grid-cols-3 gap-3 mb-8">
-                <div onclick="filtrarDash('vencidos')" class="bg-red-600 p-4 rounded-[2rem] text-center shadow-lg border-b-4 border-red-800 active:scale-95 transition-all cursor-pointer">
+                <div onclick="filtrarDash('vencidos')" class="bg-red-600 p-4 rounded-[2rem] text-center shadow-lg border-b-4 border-red-800 active:scale-95 transition-all">
                     <p class="text-[8px] font-black text-white/60 uppercase">Vencidos</p>
                     <p id="dash-vencidos" class="text-xl font-black text-white italic">0</p>
                 </div>
-                <div onclick="filtrarDash('alerta')" class="bg-empresa-amarelo p-4 rounded-[2rem] text-center shadow-lg border-b-4 border-yellow-600 active:scale-95 transition-all cursor-pointer">
+                <div onclick="filtrarDash('alerta')" class="bg-empresa-amarelo p-4 rounded-[2rem] text-center shadow-lg border-b-4 border-yellow-600 active:scale-95 transition-all">
                     <p class="text-[8px] font-black text-slate-800/60 uppercase">Alerta</p>
                     <p id="dash-alerta" class="text-xl font-black text-slate-900 italic">0</p>
                 </div>
-                <div onclick="filtrarDash('todos')" class="bg-white p-4 rounded-[2rem] text-center shadow-lg border-b-4 border-slate-200 active:scale-95 transition-all cursor-pointer">
+                <div onclick="filtrarDash('todos')" class="bg-white p-4 rounded-[2rem] text-center shadow-lg border-b-4 border-slate-200 active:scale-95 transition-all">
                     <p class="text-[8px] font-black text-slate-400 uppercase">Total</p>
                     <p id="dash-total" class="text-xl font-black text-empresa-azul italic">0</p>
                 </div>
@@ -72,6 +71,7 @@
         </main>
 
         <button id="btn-wa-float" onclick="gerarRelatorio()" class="hidden fixed bottom-32 right-6 w-16 h-16 bg-emerald-500 text-white rounded-full shadow-2xl flex items-center justify-center text-3xl border-4 border-white z-50">📊</button>
+        
         <div class="fixed bottom-8 left-0 right-0 flex justify-center z-40 px-8">
             <button onclick="abrirModalScanner()" class="w-full max-w-sm bg-empresa-amarelo text-slate-900 py-6 rounded-[2.5rem] shadow-2xl font-black text-xs uppercase border-4 border-white active:scale-95 transition-all">📸 ESCANEAR PRODUTO</button>
         </div>
@@ -79,21 +79,21 @@
 
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-white z-[120] overflow-y-auto p-8">
         <div class="max-w-lg mx-auto">
-            <div class="flex justify-between items-center mb-8 text-empresa-azul">
-                <h2 class="text-2xl font-black uppercase italic">Registro</h2>
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-black uppercase italic text-empresa-azul">Registro</h2>
                 <button onclick="fecharModalScanner()" class="text-5xl font-light">&times;</button>
             </div>
             <div id="reader-container" class="mb-8 rounded-[3rem] overflow-hidden border-8 border-slate-50 bg-black min-h-[250px]"><div id="reader"></div></div>
             <div class="space-y-4">
-                <input type="text" id="ean" placeholder="CÓDIGO EAN" class="w-full p-5 bg-slate-50 rounded-2xl font-mono text-blue-600 font-bold outline-none border-2 border-slate-100">
+                <input type="text" id="ean" placeholder="CÓDIGO EAN" class="w-full p-5 bg-slate-50 rounded-2xl font-mono text-blue-600 font-bold border-2 border-slate-100 outline-none">
                 <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-5 bg-slate-50 rounded-2xl font-black uppercase outline-none">
                 <div class="grid grid-cols-2 gap-4">
                     <input type="date" id="data" class="w-full p-5 bg-slate-50 rounded-2xl font-bold outline-none">
                     <input type="tel" id="qtd" placeholder="QTD" class="w-full p-5 bg-slate-50 rounded-2xl font-black outline-none text-center text-xl">
                 </div>
                 <input type="hidden" id="edit-id">
-                <button onclick="salvarItem()" class="w-full py-6 bg-empresa-azul text-white rounded-[2rem] font-black uppercase shadow-xl">Salvar Registro</button>
-                <button id="btn-excluir" onclick="excluirItem()" class="hidden w-full py-3 text-red-500 font-black uppercase text-[10px] mt-2">Excluir</button>
+                <button onclick="salvarItem()" class="w-full py-6 bg-empresa-azul text-white rounded-[2rem] font-black uppercase shadow-xl">Salvar</button>
+                <button id="btn-excluir" onclick="excluirItem()" class="hidden w-full py-3 text-red-500 font-black uppercase text-[10px]">Excluir</button>
             </div>
         </div>
     </div>
@@ -110,7 +110,7 @@
     </div>
 
     <script>
-        const MODO_MANUTENCAO = false; //
+        const MODO_MANUTENCAO = false;
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -134,6 +134,22 @@
         ];
 
         let usuarioSessao = null, estoque = [], abaAtiva = 'estoque', filtroDash = 'todos', html5QrCode = null;
+
+        // FUNÇÃO DE SOM DO BIP
+        function tocarBip() {
+            try {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = context.createOscillator();
+                const gain = context.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(600, context.currentTime);
+                gain.gain.setValueAtTime(0.1, context.currentTime);
+                osc.connect(gain);
+                gain.connect(context.destination);
+                osc.start();
+                osc.stop(context.currentTime + 0.1);
+            } catch(e) { console.log("Erro ao tocar som"); }
+        }
 
         window.onload = function() {
             const lista = document.getElementById('lista-usuarios');
@@ -234,7 +250,7 @@
                 const dados = { produto: n, vencimento: d, ean: e, quantidade: q, user: usuarioSessao.nome };
                 id ? await db.collection("validades").doc(id).update(dados) : await db.collection("validades").add(dados);
                 fecharModalScanner();
-            } else alert("Preencha tudo!");
+            } else alert("Preencha todos os campos!");
         }
 
         function prepararEdicao(item) {
@@ -259,6 +275,7 @@
             if(html5QrCode) await html5QrCode.clear();
             html5QrCode = new Html5Qrcode("reader");
             html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (txt) => {
+                tocarBip(); // SOM AO ESCANEAR
                 document.getElementById('ean').value = txt;
                 db.collection("validades").where("ean", "==", txt).limit(1).get().then(s => { if(!s.empty) document.getElementById('nome').value = s.docs[0].data().produto; });
             }).catch(()=>{});
