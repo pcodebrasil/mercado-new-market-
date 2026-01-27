@@ -109,61 +109,69 @@
         
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+<script>
+    // ... Configuração do Firebase igual ...
 
-        const EQUIPE = [
-            { nome: "ADRIANO", cargo: "ADMIN", pass: "2026" },
-            { nome: "ADRIELLE", cargo: "ADMIN", pass: "2026" },
-            { nome: "PAULO", cargo: "USER", pass: "1234" },
-            { nome: "PEDRO", cargo: "USER", pass: "1234" },
-            { nome: "LEANDRO", cargo: "USER", pass: "1234" },
-            { nome: "EDMAR", cargo: "USER", pass: "1234" },
-            { nome: "JOÃO", cargo: "USER", pass: "1234" },
-            { nome: "TAMIRIS", cargo: "USER", pass: "1234" }
-        ];
+    const EQUIPE = [
+        { nome: "ADRIANO", cargo: "ADMIN", pass: "2026" },
+        { nome: "ADRIELLE", cargo: "ADMIN", pass: "2026" },
+        { nome: "PAULO", cargo: "USER", pass: "1234" },
+        { nome: "PEDRO", cargo: "USER", pass: "1234" },
+        { nome: "LEANDRO", cargo: "USER", pass: "1234" },
+        { nome: "EDMAR", cargo: "USER", pass: "1234" },
+        { nome: "JOÃO", cargo: "USER", pass: "1234" },
+        { nome: "TAMIRIS", cargo: "USER", pass: "1234" }
+    ];
 
-        let usuarioTemp = null; // Para guardar quem clicou antes da senha
-        let usuarioSessao = null; // Para manter logado
-        let estoque = [];
-        let abaAtiva = 'estoque';
-        let html5QrCode = null;
+    let usuarioSessao = null;
+    let nomeSelecionadoNoMomento = ""; // Variável global para garantir o login
 
-        // Renderiza lista de usuários no login
-        const listaLogin = document.getElementById('lista-usuarios');
-        EQUIPE.forEach(u => {
-            listaLogin.innerHTML += `
-                <button onclick="pedirSenha('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-600 rounded-2xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-sm flex justify-between px-6 items-center border border-slate-100">
-                    <span>${u.nome}</span>
-                    <span class="opacity-40 text-[7px] uppercase">${u.cargo === 'ADMIN' ? 'Gerente' : 'Equipe'}</span>
-                </button>`;
-        });
+    // Renderizar botões de login
+    const listaLogin = document.getElementById('lista-usuarios');
+    EQUIPE.forEach(u => {
+        listaLogin.innerHTML += `
+            <button onclick="prepararLogin('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-600 rounded-2xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-sm flex justify-between px-6 items-center border border-slate-100 mb-2">
+                <span>${u.nome}</span>
+                <span class="opacity-40 text-[7px] uppercase">${u.cargo === 'ADMIN' ? 'Gerente' : 'Equipe'}</span>
+            </button>`;
+    });
 
-        function pedirSenha(nome) {
-            usuarioTemp = EQUIPE.find(u => u.nome === nome);
-            document.getElementById('nome-selecionado').innerText = nome;
-            document.getElementById('modal-senha').classList.remove('hidden');
-            document.getElementById('input-senha').focus();
-        }
+    function prepararLogin(nome) {
+        nomeSelecionadoNoMomento = nome; // Decisão técnica: Garante que o nome não se perca
+        document.getElementById('nome-selecionado').innerText = nome;
+        document.getElementById('modal-senha').classList.remove('hidden');
+        document.getElementById('input-senha').value = ''; // Limpa antes de usar
+        setTimeout(() => document.getElementById('input-senha').focus(), 100);
+    }
 
-        function fecharSenha() { 
-            document.getElementById('modal-senha').classList.add('hidden'); 
+    function fecharSenha() {
+        document.getElementById('modal-senha').classList.add('hidden');
+        nomeSelecionadoNoMomento = "";
+    }
+
+    function validarAcesso() {
+        const passDigitada = document.getElementById('input-senha').value;
+        
+        // Decisão Técnica: Busca o objeto do usuário na hora do clique no botão "Entrar"
+        const userObj = EQUIPE.find(u => u.nome === nomeSelecionadoNoMomento);
+
+        if (userObj && userObj.pass === passDigitada) {
+            usuarioSessao = userObj;
+            document.getElementById('modal-senha').classList.add('hidden');
+            document.getElementById('loginView').classList.add('hidden-app');
+            document.getElementById('appView').classList.remove('hidden-app');
+            document.getElementById('user-display').innerText = usuarioSessao.nome;
+            escutarNuvem();
+        } else {
+            alert("Senha Incorreta para " + nomeSelecionadoNoMomento);
             document.getElementById('input-senha').value = '';
         }
+    }
 
-        function validarAcesso() {
-            const pass = document.getElementById('input-senha').value;
-            if (usuarioTemp && usuarioTemp.pass === pass) {
-                usuarioSessao = usuarioTemp;
-                fecharSenha();
-                document.getElementById('loginView').classList.add('hidden-app');
-                document.getElementById('appView').classList.remove('hidden-app');
-                document.getElementById('user-display').innerText = usuarioSessao.nome;
-                escutarNuvem();
-            } else { 
-                alert("Senha incorreta!"); 
-                document.getElementById('input-senha').value = '';
-            }
-        }
-
+    // ... Restante do código (escutarNuvem, renderizar, salvarItem) permanece igual ...
+</script>
+    
+        
         function escutarNuvem() {
             db.collection("validades").onSnapshot((snapshot) => {
                 estoque = [];
