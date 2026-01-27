@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SGV - New Market v13.4</title>
+    <title>SGV - New Market v13.5</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,6 +15,9 @@
         .card-vencido { border-left: 8px solid #ef4444; }
         .card-alerta { border-left: 8px solid #f59e0b; }
         .card-ok { border-left: 8px solid #10b981; }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            width: 100%; height: 100%; position: absolute; top: 0; left: 0; opacity: 0; cursor: pointer;
+        }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen font-sans">
@@ -27,17 +30,14 @@
                 <p class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1">Gestão de Validades</p>
             </div>
             <div id="lista-usuarios" class="space-y-2"></div>
-            <div class="mt-8 pt-6 border-t border-slate-100 text-center">
-                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Desenvolvido por</p>
-                <p class="text-[11px] text-slate-600 font-black italic">Paulo Souza by 2026</p>
-            </div>
+            <div class="mt-8 pt-6 border-t border-slate-100 text-center text-[10px] text-slate-400 font-bold uppercase italic">Paulo Souza by 2026</div>
         </div>
     </div>
 
     <div id="modal-senha" class="hidden fixed inset-0 bg-slate-900/90 z-[110] flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-xs rounded-[2.5rem] p-8 text-center shadow-2xl">
             <h3 id="nome-selecionado" class="font-black text-indigo-600 uppercase mb-4 text-lg"></h3>
-            <input type="password" id="input-senha" placeholder="SENHA" class="w-full p-4 bg-slate-100 rounded-2xl text-center font-black outline-none focus:ring-2 ring-indigo-500 mb-6 tracking-widest">
+            <input type="password" id="input-senha" placeholder="SENHA" class="w-full p-4 bg-slate-100 rounded-2xl text-center font-black outline-none focus:ring-2 ring-indigo-500 mb-6">
             <div class="flex gap-2">
                 <button onclick="fecharSenha()" class="flex-1 py-3 bg-slate-50 text-slate-400 rounded-xl font-bold text-xs uppercase">Voltar</button>
                 <button onclick="validarAcesso()" class="flex-[2] py-4 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase shadow-lg">Entrar</button>
@@ -85,18 +85,22 @@
             </div>
             <div id="reader" class="rounded-[2rem] bg-slate-100 overflow-hidden mb-6 border-2 border-dashed border-slate-300 min-h-[250px]"></div>
             <div class="space-y-4">
-                <input type="text" id="ean" placeholder="EAN (CÓDIGO DE BARRAS)" class="w-full p-4 bg-slate-100 rounded-2xl font-mono text-xs text-indigo-600 border-none">
+                <input type="text" id="ean" placeholder="EAN (CÓDIGO DE BARRAS)" class="w-full p-4 bg-slate-100 rounded-2xl font-mono text-xs text-indigo-600 border-none shadow-inner">
                 <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase focus:ring-2 ring-indigo-500 border-none">
                 <div class="grid grid-cols-2 gap-3">
-                    <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold border-none uppercase">
-                    <input type="number" id="qtd" placeholder="QTD" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold border-none">
+                    <div class="relative bg-slate-50 rounded-2xl flex items-center justify-center min-h-[56px]">
+                        <span id="label-data" class="absolute font-black text-[10px] text-slate-400 uppercase">Definir Data</span>
+                        <input type="date" id="data" oninput="document.getElementById('label-data').style.display = this.value ? 'none' : 'flex'" class="w-full h-full p-4 bg-transparent rounded-2xl text-sm font-bold border-none uppercase text-center focus:ring-2 ring-indigo-500 z-10">
+                    </div>
+                    <input type="number" id="qtd" placeholder="QTD" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold border-none text-center focus:ring-2 ring-indigo-500">
                 </div>
-                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95">Salvar</button>
+                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95">Salvar Registro</button>
             </div>
         </div>
     </div>
 
     <script>
+        // CONFIG E EQUIPE
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -125,43 +129,45 @@
         let abaAtiva = 'estoque';
         let html5QrCode = null;
 
-        // VERIFICAÇÃO INICIAL (LEMBRAR LOGIN)
-        window.onload = function() {
-            const usuarioSalvo = localStorage.getItem('sessaoNewMarket');
-            if (usuarioSalvo) {
-                const userObj = EQUIPE.find(u => u.nome === usuarioSalvo);
-                if (userObj) {
-                    usuarioSessao = userObj;
-                    entrarNoApp();
-                }
-            }
-            renderizarListaLogin();
-        };
-
-        function renderizarListaLogin() {
-            const lista = document.getElementById('lista-usuarios');
-            lista.innerHTML = "";
-            EQUIPE.forEach(u => {
-                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-600 rounded-2xl font-black uppercase text-[10px] tracking-widest flex justify-between px-6 items-center border border-slate-100 mb-2 active:scale-95"><span>${u.nome}</span><span class="opacity-40 text-[7px]">${u.cargo === 'ADMIN' ? 'Gerente' : 'Equipe'}</span></button>`;
-            });
+        // FUNÇÃO DE SOM (BIP)
+        function playBeep() {
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = context.createOscillator();
+            const gain = context.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(880, context.currentTime);
+            gain.gain.setValueAtTime(0.1, context.currentTime);
+            osc.connect(gain);
+            gain.connect(context.destination);
+            osc.start();
+            osc.stop(context.currentTime + 0.1);
         }
+
+        // LOGIN E SESSÃO
+        window.onload = function() {
+            const salvo = localStorage.getItem('sessaoNewMarket');
+            if (salvo) {
+                usuarioSessao = EQUIPE.find(u => u.nome === salvo);
+                if (usuarioSessao) entrarNoApp();
+            }
+            const lista = document.getElementById('lista-usuarios');
+            EQUIPE.forEach(u => {
+                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-600 rounded-2xl font-black uppercase text-[10px] flex justify-between px-6 items-center border border-slate-100 mb-2"><span>${u.nome}</span><span class="opacity-40 text-[7px]">${u.cargo}</span></button>`;
+            });
+        };
 
         function prepararLogin(nome) {
             nomeSelecionadoNoMomento = nome;
             document.getElementById('nome-selecionado').innerText = nome;
             document.getElementById('modal-senha').classList.remove('hidden');
-            document.getElementById('input-senha').value = '';
-            setTimeout(() => document.getElementById('input-senha').focus(), 100);
         }
 
-        function fecharSenha() { document.getElementById('modal-senha').classList.add('hidden'); }
-
         function validarAcesso() {
-            const passDigitada = document.getElementById('input-senha').value;
-            const userObj = EQUIPE.find(u => u.nome === nomeSelecionadoNoMomento);
-            if (userObj && userObj.pass === passDigitada) {
-                usuarioSessao = userObj;
-                localStorage.setItem('sessaoNewMarket', userObj.nome);
+            const pass = document.getElementById('input-senha').value;
+            const user = EQUIPE.find(u => u.nome === nomeSelecionadoNoMomento);
+            if (user && user.pass === pass) {
+                usuarioSessao = user;
+                localStorage.setItem('sessaoNewMarket', user.nome);
                 entrarNoApp();
             } else { alert("Senha Incorreta!"); }
         }
@@ -174,27 +180,15 @@
             escutarNuvem();
         }
 
-        function logout() {
-            localStorage.removeItem('sessaoNewMarket');
-            location.reload();
-        }
+        function logout() { localStorage.removeItem('sessaoNewMarket'); location.reload(); }
 
-        // FIREBASE E LÓGICA DE BUSCA EAN
+        // LÓGICA DE DADOS
         function escutarNuvem() {
-            db.collection("validades").onSnapshot((snapshot) => {
+            db.collection("validades").onSnapshot(snap => {
                 estoque = [];
-                snapshot.forEach((doc) => estoque.push({ id: doc.id, ...doc.data() }));
+                snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
                 renderizar();
             });
-        }
-
-        async function buscarProdutoPorEAN(codigo) {
-            const snapshot = await db.collection("validades").where("ean", "==", codigo).limit(1).get();
-            if (!snapshot.empty) {
-                const dados = snapshot.docs[0].data();
-                const campoNome = document.getElementById('nome');
-                if(!campoNome.value) campoNome.value = dados.produto || dados.nome;
-            }
         }
 
         function renderizar() {
@@ -213,36 +207,73 @@
                 return matches;
             });
 
-            document.getElementById('contador').innerText = `${filtrados.length} Itens encontrados`;
+            document.getElementById('contador').innerText = `${filtrados.length} Itens`;
 
             filtrados.sort((a,b) => new Date(a.vencimento || a.data) - new Date(b.vencimento || b.data)).forEach(item => {
-                const n = item.produto || item.nome || "SEM NOME";
                 const v = item.vencimento || item.data;
-                const ean = item.ean || "";
-                const q = item.quantidade || 0;
-                let diasTxt = "---"; let corCard = "card-ok"; let corBadge = "bg-green-500";
-
-                if(v) {
-                    const d = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
-                    if(d < 0) { diasTxt = "VENCIDO"; corCard = "card-vencido"; corBadge = "bg-red-500"; }
-                    else if(d <= 7) { diasTxt = `${d} DIAS`; corCard = "card-alerta"; corBadge = "bg-amber-500"; }
-                    else { diasTxt = `${d} DIAS`; corCard = "card-ok"; corBadge = "bg-green-500"; }
-                }
+                const d = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
+                const cor = d < 0 ? "card-vencido" : (d <= 7 ? "card-alerta" : "card-ok");
+                const badge = d < 0 ? "bg-red-500" : (d <= 7 ? "bg-amber-500" : "bg-green-500");
 
                 container.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl shadow-sm flex justify-between items-center ${corCard} mb-3">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm flex justify-between items-center ${cor} mb-3">
                         <div>
-                            <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${corBadge} text-white uppercase mb-1 inline-block">${diasTxt}</span>
-                            <h3 class="font-bold text-slate-800 text-sm uppercase leading-tight">${n}</h3>
-                            ${ean ? `<p class="text-[8px] font-mono text-indigo-400 mt-0.5">EAN: ${ean}</p>` : ''}
-                            <p class="text-[9px] text-slate-400 font-bold italic mt-1 uppercase">Val: ${v ? v.split('-').reverse().join('/') : '--/--'}</p>
+                            <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${badge} text-white uppercase mb-1 inline-block">${d < 0 ? 'Vencido' : d + ' Dias'}</span>
+                            <h3 class="font-bold text-slate-800 text-sm uppercase leading-tight">${item.produto || item.nome}</h3>
+                            <p class="text-[9px] text-slate-400 font-bold mt-1 uppercase">Val: ${v.split('-').reverse().join('/')}</p>
                         </div>
                         <div class="text-right">
-                            <p class="font-black text-slate-900 font-mono text-sm uppercase">${q} UN</p>
-                            ${usuarioSessao.cargo === 'ADMIN' ? `<button onclick="removerItem('${item.id}')" class="text-red-200 text-[9px] font-black mt-2 uppercase">Apagar</button>` : ''}
+                            <p class="font-black text-slate-900 text-sm">${item.quantidade || 0} UN</p>
+                            ${usuarioSessao.cargo === 'ADMIN' ? `<button onclick="removerItem('${item.id}')" class="text-red-200 text-[9px] mt-2 uppercase">Apagar</button>` : ''}
                         </div>
                     </div>`;
             });
+        }
+
+        async function salvarItem() {
+            const n = document.getElementById('nome').value;
+            const d = document.getElementById('data').value;
+            if (n && d) {
+                await db.collection("validades").add({
+                    produto: n.toUpperCase(), vencimento: d,
+                    ean: document.getElementById('ean').value,
+                    quantidade: document.getElementById('qtd').value || 0,
+                    by: usuarioSessao.nome, criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                fecharModalScanner();
+                limparCampos();
+            } else { alert("Preencha Nome e Data!"); }
+        }
+
+        function limparCampos() {
+            ['nome','data','ean','qtd'].forEach(id => document.getElementById(id).value='');
+            document.getElementById('label-data').style.display = 'flex';
+        }
+
+        function abrirModalScanner() {
+            document.getElementById('modal-cadastro').classList.remove('hidden');
+            html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (txt) => {
+                playBeep();
+                document.getElementById('ean').value = txt;
+                buscarEAN(txt);
+            }).catch(()=>{});
+        }
+
+        async function buscarEAN(codigo) {
+            const snap = await db.collection("validades").where("ean", "==", codigo).limit(1).get();
+            if (!snap.empty) {
+                const dados = snap.docs[0].data();
+                document.getElementById('nome').value = dados.produto || dados.nome;
+            }
+        }
+
+        function fecharModalScanner() {
+            if(html5QrCode) html5QrCode.stop().then(() => {
+                document.getElementById('modal-cadastro').classList.add('hidden');
+                html5QrCode = null;
+            });
+            else document.getElementById('modal-cadastro').classList.add('hidden');
         }
 
         function mudarAba(a) {
@@ -252,54 +283,16 @@
             renderizar();
         }
 
-        async function salvarItem() {
-            const nome = document.getElementById('nome').value;
-            const data = document.getElementById('data').value;
-            const ean = document.getElementById('ean').value;
-            const qtd = document.getElementById('qtd').value || 0;
-            if (nome && data) {
-                await db.collection("validades").add({
-                    produto: nome.toUpperCase(), vencimento: data, ean: ean, quantidade: qtd,
-                    by: usuarioSessao.nome, criadoEm: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                fecharModalScanner();
-                limparCampos();
-            } else { alert("Informe Nome e Data!"); }
-        }
-
-        function limparCampos() {
-            document.getElementById('nome').value=''; document.getElementById('data').value=''; 
-            document.getElementById('ean').value=''; document.getElementById('qtd').value='';
-        }
-
-        async function removerItem(id) { if(confirm("Deseja excluir?")) { await db.collection("validades").doc(id).delete(); } }
-
-        function abrirModalScanner() {
-            document.getElementById('modal-cadastro').classList.remove('hidden');
-            html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (txt) => {
-                document.getElementById('ean').value = txt;
-                buscarProdutoPorEAN(txt);
-            }).catch(()=>{});
-        }
-
-        function fecharModalScanner() {
-            if(html5QrCode) {
-                html5QrCode.stop().then(() => {
-                    document.getElementById('modal-cadastro').classList.add('hidden');
-                    html5QrCode = null;
-                }).catch(() => document.getElementById('modal-cadastro').classList.add('hidden'));
-            } else { document.getElementById('modal-cadastro').classList.add('hidden'); }
-        }
+        function removerItem(id) { if(confirm("Apagar item?")) db.collection("validades").doc(id).delete(); }
 
         function gerarRelatorio() {
             let msg = `*📢 NEW MARKET - ALERTAS*\n\n`;
             let alerta = estoque.filter(i => {
-                const d = Math.ceil((new Date(i.vencimento || i.data) - new Date()) / (1000*60*60*24));
+                const d = Math.ceil((new Date(i.vencimento) - new Date()) / (1000*60*60*24));
                 return d <= 7;
             });
-            if(alerta.length === 0) return alert("Nada para alertar.");
-            alerta.forEach(i => { msg += `*${(i.produto || i.nome).toUpperCase()}*\nVal: ${(i.vencimento || i.data).split('-').reverse().join('/')}\nEAN: ${i.ean || 'N/A'}\n\n`; });
+            if(alerta.length === 0) return alert("Sem alertas.");
+            alerta.forEach(i => { msg += `*${i.produto}*\nVal: ${i.vencimento.split('-').reverse().join('/')}\n\n`; });
             window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
         }
     </script>
