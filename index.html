@@ -25,8 +25,8 @@
             </div>
             <div id="lista-usuarios" class="space-y-2 text-left"></div>
             <div class="mt-8 pt-6 border-t border-slate-100">
-                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Desenvolvido por</p>
-                <p class="text-[11px] text-slate-600 font-black italic">Paulo Souza by 2026</p>
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest text-center">Desenvolvido por</p>
+                <p class="text-[11px] text-slate-600 font-black italic text-center">Paulo Souza by 2026</p>
             </div>
         </div>
     </div>
@@ -53,15 +53,15 @@
 
         <main class="max-w-lg mx-auto p-4 pb-32">
             <div class="flex gap-2 mb-6">
-                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white uppercase shadow-md transition-all">Produtos</button>
-                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase transition-all">Alertas</button>
-                <button onclick="gerarRelatorio()" class="px-5 py-4 rounded-2xl bg-green-500 text-white shadow-md active:scale-90 text-lg">📊</button>
+                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase">Produtos</button>
+                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase">Alertas</button>
+                <button onclick="gerarRelatorio()" class="px-5 py-4 rounded-2xl bg-green-500 text-white shadow-md text-lg">📊</button>
             </div>
             <div id="container-produtos" class="space-y-3"></div>
         </main>
 
         <div class="fixed bottom-8 left-0 right-0 flex justify-center z-40 px-6">
-            <button onclick="abrirModalScanner()" class="w-full max-w-sm bg-slate-900 text-white py-5 rounded-full shadow-2xl font-black flex items-center justify-center gap-3 active:scale-95 text-xs uppercase tracking-widest border-4 border-white">
+            <button onclick="abrirModalScanner()" class="w-full max-w-sm bg-slate-900 text-white py-5 rounded-full shadow-2xl font-black flex items-center justify-center gap-3 text-xs uppercase tracking-widest border-4 border-white">
                 <span>📸</span> ESCANEAR PRODUTO
             </button>
         </div>
@@ -70,24 +70,23 @@
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-white z-[120] overflow-y-auto p-6">
         <div class="max-w-lg mx-auto">
             <div class="flex justify-between items-center mb-6 pt-4">
-                <h2 class="text-xl font-black italic uppercase text-slate-800">Registro de Lote</h2>
+                <h2 class="text-xl font-black italic uppercase text-slate-800">Registro</h2>
                 <button onclick="fecharModalScanner()" class="text-slate-300 text-5xl">&times;</button>
             </div>
             <div id="reader" class="rounded-[2.5rem] bg-slate-100 overflow-hidden mb-6 min-h-[250px] border-2 border-dashed border-slate-300"></div>
             <div class="space-y-4">
-                <input type="number" id="ean" placeholder="CÓDIGO EAN" class="w-full p-4 bg-slate-50 rounded-2xl border-none text-center font-mono focus:ring-2 ring-indigo-500">
-                <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase border-none focus:ring-2 ring-indigo-500">
+                <input type="number" id="ean" placeholder="CÓDIGO EAN" class="w-full p-4 bg-slate-50 rounded-2xl text-center font-mono focus:ring-2 ring-indigo-500">
+                <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase focus:ring-2 ring-indigo-500">
                 <div class="grid grid-cols-2 gap-3">
-                    <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold border-none focus:ring-2 ring-indigo-500 uppercase">
-                    <input type="number" id="preco" placeholder="CUSTO R$" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold border-none focus:ring-2 ring-indigo-500">
+                    <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold focus:ring-2 ring-indigo-500 uppercase">
+                    <input type="number" id="qtd" placeholder="QTD" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold focus:ring-2 ring-indigo-500">
                 </div>
-                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest mt-4 shadow-lg active:scale-95">Salvar no Firebase</button>
+                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest mt-4 shadow-lg active:scale-95">Salvar</button>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO MERCADO-C3E95
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -159,23 +158,22 @@
             container.innerHTML = '';
             
             const lista = estoque.filter(i => {
-                const dataRaw = i.data || i.VALIDADE || i.validade;
-                if(!dataRaw) return abaAtiva !== 'auditoria';
-                const d = Math.ceil((new Date(dataRaw) - new Date()) / (1000*60*60*24));
+                const v = i.vencimento || i.data;
+                if(!v) return abaAtiva !== 'auditoria';
+                const d = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
                 return abaAtiva === 'auditoria' ? d <= 7 : true;
             });
 
-            lista.sort((a,b) => new Date(a.data || a.VALIDADE) - new Date(b.data || b.VALIDADE)).forEach(item => {
-                const n = item.nome || item.PRODUTO || "Sem Nome";
-                const v = item.data || item.VALIDADE || item.validade;
-                const p = item.preco || item.valor || 0;
-                const r = item.by || "Sist";
+            lista.sort((a,b) => new Date(a.vencimento || a.data) - new Date(b.vencimento || b.data)).forEach(item => {
+                const n = item.produto || item.nome || "SEM NOME";
+                const v = item.vencimento || item.data;
+                const q = item.quantidade || 0;
                 
                 let dias = "---";
                 let cor = "bg-slate-400";
                 if(v) {
                     const diff = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
-                    dias = diff < 0 ? "Vencido" : diff + " dias";
+                    dias = diff < 0 ? "VENCIDO" : diff + " DIAS";
                     cor = diff < 0 ? "bg-red-500" : (diff <= 7 ? "bg-amber-400" : "bg-green-500");
                 }
 
@@ -184,10 +182,10 @@
                         <div>
                             <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${cor} text-white uppercase mb-1 inline-block">${dias}</span>
                             <h3 class="font-bold text-slate-800 text-sm uppercase leading-tight">${n}</h3>
-                            <p class="text-[9px] text-slate-400 font-bold italic mt-0.5 uppercase tracking-tighter">Resp: ${r} | Val: ${v ? v.split('-').reverse().join('/') : '--/--'}</p>
+                            <p class="text-[9px] text-slate-400 font-bold italic mt-0.5 uppercase tracking-tighter">Val: ${v ? v.split('-').reverse().join('/') : '--/--'}</p>
                         </div>
                         <div class="text-right">
-                            <p class="font-black text-slate-900 font-mono text-sm italic">R$ ${p}</p>
+                            <p class="font-black text-slate-900 font-mono text-sm italic">${q} UN</p>
                             ${usuarioAtivo.cargo === 'ADMIN' ? `<button onclick="removerItem('${item.id}')" class="text-red-200 text-[10px] font-black uppercase mt-2">Apagar</button>` : ''}
                         </div>
                     </div>`;
@@ -197,12 +195,12 @@
         async function salvarItem() {
             const nome = document.getElementById('nome').value;
             const data = document.getElementById('data').value;
-            const preco = document.getElementById('preco').value || 0;
+            const qtd = document.getElementById('qtd').value || 0;
             if (nome && data) {
                 await db.collection("validades").add({
-                    nome: nome.toUpperCase(),
-                    data: data,
-                    preco: preco,
+                    produto: nome.toUpperCase(),
+                    vencimento: data,
+                    quantidade: qtd,
                     by: usuarioAtivo.nome,
                     criadoEm: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -212,47 +210,33 @@
         }
 
         async function removerItem(id) {
-            if(confirm("Confirmar exclusão definitiva?")) {
-                await db.collection("validades").doc(id).delete();
-            }
+            if(confirm("Excluir item?")) { await db.collection("validades").doc(id).delete(); }
         }
 
         function abrirModalScanner() {
             document.getElementById('modal-cadastro').classList.remove('hidden');
             html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => { 
-                document.getElementById('ean').value = txt; 
-                // Aqui você pode adicionar uma busca automática por EAN no futuro
-            }).catch(()=>{});
+            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => { document.getElementById('ean').value = txt; }).catch(()=>{});
         }
 
         function fecharModalScanner() {
-            if(html5QrCode) {
-                html5QrCode.stop().then(() => {
-                    document.getElementById('modal-cadastro').classList.add('hidden');
-                    html5QrCode = null;
-                });
-            } else { document.getElementById('modal-cadastro').classList.add('hidden'); }
+            if(html5QrCode) { html5QrCode.stop().then(() => { document.getElementById('modal-cadastro').classList.add('hidden'); html5QrCode = null; }); } 
+            else { document.getElementById('modal-cadastro').classList.add('hidden'); }
         }
 
         function mudarAba(a) {
             abaAtiva = a;
-            document.getElementById('btn-estoque').className = a === 'estoque' ? "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase" : "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase";
-            document.getElementById('btn-auditoria').className = a === 'auditoria' ? "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase" : "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase";
             renderizar();
         }
 
         function gerarRelatorio() {
-            let msg = `*📢 NEW MARKET - RELATÓRIO DE ALERTAS*\n_Responsável: ${usuarioAtivo.nome}_\n\n`;
+            let msg = `*📢 NEW MARKET - ALERTAS*\n\n`;
             let alerta = estoque.filter(i => {
-                const v = i.data || i.VALIDADE;
+                const v = i.vencimento || i.data;
                 const d = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
                 return d <= 7;
             });
-            if(alerta.length === 0) return alert("Nenhum item em alerta crítico!");
-            alerta.forEach(i => {
-                msg += `*${(i.nome || i.PRODUTO).toUpperCase()}*\nVenc: ${(i.data || i.VALIDADE).split('-').reverse().join('/')}\n\n`;
-            });
+            alerta.forEach(i => { msg += `*${(i.produto || i.nome).toUpperCase()}*\nVenc: ${(i.vencimento || i.data).split('-').reverse().join('/')}\n\n`; });
             window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
         }
     </script>
