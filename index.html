@@ -3,323 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - Sistema 2026</title>
+    <title>New Market - Controle de Validade</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        #login-screen, #main-panel { display: none; }
-        #loading-screen { position: fixed; inset: 0; background: white; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        
-        .card-critico { border-left: 10px solid #ef4444; background-color: #fff1f2 !important; }
-        .card-atencao { border-left: 10px solid #f59e0b; background-color: #fffbeb !important; }
-        .card-normal { border-left: 10px solid #10b981; background-color: #ffffff !important; }
-        .card-checked { opacity: 0.4 !important; filter: grayscale(1); transform: scale(0.96); }
-        
-        .text-gradient-yellow {
-            background: linear-gradient(to right, #1e40af, #dc2626, #facc15);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .bg-newmarket { background: linear-gradient(135deg, #1e40af 0%, #dc2626 50%, #facc15 100%); }
-        .btn-newmarket { background: linear-gradient(90deg, #1e40af, #dc2626, #facc15); background-size: 200% auto; transition: 0.5s; }
-        
-        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 12px; padding: 12px; position: fixed; z-index: 1100; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; }
-        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-
-        .barcode-container {
-            background: white;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100px;
-            width: 100%;
-        }
-        svg.barcode {
-            width: 100% !important;
-            height: 100% !important;
-        }
-        
-        .filtro-ativo { border: 4px solid #1e40af !important; transform: scale(1.05); }
+        body { -webkit-tap-highlight-color: transparent; }
+        .hidden-app { display: none !important; }
+        .admin-only { display: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        input[type="date"] { appearance: none; -webkit-appearance: none; }
     </style>
 </head>
-<body class="bg-slate-100 font-sans text-slate-900 flex flex-col min-h-screen">
+<body class="bg-slate-50 min-h-screen font-sans text-slate-900">
 
-    <div id="toast"></div>
-
-    <div id="loading-screen">
-        <div class="w-12 h-12 border-4 border-blue-800 border-t-red-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase text-slate-400">Carregando...</p>
-    </div>
-
-    <div id="login-screen" class="flex-grow flex flex-col items-center justify-center p-6">
-        <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md border-b-8 border-yellow-400 text-center">
-            <h1 class="text-4xl font-black uppercase italic text-gradient-yellow leading-none">New Market</h1>
-            <p class="text-lg font-bold text-blue-900 uppercase tracking-tighter -mt-1">Supermercados</p>
-            <p class="text-[10px] text-slate-400 font-black tracking-[0.3em] mt-4 mb-8 uppercase border-t pt-2">Sistema de Validade 2026</p>
-            <form class="space-y-4" onsubmit="return false;">
-                <input type="email" id="email" class="w-full p-4 border-2 rounded-2xl outline-none" placeholder="E-mail">
-                <input type="password" id="password" class="w-full p-4 border-2 rounded-2xl outline-none" placeholder="Senha">
-                <button type="button" id="btn-entrar" class="w-full btn-newmarket text-white p-5 rounded-2xl font-black uppercase shadow-lg">Entrar</button>
-            </form>
+    <div id="tela-login" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh] no-scrollbar border-b-8 border-indigo-600 text-center">
+            <div class="mb-6">
+                <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-black text-xl shadow-lg">NM</div>
+                <h2 class="text-2xl font-black italic tracking-tighter">NEW MARKET</h2>
+                <p class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1">Selecione seu Nome</p>
+            </div>
+            
+            <div id="lista-usuarios" class="space-y-2 text-left">
+                </div>
+            
+            <div class="mt-8 pt-6 border-t border-slate-100">
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Desenvolvido por</p>
+                <p class="text-[11px] text-slate-600 font-black italic">Paulo Souza by 2026</p>
+            </div>
         </div>
     </div>
 
-    <div id="main-panel" class="flex-grow flex flex-col">
-        <nav class="bg-newmarket text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
-            <div class="leading-none text-left">
-                <span class="font-black italic uppercase text-lg">New Market</span><br>
-                <span id="user-display" class="text-[8px] font-black text-yellow-200 uppercase tracking-widest">...</span>
+    <div id="modal-senha" class="hidden fixed inset-0 bg-slate-900/90 z-[110] flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-xs rounded-[2.5rem] p-8 text-center shadow-2xl">
+            <h3 id="nome-selecionado" class="font-black text-indigo-600 uppercase mb-4 tracking-tighter text-lg"></h3>
+            <input type="password" id="input-senha" placeholder="DIGITE SUA SENHA" class="w-full p-4 bg-slate-100 rounded-2xl text-center font-black tracking-widest border-none outline-none focus:ring-2 ring-indigo-500 mb-6">
+            <div class="flex gap-2">
+                <button onclick="fecharSenha()" class="flex-1 py-3 bg-slate-50 text-slate-400 rounded-xl font-bold text-xs uppercase">Sair</button>
+                <button onclick="validarAcesso()" class="flex-[2] py-4 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase shadow-lg active:scale-95">Entrar</button>
             </div>
-            <button type="button" id="btn-logout" class="text-[9px] bg-black/40 px-4 py-2 rounded-full font-bold border border-white/20 uppercase">Sair</button>
-        </nav>
-
-        <main class="p-4 max-w-xl mx-auto w-full space-y-6 flex-grow">
-            
-            <div id="repositor-form" class="hidden bg-white p-6 rounded-3xl shadow-xl border-b-8 border-blue-600 space-y-4">
-                <h2 class="font-black uppercase text-blue-800 text-xs tracking-widest">Novo Lançamento</h2>
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 border rounded-2xl font-bold uppercase bg-slate-50">
-                <div class="grid grid-cols-4 gap-2">
-                    <input type="number" id="p-ean" placeholder="EAN" class="col-span-3 w-full p-4 border rounded-2xl outline-none">
-                    <input type="number" id="p-qtd" placeholder="QTD" class="col-span-1 w-full p-4 border rounded-2xl outline-none">
-                </div>
-                <select id="p-setor-add" class="w-full p-4 border rounded-2xl font-black uppercase bg-yellow-50 text-blue-900 border-yellow-200">
-                    <option value="Estoque Central">Estoque Central (João)</option>
-                    <option value="Corredor do Paulo">Corredor do Paulo</option>
-                    <option value="Corredor do Leandro">Corredor do Leandro</option>
-                    <option value="Corredor do Pedro">Corredor do Pedro</option>
-                    <option value="Corredor do Edmar">Corredor do Edmar</option>
-                </select>
-                <input type="date" id="p-data" class="w-full p-4 border rounded-2xl font-bold text-blue-700">
-                <button type="button" id="btn-salvar" class="w-full bg-blue-700 text-white p-4 rounded-2xl font-black uppercase shadow-lg">Salvar Registro</button>
-            </div>
-
-            <div class="space-y-4">
-                <div class="grid grid-cols-3 gap-2 text-center font-black">
-                    <button type="button" id="f-critico" class="bg-white p-3 rounded-2xl text-red-600 border-2" onclick="aplicarFiltro('critico')"><p class="text-[8px]">🚨 Crítico</p><p id="c-critico" class="text-xl">0</p></button>
-                    <button type="button" id="f-atencao" class="bg-white p-3 rounded-2xl text-yellow-600 border-2" onclick="aplicarFiltro('atencao')"><p class="text-[8px]">⚠️ Atenção</p><p id="c-atencao" class="text-xl">0</p></button>
-                    <button type="button" id="f-todos" class="bg-white p-3 rounded-2xl text-blue-600 border-2 filtro-ativo" onclick="aplicarFiltro('todos')"><p class="text-[8px]">📦 Total</p><p id="c-total" class="text-xl">0</p></button>
-                </div>
-                
-                <div class="flex gap-2">
-                    <input type="text" id="busca" oninput="processarLista()" placeholder="🔍 Buscar..." class="flex-grow p-4 rounded-2xl bg-white border-2 outline-none font-bold">
-                    <button type="button" id="btn-selecionar-criticos" class="bg-red-600 text-white px-4 rounded-2xl font-black text-[9px] uppercase">Selecionar Críticos</button>
-                </div>
-                
-                <button type="button" id="btn-whatsapp" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs shadow-md">📱 Enviar Relatório via WhatsApp</button>
-                
-                <div id="lista" class="space-y-4 pb-10"></div>
-            </div>
-        </main>
-
-        <footer class="p-6 text-center">
-            <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 italic">Dev Paulo Souza by 2026</p>
-        </footer>
+        </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <div id="app-container" class="hidden-app">
+        <header class="bg-white border-b border-slate-100 sticky top-0 z-30 p-4 shadow-sm">
+            <div class="max-w-lg mx-auto flex justify-between items-center">
+                <div>
+                    <h1 class="font-black text-lg text-slate-800 italic tracking-tighter uppercase">New Market</h1>
+                    <p id="user-display" class="text-[9px] font-black text-white bg-indigo-500 px-2 py-0.5 rounded uppercase tracking-tighter"></p>
+                </div>
+                <button onclick="location.reload()" class="bg-slate-50 p-2.5 rounded-xl text-lg shadow-inner">🚪</button>
+            </div>
+        </header>
 
+        <main class="max-w-lg mx-auto p-4 pb-40">
+            <div class="flex gap-2 mb-6">
+                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white uppercase shadow-md transition-all">Estoque</button>
+                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase transition-all">Alertas</button>
+                <button onclick="gerarRelatorio()" class="px-5 py-4 rounded-2xl bg-green-500 text-white shadow-md active:scale-90">📊</button>
+            </div>
+            <div id="container-produtos" class="space-y-3"></div>
+        </main>
+
+        <div class="fixed bottom-8 left-0 right-0 flex justify-center z-40 px-6">
+            <button onclick="abrirModalScanner()" class="w-full max-w-sm bg-slate-900 text-white py-5 rounded-full shadow-2xl font-black flex items-center justify-center gap-3 active:scale-95 text-xs uppercase tracking-widest border-4 border-white">
+                <span>📸</span> ESCANEAR PRODUTO
+            </button>
+        </div>
+    </div>
+
+    <div id="modal-cadastro" class="hidden fixed inset-0 bg-white z-50 overflow-y-auto p-6">
+        <div class="max-w-lg mx-auto">
+            <div class="flex justify-between items-center mb-6 pt-4">
+                <h2 class="text-xl font-black italic uppercase text-slate-800">New Market - Registro</h2>
+                <button onclick="fecharModalScanner()" class="text-slate-300 text-5xl">&times;</button>
+            </div>
+            <div id="reader" class="rounded-[2.5rem] bg-slate-100 overflow-hidden mb-6 min-h-[250px] border-2 border-dashed border-slate-300"></div>
+            <div class="space-y-4">
+                <input type="number" id="ean" placeholder="CÓDIGO EAN" class="w-full p-4 bg-slate-50 rounded-2xl border-none text-center font-mono focus:ring-2 ring-indigo-500">
+                <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase border-none focus:ring-2 ring-indigo-500">
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold border-none focus:ring-2 ring-indigo-500 uppercase">
+                    <input type="number" id="preco" placeholder="CUSTO R$" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold border-none focus:ring-2 ring-indigo-500">
+                </div>
+                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest mt-4 shadow-lg active:scale-95">Confirmar Registro</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CONFIGURAÇÃO FIREBASE (COLE SUAS CHAVES AQUI) ---
         const firebaseConfig = {
-            apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
-            authDomain: "mercado-c3e95.firebaseapp.com",
-            projectId: "mercado-c3e95",
-            storageBucket: "mercado-c3e95.firebasestorage.app",
-            messagingSenderId: "883539091925",
-            appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c"
+            apiKey: "COLE_AQUI",
+            authDomain: "COLE_AQUI",
+            projectId: "COLE_AQUI",
+            storageBucket: "COLE_AQUI",
+            messagingSenderId: "COLE_AQUI",
+            appId: "COLE_AQUI"
         };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
         
-        const gerentesREAIS = ['adriano@newmarket.com', 'adrielle@newmarket.com'];
-        const pauloADM = 'paulo@newmarket.com';
-        let filtroAtual = 'todos';
-        let currentUserEmail = "";
-
-        function configurarSetorAutomatico(email) {
-            const seletor = document.getElementById('p-setor-add');
-            if (email.includes('paulo')) seletor.value = "Corredor do Paulo";
-            else if (email.includes('leandro')) seletor.value = "Corredor do Leandro";
-            else if (email.includes('pedro')) seletor.value = "Corredor do Pedro";
-            else if (email.includes('edmar')) seletor.value = "Corredor do Edmar";
-            else if (email.includes('joao')) seletor.value = "Estoque Central";
+        if(firebaseConfig.apiKey !== "COLE_AQUI") {
+            firebase.initializeApp(firebaseConfig);
+            var db = firebase.firestore();
         }
 
-        function showToast(msg) {
-            const t = document.getElementById("toast");
-            t.innerText = msg; t.className = "show";
-            setTimeout(() => t.className = "", 3000);
-        }
+        // --- 2. CONFIGURAÇÃO DA EQUIPE ---
+        const EQUIPE = [
+            { nome: "ADRIANO", cargo: "ADMIN", pass: "2026" },
+            { nome: "ADRIELLE", cargo: "ADMIN", pass: "2026" },
+            { nome: "PAULO", cargo: "USER", pass: "1234" },
+            { nome: "PEDRO", cargo: "USER", pass: "1234" },
+            { nome: "LEANDRO", cargo: "USER", pass: "1234" },
+            { nome: "EDMAR", cargo: "USER", pass: "1234" },
+            { nome: "JOÃO", cargo: "USER", pass: "1234" },
+            { nome: "TAMIRIS", cargo: "USER", pass: "1234" }
+        ];
 
-        window.aplicarFiltro = (tipo) => {
-            filtroAtual = tipo;
-            const bts = { critico: 'f-critico', atencao: 'f-atencao', todos: 'f-todos' };
-            Object.values(bts).forEach(id => document.getElementById(id).classList.remove('filtro-ativo'));
-            document.getElementById(bts[tipo]).classList.add('filtro-ativo');
-            processarLista();
-        };
+        let usuarioTemp = null;
+        let usuarioAtivo = null;
+        let estoque = [];
+        let abaAtiva = 'estoque';
+        let html5QrCode;
 
-        window.processarLista = () => {
-            const busca = document.getElementById('busca').value.toLowerCase();
-            document.querySelectorAll('.card').forEach(c => {
-                const matchF = filtroAtual === 'todos' || c.dataset.cat === filtroAtual;
-                const matchB = c.dataset.search.includes(busca);
-                c.style.display = (matchF && matchB) ? "block" : "none";
-            });
-        };
-
-        function carregar(podeApagar) {
-            const q = query(collection(db, "validades"), orderBy("vencimento", "asc"));
-            onSnapshot(q, (snap) => {
-                const lista = document.getElementById('lista');
-                lista.innerHTML = "";
-                let counts = { critico: 0, atencao: 0 };
-                const hoje = new Date(); hoje.setHours(0,0,0,0);
-
-                snap.forEach(d => {
-                    const item = { id: d.id, ...d.data() };
-                    const dataVenc = new Date(item.vencimento + "T12:00:00");
-                    const diff = Math.ceil((dataVenc - hoje) / 86400000);
-                    
-                    let cat = "normal", estilo = "card-normal", textoVenc = `Vence em ${diff} dias`;
-                    if(diff <= 0) { estilo="card-critico"; cat="critico"; textoVenc = "🚨 VENCIDO HOJE!"; counts.critico++; }
-                    else if(diff <= 7) { estilo="card-critico"; cat="critico"; counts.critico++; }
-                    else if(diff <= 15) { estilo="card-atencao"; cat="atencao"; counts.atencao++; }
-                    
-                    const div = document.createElement('div');
-                    div.className = `card p-5 rounded-3xl shadow-sm ${estilo} mb-3 border-2 transition-all`;
-                    div.dataset.id = item.id; div.dataset.cat = cat; div.dataset.search = `${item.produto} ${item.codigo}`.toLowerCase();
-                    
-                    div.onclick = (e) => { 
-                        if(e.target.tagName !== 'BUTTON') { 
-                            const cb = div.querySelector('.item-check'); 
-                            cb.checked = !cb.checked; 
-                            div.classList.toggle('card-checked', cb.checked); 
-                        } 
-                    };
-
-                    div.innerHTML = `
-                        <div class="flex gap-4">
-                            <input type="checkbox" class="item-check scale-[2] pointer-events-none">
-                            <div class="flex-grow">
-                                <div class="flex justify-between text-[8px] font-black uppercase text-slate-400 mb-1">
-                                    <span>${item.setor}</span>
-                                    <span>Cod: ${item.codigo}</span>
-                                </div>
-                                <h3 class="font-black text-base uppercase text-slate-800 leading-tight">${item.produto}</h3>
-                                <p class="text-[10px] font-bold text-slate-500 mb-2">Qtd: ${item.quantidade}</p>
-                                
-                                <div class="barcode-container my-3">
-                                    <svg class="barcode" 
-                                        jsbarcode-value="${item.codigo}" 
-                                        jsbarcode-format="auto"
-                                        jsbarcode-displayValue="true"
-                                        jsbarcode-fontSize="18"
-                                        jsbarcode-margin="0"
-                                        jsbarcode-height="80">
-                                    </svg>
-                                </div>
-
-                                <div class="flex justify-between items-center mt-2">
-                                    <div class="flex flex-col">
-                                        <span class="text-[9px] uppercase font-black text-slate-400">Vencimento:</span>
-                                        <span class="text-xl font-black text-slate-900 bg-white px-2 rounded-lg border-2 border-slate-200">
-                                            ${item.vencimento.split('-').reverse().join('/')}
-                                        </span>
-                                    </div>
-                                    ${podeApagar ? `<button type="button" class="btn-excluir text-[10px] text-red-600 bg-red-50 px-3 py-2 rounded-xl font-black border-2 border-red-200" data-id="${item.id}">EXCLUIR</button>` : ''}
-                                </div>
-                                <p class="text-[10px] font-black uppercase mt-2 ${cat === 'critico' ? 'text-red-600' : 'text-slate-500'}">${textoVenc}</p>
-                            </div>
-                        </div>`;
-                    lista.appendChild(div);
-                });
-                JsBarcode(".barcode").init();
-                document.getElementById('c-total').innerText = snap.size;
-                document.getElementById('c-critico').innerText = counts.critico;
-                document.getElementById('c-atencao').innerText = counts.atencao;
-                processarLista();
-
-                document.querySelectorAll('.btn-excluir').forEach(btn => {
-                    btn.onclick = async (e) => { 
-                        e.stopPropagation(); 
-                        if(confirm("Deseja apagar este item?")) await deleteDoc(doc(db, "validades", btn.dataset.id)); 
-                    };
-                });
-            });
-        }
-
-        onAuthStateChanged(auth, (user) => {
-            document.getElementById('loading-screen').style.display = 'none';
-            if (user) {
-                currentUserEmail = user.email;
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-panel').style.display = 'flex';
-                configurarSetorAutomatico(user.email);
-                const isGerente = gerentesREAIS.includes(user.email);
-                const isPaulo = user.email === pauloADM;
-                document.getElementById('user-display').innerText = user.email;
-                document.getElementById('repositor-form').classList.toggle('hidden', isGerente);
-                carregar(isPaulo || isGerente);
-            } else {
-                document.getElementById('login-screen').style.display = 'flex';
-                document.getElementById('main-panel').style.display = 'none';
-            }
+        // Gerar botões de login
+        const listaLogin = document.getElementById('lista-usuarios');
+        EQUIPE.forEach(u => {
+            listaLogin.innerHTML += `
+                <button onclick="pedirSenha('${u.nome}')" class="w-full py-4 ${u.cargo === 'ADMIN' ? 'bg-indigo-600 text-white shadow-indigo-100' : 'bg-slate-50 text-slate-600'} rounded-2xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-sm flex justify-between px-6 items-center border border-slate-100">
+                    <span>${u.nome}</span>
+                    <span class="opacity-40 text-[7px]">${u.cargo === 'ADMIN' ? 'GERENTE' : 'EQUIPE'}</span>
+                </button>
+            `;
         });
 
-        document.getElementById('btn-entrar').onclick = async () => {
-            const e = document.getElementById('email').value.trim().toLowerCase();
-            const s = document.getElementById('password').value;
-            try { await signInWithEmailAndPassword(auth, e, s); } catch (err) { showToast("Login Inválido!"); }
-        };
+        // Funções de Login
+        function pedirSenha(nome) {
+            usuarioTemp = EQUIPE.find(u => u.nome === nome);
+            document.getElementById('nome-selecionado').innerText = nome;
+            document.getElementById('modal-senha').classList.remove('hidden');
+            document.getElementById('input-senha').focus();
+        }
 
-        document.getElementById('btn-logout').onclick = () => signOut(auth);
-        
-        document.getElementById('btn-salvar').onclick = async () => {
-            const p = { 
-                produto: document.getElementById('p-nome').value.toUpperCase().trim(), 
-                codigo: document.getElementById('p-ean').value || "0", 
-                quantidade: document.getElementById('p-qtd').value || "1", 
-                setor: document.getElementById('p-setor-add').value, 
-                vencimento: document.getElementById('p-data').value, 
-                criadoEm: serverTimestamp() 
-            };
-            if(!p.produto || !p.vencimento) return showToast("Preencha os campos!");
-            await addDoc(collection(db, "validades"), p);
-            showToast("Item salvo!");
-            document.getElementById('p-nome').value = ""; 
-            document.getElementById('p-ean').value = "";
-        };
+        function fecharSenha() {
+            document.getElementById('modal-senha').classList.add('hidden');
+            document.getElementById('input-senha').value = '';
+        }
 
-        document.getElementById('btn-whatsapp').onclick = () => {
-            const sel = document.querySelectorAll('.card-checked');
-            if(sel.length === 0) return showToast("Marque os itens!");
-            let msg = "*⚠️ NEW MARKET - RELATÓRIO DE VENCIMENTOS*\n\n";
-            sel.forEach(c => {
-                const nome = c.querySelector('h3').innerText;
-                const data = c.querySelector('.text-xl').innerText;
-                msg += `📌 *${nome}*\n📅 Vencimento: ${data}\n\n`;
+        function validarAcesso() {
+            const pass = document.getElementById('input-senha').value;
+            if (usuarioTemp && usuarioTemp.pass === pass) {
+                usuarioAtivo = usuarioTemp;
+                fecharSenha();
+                document.getElementById('tela-login').classList.add('hidden-app');
+                document.getElementById('app-container').classList.remove('hidden-app');
+                document.getElementById('user-display').innerText = usuarioAtivo.nome;
+                if(usuarioAtivo.cargo === 'ADMIN') document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
+                if(typeof db !== 'undefined') escutarNuvem(); else renderizar();
+            } else {
+                alert("Senha incorreta!");
+            }
+        }
+
+        // Lógica de Renderização e Abas
+        function renderizar() {
+            const container = document.getElementById('container-produtos');
+            container.innerHTML = '';
+            const lista = estoque.filter(i => {
+                const d = Math.ceil((new Date(i.data) - new Date()) / (1000*60*60*24));
+                return abaAtiva === 'auditoria' ? d <= 7 : true;
             });
-            msg += "_Desenvolvido por Paulo Souza_";
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
-        };
-
-        document.getElementById('btn-selecionar-criticos').onclick = () => {
-            const criticos = Array.from(document.querySelectorAll('.card')).filter(c => c.dataset.cat === 'critico');
-            const todosMarcados = criticos.every(c => c.querySelector('.item-check').checked);
-            criticos.forEach(c => {
-                const cb = c.querySelector('.item-check');
-                cb.checked = !todosMarcados;
-                c.classList.toggle('card-checked', !todosMarcados);
+            lista.sort((a,b) => new Date(a.data) - new Date(b.data)).forEach(item => {
+                const d = Math.ceil((new Date(item.data) - new Date()) / (1000*60*60*24));
+                container.innerHTML += `
+                    <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex justify-between items-center">
+                        <div>
+                            <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${d < 0 ? 'bg-red-500' : 'bg-amber-400'} text-white uppercase mb-1 inline-block">
+                                ${d < 0 ? 'Vencido' : d + ' dias'}
+                            </span>
+                            <h3 class="font-bold text-slate-800 text-sm uppercase leading-tight">${item.nome}</h3>
+                            <p class="text-[9px] text-slate-400 font-bold italic mt-0.5 uppercase tracking-tighter">Resp: ${item.by} | Val: ${item.data.split('-').reverse().join('/')}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-black text-slate-900 font-mono text-sm italic">R$ ${item.preco}</p>
+                            ${usuarioAtivo.cargo === 'ADMIN' ? `<button onclick="removerItem('${item.id}')" class="text-red-200 text-[10px] font-black uppercase mt-2">Apagar</button>` : ''}
+                        </div>
+                    </div>
+                `;
             });
-        };
+        }
+
+        // Relatório WhatsApp
+        function gerarRelatorio() {
+            let msg = `*📢 NEW MARKET - RELATÓRIO*\n_Gerado por: ${usuarioAtivo.nome}_\n\n`;
+            let filtrados = estoque.filter(i => (Math.ceil((new Date(i.data) - new Date()) / (1000*60*60*24))) <= 7);
+            if(filtrados.length === 0) return alert("Nada vencendo em 7 dias.");
+            filtrados.forEach(i => {
+                msg += `*${i.nome.toUpperCase()}* - Val: ${i.data.split('-').reverse().join('/')}\n`;
+            });
+            window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        }
+
+        // Banco de Dados e Cadastro
+        function escutarNuvem() {
+            db.collection("estoque").onSnapshot((snapshot) => {
+                estoque = [];
+                snapshot.forEach((doc) => estoque.push({ id: doc.id, ...doc.data() }));
+                renderizar();
+            });
+        }
+
+        async function salvarItem() {
+            const nome = document.getElementById('nome').value;
+            const data = document.getElementById('data').value;
+            const preco = document.getElementById('preco').value || 0;
+            if (nome && data) {
+                const novo = { nome: nome.toUpperCase(), data, preco, by: usuarioAtivo.nome };
+                if(typeof db !== 'undefined') await db.collection("estoque").add(novo);
+                fecharModalScanner();
+                document.getElementById('nome').value=''; document.getElementById('data').value='';
+            }
+        }
+
+        async function removerItem(id) {
+            if(confirm("Deseja apagar este lote?")) {
+                if(typeof db !== 'undefined') await db.collection("estoque").doc(id).delete();
+            }
+        }
+
+        // UI Scanner
+        function abrirModalScanner() {
+            document.getElementById('modal-cadastro').classList.remove('hidden');
+            html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => { document.getElementById('ean').value = txt; }).catch(()=>{});
+        }
+
+        function fecharModalScanner() {
+            if(html5QrCode) html5QrCode.stop().then(() => document.getElementById('modal-cadastro').classList.add('hidden'));
+            else document.getElementById('modal-cadastro').classList.add('hidden');
+        }
+
+        function mudarAba(a) {
+            abaAtiva = a;
+            document.getElementById('btn-estoque').className = a === 'estoque' ? "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase" : "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase";
+            document.getElementById('btn-auditoria').className = a === 'auditoria' ? "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase" : "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase";
+            renderizar();
+        }
     </script>
 </body>
 </html>
