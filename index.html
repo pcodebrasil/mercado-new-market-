@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v14.5.2 Gold</title>
+    <title>New Market v14.5.3 Gold</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,7 +25,7 @@
         <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border-b-8 border-indigo-600">
             <div class="w-20 h-20 bg-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-4 text-white font-black text-2xl shadow-lg">NM</div>
             <h2 class="text-2xl font-black italic uppercase text-slate-800 tracking-tighter">New Market</h2>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 mb-8">v14.5.2 | Registro de Equipe</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 mb-8">v14.5.3 | Histórico de Equipe</p>
             <div id="lista-usuarios" class="space-y-3 max-h-[40vh] overflow-y-auto no-scrollbar"></div>
         </div>
     </div>
@@ -43,32 +43,32 @@
                 <button onclick="logout()" class="bg-slate-100 p-3 rounded-2xl text-xl border border-slate-200">🚪</button>
             </div>
             <div class="relative">
-                <input type="text" id="input-busca" oninput="renderizar()" placeholder="Buscar Produto ou EAN..." class="w-full bg-slate-50 p-4 rounded-2xl text-sm font-bold pl-12 uppercase border-2 border-slate-100 focus:border-indigo-500 transition-all outline-none">
+                <input type="text" id="input-busca" oninput="renderizar()" placeholder="Buscar Produto ou EAN..." class="w-full bg-slate-50 p-4 rounded-2xl text-sm font-bold pl-12 uppercase border-2 border-slate-100 focus:border-indigo-500 outline-none">
                 <span class="absolute left-4 top-4 opacity-40 text-lg">🔍</span>
             </div>
         </header>
 
         <main class="max-w-lg mx-auto p-4 pb-32">
             <div class="flex gap-2 mb-6 overflow-x-auto no-scrollbar py-2">
-                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-4 rounded-2xl font-black text-[10px] uppercase transition-all btn-active">Estoque</button>
-                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-4 rounded-2xl font-black text-[10px] uppercase transition-all btn-inactive">Alertas</button>
-                <button onclick="mudarAba('logs')" id="btn-logs" class="flex-1 py-4 rounded-2xl font-black text-[10px] uppercase transition-all btn-inactive">Histórico</button>
+                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-4 rounded-2xl font-black text-[10px] uppercase btn-active">Estoque</button>
+                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-4 rounded-2xl font-black text-[10px] uppercase btn-inactive">Alertas</button>
+                <button onclick="mudarAba('logs')" id="btn-logs" class="flex-1 py-4 rounded-2xl font-black text-[10px] uppercase btn-inactive">Histórico</button>
                 <button onclick="gerarRelatorio()" class="px-6 py-4 rounded-2xl bg-emerald-500 text-white shadow-lg text-xl">📊</button>
             </div>
             
-            <p id="contador" class="text-[11px] font-black text-slate-500 uppercase mb-4 ml-1 tracking-tight"></p>
+            <p id="contador" class="text-[11px] font-black text-slate-500 uppercase mb-4 ml-1"></p>
             <div id="container-produtos" class="space-y-4"></div>
         </main>
 
         <div id="wrapper-scanner" class="fixed bottom-8 left-0 right-0 flex justify-center z-40 px-6">
-            <button onclick="abrirModalScanner()" class="w-full max-w-sm bg-slate-900 text-white py-5 rounded-[2rem] shadow-2xl font-black flex items-center justify-center gap-3 text-[11px] uppercase border-4 border-white active:scale-95 transition-all">
+            <button onclick="abrirModalScanner()" class="w-full max-w-sm bg-slate-900 text-white py-5 rounded-[2rem] shadow-2xl font-black flex items-center justify-center gap-3 text-[11px] uppercase border-4 border-white active:scale-95">
                 <span>📸</span> ESCANEAR OU CADASTRAR
             </button>
         </div>
     </div>
 
     <div id="modal-senha" class="hidden fixed inset-0 bg-slate-900/95 z-[110] flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-xs rounded-[2.5rem] p-8 shadow-2xl text-center">
+        <div class="bg-white w-full max-xs rounded-[2.5rem] p-8 shadow-2xl text-center">
             <h3 id="nome-selecionado" class="font-black text-indigo-600 uppercase mb-4 text-lg"></h3>
             <input type="password" id="input-senha" placeholder="SENHA" class="w-full p-4 bg-slate-100 rounded-2xl text-center font-black outline-none focus:ring-4 ring-indigo-500/20 mb-6 tracking-widest">
             <div class="flex gap-2">
@@ -87,13 +87,13 @@
             <div id="reader" class="rounded-[2.5rem] bg-slate-900 overflow-hidden mb-6 min-h-[250px] shadow-inner border-4 border-slate-100"></div>
             <div class="space-y-4">
                 <input type="hidden" id="edit-id">
-                <input type="text" id="ean" placeholder="EAN / CÓDIGO DE BARRAS" class="w-full p-4 bg-slate-100 rounded-2xl font-mono text-sm text-indigo-600 border-none outline-none focus:ring-2 ring-indigo-500">
-                <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase border-none outline-none focus:ring-2 ring-indigo-500">
+                <input type="text" id="ean" placeholder="EAN / CÓDIGO DE BARRAS" class="w-full p-4 bg-slate-100 rounded-2xl font-mono text-sm text-indigo-600 outline-none focus:ring-2 ring-indigo-500">
+                <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase outline-none focus:ring-2 ring-indigo-500">
                 <div class="grid grid-cols-2 gap-3">
-                    <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none outline-none focus:ring-2 ring-indigo-500 uppercase">
-                    <input type="number" id="qtd" placeholder="QTD" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none outline-none focus:ring-2 ring-indigo-500 text-center">
+                    <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl font-bold outline-none focus:ring-2 ring-indigo-500 uppercase">
+                    <input type="number" id="qtd" placeholder="QTD" class="w-full p-4 bg-slate-50 rounded-2xl font-bold outline-none focus:ring-2 ring-indigo-500 text-center">
                 </div>
-                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs shadow-xl active:scale-95 transition-all mt-4">Salvar no Sistema</button>
+                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs shadow-xl active:scale-95 mt-4">Salvar no Sistema</button>
             </div>
         </div>
     </div>
@@ -144,7 +144,7 @@
             document.getElementById('appView').classList.remove('hidden-app');
             document.getElementById('user-display').innerText = usuarioSessao.nome;
             escutarNuvem();
-            registrarLog('ACESSO', 'ENTROU NO SISTEMA'); // REGISTRA ENTRADA DE TODOS
+            registrarLog('ACESSO', 'ENTROU NO SISTEMA'); 
         }
 
         function prepararLogin(nome) {
@@ -174,7 +174,8 @@
                 snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
                 if(abaAtiva !== 'logs') renderizar();
             });
-            db.collection("logs").orderBy("data", "desc").limit(30).onSnapshot(snap => {
+            // AUMENTADO O LIMITE PARA 50 REGISTROS PARA VER MAIS USUÁRIOS
+            db.collection("logs").orderBy("data", "desc").limit(50).onSnapshot(snap => {
                 logsAtividades = [];
                 snap.forEach(doc => logsAtividades.push(doc.data()));
                 if(abaAtiva === 'logs') renderizar();
@@ -198,7 +199,7 @@
             container.innerHTML = '';
             
             if (abaAtiva === 'logs') {
-                document.getElementById('contador').innerText = "Histórico de Atividade";
+                document.getElementById('contador').innerText = "Histórico Geral da Equipe";
                 document.getElementById('wrapper-scanner').classList.add('hidden');
                 logsAtividades.forEach(log => {
                     let corAcao = log.acao === 'ACESSO' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600';
@@ -209,10 +210,10 @@
                     container.innerHTML += `<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-2">
                         <div class="flex justify-between items-center mb-1">
                             <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${corAcao}">${log.acao}</span>
-                            <span class="text-[8px] font-bold text-slate-300">${new Date(log.data).toLocaleTimeString()}</span>
+                            <span class="text-[8px] font-bold text-slate-300 uppercase">${new Date(log.data).toLocaleTimeString()}</span>
                         </div>
                         <h4 class="text-[11px] font-black uppercase text-slate-700">${log.produto}</h4>
-                        <p class="text-[9px] font-bold text-slate-400">Por: ${log.usuario}</p>
+                        <p class="text-[9px] font-bold text-slate-400">Funcionário: ${log.usuario}</p>
                     </div>`;
                 });
                 return;
@@ -228,11 +229,10 @@
                 return matches;
             });
 
-            document.getElementById('contador').innerText = `${filtrados.length} Itens`;
+            document.getElementById('contador').innerText = `${filtrados.length} Itens Encontrados`;
             filtrados.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento)).forEach(item => {
                 const d = Math.ceil((new Date(item.vencimento) - new Date()) / (1000*60*60*24));
-                const statusClass = d < 0 ? "border-vencido" : (d <= 7 ? "border-alerta" : "border-ok");
-                container.innerHTML += `<div class="bg-white p-5 rounded-3xl shadow-sm flex justify-between items-center ${statusClass}">
+                container.innerHTML += `<div class="bg-white p-5 rounded-3xl shadow-sm flex justify-between items-center ${d < 0 ? 'border-vencido' : (d <= 7 ? 'border-alerta' : 'border-ok')}">
                     <div class="flex-1">
                         <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${d < 0 ? 'bg-red-500' : (d <= 7 ? 'bg-amber-500' : 'bg-emerald-500')} text-white uppercase mb-2 inline-block">
                             ${d < 0 ? 'Vencido' : d + ' Dias'}
