@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v14.7 Gold</title>
+    <title>New Market v14.8 Black Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,7 +25,7 @@
         <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border-b-8 border-indigo-600">
             <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-black text-xl shadow-lg">NM</div>
             <h2 class="text-2xl font-black italic uppercase text-slate-800 tracking-tighter">New Market</h2>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 mb-8">v14.7 | Sistema de Auditoria</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 mb-8">v14.8 | Gestão de Equipe</p>
             <div id="lista-usuarios" class="space-y-3 max-h-[45vh] overflow-y-auto no-scrollbar"></div>
         </div>
     </div>
@@ -43,7 +43,7 @@
                 <button onclick="logout()" class="bg-slate-100 p-3 rounded-2xl text-xl border border-slate-200">🚪</button>
             </div>
             <div class="relative">
-                <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR..." class="w-full bg-slate-50 p-4 rounded-2xl text-sm font-bold pl-12 uppercase border-2 border-slate-100 focus:border-indigo-500 outline-none">
+                <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR PRODUTO..." class="w-full bg-slate-50 p-4 rounded-2xl text-sm font-bold pl-12 uppercase border-2 border-slate-100 focus:border-indigo-500 outline-none">
                 <span class="absolute left-4 top-4 opacity-40 text-lg">🔍</span>
             </div>
         </header>
@@ -84,16 +84,16 @@
                 <h2 id="titulo-modal" class="text-xl font-black italic uppercase text-slate-800">Novo Item</h2>
                 <button onclick="fecharModalScanner()" class="text-slate-300 text-5xl font-light">&times;</button>
             </div>
-            <div id="reader" class="rounded-[2.5rem] bg-slate-900 overflow-hidden mb-6 min-h-[250px] border-4 border-slate-100 shadow-inner"></div>
+            <div id="reader" class="rounded-[2.5rem] bg-slate-900 overflow-hidden mb-6 min-h-[250px] border-4 border-slate-100"></div>
             <div class="space-y-4">
                 <input type="hidden" id="edit-id">
-                <input type="text" id="ean" placeholder="EAN / CÓDIGO DE BARRAS" class="w-full p-4 bg-slate-100 rounded-2xl font-mono text-sm text-indigo-600 outline-none focus:ring-2 ring-indigo-500">
-                <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase outline-none focus:ring-2 ring-indigo-500">
+                <input type="text" id="ean" placeholder="EAN / CÓDIGO DE BARRAS" class="w-full p-4 bg-slate-100 rounded-2xl font-mono text-sm text-indigo-600 outline-none">
+                <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase outline-none">
                 <div class="grid grid-cols-2 gap-3">
                     <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl font-bold outline-none uppercase">
                     <input type="number" id="qtd" placeholder="QTD" class="w-full p-4 bg-slate-50 rounded-2xl font-bold outline-none text-center">
                 </div>
-                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs shadow-xl mt-4">Confirmar Cadastro</button>
+                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs shadow-xl mt-4">Salvar Cadastro</button>
             </div>
         </div>
     </div>
@@ -135,7 +135,7 @@
             }
             const lista = document.getElementById('lista-usuarios');
             EQUIPE.forEach(u => {
-                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-700 rounded-2xl font-black uppercase text-[10px] flex justify-between px-6 border border-slate-200 active:bg-indigo-50"><span>${u.nome}</span><span class="text-indigo-600 opacity-40 text-[7px] bg-indigo-50 px-2 py-0.5 rounded-full">${u.cargo}</span></button>`;
+                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-700 rounded-2xl font-black uppercase text-[10px] flex justify-between px-6 border border-slate-200"><span>${u.nome}</span><span class="text-indigo-600 opacity-40 text-[7px] bg-indigo-50 px-2 py-0.5 rounded-full">${u.cargo}</span></button>`;
             });
         };
 
@@ -154,8 +154,8 @@
                 if(abaAtiva !== 'logs') renderizar();
             });
 
-            // ESCUTA O HISTÓRICO DE TODA A EQUIPE
-            db.collection("logs").orderBy("data", "desc").limit(60).onSnapshot(snap => {
+            // ESCUTA O HISTÓRICO - LÓGICA DE EMPILHAMENTO v14.8
+            db.collection("logs").orderBy("data", "desc").limit(50).onSnapshot(snap => {
                 logsAtividades = [];
                 snap.forEach(doc => logsAtividades.push(doc.data()));
                 if(abaAtiva === 'logs') renderizar();
@@ -176,30 +176,32 @@
         function renderizar() {
             const container = document.getElementById('container-produtos');
             const termo = document.getElementById('input-busca').value.toUpperCase();
-            container.innerHTML = ''; // LIMPEZA CRÍTICA PARA NÃO REPETIR
-
+            
             if (abaAtiva === 'logs') {
-                document.getElementById('contador').innerText = `Rastros Recentes (${logsAtividades.length})`;
+                document.getElementById('contador').innerText = `HISTÓRICO DE EQUIPE (${logsAtividades.length})`;
                 document.getElementById('wrapper-scanner').classList.add('hidden');
                 
+                let conteudoHtml = ""; // CONSTRÓI A LISTA TODA NA MEMÓRIA
                 logsAtividades.forEach(log => {
                     let corAcao = 'bg-slate-100 text-slate-600';
                     if(log.acao === 'CADASTROU') corAcao = 'bg-emerald-100 text-emerald-700';
                     if(log.acao === 'ACESSO') corAcao = 'bg-purple-100 text-purple-700';
                     if(log.acao === 'APAGOU') corAcao = 'bg-red-100 text-red-700';
 
-                    container.innerHTML += `<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-2">
+                    conteudoHtml += `<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-2">
                         <div class="flex justify-between items-center mb-1">
                             <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${corAcao}">${log.acao}</span>
                             <span class="text-[8px] font-bold text-slate-400">${new Date(log.data).toLocaleTimeString()}</span>
                         </div>
-                        <h4 class="text-[11px] font-black uppercase text-slate-700 tracking-tight">${log.produto}</h4>
-                        <p class="text-[9px] font-bold text-slate-400 mt-1 italic">Responsável: ${log.usuario}</p>
+                        <h4 class="text-[11px] font-black uppercase text-slate-700">${log.produto}</h4>
+                        <p class="text-[9px] font-bold text-slate-400 mt-1 italic">Por: ${log.usuario}</p>
                     </div>`;
                 });
+                container.innerHTML = conteudoHtml; // DESENHA TUDO DE UMA VEZ
                 return;
             }
 
+            container.innerHTML = '';
             document.getElementById('wrapper-scanner').classList.remove('hidden');
             let filtrados = estoque.filter(i => {
                 const matches = (i.produto || "").toUpperCase().includes(termo) || (i.ean || "").toString().includes(termo);
@@ -210,7 +212,7 @@
                 return matches;
             });
 
-            document.getElementById('contador').innerText = `${filtrados.length} Itens Encontrados`;
+            document.getElementById('contador').innerText = `${filtrados.length} Itens Exibidos`;
             filtrados.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento)).forEach(item => {
                 const d = Math.ceil((new Date(item.vencimento) - new Date()) / (1000*60*60*24));
                 container.innerHTML += `<div class="bg-white p-5 rounded-3xl shadow-sm flex justify-between items-center ${d < 0 ? 'border-vencido' : (d <= 7 ? 'border-alerta' : 'border-ok')}">
@@ -223,13 +225,12 @@
                     </div>
                     <div class="text-right ml-4">
                         <p class="font-black text-indigo-600 text-xl tracking-tighter">${item.quantidade} <span class="text-[9px]">UN</span></p>
-                        <button onclick='prepararEdicao(${JSON.stringify(item)})' class="bg-slate-50 text-slate-600 px-4 py-2 rounded-xl text-[9px] font-black uppercase mt-3 border border-slate-200">✏️ Editar</button>
+                        <button onclick='prepararEdicao(${JSON.stringify(item)})' class="bg-slate-50 text-slate-600 px-4 py-2 rounded-xl text-[9px] font-black uppercase mt-3 border border-slate-200">✏️ Detalhes</button>
                     </div>
                 </div>`;
             });
         }
 
-        // --- FUNÇÕES DE AUXÍLIO ---
         function prepararLogin(nome) { document.getElementById('nome-selecionado').innerText = nome; document.getElementById('modal-senha').classList.remove('hidden'); }
         function fecharSenha() { document.getElementById('modal-senha').classList.add('hidden'); }
         function logout() { localStorage.removeItem('sessaoNewMarket'); location.reload(); }
@@ -289,7 +290,7 @@
         }
 
         function prepararEdicao(item) {
-            document.getElementById('titulo-modal').innerText = "Editar Detalhes";
+            document.getElementById('titulo-modal').innerText = "Editar Produto";
             document.getElementById('edit-id').value = item.id;
             document.getElementById('ean').value = item.ean || '';
             document.getElementById('nome').value = item.produto;
