@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.0.7 - Emergency Exit</title>
+    <title>New Market v16.0.7 - Revisado</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -24,11 +24,7 @@
         <div onclick="logout()" class="text-7xl mb-6 cursor-pointer active:scale-90 transition-all">🛠️</div>
         <h1 class="text-3xl font-black uppercase italic mb-2">Sistema em Manutenção</h1>
         <p class="text-blue-200 font-bold mb-8">Voltamos em breve com novidades!</p>
-        
-        <button onclick="logout()" class="mb-12 text-[10px] font-black bg-white/10 px-6 py-3 rounded-2xl border border-white/20 uppercase tracking-[0.2em] active:bg-white active:text-empresa-azul transition-all">
-            Voltar ao Login
-        </button>
-
+        <button onclick="logout()" class="mb-12 text-[10px] font-black bg-white/10 px-6 py-3 rounded-2xl border border-white/20 uppercase tracking-[0.2em] active:bg-white active:text-empresa-azul transition-all">Voltar ao Login</button>
         <div class="opacity-40 text-[10px] font-medium tracking-widest uppercase mb-4">Developed by Paulo Souza &copy; 2026</div>
         <a href="https://wa.me/5511932280031" target="_blank" class="inline-block bg-emerald-500/20 text-emerald-400 px-6 py-2 rounded-full text-[10px] font-black border border-emerald-500/30">SUPORTE TÉCNICO</a>
     </div>
@@ -117,7 +113,7 @@
     </div>
 
     <script>
-        const MODO_MANUTENCAO = false; // Altere para true para bloquear todos (exceto PAULO)
+        const MODO_MANUTENCAO = false; // Bloqueio seletivo
 
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
@@ -149,12 +145,10 @@
             EQUIPE.forEach(u => {
                 lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-5 bg-slate-50 rounded-2xl font-black uppercase text-[11px] flex justify-between px-8 border-2 border-slate-100 mb-3 active:bg-yellow-50 transition-all"><span>${u.nome}</span><span class="text-empresa-azul opacity-40 font-bold">${u.cargo}</span></button>`;
             });
-            
             const salvo = localStorage.getItem('sessaoNewMarket');
             if (salvo) {
                 usuarioSessao = EQUIPE.find(u => u.nome === salvo);
                 if (usuarioSessao) {
-                    // REGRA DE OURO: Paulo sempre entra
                     if (usuarioSessao.nome === "PAULO") entrarNoApp();
                     else if (MODO_MANUTENCAO) mostrarManutencao();
                     else entrarNoApp();
@@ -168,7 +162,7 @@
             document.getElementById('appView').classList.add('hidden-app');
             document.getElementById('manutencaoView').classList.add('hidden-app');
             document.getElementById('loginView').classList.remove('hidden-app');
-            window.location.reload(); // Força reset total do cache
+            window.location.reload();
         }
 
         function entrarNoApp() {
@@ -209,14 +203,12 @@
             const termo = document.getElementById('input-busca').value.toUpperCase();
             let cVencidos = 0, cAlerta = 0;
             container.innerHTML = '';
-            
             let filtrados = estoque.filter(i => {
                 const d = difDias(i.vencimento);
                 if (d < 0) cVencidos++; if (d >= 0 && d <= 7) cAlerta++;
                 const m = (i.produto || "").toUpperCase().includes(termo) || (i.ean || "").toString().includes(termo);
                 return abaAtiva === 'auditoria' ? (m && d <= 7) : m;
             });
-
             document.getElementById('dash-vencidos').innerText = cVencidos;
             document.getElementById('dash-alerta').innerText = cAlerta;
             document.getElementById('dash-total').innerText = estoque.length;
@@ -228,7 +220,6 @@
                 if (d < 0) { lbl = "VENCIDO"; card = "bg-white shadow-sm border-l-8 border-red-900"; bg = "bg-red-900"; }
                 else if (d === 0) { lbl = "VENCE HOJE"; card = "border-hoje shadow-lg"; bg = "bg-red-600"; }
                 else if (d <= 7) { lbl = d + " DIAS"; card = "bg-white shadow-sm border-l-8 border-yellow-400"; bg = "bg-yellow-400 text-slate-900"; }
-                
                 container.innerHTML += `<div class="${card} p-6 rounded-[2.5rem] flex justify-between items-center transition-all active:scale-95"><div class="max-w-[70%]"><span class="${bg} text-[9px] font-black px-3 py-1 rounded-full uppercase mb-2 inline-block">${lbl}</span><h3 class="font-black text-slate-800 text-base uppercase leading-tight">${item.produto}</h3><p class="text-[10px] text-slate-400 font-bold mt-1 uppercase italic">Validade: ${item.vencimento.split('-').reverse().join('/')}</p></div><div class="text-right"><p class="font-black text-empresa-azul text-2xl tracking-tighter">${item.quantidade}<span class="text-[10px] ml-1">UN</span></p><button onclick='prepararEdicao(${JSON.stringify(item)})' class="bg-slate-100 p-2 rounded-xl text-[9px] font-black uppercase text-slate-400 mt-2">Editar</button></div></div>`;
             });
         }
