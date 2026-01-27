@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SGV - New Market v13.1</title>
+    <title>SGV - New Market v13.4</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -26,9 +26,7 @@
                 <h2 class="text-2xl font-black italic tracking-tighter uppercase text-slate-800">New Market</h2>
                 <p class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1">Gestão de Validades</p>
             </div>
-            
             <div id="lista-usuarios" class="space-y-2"></div>
-
             <div class="mt-8 pt-6 border-t border-slate-100 text-center">
                 <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Desenvolvido por</p>
                 <p class="text-[11px] text-slate-600 font-black italic">Paulo Souza by 2026</p>
@@ -41,7 +39,7 @@
             <h3 id="nome-selecionado" class="font-black text-indigo-600 uppercase mb-4 text-lg"></h3>
             <input type="password" id="input-senha" placeholder="SENHA" class="w-full p-4 bg-slate-100 rounded-2xl text-center font-black outline-none focus:ring-2 ring-indigo-500 mb-6 tracking-widest">
             <div class="flex gap-2">
-                <button onclick="fecharSenha()" class="flex-1 py-3 bg-slate-50 text-slate-400 rounded-xl font-bold text-xs uppercase">Sair</button>
+                <button onclick="fecharSenha()" class="flex-1 py-3 bg-slate-50 text-slate-400 rounded-xl font-bold text-xs uppercase">Voltar</button>
                 <button onclick="validarAcesso()" class="flex-[2] py-4 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase shadow-lg">Entrar</button>
             </div>
         </div>
@@ -54,10 +52,10 @@
                     <h1 class="font-black text-xl italic text-slate-800 uppercase tracking-tighter">New Market</h1>
                     <p id="user-display" class="text-[9px] font-black text-white bg-indigo-500 px-2 py-0.5 rounded uppercase inline-block"></p>
                 </div>
-                <button onclick="location.reload()" class="bg-slate-100 p-2 rounded-xl text-lg">🚪</button>
+                <button onclick="logout()" class="bg-slate-100 p-2 rounded-xl text-lg">🚪</button>
             </div>
             <div class="relative">
-                <input type="text" id="input-busca" oninput="renderizar()" placeholder="Buscar produto..." class="w-full bg-slate-100 p-4 rounded-2xl border-none text-sm font-bold focus:ring-2 ring-indigo-500 pl-12 shadow-inner">
+                <input type="text" id="input-busca" oninput="renderizar()" placeholder="Buscar produto ou EAN..." class="w-full bg-slate-100 p-4 rounded-2xl border-none text-sm font-bold focus:ring-2 ring-indigo-500 pl-12 shadow-inner">
                 <span class="absolute left-4 top-4 opacity-30">🔍</span>
             </div>
         </header>
@@ -87,12 +85,13 @@
             </div>
             <div id="reader" class="rounded-[2rem] bg-slate-100 overflow-hidden mb-6 border-2 border-dashed border-slate-300 min-h-[250px]"></div>
             <div class="space-y-4">
+                <input type="text" id="ean" placeholder="EAN (CÓDIGO DE BARRAS)" class="w-full p-4 bg-slate-100 rounded-2xl font-mono text-xs text-indigo-600 border-none">
                 <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase focus:ring-2 ring-indigo-500 border-none">
                 <div class="grid grid-cols-2 gap-3">
                     <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold border-none uppercase">
                     <input type="number" id="qtd" placeholder="QTD" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold border-none">
                 </div>
-                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95">Salvar no Sistema</button>
+                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95">Salvar</button>
             </div>
         </div>
     </div>
@@ -126,15 +125,26 @@
         let abaAtiva = 'estoque';
         let html5QrCode = null;
 
-        // TÉCNICA: Gerar os botões de login automaticamente
-        const listaLogin = document.getElementById('lista-usuarios');
-        EQUIPE.forEach(u => {
-            listaLogin.innerHTML += `
-                <button onclick="prepararLogin('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-600 rounded-2xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-sm flex justify-between px-6 items-center border border-slate-100 mb-2">
-                    <span>${u.nome}</span>
-                    <span class="opacity-40 text-[7px] uppercase">${u.cargo === 'ADMIN' ? 'Gerente' : 'Equipe'}</span>
-                </button>`;
-        });
+        // VERIFICAÇÃO INICIAL (LEMBRAR LOGIN)
+        window.onload = function() {
+            const usuarioSalvo = localStorage.getItem('sessaoNewMarket');
+            if (usuarioSalvo) {
+                const userObj = EQUIPE.find(u => u.nome === usuarioSalvo);
+                if (userObj) {
+                    usuarioSessao = userObj;
+                    entrarNoApp();
+                }
+            }
+            renderizarListaLogin();
+        };
+
+        function renderizarListaLogin() {
+            const lista = document.getElementById('lista-usuarios');
+            lista.innerHTML = "";
+            EQUIPE.forEach(u => {
+                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-600 rounded-2xl font-black uppercase text-[10px] tracking-widest flex justify-between px-6 items-center border border-slate-100 mb-2 active:scale-95"><span>${u.nome}</span><span class="opacity-40 text-[7px]">${u.cargo === 'ADMIN' ? 'Gerente' : 'Equipe'}</span></button>`;
+            });
+        }
 
         function prepararLogin(nome) {
             nomeSelecionadoNoMomento = nome;
@@ -151,20 +161,40 @@
             const userObj = EQUIPE.find(u => u.nome === nomeSelecionadoNoMomento);
             if (userObj && userObj.pass === passDigitada) {
                 usuarioSessao = userObj;
-                document.getElementById('modal-senha').classList.add('hidden');
-                document.getElementById('loginView').classList.add('hidden-app');
-                document.getElementById('appView').classList.remove('hidden-app');
-                document.getElementById('user-display').innerText = usuarioSessao.nome;
-                escutarNuvem();
+                localStorage.setItem('sessaoNewMarket', userObj.nome);
+                entrarNoApp();
             } else { alert("Senha Incorreta!"); }
         }
 
+        function entrarNoApp() {
+            document.getElementById('loginView').classList.add('hidden-app');
+            document.getElementById('appView').classList.remove('hidden-app');
+            document.getElementById('user-display').innerText = usuarioSessao.nome;
+            document.getElementById('modal-senha').classList.add('hidden');
+            escutarNuvem();
+        }
+
+        function logout() {
+            localStorage.removeItem('sessaoNewMarket');
+            location.reload();
+        }
+
+        // FIREBASE E LÓGICA DE BUSCA EAN
         function escutarNuvem() {
             db.collection("validades").onSnapshot((snapshot) => {
                 estoque = [];
                 snapshot.forEach((doc) => estoque.push({ id: doc.id, ...doc.data() }));
                 renderizar();
             });
+        }
+
+        async function buscarProdutoPorEAN(codigo) {
+            const snapshot = await db.collection("validades").where("ean", "==", codigo).limit(1).get();
+            if (!snapshot.empty) {
+                const dados = snapshot.docs[0].data();
+                const campoNome = document.getElementById('nome');
+                if(!campoNome.value) campoNome.value = dados.produto || dados.nome;
+            }
         }
 
         function renderizar() {
@@ -174,10 +204,10 @@
             
             let filtrados = estoque.filter(i => {
                 const n = (i.produto || i.nome || "").toUpperCase();
-                const v = i.vencimento || i.data;
-                const matches = n.includes(termo);
+                const e = (i.ean || "").toString();
+                const matches = n.includes(termo) || e.includes(termo);
                 if (abaAtiva === 'auditoria') {
-                    const d = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
+                    const d = Math.ceil((new Date(i.vencimento || i.data) - new Date()) / (1000*60*60*24));
                     return matches && (d <= 7);
                 }
                 return matches;
@@ -188,6 +218,7 @@
             filtrados.sort((a,b) => new Date(a.vencimento || a.data) - new Date(b.vencimento || b.data)).forEach(item => {
                 const n = item.produto || item.nome || "SEM NOME";
                 const v = item.vencimento || item.data;
+                const ean = item.ean || "";
                 const q = item.quantidade || 0;
                 let diasTxt = "---"; let corCard = "card-ok"; let corBadge = "bg-green-500";
 
@@ -203,11 +234,12 @@
                         <div>
                             <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${corBadge} text-white uppercase mb-1 inline-block">${diasTxt}</span>
                             <h3 class="font-bold text-slate-800 text-sm uppercase leading-tight">${n}</h3>
-                            <p class="text-[9px] text-slate-400 font-bold italic mt-0.5 uppercase tracking-tighter">Val: ${v ? v.split('-').reverse().join('/') : '--/--'}</p>
+                            ${ean ? `<p class="text-[8px] font-mono text-indigo-400 mt-0.5">EAN: ${ean}</p>` : ''}
+                            <p class="text-[9px] text-slate-400 font-bold italic mt-1 uppercase">Val: ${v ? v.split('-').reverse().join('/') : '--/--'}</p>
                         </div>
                         <div class="text-right">
                             <p class="font-black text-slate-900 font-mono text-sm uppercase">${q} UN</p>
-                            ${usuarioSessao.cargo === 'ADMIN' ? `<button onclick="removerItem('${item.id}')" class="text-red-200 text-[9px] font-black uppercase mt-2">Apagar</button>` : ''}
+                            ${usuarioSessao.cargo === 'ADMIN' ? `<button onclick="removerItem('${item.id}')" class="text-red-200 text-[9px] font-black mt-2 uppercase">Apagar</button>` : ''}
                         </div>
                     </div>`;
             });
@@ -223,28 +255,32 @@
         async function salvarItem() {
             const nome = document.getElementById('nome').value;
             const data = document.getElementById('data').value;
+            const ean = document.getElementById('ean').value;
             const qtd = document.getElementById('qtd').value || 0;
             if (nome && data) {
                 await db.collection("validades").add({
-                    produto: nome.toUpperCase(),
-                    vencimento: data,
-                    quantidade: qtd,
-                    by: usuarioSessao.nome,
-                    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                    produto: nome.toUpperCase(), vencimento: data, ean: ean, quantidade: qtd,
+                    by: usuarioSessao.nome, criadoEm: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 fecharModalScanner();
-                document.getElementById('nome').value=''; document.getElementById('data').value=''; document.getElementById('qtd').value='';
+                limparCampos();
             } else { alert("Informe Nome e Data!"); }
         }
 
-        async function removerItem(id) {
-            if(confirm("Deseja excluir?")) { await db.collection("validades").doc(id).delete(); }
+        function limparCampos() {
+            document.getElementById('nome').value=''; document.getElementById('data').value=''; 
+            document.getElementById('ean').value=''; document.getElementById('qtd').value='';
         }
+
+        async function removerItem(id) { if(confirm("Deseja excluir?")) { await db.collection("validades").doc(id).delete(); } }
 
         function abrirModalScanner() {
             document.getElementById('modal-cadastro').classList.remove('hidden');
             html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {}).catch(()=>{});
+            html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (txt) => {
+                document.getElementById('ean').value = txt;
+                buscarProdutoPorEAN(txt);
+            }).catch(()=>{});
         }
 
         function fecharModalScanner() {
@@ -259,12 +295,11 @@
         function gerarRelatorio() {
             let msg = `*📢 NEW MARKET - ALERTAS*\n\n`;
             let alerta = estoque.filter(i => {
-                const v = i.vencimento || i.data;
-                const d = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
+                const d = Math.ceil((new Date(i.vencimento || i.data) - new Date()) / (1000*60*60*24));
                 return d <= 7;
             });
             if(alerta.length === 0) return alert("Nada para alertar.");
-            alerta.forEach(i => { msg += `*${(i.produto || i.nome).toUpperCase()}*\nVenc: ${(i.vencimento || i.data).split('-').reverse().join('/')}\n\n`; });
+            alerta.forEach(i => { msg += `*${(i.produto || i.nome).toUpperCase()}*\nVal: ${(i.vencimento || i.data).split('-').reverse().join('/')}\nEAN: ${i.ean || 'N/A'}\n\n`; });
             window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
         }
     </script>
