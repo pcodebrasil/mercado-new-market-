@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v15.4.2 Titanium</title>
+    <title>New Market v15.4.3 Titanium</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,7 +25,7 @@
         <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 shadow-2xl border-b-[10px] border-indigo-600">
             <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-black text-xl shadow-lg">NM</div>
             <h2 class="text-2xl font-black italic uppercase text-slate-800 tracking-tighter">New Market</h2>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 mb-8">v15.4.2 | Titanium Edition</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 mb-8">v15.4.3 | Titanium Edition</p>
             <div id="lista-usuarios" class="space-y-2.5 max-h-[50vh] overflow-y-auto no-scrollbar"></div>
         </div>
     </div>
@@ -42,7 +42,7 @@
                 </div>
                 <button onclick="logout()" class="bg-slate-100 p-3 rounded-2xl text-xl border border-slate-200">🚪</button>
             </div>
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO OU EAN..." class="w-full bg-slate-50 p-4 rounded-2xl text-sm font-black uppercase border-2 border-transparent focus:border-indigo-500 outline-none transition-all">
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR..." class="w-full bg-slate-50 p-4 rounded-2xl text-sm font-black uppercase border-2 border-transparent focus:border-indigo-500 outline-none transition-all">
         </header>
 
         <main class="max-w-lg mx-auto p-5 pb-32">
@@ -54,9 +54,7 @@
             
             <div class="flex justify-between items-center mb-6 px-2">
                 <p id="contador" class="text-[11px] font-black text-slate-400 uppercase"></p>
-                <button id="btn-relatorio-hist" onclick="gerarRelatorio()" class="hidden bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg flex items-center gap-2">
-                    WhatsApp 📊
-                </button>
+                <button id="btn-relatorio-hist" onclick="gerarRelatorio()" class="hidden bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg">WhatsApp 📊</button>
             </div>
 
             <div id="container-produtos" class="space-y-4"></div>
@@ -104,6 +102,7 @@
     </div>
 
     <script>
+        // CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -177,12 +176,13 @@
             } catch(e) { console.error(e); }
         }
 
-        function calcularDias(vencimento) {
+        function difDias(vencimento) {
             const hoje = new Date();
             hoje.setHours(0,0,0,0);
-            const dataVenc = new Date(vencimento + 'T12:00:00'); // Força meio-dia para evitar erro de fuso
+            const dataVenc = new Date(vencimento + "T12:00:00");
             dataVenc.setHours(0,0,0,0);
-            return Math.ceil((dataVenc - hoje) / (1000 * 60 * 60 * 24));
+            const diff = dataVenc.getTime() - hoje.getTime();
+            return Math.ceil(diff / (1000 * 3600 * 24));
         }
 
         function renderizar() {
@@ -191,63 +191,67 @@
             const btnRelatorio = document.getElementById('btn-relatorio-hist');
             
             if (abaAtiva === 'logs') {
-                document.getElementById('contador').innerText = `ÚLTIMAS ATIVIDADES`;
-                btnRelatorio.classList.remove('hidden');
+                document.getElementById('contador').innerText = `HISTÓRICO RECENTE`;
+                btnRelatorio.classList.add('hidden');
                 document.getElementById('wrapper-scanner').classList.add('hidden');
                 
-                let logsOrdenados = [...logsAtividades].sort((a,b) => b.data - a.data);
-                container.innerHTML = logsOrdenados.map(log => {
+                let html = "";
+                const logsOrdenados = [...logsAtividades].sort((a,b) => b.data - a.data);
+                
+                logsOrdenados.forEach(log => {
                     const userRef = EQUIPE.find(u => u.nome === log.usuario) || {cor: "text-slate-500 bg-slate-50"};
-                    return `<div class="bg-white p-5 rounded-[2rem] border border-slate-100 mb-3 shadow-sm">
+                    html += `<div class="bg-white p-5 rounded-[2rem] border border-slate-100 mb-3 shadow-sm">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-[7px] font-black px-2 py-1 rounded-lg text-indigo-600 bg-indigo-50 uppercase">${log.acao}</span>
-                            <span class="text-[8px] font-bold text-slate-300">${new Date(log.data).toLocaleString()}</span>
+                            <span class="text-[8px] font-bold text-slate-300">${new Date(log.data).toLocaleTimeString()}</span>
                         </div>
                         <h4 class="text-[12px] font-black uppercase text-slate-800">${log.produto}</h4>
                         <p class="text-[9px] font-black mt-2 px-3 py-1 rounded-full inline-block ${userRef.cor}">${log.usuario}</p>
                     </div>`;
-                }).join('') || '<p class="text-center py-10 font-bold text-slate-300">Nenhum log encontrado.</p>';
+                });
+                container.innerHTML = html || '<p class="text-center py-10 font-bold text-slate-300">Nenhum log...</p>';
                 return;
             }
 
-            // Exibir botão de relatório também na aba de Alertas
-            if (abaAtiva === 'auditoria') btnRelatorio.classList.remove('hidden');
-            else btnRelatorio.classList.add('hidden');
-
+            // Interface Estoque/Auditoria
+            btnRelatorio.classList.toggle('hidden', abaAtiva !== 'auditoria');
             document.getElementById('wrapper-scanner').classList.remove('hidden');
+            container.innerHTML = '';
             
             let filtrados = estoque.filter(i => {
-                const match = (i.produto || "").toUpperCase().includes(termo) || (i.ean || "").toString().includes(termo);
+                const matchBusca = (i.produto || "").toUpperCase().includes(termo) || (i.ean || "").toString().includes(termo);
                 if (abaAtiva === 'auditoria') {
-                    return match && (calcularDias(i.vencimento) <= 7);
+                    return matchBusca && (difDias(i.vencimento) <= 7);
                 }
-                return match;
+                return matchBusca;
             });
 
-            document.getElementById('contador').innerText = `${filtrados.length} ITENS`;
-            container.innerHTML = filtrados.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento)).map(item => {
-                const d = calcularDias(item.vencimento);
-                const corStatus = d < 0 ? 'bg-red-500' : (d <= 7 ? 'bg-amber-500' : 'bg-emerald-500');
-                const bordaStatus = d < 0 ? 'border-vencido' : (d <= 7 ? 'border-alerta' : 'border-ok');
-                
-                return `<div class="bg-white p-5 rounded-[2.5rem] shadow-sm flex justify-between items-center ${bordaStatus}">
+            document.getElementById('contador').innerText = `${filtrados.length} ITENS ENCONTRADOS`;
+            
+            filtrados.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento)).forEach(item => {
+                const d = difDias(item.vencimento);
+                const classeBorda = d < 0 ? 'border-vencido' : (d <= 7 ? 'border-alerta' : 'border-ok');
+                const classeBadge = d < 0 ? 'bg-red-500' : (d <= 7 ? 'bg-amber-500' : 'bg-emerald-500');
+
+                container.innerHTML += `<div class="bg-white p-5 rounded-[2.5rem] shadow-sm flex justify-between items-center ${classeBorda}">
                     <div class="flex-1">
-                        <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${corStatus} text-white uppercase mb-2 inline-block">${d < 0 ? 'Vencido' : d + ' Dias'}</span>
+                        <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${classeBadge} text-white uppercase mb-2 inline-block">${d < 0 ? 'Vencido' : d + ' Dias'}</span>
                         <h3 class="font-black text-slate-800 text-sm uppercase leading-tight">${item.produto}</h3>
                         <p class="text-[10px] text-slate-400 font-bold mt-1">📅 ${item.vencimento.split('-').reverse().join('/')}</p>
                     </div>
                     <div class="text-right ml-4">
-                        <p class="font-black text-indigo-600 text-xl tracking-tighter">${item.quantidade} <span class="text-[9px]">UN</span></p>
-                        <button onclick='prepararEdicao(${JSON.stringify(item).replace(/'/g, "&apos;")})' class="bg-slate-50 text-slate-600 px-4 py-2 rounded-xl text-[9px] font-black uppercase mt-3 border border-slate-100">Editar</button>
+                        <p class="font-black text-indigo-600 text-xl tracking-tighter">${item.quantidade || 0} <span class="text-[9px]">UN</span></p>
+                        <button onclick='prepararEdicao(${JSON.stringify(item)})' class="bg-slate-50 text-slate-600 px-4 py-2 rounded-xl text-[9px] font-black uppercase mt-3 border border-slate-100">Editar</button>
                     </div>
                 </div>`;
-            }).join('');
+            });
         }
 
-        // --- SISTEMA DE ACESSO ---
+        // AÇÕES
         function prepararLogin(nome) { document.getElementById('nome-selecionado').innerText = nome; document.getElementById('modal-senha').classList.remove('hidden'); }
         function fecharSenha() { document.getElementById('modal-senha').classList.add('hidden'); document.getElementById('input-senha').value = ''; }
         function logout() { localStorage.removeItem('sessaoNewMarket'); location.reload(); }
+        
         function validarAcesso() {
             const pass = document.getElementById('input-senha').value;
             const nome = document.getElementById('nome-selecionado').innerText;
@@ -269,14 +273,13 @@
             renderizar();
         }
 
-        // --- SCANNER E CADASTRO ---
-        function abrirModalScanner() {
+        async function abrirModalScanner() {
             document.getElementById('modal-cadastro').classList.remove('hidden');
+            if(html5QrCode) await html5QrCode.clear(); 
             html5QrCode = new Html5Qrcode("reader");
             html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (txt) => {
                 document.getElementById('ean').value = txt;
                 buscarEAN(txt);
-                // Beep ou feedback visual aqui se desejar
             }).catch(()=>{});
         }
 
@@ -289,42 +292,31 @@
         }
 
         function fecharModalScanner() {
-            const limpar = () => { 
+            const reset = () => { 
                 document.getElementById('modal-cadastro').classList.add('hidden'); 
                 ['edit-id','nome','data','ean','qtd'].forEach(i => document.getElementById(i).value=''); 
                 document.getElementById('reader-container').classList.remove('hidden'); 
-                document.getElementById('btn-excluir').classList.add('hidden'); 
+                document.getElementById('btn-excluir').classList.add('hidden');
+                document.getElementById('titulo-modal').innerText = "Novo Registro";
             };
             if(html5QrCode) {
-                html5QrCode.stop().then(() => { html5QrCode = null; limpar(); }).catch(() => limpar());
-            } else limpar();
+                html5QrCode.stop().then(() => { html5QrCode = null; reset(); }).catch(reset);
+            } else reset();
         }
 
         async function salvarItem() {
             const id = document.getElementById('edit-id').value;
-            const n = document.getElementById('nome').value;
+            const n = document.getElementById('nome').value.trim().toUpperCase();
             const d = document.getElementById('data').value;
-            const q = document.getElementById('qtd').value || 0;
-            const eanVal = document.getElementById('ean').value;
+            const q = parseInt(document.getElementById('qtd').value) || 0;
+            const ean = document.getElementById('ean').value;
 
             if (n && d) {
-                const dados = { 
-                    produto: n.toUpperCase(), 
-                    vencimento: d, 
-                    ean: eanVal, 
-                    quantidade: q, 
-                    atualizadoPor: usuarioSessao.nome,
-                    ultimaModificacao: new Date().getTime()
-                };
-                if (id) { 
-                    await db.collection("validades").doc(id).update(dados); 
-                    registrarLog('EDITOU', n); 
-                } else { 
-                    await db.collection("validades").add(dados); 
-                    registrarLog('CADASTROU', n); 
-                }
+                const dados = { produto: n, vencimento: d, ean: ean, quantidade: q, user: usuarioSessao.nome, timestamp: new Date().getTime() };
+                if (id) { await db.collection("validades").doc(id).update(dados); registrarLog('EDITOU', n); }
+                else { await db.collection("validades").add(dados); registrarLog('CADASTROU', n); }
                 fecharModalScanner();
-            } else { alert("Nome e Data são obrigatórios!"); }
+            } else { alert("Preencha Nome e Data!"); }
         }
 
         function prepararEdicao(item) {
@@ -340,33 +332,42 @@
         }
 
         async function excluirItem() {
-            if(confirm("Excluir permanentemente?")) {
+            if(confirm("Deseja apagar permanentemente?")) {
                 const id = document.getElementById('edit-id').value;
                 const n = document.getElementById('nome').value;
                 await db.collection("validades").doc(id).delete();
-                registrarLog('DELETOU', n);
+                registrarLog('APAGOU', n);
                 fecharModalScanner();
             }
         }
 
-        // --- RELATÓRIO CORRIGIDO ---
+        // RELATÓRIO BLINDADO v15.4.3
         function gerarRelatorio() {
-            let msg = `*📢 NEW MARKET - RELATÓRIO DE VENCIMENTOS*\n`;
-            msg += `_Gerado por: ${usuarioSessao.nome}_\n`;
-            msg += `------------------------------------------\n\n`;
+            let itensAlerta = estoque.filter(i => difDias(i.vencimento) <= 7);
+            
+            if(itensAlerta.length === 0) {
+                alert("Nenhum item em alerta para gerar relatório!");
+                return;
+            }
 
-            const alerta = estoque.filter(i => calcularDias(i.vencimento) <= 7);
+            itensAlerta.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
 
-            if(alerta.length === 0) {
-                msg += "✅ *Nenhum item vencido ou próximo do vencimento.*";
-            } else {
-                alerta.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento)).forEach(i => {
-                    const dias = calcularDias(i.vencimento);
-                    const status = dias < 0 ? "🔴 VENCIDO" : `🟡 VENCE EM ${dias} DIAS`;
-                    msg += `📦 *${i.produto}*\n`;
-                    msg += `${status} (${i.vencimento.split('-').reverse().join('/')})\n`;
-                    msg += `Qtd: ${i.quantidade} unidades\n\n`;
-                });
+            let msg = `*📢 NEW MARKET - ALERTA DE VALIDADE*\n`;
+            msg += `_Responsável: ${usuarioSessao.nome}_\n`;
+            msg += `--------------------------------\n\n`;
+
+            // Limite de 25 itens para não quebrar o link do WhatsApp
+            const maxItens = 25;
+            const listaParaEnviar = itensAlerta.slice(0, maxItens);
+
+            listaParaEnviar.forEach(i => {
+                const dias = difDias(i.vencimento);
+                const status = dias < 0 ? "❌ VENCIDO" : `⚠️ FALTAM ${dias} DIAS`;
+                msg += `*${i.produto}*\n${status} (${i.vencimento.split('-').reverse().join('/')})\nQtd: ${i.quantidade || 0}\n\n`;
+            });
+
+            if(itensAlerta.length > maxItens) {
+                msg += `_... e mais ${itensAlerta.length - maxItens} itens no sistema._`;
             }
 
             const link = `https://wa.me/?text=${encodeURIComponent(msg)}`;
