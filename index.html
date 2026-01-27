@@ -3,88 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.3.1 - Paulo Souza</title>
+    <title>New Market v16.5.7 - Paulo Souza</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIk5ldyBNYXJrZXQgdiAxNiIsCiAgInNob3J0X25hbWUiOiAiTmV3IE1hcmtldCIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMDAzMzY2IiwKICAidGhlbWV_Y29sb3IiOiAiIzAwMzM2NiIsCiAgImljb25zIjogW3sgInNyYyI6ICJodHRwczovL2Nkbi1pY29ucy1wbmcuZmxhdGiconsLmNvbS81MTIvMzA4MS8zMDgxOTg2LnBuZyIsICJzaXplcyI6ICI1MTJ4NTEyIiwgInR5cGUiOiAiaW1hZ2UvcG5nIiB9IF0KfQ==">
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
     <style>
-        body { -webkit-tap-highlight-color: transparent; font-family: sans-serif; background-color: #f1f5f9; overflow-x: hidden; }
+        body { -webkit-tap-highlight-color: transparent; font-family: sans-serif; background-color: #f8fafc; overflow-x: hidden; }
         .hidden-app { display: none !important; }
         .bg-empresa-azul { background-color: #003366; } 
         .bg-empresa-amarelo { background-color: #FFD700; }
-        .bg-gradient-premium { background: linear-gradient(180deg, #0f172a 0%, #2563eb 100%); }
-        .btn-user-premium { background: #f8fafc; border: 2px solid #e2e8f0; transition: all 0.3s; }
-        .btn-user-premium:active { border-color: #3b82f6; background: #eff6ff; transform: scale(0.98); }
-        .btn-nav-active { background-color: #003366; color: white; font-weight: 900; box-shadow: 0 4px 12px rgba(0,51,102,0.2); }
-        .btn-nav-inactive { background-color: #E2E8F0; color: #64748B; font-weight: 700; }
+        .online-pulse { width: 8px; height: 8px; background-color: #4ade80; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; margin-right: 6px; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); } 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 51, 102, 0.1); }
     </style>
 </head>
 <body>
 
-    <div id="lockdownView" class="hidden fixed inset-0 bg-slate-900 z-[200] flex items-center justify-center p-8 text-center">
-        <div class="max-w-xs">
-            <div class="text-6xl mb-6">🛠️</div>
-            <h2 class="text-white font-black uppercase text-2xl mb-4 italic">Sistema em Manutenção</h2>
-            <p class="text-slate-400 text-sm font-bold uppercase leading-relaxed mb-8">Estamos realizando atualizações técnicas para melhorar sua experiência. Voltamos logo!</p>
-            <div class="h-1 w-20 bg-empresa-amarelo mx-auto rounded-full"></div>
-            <p class="text-[10px] text-slate-500 mt-10 font-black uppercase tracking-widest">Paulo Souza by 2026</p>
+    <div id="modal-senha" class="hidden fixed inset-0 bg-slate-900/95 z-[600] flex items-center justify-center p-6 text-center">
+        <div class="bg-white w-full max-w-xs rounded-[3rem] p-10 shadow-2xl">
+            <h3 id="nome-selecionado" class="font-black text-[#003366] uppercase mb-6 tracking-widest text-xl"></h3>
+            <input type="password" id="input-senha" placeholder="••••" class="w-full p-5 bg-slate-100 rounded-2xl text-center font-black outline-none mb-8 text-4xl tracking-widest border-2 border-transparent focus:border-blue-500">
+            <div class="flex gap-3">
+                <button onclick="fecharSenha()" class="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-[10px] uppercase">Sair</button>
+                <button id="btn-confirmar-senha" class="flex-[2] py-4 bg-[#003366] text-white rounded-2xl font-black text-[10px] uppercase shadow-lg">Entrar</button>
+            </div>
         </div>
     </div>
 
-    <div id="loginView" class="fixed inset-0 bg-gradient-premium z-[100] flex items-center justify-center p-6 text-center">
+    <div id="lockdownView" class="hidden fixed inset-0 bg-[#0f172a] z-[500] flex items-center justify-center p-8 text-center">
+        <div class="max-w-xs text-white">
+            <div class="text-6xl mb-6">🛠️</div>
+            <h2 class="font-black uppercase text-2xl mb-4 italic">Manutenção</h2>
+            <p class="text-slate-400 text-sm font-bold uppercase mb-8">O sistema está sendo ajustado por Paulo Souza.</p>
+            <div class="h-1 w-20 bg-empresa-amarelo mx-auto rounded-full"></div>
+        </div>
+    </div>
+
+    <div id="loginView" class="fixed inset-0 bg-gradient-to-b from-[#003366] to-[#1e40af] z-[100] flex items-center justify-center p-6 text-center">
         <div class="bg-white w-full max-w-sm rounded-[3.5rem] p-8 shadow-2xl flex flex-col min-h-[580px]">
             <div class="flex-grow">
                 <div class="w-20 h-20 bg-empresa-azul rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-empresa-amarelo text-3xl font-black italic shadow-xl">NM</div>
                 <h2 class="text-xl font-black uppercase text-slate-800 italic mb-8 tracking-tight">Controle de Validades</h2>
-                <div id="lista-usuarios" class="space-y-3 max-h-[300px] overflow-y-auto pr-1"></div>
+                <div id="lista-usuarios" class="space-y-3 max-h-[300px] overflow-y-auto pr-2"></div>
             </div>
-            <div class="mt-8 pt-6 border-t border-slate-100">
-                <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none">Desenvolvido por</p>
-                <p class="text-[13px] font-black text-blue-700 uppercase tracking-widest mt-2 italic">Paulo Souza by 2026</p>
-            </div>
+            <p class="text-[13px] font-black text-blue-700 uppercase tracking-widest mt-6 italic">Paulo Souza by 2026</p>
         </div>
     </div>
 
     <div id="appView" class="hidden-app">
-        <header class="bg-empresa-azul p-6 sticky top-0 z-30 shadow-lg rounded-b-[2.5rem]">
-            <div class="flex justify-between items-center mb-6">
+        <header class="bg-[#003366] p-6 sticky top-0 z-30 shadow-xl rounded-b-[3rem] border-b-4 border-[#FFD700]">
+            <div class="flex justify-between items-start mb-6 text-white">
                 <div>
-                    <h1 class="font-black text-2xl italic text-empresa-amarelo uppercase leading-tight">New Market</h1>
-                    <p id="user-display" onclick="abrirPerfil()" class="text-[10px] font-bold text-blue-200 uppercase tracking-widest h-4 cursor-pointer"></p>
+                    <h1 class="font-black text-3xl italic text-[#FFD700] uppercase tracking-tighter">New Market</h1>
+                    <div class="flex items-center mt-2">
+                        <span class="online-pulse"></span>
+                        <p id="user-display" class="text-[11px] font-black uppercase tracking-widest"></p>
+                    </div>
                 </div>
-                <div class="flex gap-2">
-                    <button id="btn-manutencao" onclick="abrirModalManutencao()" class="hidden bg-white/10 p-3 rounded-2xl text-white border border-white/20">⚙️</button>
-                    <button onclick="logout()" class="bg-white/10 p-3 rounded-2xl text-white border border-white/20">🚪</button>
+                <button onclick="logout()" class="bg-white/10 p-4 rounded-2xl border border-white/20 active:scale-90 transition-all">🚪</button>
+            </div>
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR PRODUTO..." class="w-full bg-white p-5 rounded-2xl text-sm font-black uppercase outline-none shadow-inner border-4 border-transparent focus:border-[#FFD700]">
+        </header>
+
+        <main class="max-w-lg mx-auto p-5 pb-40">
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <div class="bg-red-600 p-4 rounded-[2rem] text-center text-white border-b-4 border-red-800 shadow-lg">
+                    <p class="text-[8px] font-black opacity-60 uppercase">Vencidos</p>
+                    <p id="dash-vencidos" class="text-xl font-black">0</p>
+                </div>
+                <div class="bg-[#FFD700] p-4 rounded-[2rem] text-center text-slate-900 border-b-4 border-yellow-600 shadow-lg">
+                    <p class="text-[8px] font-black opacity-60 uppercase">Alerta</p>
+                    <p id="dash-alerta" class="text-xl font-black">0</p>
+                </div>
+                <div class="bg-white p-4 rounded-[2rem] text-center text-slate-800 border-b-4 border-slate-200 shadow-lg">
+                    <p class="text-[8px] font-black opacity-40 uppercase">Total</p>
+                    <p id="dash-total" class="text-xl font-black">0</p>
                 </div>
             </div>
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR PRODUTO..." class="w-full bg-white p-4 rounded-2xl text-sm font-black uppercase outline-none shadow-inner border-2 border-transparent focus:border-yellow-400 transition-all">
-        </header>
-        <main class="max-w-lg mx-auto p-5 pb-40">
+
+            <button id="btn-relatorio" onclick="gerarRelatorioRetirada()" class="hidden w-full bg-emerald-600 text-white py-4 rounded-2xl font-black uppercase text-[10px] shadow-lg mb-6 flex items-center justify-center gap-2">
+                📄 GERAR LISTA DE RETIRADA
+            </button>
+
             <div id="container-produtos" class="space-y-4"></div>
         </main>
+        
+        <div class="fixed bottom-8 left-0 right-0 flex justify-center px-8 z-40">
+            <button onclick="abrirCadastro()" class="w-full max-w-sm bg-[#FFD700] text-slate-900 py-6 rounded-[2.5rem] shadow-2xl font-black text-xs uppercase border-4 border-white active:scale-95 transition-all">
+                + CADASTRAR / SCANNER
+            </button>
+        </div>
     </div>
 
-    <div id="modal-manutencao" class="hidden fixed inset-0 bg-slate-900/95 z-[170] flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 text-center shadow-2xl">
-            <h3 class="font-black text-blue-900 uppercase mb-4 tracking-widest">Painel de Controle</h3>
-            <div class="space-y-4 mb-8">
-                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                    <span class="text-[10px] font-black uppercase text-slate-600">Modo Manutenção</span>
-                    <button id="toggle-lockdown" onclick="toggleManutencao()" class="w-12 h-6 bg-slate-300 rounded-full relative transition-all">
-                        <div id="toggle-ball" class="w-4 h-4 bg-white rounded-full absolute top-1 left-1 transition-all"></div>
-                    </button>
-                </div>
-                <button onclick="limparVencidosAntigos()" class="w-full p-4 bg-red-50 rounded-2xl text-[10px] font-black uppercase text-red-600 border border-red-100">Apagar Vencidos +30d</button>
+    <div id="modal-cadastro" class="hidden fixed inset-0 bg-white z-[800] overflow-y-auto">
+        <div class="max-w-lg mx-auto p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-black uppercase text-[#003366] italic">Scanner & Registro</h2>
+                <button onclick="fecharModalCadastro()" class="text-4xl text-slate-300">&times;</button>
             </div>
-            <button onclick="fecharModalManutencao()" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase">Fechar</button>
+            <div id="reader-container" class="relative w-full aspect-video bg-black rounded-[2rem] overflow-hidden mb-6 border-4 border-slate-100">
+                <div id="reader"></div>
+            </div>
+            <div class="space-y-4">
+                <input type="text" id="p-ean" placeholder="CÓDIGO EAN" class="w-full p-5 bg-slate-50 rounded-2xl font-mono text-blue-700 font-bold border-2 border-transparent focus:border-blue-500 outline-none">
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-5 bg-slate-50 rounded-2xl font-black uppercase outline-none">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="date" id="p-validade" class="w-full p-5 bg-slate-50 rounded-2xl font-bold outline-none">
+                    <input type="tel" id="p-qtd" placeholder="QTD" class="w-full p-5 bg-slate-50 rounded-2xl font-black text-center text-2xl outline-none">
+                </div>
+                <input type="hidden" id="edit-id">
+                <button onclick="salvarProduto()" class="w-full py-6 bg-[#003366] text-white rounded-[2.5rem] font-black uppercase shadow-xl tracking-widest">Confirmar Dados</button>
+                <button id="btn-excluir" onclick="solicitarSenhaExclusao()" class="hidden w-full py-4 text-red-600 font-black uppercase text-xs">Excluir Produto</button>
+            </div>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = { /* Seu Config Firebase */ };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
+            authDomain: "mercado-c3e95.firebaseapp.com",
+            projectId: "mercado-c3e95",
+            storageBucket: "mercado-c3e95.firebasestorage.app",
+            messagingSenderId: "883539091925",
+            appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c"
+        };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
@@ -99,69 +148,167 @@
             { nome: "TAMIRIS", cargo: "EQUIPE", pass: "tamiris123" }
         ];
 
-        let usuarioSessao = null, emManutencao = false;
+        let usuarioSessao = null, estoque = [], emManutencao = false, scannerInstancia = null;
 
-        // VERIFICA STATUS DE MANUTENÇÃO NA NUVEM
-        function checkLockdown() {
+        // FUNÇÃO X: INTELIGÊNCIA OPERACIONAL
+        function getAcaoSugerida(dias) {
+            if (dias < 0) return { acao: "RETIRAR IMEDIATAMENTE", classe: "bg-red-600 text-white" };
+            if (dias === 0) return { acao: "DESCONTO 70% OU QUEBRA", classe: "bg-orange-600 text-white" };
+            if (dias <= 3) return { acao: "PROMOÇÃO URGENTE (50%)", classe: "bg-yellow-400 text-slate-900" };
+            if (dias <= 7) return { acao: "REPOR / MONITORAR", classe: "bg-blue-100 text-blue-700" };
+            return { acao: "PRODUTO EM DIA", classe: "bg-slate-50 text-slate-400" };
+        }
+
+        function monitorarLockdown() {
             db.collection("config").doc("status").onSnapshot(doc => {
-                if (doc.exists) {
-                    emManutencao = doc.data().manutencao;
-                    aplicarLockdown();
-                }
+                if (doc.exists) emManutencao = doc.data().manutencao;
+                aplicarLockdown();
             });
         }
 
         function aplicarLockdown() {
-            const lockdownDiv = document.getElementById('lockdownView');
             const isPaulo = usuarioSessao && usuarioSessao.nome === "PAULO";
-            
-            // Se estiver em manutenção e NÃO for o Paulo, bloqueia tudo.
-            if (emManutencao && !isPaulo) {
-                lockdownDiv.classList.remove('hidden');
-            } else {
-                lockdownDiv.classList.add('hidden');
-            }
-            
-            // Atualiza o botão visual no painel de manutenção
-            const ball = document.getElementById('toggle-ball');
-            const bg = document.getElementById('toggle-lockdown');
-            if (emManutencao) {
-                ball.style.left = "26px"; bg.style.backgroundColor = "#ef4444";
-            } else {
-                ball.style.left = "4px"; bg.style.backgroundColor = "#cbd5e1";
-            }
+            const div = document.getElementById('lockdownView');
+            (usuarioSessao && emManutencao && !isPaulo) ? div.classList.remove('hidden') : div.classList.add('hidden');
         }
 
-        async function toggleManutencao() {
-            if (usuarioSessao.nome === "PAULO" || usuarioSessao.cargo === "GERENTE") {
-                await db.collection("config").doc("status").set({ manutencao: !emManutencao });
-            } else {
-                alert("Apenas desenvolvedor/gerente!");
-            }
-        }
-
-        // Funções de login e sistema mantidas, chamando checkLockdown no início
         window.onload = function() {
-            checkLockdown();
-            // ... resto do carregamento de lista de usuários ...
+            monitorarLockdown();
+            const lista = document.getElementById('lista-usuarios');
+            EQUIPE.forEach(u => {
+                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-5 px-6 bg-slate-50 border border-slate-100 rounded-2xl font-black uppercase text-[11px] flex justify-between items-center mb-2 active:bg-blue-50 transition-all"><span>${u.nome}</span><span class="opacity-30 text-[9px]">${u.cargo}</span></button>`;
+            });
+            const salvo = localStorage.getItem('sessaoNewMarket');
+            if (salvo) { usuarioSessao = EQUIPE.find(u => u.nome === salvo); if (usuarioSessao) entrarNoApp(); }
         };
 
-        function entrarNoApp() {
-            // Verifica novamente ao entrar
-            if (emManutencao && usuarioSessao.nome !== "PAULO") {
-                alert("O sistema entrou em manutenção agora.");
-                logout();
-                return;
-            }
-            document.getElementById('loginView').classList.add('hidden-app');
-            document.getElementById('appView').classList.remove('hidden-app');
-            if (usuarioSessao.cargo === "GERENTE" || usuarioSessao.nome === "PAULO") {
-                document.getElementById('btn-manutencao').classList.remove('hidden');
-            }
-            escutarNuvem();
+        function prepararLogin(n) {
+            document.getElementById('nome-selecionado').innerText = n;
+            document.getElementById('modal-senha').classList.remove('hidden');
+            document.getElementById('btn-confirmar-senha').onclick = () => {
+                const p = document.getElementById('input-senha').value;
+                const u = EQUIPE.find(x => x.nome === n);
+                if (p === u.pass) {
+                    usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome);
+                    fecharSenha(); entrarNoApp();
+                } else alert("Incorreta!");
+            };
         }
 
-        // [Demais funções de renderizar, salvar e gerenciar senhas mantidas da v16.3.0]
+        function entrarNoApp() {
+            document.getElementById('loginView').classList.add('hidden-app');
+            document.getElementById('appView').classList.remove('hidden-app');
+            document.getElementById('user-display').innerHTML = `OLÁ, <span class="text-[#FFD700]">${usuarioSessao.nome}</span>`;
+            db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
+                estoque = [];
+                snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
+                renderizar();
+            });
+            aplicarLockdown();
+        }
+
+        function renderizar() {
+            const container = document.getElementById('container-produtos');
+            const busca = document.getElementById('input-busca').value.toUpperCase();
+            let cV = 0, cA = 0; container.innerHTML = '';
+
+            estoque.filter(i => (i.produto || "").includes(busca) || (i.ean || "").includes(busca)).forEach(item => {
+                const dias = Math.ceil((new Date(item.vencimento) - new Date()) / (1000*60*60*24));
+                const decisao = getAcaoSugerida(dias);
+                let estiloCard = "bg-white border-slate-200";
+
+                if (dias < 0) { estiloCard = "bg-red-50 border-red-600"; cV++; }
+                else if (dias <= 7) { estiloCard = "bg-yellow-50 border-yellow-500"; cA++; }
+
+                container.innerHTML += `
+                    <div class="${estiloCard} p-6 rounded-[2.5rem] border-2 shadow-sm flex flex-col mb-4 active:scale-[0.98] transition-all">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="max-w-[70%]">
+                                <h3 class="font-black text-slate-800 text-base uppercase leading-tight truncate">${item.produto}</h3>
+                                <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase">Val: <span class="text-blue-700">${item.vencimento.split('-').reverse().join('/')}</span></p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[9px] font-black text-slate-300">QTD</p>
+                                <p class="text-3xl font-black text-[#003366] leading-none">${item.quantidade}</p>
+                            </div>
+                        </div>
+                        <div class="${decisao.classe} text-[9px] font-black p-2 rounded-xl text-center uppercase tracking-widest mb-3">${decisao.acao}</div>
+                        <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[10px] font-black text-slate-400 uppercase self-end">Editar Produto</button>
+                    </div>`;
+            });
+
+            document.getElementById('dash-vencidos').innerText = cV;
+            document.getElementById('dash-alerta').innerText = cA;
+            document.getElementById('dash-total').innerText = estoque.length;
+            (cV > 0 || cA > 0) ? document.getElementById('btn-relatorio').classList.remove('hidden') : document.getElementById('btn-relatorio').classList.add('hidden');
+        }
+
+        async function abrirCadastro() {
+            document.getElementById('modal-cadastro').classList.remove('hidden');
+            limparForm();
+            scannerInstancia = new Html5Qrcode("reader");
+            try {
+                await scannerInstancia.start({ facingMode: "environment" }, { fps: 15, qrbox: {width: 250, height: 150} }, (txt) => {
+                    document.getElementById('p-ean').value = txt;
+                    if (navigator.vibrate) navigator.vibrate(100);
+                    scannerInstancia.stop();
+                });
+            } catch (e) { console.log("Câmara OFF"); }
+        }
+
+        function fecharModalCadastro() { if(scannerInstancia) scannerInstancia.stop().catch(()=>{}); document.getElementById('modal-cadastro').classList.add('hidden'); }
+
+        async function salvarProduto() {
+            const id = document.getElementById('edit-id').value;
+            const dados = {
+                produto: document.getElementById('p-nome').value.toUpperCase(),
+                vencimento: document.getElementById('p-validade').value,
+                ean: document.getElementById('p-ean').value,
+                quantidade: parseInt(document.getElementById('p-qtd').value) || 0,
+                usuario: usuarioSessao.nome
+            };
+            if(!dados.produto || !dados.vencimento) return alert("Preencha tudo!");
+            id ? await db.collection("validades").doc(id).update(dados) : await db.collection("validades").add(dados);
+            fecharModalCadastro();
+        }
+
+        function prepararEdicao(item) {
+            document.getElementById('modal-cadastro').classList.remove('hidden');
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('p-nome').value = item.produto;
+            document.getElementById('p-validade').value = item.vencimento;
+            document.getElementById('p-ean').value = item.ean || '';
+            document.getElementById('p-qtd').value = item.quantidade;
+            document.getElementById('btn-excluir').classList.remove('hidden');
+        }
+
+        function solicitarSenhaExclusao() {
+            document.getElementById('nome-selecionado').innerText = "Apagar Produto?";
+            document.getElementById('modal-senha').classList.remove('hidden');
+            document.getElementById('btn-confirmar-senha').onclick = async () => {
+                if (document.getElementById('input-senha').value === usuarioSessao.pass) {
+                    await db.collection("validades").doc(document.getElementById('edit-id').value).delete();
+                    fecharSenha(); fecharModalCadastro();
+                } else alert("Senha incorreta");
+            };
+        }
+
+        function gerarRelatorioRetirada() {
+            let rel = `*NEW MARKET - LISTA DE RETIRADA*\n\n`;
+            estoque.forEach(i => {
+                const d = Math.ceil((new Date(i.vencimento) - new Date()) / (1000*60*60*24));
+                if (d <= 7) rel += `▪️ *${i.produto}*\nQtd: ${i.quantidade} | Val: ${i.vencimento.split('-').reverse().join('/')}\nStatus: ${d < 0 ? 'VENCIDO' : 'ALERTA'}\n\n`;
+            });
+            navigator.share ? navigator.share({ title: 'Relatório', text: rel }) : alert("Relatório pronto!");
+        }
+
+        function fecharSenha() { document.getElementById('modal-senha').classList.add('hidden'); document.getElementById('input-senha').value = ''; }
+        function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
+        function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; document.getElementById('btn-excluir').classList.add('hidden'); }
+        
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('data:application/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGV2ZW50ID0+IHsgfSk7'));
+        }
     </script>
 </body>
 </html>
