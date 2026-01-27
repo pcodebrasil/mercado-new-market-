@@ -199,7 +199,7 @@
                 if (doc.exists) {
                     emManutencao = doc.data().manutencao;
                 } else {
-                    db.collection("config").doc("status").set({ manutencao: false });
+                    db.collection("config").doc("status").set({ manutencao: true });
                 }
                 aplicarLockdown();
             });
