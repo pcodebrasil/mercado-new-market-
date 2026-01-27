@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SGV - New Market v12.9</title>
+    <title>SGV - New Market v13.0</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -64,9 +64,9 @@
 
         <main class="max-w-lg mx-auto p-4 pb-32">
             <div class="flex gap-2 mb-4">
-                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase transition-all">Todos</button>
-                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase transition-all">Alertas</button>
-                <button onclick="gerarRelatorio()" class="px-5 py-4 rounded-2xl bg-green-500 text-white shadow-md text-lg active:scale-95">📊</button>
+                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase">Todos</button>
+                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase">Alertas</button>
+                <button onclick="gerarRelatorio()" class="px-5 py-4 rounded-2xl bg-green-500 text-white shadow-md text-lg">📊</button>
             </div>
             <p id="contador" class="text-[10px] font-bold text-slate-400 uppercase mb-4 ml-2"></p>
             <div id="container-produtos" class="space-y-3"></div>
@@ -89,15 +89,16 @@
             <div class="space-y-4">
                 <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase focus:ring-2 ring-indigo-500 border-none">
                 <div class="grid grid-cols-2 gap-3">
-                    <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold focus:ring-2 ring-indigo-500 border-none uppercase">
-                    <input type="number" id="qtd" placeholder="QTD" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold focus:ring-2 ring-indigo-500 border-none">
+                    <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold border-none uppercase">
+                    <input type="number" id="qtd" placeholder="QTD" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold border-none">
                 </div>
-                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest mt-4 shadow-lg active:scale-95">Salvar no Sistema</button>
+                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95">Salvar no Sistema</button>
             </div>
         </div>
     </div>
 
     <script>
+        // CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -106,72 +107,66 @@
             messagingSenderId: "883539091925",
             appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c"
         };
-        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-    // ... Configuração do Firebase igual ...
-        
 
-    const EQUIPE = [
-        { nome: "ADRIANO", cargo: "ADMIN", pass: "2026" },
-        { nome: "ADRIELLE", cargo: "ADMIN", pass: "2026" },
-        { nome: "PAULO", cargo: "USER", pass: "1234" },
-        { nome: "PEDRO", cargo: "USER", pass: "1234" },
-        { nome: "LEANDRO", cargo: "USER", pass: "1234" },
-        { nome: "EDMAR", cargo: "USER", pass: "1234" },
-        { nome: "JOÃO", cargo: "USER", pass: "1234" },
-        { nome: "TAMIRIS", cargo: "USER", pass: "1234" }
-    ];
+        // VARIÁVEIS GLOBAIS
+        const EQUIPE = [
+            { nome: "ADRIANO", cargo: "ADMIN", pass: "2026" },
+            { nome: "ADRIELLE", cargo: "ADMIN", pass: "2026" },
+            { nome: "PAULO", cargo: "USER", pass: "1234" },
+            { nome: "PEDRO", cargo: "USER", pass: "1234" },
+            { nome: "LEANDRO", cargo: "USER", pass: "1234" },
+            { nome: "EDMAR", cargo: "USER", pass: "1234" },
+            { nome: "JOÃO", cargo: "USER", pass: "1234" },
+            { nome: "TAMIRIS", cargo: "USER", pass: "1234" }
+        ];
 
-    let usuarioSessao = null;
-    let nomeSelecionadoNoMomento = ""; // Variável global para garantir o login
+        let usuarioSessao = null;
+        let nomeSelecionadoNoMomento = "";
+        let estoque = [];
+        let abaAtiva = 'estoque';
+        let html5QrCode = null;
 
-    // Renderizar botões de login
-    const listaLogin = document.getElementById('lista-usuarios');
-    EQUIPE.forEach(u => {
-        listaLogin.innerHTML += `
-            <button onclick="prepararLogin('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-600 rounded-2xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-sm flex justify-between px-6 items-center border border-slate-100 mb-2">
-                <span>${u.nome}</span>
-                <span class="opacity-40 text-[7px] uppercase">${u.cargo === 'ADMIN' ? 'Gerente' : 'Equipe'}</span>
-            </button>`;
-    });
+        // LÓGICA DE LOGIN
+        const listaLogin = document.getElementById('lista-usuarios');
+        EQUIPE.forEach(u => {
+            listaLogin.innerHTML += `
+                <button onclick="prepararLogin('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-600 rounded-2xl font-black uppercase text-[10px] tracking-widest flex justify-between px-6 items-center border border-slate-100 mb-2 active:scale-95">
+                    <span>${u.nome}</span>
+                    <span class="opacity-40 text-[7px] uppercase">${u.cargo === 'ADMIN' ? 'Gerente' : 'Equipe'}</span>
+                </button>`;
+        });
 
-    function prepararLogin(nome) {
-        nomeSelecionadoNoMomento = nome; // Decisão técnica: Garante que o nome não se perca
-        document.getElementById('nome-selecionado').innerText = nome;
-        document.getElementById('modal-senha').classList.remove('hidden');
-        document.getElementById('input-senha').value = ''; // Limpa antes de usar
-        setTimeout(() => document.getElementById('input-senha').focus(), 100);
-    }
-
-    function fecharSenha() {
-        document.getElementById('modal-senha').classList.add('hidden');
-        nomeSelecionadoNoMomento = "";
-    }
-
-    function validarAcesso() {
-        const passDigitada = document.getElementById('input-senha').value;
-        
-        // Decisão Técnica: Busca o objeto do usuário na hora do clique no botão "Entrar"
-        const userObj = EQUIPE.find(u => u.nome === nomeSelecionadoNoMomento);
-
-        if (userObj && userObj.pass === passDigitada) {
-            usuarioSessao = userObj;
-            document.getElementById('modal-senha').classList.add('hidden');
-            document.getElementById('loginView').classList.add('hidden-app');
-            document.getElementById('appView').classList.remove('hidden-app');
-            document.getElementById('user-display').innerText = usuarioSessao.nome;
-            escutarNuvem();
-        } else {
-            alert("Senha Incorreta para " + nomeSelecionadoNoMomento);
+        function prepararLogin(nome) {
+            nomeSelecionadoNoMomento = nome;
+            document.getElementById('nome-selecionado').innerText = nome;
+            document.getElementById('modal-senha').classList.remove('hidden');
             document.getElementById('input-senha').value = '';
+            setTimeout(() => document.getElementById('input-senha').focus(), 100);
         }
-    }
 
-    // ... Restante do código (escutarNuvem, renderizar, salvarItem) permanece igual ...
-</script>
-    
-        
+        function fecharSenha() {
+            document.getElementById('modal-senha').classList.add('hidden');
+        }
+
+        function validarAcesso() {
+            const passDigitada = document.getElementById('input-senha').value;
+            const userObj = EQUIPE.find(u => u.nome === nomeSelecionadoNoMomento);
+
+            if (userObj && userObj.pass === passDigitada) {
+                usuarioSessao = userObj;
+                document.getElementById('modal-senha').classList.add('hidden');
+                document.getElementById('loginView').classList.add('hidden-app');
+                document.getElementById('appView').classList.remove('hidden-app');
+                document.getElementById('user-display').innerText = usuarioSessao.nome;
+                escutarNuvem();
+            } else {
+                alert("Senha Incorreta!");
+            }
+        }
+
+        // LÓGICA DE DADOS
         function escutarNuvem() {
             db.collection("validades").onSnapshot((snapshot) => {
                 estoque = [];
@@ -196,16 +191,13 @@
                 return matches;
             });
 
-            document.getElementById('contador').innerText = `${filtrados.length} Itens na lista`;
+            document.getElementById('contador').innerText = `${filtrados.length} Itens encontrados`;
 
             filtrados.sort((a,b) => new Date(a.vencimento || a.data) - new Date(b.vencimento || b.data)).forEach(item => {
                 const n = item.produto || item.nome || "SEM NOME";
                 const v = item.vencimento || item.data;
                 const q = item.quantidade || 0;
-                
-                let diasTxt = "---";
-                let corCard = "card-ok";
-                let corBadge = "bg-green-500";
+                let diasTxt = "---"; let corCard = "card-ok"; let corBadge = "bg-green-500";
 
                 if(v) {
                     const d = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
@@ -215,7 +207,7 @@
                 }
 
                 container.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl shadow-sm flex justify-between items-center ${corCard}">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm flex justify-between items-center ${corCard} mb-3">
                         <div>
                             <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${corBadge} text-white uppercase mb-1 inline-block">${diasTxt}</span>
                             <h3 class="font-bold text-slate-800 text-sm uppercase leading-tight">${n}</h3>
@@ -231,15 +223,8 @@
 
         function mudarAba(a) {
             abaAtiva = a;
-            const btnE = document.getElementById('btn-estoque');
-            const btnA = document.getElementById('btn-auditoria');
-            if (a === 'estoque') {
-                btnE.className = "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase";
-                btnA.className = "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase";
-            } else {
-                btnE.className = "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase";
-                btnA.className = "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase";
-            }
+            document.getElementById('btn-estoque').className = a === 'estoque' ? "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase" : "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase";
+            document.getElementById('btn-auditoria').className = a === 'auditoria' ? "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase" : "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase";
             renderizar();
         }
 
@@ -267,9 +252,7 @@
         function abrirModalScanner() {
             document.getElementById('modal-cadastro').classList.remove('hidden');
             html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {
-                // EAN detectado
-            }).catch(()=>{});
+            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {}).catch(()=>{});
         }
 
         function fecharModalScanner() {
