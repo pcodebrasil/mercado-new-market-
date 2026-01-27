@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v15.4.3 Titanium</title>
+    <title>New Market v15.4.4 Titanium</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,9 +12,11 @@
         body { -webkit-tap-highlight-color: transparent; font-family: sans-serif; background-color: #f8fafc; }
         .hidden-app { display: none !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .border-vencido { border-left: 8px solid #ef4444; }
+        .border-hoje { border-left: 10px solid #ef4444; animation: pulse-border 2s infinite; }
+        .border-vencido { border-left: 8px solid #7f1d1d; }
         .border-alerta { border-left: 8px solid #f59e0b; }
         .border-ok { border-left: 8px solid #10b981; }
+        @keyframes pulse-border { 0% { border-left-color: #ef4444; } 50% { border-left-color: #fee2e2; } 100% { border-left-color: #ef4444; } }
         .btn-inactive { background-color: #ffffff; color: #64748b; border: 1px solid #e2e8f0; font-weight: 800; }
         .btn-active { background-color: #4f46e5; color: #ffffff; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3); font-weight: 800; }
     </style>
@@ -25,7 +27,7 @@
         <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 shadow-2xl border-b-[10px] border-indigo-600">
             <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-black text-xl shadow-lg">NM</div>
             <h2 class="text-2xl font-black italic uppercase text-slate-800 tracking-tighter">New Market</h2>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 mb-8">v15.4.3 | Titanium Edition</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 mb-8">v15.4.4 | Titanium Edition</p>
             <div id="lista-usuarios" class="space-y-2.5 max-h-[50vh] overflow-y-auto no-scrollbar"></div>
         </div>
     </div>
@@ -67,17 +69,6 @@
         </div>
     </div>
 
-    <div id="modal-senha" class="hidden fixed inset-0 bg-slate-900/95 z-[110] flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-xs rounded-[2.5rem] p-8 shadow-2xl text-center">
-            <h3 id="nome-selecionado" class="font-black text-indigo-600 uppercase mb-4 text-xl"></h3>
-            <input type="password" id="input-senha" placeholder="SENHA" class="w-full p-4 bg-slate-100 rounded-2xl text-center font-black outline-none mb-6 text-xl tracking-widest">
-            <div class="flex gap-2">
-                <button onclick="fecharSenha()" class="flex-1 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-[10px] uppercase">Sair</button>
-                <button onclick="validarAcesso()" class="flex-[2] py-4 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase">Entrar</button>
-            </div>
-        </div>
-    </div>
-
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-white z-[120] overflow-y-auto p-6">
         <div class="max-w-lg mx-auto">
             <div class="flex justify-between items-center mb-6">
@@ -101,8 +92,18 @@
         </div>
     </div>
 
+    <div id="modal-senha" class="hidden fixed inset-0 bg-slate-900/95 z-[110] flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-xs rounded-[2.5rem] p-8 shadow-2xl text-center">
+            <h3 id="nome-selecionado" class="font-black text-indigo-600 uppercase mb-4 text-xl"></h3>
+            <input type="password" id="input-senha" placeholder="SENHA" class="w-full p-4 bg-slate-100 rounded-2xl text-center font-black outline-none mb-6 text-xl tracking-widest">
+            <div class="flex gap-2">
+                <button onclick="fecharSenha()" class="flex-1 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-[10px] uppercase">Sair</button>
+                <button onclick="validarAcesso()" class="flex-[2] py-4 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase">Entrar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -157,8 +158,7 @@
                 snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
                 renderizar();
             });
-
-            db.collection("logs").limit(50).onSnapshot(snap => {
+            db.collection("logs").limit(30).onSnapshot(snap => {
                 logsAtividades = [];
                 snap.forEach(doc => logsAtividades.push(doc.data()));
                 if(abaAtiva === 'logs') renderizar();
@@ -181,8 +181,7 @@
             hoje.setHours(0,0,0,0);
             const dataVenc = new Date(vencimento + "T12:00:00");
             dataVenc.setHours(0,0,0,0);
-            const diff = dataVenc.getTime() - hoje.getTime();
-            return Math.ceil(diff / (1000 * 3600 * 24));
+            return Math.ceil((dataVenc.getTime() - hoje.getTime()) / (1000 * 3600 * 24));
         }
 
         function renderizar() {
@@ -197,7 +196,6 @@
                 
                 let html = "";
                 const logsOrdenados = [...logsAtividades].sort((a,b) => b.data - a.data);
-                
                 logsOrdenados.forEach(log => {
                     const userRef = EQUIPE.find(u => u.nome === log.usuario) || {cor: "text-slate-500 bg-slate-50"};
                     html += `<div class="bg-white p-5 rounded-[2rem] border border-slate-100 mb-3 shadow-sm">
@@ -209,33 +207,35 @@
                         <p class="text-[9px] font-black mt-2 px-3 py-1 rounded-full inline-block ${userRef.cor}">${log.usuario}</p>
                     </div>`;
                 });
-                container.innerHTML = html || '<p class="text-center py-10 font-bold text-slate-300">Nenhum log...</p>';
+                container.innerHTML = html || '<p class="text-center py-10 font-bold text-slate-300">Nenhum registro...</p>';
                 return;
             }
 
-            // Interface Estoque/Auditoria
             btnRelatorio.classList.toggle('hidden', abaAtiva !== 'auditoria');
             document.getElementById('wrapper-scanner').classList.remove('hidden');
             container.innerHTML = '';
             
             let filtrados = estoque.filter(i => {
                 const matchBusca = (i.produto || "").toUpperCase().includes(termo) || (i.ean || "").toString().includes(termo);
-                if (abaAtiva === 'auditoria') {
-                    return matchBusca && (difDias(i.vencimento) <= 7);
-                }
+                if (abaAtiva === 'auditoria') return matchBusca && (difDias(i.vencimento) <= 7);
                 return matchBusca;
             });
 
-            document.getElementById('contador').innerText = `${filtrados.length} ITENS ENCONTRADOS`;
+            document.getElementById('contador').innerText = `${filtrados.length} ITENS`;
             
             filtrados.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento)).forEach(item => {
                 const d = difDias(item.vencimento);
-                const classeBorda = d < 0 ? 'border-vencido' : (d <= 7 ? 'border-alerta' : 'border-ok');
-                const classeBadge = d < 0 ? 'bg-red-500' : (d <= 7 ? 'bg-amber-500' : 'bg-emerald-500');
+                let label = d + " Dias";
+                let classeBorda = "border-ok";
+                let classeBadge = "bg-emerald-500";
+
+                if (d < 0) { label = "Vencido"; classeBorda = "border-vencido"; classeBadge = "bg-red-900"; }
+                else if (d === 0) { label = "VENCE HOJE"; classeBorda = "border-hoje"; classeBadge = "bg-red-600"; }
+                else if (d <= 7) { label = d + " Dias"; classeBorda = "border-alerta"; classeBadge = "bg-amber-500"; }
 
                 container.innerHTML += `<div class="bg-white p-5 rounded-[2.5rem] shadow-sm flex justify-between items-center ${classeBorda}">
                     <div class="flex-1">
-                        <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${classeBadge} text-white uppercase mb-2 inline-block">${d < 0 ? 'Vencido' : d + ' Dias'}</span>
+                        <span class="text-[8px] font-black px-3 py-1 rounded-full ${classeBadge} text-white uppercase mb-2 inline-block shadow-sm">${label}</span>
                         <h3 class="font-black text-slate-800 text-sm uppercase leading-tight">${item.produto}</h3>
                         <p class="text-[10px] text-slate-400 font-bold mt-1">📅 ${item.vencimento.split('-').reverse().join('/')}</p>
                     </div>
@@ -247,11 +247,10 @@
             });
         }
 
-        // AÇÕES
+        // Funções de login e gerenciamento mantidas e otimizadas...
         function prepararLogin(nome) { document.getElementById('nome-selecionado').innerText = nome; document.getElementById('modal-senha').classList.remove('hidden'); }
         function fecharSenha() { document.getElementById('modal-senha').classList.add('hidden'); document.getElementById('input-senha').value = ''; }
         function logout() { localStorage.removeItem('sessaoNewMarket'); location.reload(); }
-        
         function validarAcesso() {
             const pass = document.getElementById('input-senha').value;
             const nome = document.getElementById('nome-selecionado').innerText;
@@ -295,7 +294,6 @@
             const reset = () => { 
                 document.getElementById('modal-cadastro').classList.add('hidden'); 
                 ['edit-id','nome','data','ean','qtd'].forEach(i => document.getElementById(i).value=''); 
-                document.getElementById('reader-container').classList.remove('hidden'); 
                 document.getElementById('btn-excluir').classList.add('hidden');
                 document.getElementById('titulo-modal').innerText = "Novo Registro";
             };
@@ -312,9 +310,9 @@
             const ean = document.getElementById('ean').value;
 
             if (n && d) {
-                const dados = { produto: n, vencimento: d, ean: ean, quantidade: q, user: usuarioSessao.nome, timestamp: new Date().getTime() };
-                if (id) { await db.collection("validades").doc(id).update(dados); registrarLog('EDITOU', n); }
-                else { await db.collection("validades").add(dados); registrarLog('CADASTROU', n); }
+                const dados = { produto: n, vencimento: d, ean: ean, quantidade: q, user: usuarioSessao.nome };
+                if (id) { await db.collection("validades").doc(id).update(dados); registrarLog('EDITOU QUANT/VAL', n); }
+                else { await db.collection("validades").add(dados); registrarLog('CADASTROU NOVO', n); }
                 fecharModalScanner();
             } else { alert("Preencha Nome e Data!"); }
         }
@@ -332,46 +330,25 @@
         }
 
         async function excluirItem() {
-            if(confirm("Deseja apagar permanentemente?")) {
+            if(confirm("Deseja apagar?")) {
                 const id = document.getElementById('edit-id').value;
                 const n = document.getElementById('nome').value;
                 await db.collection("validades").doc(id).delete();
-                registrarLog('APAGOU', n);
+                registrarLog('APAGOU PRODUTO', n);
                 fecharModalScanner();
             }
         }
 
-        // RELATÓRIO BLINDADO v15.4.3
         function gerarRelatorio() {
-            let itensAlerta = estoque.filter(i => difDias(i.vencimento) <= 7);
-            
-            if(itensAlerta.length === 0) {
-                alert("Nenhum item em alerta para gerar relatório!");
-                return;
-            }
-
-            itensAlerta.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
-
-            let msg = `*📢 NEW MARKET - ALERTA DE VALIDADE*\n`;
-            msg += `_Responsável: ${usuarioSessao.nome}_\n`;
-            msg += `--------------------------------\n\n`;
-
-            // Limite de 25 itens para não quebrar o link do WhatsApp
-            const maxItens = 25;
-            const listaParaEnviar = itensAlerta.slice(0, maxItens);
-
-            listaParaEnviar.forEach(i => {
-                const dias = difDias(i.vencimento);
-                const status = dias < 0 ? "❌ VENCIDO" : `⚠️ FALTAM ${dias} DIAS`;
-                msg += `*${i.produto}*\n${status} (${i.vencimento.split('-').reverse().join('/')})\nQtd: ${i.quantidade || 0}\n\n`;
+            let alerta = estoque.filter(i => difDias(i.vencimento) <= 7);
+            if(alerta.length === 0) return alert("Nada em alerta!");
+            let msg = `*📢 NEW MARKET - ALERTA URGENTE*\n_Auditado por: ${usuarioSessao.nome}_\n\n`;
+            alerta.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento)).slice(0, 25).forEach(i => {
+                const d = difDias(i.vencimento);
+                const status = d < 0 ? "VENCIDO" : (d === 0 ? "VENCE HOJE" : "VENCE EM " + d + " DIAS");
+                msg += `*${i.produto}*\n${status} (${i.vencimento.split('-').reverse().join('/')})\nQtd: ${i.quantidade}\n\n`;
             });
-
-            if(itensAlerta.length > maxItens) {
-                msg += `_... e mais ${itensAlerta.length - maxItens} itens no sistema._`;
-            }
-
-            const link = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-            window.open(link, '_blank');
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         }
     </script>
 </body>
