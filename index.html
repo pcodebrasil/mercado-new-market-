@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.6.0 - Paulo Souza</title>
+    <title>New Market v16.6.2 - Paulo Souza</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -22,6 +22,7 @@
         .online-pulse { width: 8px; height: 8px; background-color: #4ade80; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; margin-right: 6px; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); } 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } }
         ::-webkit-scrollbar { width: 0px; }
+        input:focus { border-color: #FFD700 !important; }
     </style>
 </head>
 <body>
@@ -29,7 +30,7 @@
     <div id="modal-senha" class="hidden fixed inset-0 bg-slate-900/95 z-[600] flex items-center justify-center p-6 text-center">
         <div class="bg-white w-full max-w-xs rounded-[3rem] p-10 shadow-2xl">
             <h3 id="nome-selecionado" class="font-black text-[#003366] uppercase mb-6 text-xl tracking-tighter"></h3>
-            <input type="password" id="input-senha" placeholder="••••" class="w-full p-5 bg-slate-100 rounded-2xl text-center font-black outline-none mb-8 text-4xl tracking-widest border-2 border-transparent focus:border-blue-500">
+            <input type="password" id="input-senha" placeholder="••••" class="w-full p-5 bg-slate-100 rounded-2xl text-center font-black outline-none mb-8 text-4xl tracking-widest border-2 border-transparent">
             <div class="flex gap-3">
                 <button onclick="fecharSenha()" class="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-[10px] uppercase">Sair</button>
                 <button id="btn-confirmar-senha" class="flex-[2] py-4 bg-[#003366] text-white rounded-2xl font-black text-[10px] uppercase shadow-lg">Entrar</button>
@@ -37,22 +38,14 @@
         </div>
     </div>
 
-    <div id="lockdownView" class="hidden fixed inset-0 bg-slate-900 z-[500] flex items-center justify-center p-8 text-center">
-        <div class="text-white">
-            <div class="text-6xl mb-6">🛠️</div>
-            <h2 class="font-black uppercase text-2xl mb-4 italic">Manutenção</h2>
-            <p class="text-slate-400 text-sm font-bold uppercase mb-8">Ajustes por Paulo Souza.</p>
-        </div>
-    </div>
-
-    <div id="loginView" class="fixed inset-0 bg-gradient-to-b from-[#003366] to-[#1e40af] z-[100] flex items-center justify-center p-6 text-center">
-        <div class="bg-white w-full max-w-sm rounded-[3.5rem] p-8 shadow-2xl flex flex-col min-h-[550px]">
+    <div id="loginView" class="fixed inset-0 bg-gradient-to-b from-[#003366] to-[#1e40af] z-[100] flex items-center justify-center p-6 text-center text-white">
+        <div class="bg-white w-full max-w-sm rounded-[3.5rem] p-8 shadow-2xl flex flex-col min-h-[550px] text-slate-800">
             <div class="flex-grow">
                 <div class="w-16 h-16 bg-empresa-azul rounded-2xl flex items-center justify-center mx-auto mb-6 text-empresa-amarelo text-2xl font-black italic shadow-xl">NM</div>
-                <h2 class="text-xl font-black uppercase text-slate-800 italic mb-8">Controle de Equipe</h2>
+                <h2 class="text-xl font-black uppercase italic mb-8">Controle de Equipe</h2>
                 <div id="lista-usuarios" class="space-y-2 max-h-[300px] overflow-y-auto"></div>
             </div>
-            <p class="text-[10px] font-black text-blue-700 uppercase tracking-widest mt-6">New Market v16.6.0</p>
+            <p class="text-[10px] font-black text-blue-700 uppercase tracking-widest mt-6 italic">Paulo Souza by 2026</p>
         </div>
     </div>
 
@@ -74,7 +67,7 @@
                 <button onclick="alternarAba('logs')" id="btn-tab-logs" class="flex-1 py-3 bg-white/10 text-white rounded-xl font-black text-[9px] uppercase transition-all">📜 Auditoria</button>
             </div>
 
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO OU EAN..." class="w-full bg-white p-4 rounded-xl text-xs font-black uppercase outline-none shadow-inner border-2 border-transparent focus:border-[#FFD700]">
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO OU EAN..." class="w-full bg-white p-4 rounded-xl text-xs font-black uppercase outline-none shadow-inner border-2 border-transparent">
         </header>
 
         <main class="max-w-lg mx-auto p-5 pb-32">
@@ -84,7 +77,7 @@
                     <div class="bg-[#FFD700] p-3 rounded-2xl text-slate-900 shadow-lg"><p class="text-[7px] font-black uppercase opacity-70">Urgente</p><p id="dash-alerta" class="text-lg font-black">0</p></div>
                     <div class="bg-white p-3 rounded-2xl text-slate-800 shadow-lg"><p class="text-[7px] font-black uppercase opacity-40">Total</p><p id="dash-total" class="text-lg font-black">0</p></div>
                 </div>
-                <button id="btn-relatorio" onclick="gerarRelatorioRetirada()" class="hidden w-full bg-emerald-600 text-white py-4 rounded-xl font-black uppercase text-[10px] shadow-lg mb-6">📄 LISTA DE RETIRADA (WHATSAPP)</button>
+                <button id="btn-relatorio" onclick="gerarRelatorioRetirada()" class="hidden w-full bg-emerald-600 text-white py-4 rounded-xl font-black uppercase text-[10px] shadow-lg mb-6 flex items-center justify-center gap-2">📄 GERAR LISTA DE RETIRADA</button>
                 <div id="container-produtos" class="space-y-3"></div>
             </div>
 
@@ -103,21 +96,21 @@
 
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-white z-[800] overflow-y-auto">
         <div class="max-w-lg mx-auto p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-lg font-black uppercase text-[#003366]">Scanner & Registro</h2>
+            <div class="flex justify-between items-center mb-6 text-[#003366]">
+                <h2 class="text-lg font-black uppercase italic">Scanner & Registro</h2>
                 <button onclick="fecharModalCadastro()" class="text-3xl text-slate-300">&times;</button>
             </div>
             <div id="reader-container" class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden mb-6"><div id="reader"></div></div>
             <div class="space-y-4">
-                <input type="text" id="p-ean" placeholder="EAN (SCANNER)" class="w-full p-4 bg-slate-50 rounded-xl font-mono text-blue-700 border-2 border-transparent focus:border-blue-500 outline-none">
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-xl font-black uppercase outline-none">
+                <input type="text" id="p-ean" placeholder="EAN (SCANNER)" onblur="buscarNomePorEAN(this.value)" class="w-full p-4 bg-slate-50 rounded-xl font-mono text-blue-700 border-2 border-transparent outline-none">
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-xl font-black uppercase outline-none transition-all duration-500">
                 <div class="grid grid-cols-2 gap-4">
                     <div><label class="text-[8px] font-black text-slate-400 ml-2 uppercase">Validade</label><input type="date" id="p-validade" class="w-full p-4 bg-slate-50 rounded-xl font-bold outline-none"></div>
                     <div><label class="text-[8px] font-black text-slate-400 ml-2 uppercase">Qtd</label><input type="tel" id="p-qtd" placeholder="0" class="w-full p-4 bg-slate-50 rounded-xl font-black text-center text-xl outline-none"></div>
                 </div>
                 <input type="hidden" id="edit-id">
                 <button onclick="salvarProduto()" class="w-full py-5 bg-[#003366] text-white rounded-xl font-black uppercase shadow-xl tracking-widest">Salvar no Banco</button>
-                <button id="btn-excluir" onclick="solicitarSenhaExclusao()" class="hidden w-full py-3 text-red-600 font-black uppercase text-[10px]">Excluir Item do Estoque</button>
+                <button id="btn-excluir" onclick="solicitarSenhaExclusao()" class="hidden w-full py-3 text-red-600 font-black uppercase text-[10px]">Excluir Item</button>
             </div>
         </div>
     </div>
@@ -145,14 +138,13 @@
             { nome: "TAMIRIS", cargo: "EQUIPE", pass: "tamiris123" }
         ];
 
-        let usuarioSessao = null, estoque = [], emManutencao = false, scannerInstancia = null;
+        let usuarioSessao = null, estoque = [], scannerInstancia = null;
 
-        // FUNÇÃO X: INTELIGÊNCIA DE AUDITORIA
         function getAcaoSugerida(dias) {
-            if (dias < 0) return { acao: "RETIRAR IMEDIATAMENTE", classe: "bg-red-600 text-white" };
-            if (dias <= 3) return { acao: "PROMOÇÃO (50% DESCONTO)", classe: "bg-orange-500 text-white" };
-            if (dias <= 7) return { acao: "URGENTE: LIQUIDAR (30%)", classe: "bg-yellow-400 text-slate-900" };
-            return { acao: "ESTOQUE SEGURO", classe: "bg-emerald-50 text-emerald-600" };
+            if (dias < 0) return { acao: "RETIRAR AGORA", classe: "bg-red-600 text-white" };
+            if (dias <= 3) return { acao: "PROMOÇÃO (50%)", classe: "bg-orange-500 text-white" };
+            if (dias <= 7) return { acao: "REPOR / MONITORAR", classe: "bg-yellow-400 text-slate-900" };
+            return { acao: "PRODUTO EM DIA", classe: "bg-slate-50 text-slate-400" };
         }
 
         async function registrarLog(acao, produto, detalhes = "") {
@@ -165,14 +157,22 @@
             });
         }
 
-        function aplicarLockdown() {
-            const isDev = usuarioSessao && (usuarioSessao.nome === "PAULO" || usuarioSessao.cargo === "GERENTE");
-            const div = document.getElementById('lockdownView');
-            (emManutencao && !isDev) ? div.classList.remove('hidden') : div.classList.add('hidden');
+        async function buscarNomePorEAN(ean) {
+            if (!ean || ean.length < 5) return;
+            const snap = await db.collection("validades").where("ean", "==", ean).limit(1).get();
+            if (!snap.empty) {
+                const prod = snap.docs[0].data();
+                const campoNome = document.getElementById('p-nome');
+                if (campoNome.value === "") {
+                    campoNome.value = prod.produto;
+                    campoNome.classList.add('bg-emerald-50', 'border-emerald-500');
+                    setTimeout(() => campoNome.classList.remove('bg-emerald-50', 'border-emerald-500'), 1500);
+                    if (navigator.vibrate) navigator.vibrate([30, 50]);
+                }
+            }
         }
 
         window.onload = function() {
-            db.collection("config").doc("status").onSnapshot(doc => { if(doc.exists) emManutencao = doc.data().manutencao; aplicarLockdown(); });
             const lista = document.getElementById('lista-usuarios');
             EQUIPE.forEach(u => {
                 lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 px-5 bg-slate-50 rounded-xl font-black uppercase text-[10px] flex justify-between items-center mb-1"><span>${u.nome}</span><span class="opacity-30">${u.cargo}</span></button>`;
@@ -196,9 +196,8 @@
         function entrarNoApp() {
             document.getElementById('loginView').classList.add('hidden-app');
             document.getElementById('appView').classList.remove('hidden-app');
-            document.getElementById('user-display').innerText = `BOM TRABALHO, ${usuarioSessao.nome}`;
+            document.getElementById('user-display').innerText = `OLÁ, ${usuarioSessao.nome}`;
             if (usuarioSessao.cargo === "GERENTE" || usuarioSessao.nome === "PAULO") document.getElementById('nav-gerente').classList.remove('hidden');
-            
             db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
                 estoque = [];
                 snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
@@ -217,22 +216,18 @@
                 if (dias < 0) cV++; else if (dias <= 7) cA++;
 
                 container.innerHTML += `
-                    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col active:scale-95 transition-all">
+                    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col mb-4 active:scale-95 transition-all">
                         <div class="flex justify-between items-start mb-2">
                             <div class="max-w-[70%]">
                                 <h3 class="font-black text-slate-800 text-sm uppercase truncate">${item.produto}</h3>
-                                <p class="text-[9px] font-bold text-slate-400 uppercase">Validade: <span class="text-blue-600">${item.vencimento.split('-').reverse().join('/')}</span></p>
+                                <p class="text-[9px] font-bold text-slate-400">Val: <span class="text-blue-700">${item.vencimento.split('-').reverse().join('/')}</span></p>
                             </div>
-                            <div class="text-right">
-                                <p class="text-2xl font-black text-[#003366] leading-none">${item.quantidade}</p>
-                                <p class="text-[8px] font-black text-slate-300 uppercase">Qtd</p>
-                            </div>
+                            <div class="text-right"><p class="text-2xl font-black text-[#003366] leading-none">${item.quantidade}</p><p class="text-[8px] font-black text-slate-300">QTD</p></div>
                         </div>
-                        <div class="${decisao.classe} text-[8px] font-black p-2 rounded-lg text-center uppercase mb-3">${decisao.acao}</div>
+                        <div class="${decisao.classe} text-[8px] font-black p-2 rounded-xl text-center uppercase mb-3">${decisao.acao}</div>
                         <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[9px] font-black text-blue-500 uppercase self-end">Ajustar</button>
                     </div>`;
             });
-
             document.getElementById('dash-vencidos').innerText = cV;
             document.getElementById('dash-alerta').innerText = cA;
             document.getElementById('dash-total').innerText = estoque.length;
@@ -241,13 +236,13 @@
 
         async function carregarLogs() {
             const container = document.getElementById('container-logs');
-            container.innerHTML = '<p class="text-center py-10 text-[10px] font-black opacity-20">BUSCANDO AUDITORIA...</p>';
-            const snap = await db.collection("logs").orderBy("timestamp", "desc").limit(25).get();
+            container.innerHTML = '<p class="text-center py-10 text-[10px] font-black opacity-20 uppercase">Auditando registros...</p>';
+            const snap = await db.collection("logs").orderBy("timestamp", "desc").limit(30).get();
             container.innerHTML = '';
             snap.forEach(doc => {
                 const log = doc.data();
                 const icon = log.acao === 'CADASTRO' ? '🟢' : log.acao === 'EDIÇÃO' ? '🟡' : '🔴';
-                container.innerHTML += `<div class="bg-white p-3 rounded-xl shadow-sm flex items-center gap-3 border border-slate-50"><span class="text-xs">${icon}</span><div><p class="text-[9px] font-black text-slate-800 uppercase">${log.usuario} • ${log.acao}</p><p class="text-[10px] font-bold text-blue-700 uppercase">${log.produto}</p></div></div>`;
+                container.innerHTML += `<div class="bg-white p-3 rounded-2xl shadow-sm flex items-center gap-3 border border-slate-50"><span class="text-xs">${icon}</span><div class="flex-1"><p class="text-[8px] font-black text-slate-400 uppercase">${log.usuario} • ${log.acao}</p><p class="text-[10px] font-black text-blue-900 uppercase">${log.produto}</p></div></div>`;
             });
         }
 
@@ -266,6 +261,7 @@
             scannerInstancia = new Html5Qrcode("reader");
             scannerInstancia.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (txt) => {
                 document.getElementById('p-ean').value = txt;
+                buscarNomePorEAN(txt);
                 if(navigator.vibrate) navigator.vibrate(50);
                 scannerInstancia.stop();
             }).catch(()=>{});
@@ -283,12 +279,12 @@
         function solicitarSenhaExclusao() {
             const id = document.getElementById('edit-id').value;
             const prod = document.getElementById('p-nome').value;
-            document.getElementById('nome-selecionado').innerText = "Confirmar Exclusão?";
+            document.getElementById('nome-selecionado').innerText = "Apagar Item?";
             document.getElementById('modal-senha').classList.remove('hidden');
             document.getElementById('btn-confirmar-senha').onclick = async () => {
                 if(document.getElementById('input-senha').value === usuarioSessao.pass) {
                     await db.collection("validades").doc(id).delete();
-                    registrarLog("EXCLUSÃO", prod, "Item removido");
+                    registrarLog("EXCLUSÃO", prod);
                     fecharSenha(); fecharModalCadastro();
                 } else alert("Senha incorreta");
             };
@@ -297,9 +293,9 @@
         function gerarRelatorioRetirada() {
             let rel = `*NEW MARKET - LISTA DE RETIRADA*\n\n`;
             estoque.filter(i => Math.ceil((new Date(i.vencimento) - new Date()) / (1000*60*60*24)) <= 7).forEach(i => {
-                rel += `▪️ *${i.produto}* (Qtd: ${i.quantidade})\nVal: ${i.vencimento.split('-').reverse().join('/')}\n\n`;
+                rel += `▪️ *${i.produto}* (${i.quantidade} un)\nVal: ${i.vencimento.split('-').reverse().join('/')}\n\n`;
             });
-            navigator.share ? navigator.share({ title: 'Relatório', text: rel }) : console.log(rel);
+            navigator.share ? navigator.share({ title: 'Relatório', text: rel }) : alert("Relatório no console.");
         }
 
         function prepararEdicao(item) {
