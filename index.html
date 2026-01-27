@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v15.2 Titanium</title>
+    <title>New Market v15.3 Platinum</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,7 +25,7 @@
         <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 shadow-2xl border-b-[10px] border-indigo-600">
             <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-black text-xl shadow-lg">NM</div>
             <h2 class="text-2xl font-black italic uppercase text-slate-800 tracking-tighter">New Market</h2>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 mb-8">v15.2 | Titanium Edition</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 mb-8">v15.3 | Platinum Edition</p>
             <div id="lista-usuarios" class="space-y-2.5 max-h-[50vh] overflow-y-auto no-scrollbar"></div>
         </div>
     </div>
@@ -42,19 +42,21 @@
                 </div>
                 <button onclick="logout()" class="bg-slate-100 p-3 rounded-2xl text-xl border border-slate-200">🚪</button>
             </div>
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR PRODUTO..." class="w-full bg-slate-50 p-4 rounded-2xl text-sm font-black pl-12 uppercase border-2 border-transparent focus:border-indigo-500 outline-none transition-all">
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR..." class="w-full bg-slate-50 p-4 rounded-2xl text-sm font-black pl-12 uppercase border-2 border-transparent focus:border-indigo-500 outline-none transition-all">
         </header>
 
         <main class="max-w-lg mx-auto p-5 pb-32">
             <div class="flex gap-2 mb-6 bg-slate-100 p-1 rounded-2xl">
-                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-3.5 rounded-xl text-[10px] uppercase btn-active">Estoque</button>
-                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-3.5 rounded-xl text-[10px] uppercase btn-inactive">Alertas</button>
-                <button onclick="mudarAba('logs')" id="btn-logs" class="flex-1 py-3.5 rounded-xl text-[10px] uppercase btn-inactive">Histórico</button>
+                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-3.5 rounded-xl text-[10px] uppercase transition-all btn-active">Estoque</button>
+                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-3.5 rounded-xl text-[10px] uppercase transition-all btn-inactive">Alertas</button>
+                <button onclick="mudarAba('logs')" id="btn-logs" class="flex-1 py-3.5 rounded-xl text-[10px] uppercase transition-all btn-inactive">Histórico</button>
             </div>
+            
             <div class="flex justify-between items-center mb-6">
                 <p id="contador" class="text-[11px] font-black text-slate-400 uppercase"></p>
                 <button onclick="gerarRelatorio()" class="bg-emerald-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg">Relatório 📊</button>
             </div>
+
             <div id="container-produtos" class="space-y-4"></div>
         </main>
 
@@ -132,7 +134,7 @@
             const lista = document.getElementById('lista-usuarios');
             lista.innerHTML = '';
             EQUIPE.forEach(u => {
-                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-700 rounded-2xl font-black uppercase text-[10px] flex justify-between px-6 border border-slate-100 mb-1"><span>${u.nome}</span><span class="text-[7px] opacity-50 bg-white px-2 py-0.5 rounded-full">${u.cargo}</span></button>`;
+                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-700 rounded-2xl font-black uppercase text-[10px] flex justify-between px-6 border border-slate-100 mb-1 active:bg-indigo-50 transition-colors"><span>${u.nome}</span><span class="text-[7px] opacity-50 bg-white px-2 py-0.5 rounded-full">${u.cargo}</span></button>`;
             });
 
             const salvo = localStorage.getItem('sessaoNewMarket');
@@ -147,6 +149,7 @@
             document.getElementById('appView').classList.remove('hidden-app');
             document.getElementById('user-display').innerText = usuarioSessao.nome;
             escutarNuvem();
+            registrarLog('ACESSO', 'ENTROU NO SISTEMA');
         }
 
         function escutarNuvem() {
@@ -156,11 +159,19 @@
                 if(abaAtiva !== 'logs') renderizar();
             });
 
+            // v15.3: Fallback caso o índice falhe
             db.collection("logs").orderBy("data", "desc").limit(50).onSnapshot(snap => {
                 logsAtividades = [];
                 snap.forEach(doc => logsAtividades.push(doc.data()));
                 if(abaAtiva === 'logs') renderizar();
-            }, () => { console.warn("Aguardando índice..."); });
+            }, error => {
+                console.warn("Índice não pronto. Carregando modo simplificado...");
+                db.collection("logs").limit(50).onSnapshot(s => {
+                    logsAtividades = [];
+                    s.forEach(d => logsAtividades.push(d.data()));
+                    if(abaAtiva === 'logs') renderizar();
+                });
+            });
         }
 
         async function registrarLog(acao, detalhe) {
@@ -179,21 +190,21 @@
             const termo = document.getElementById('input-busca').value.toUpperCase();
             
             if (abaAtiva === 'logs') {
-                document.getElementById('contador').innerText = `HISTÓRICO (${logsAtividades.length})`;
+                document.getElementById('contador').innerText = `RASTROS RECENTES (${logsAtividades.length})`;
                 document.getElementById('wrapper-scanner').classList.add('hidden');
                 let html = "";
-                logsAtividades.forEach(log => {
+                logsAtividades.sort((a,b) => b.data - a.data).forEach(log => {
                     const userRef = EQUIPE.find(u => u.nome === log.usuario) || {cor: "text-slate-500 bg-slate-50"};
-                    html += `<div class="bg-white p-4 rounded-2xl border border-slate-100 mb-2 shadow-sm">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[7px] font-black px-2 py-0.5 rounded-full text-white bg-slate-400">${log.acao}</span>
+                    html += `<div class="bg-white p-5 rounded-[2rem] border border-slate-100 mb-3 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[7px] font-black px-2 py-1 rounded-lg text-indigo-600 bg-indigo-50 uppercase">${log.acao}</span>
                             <span class="text-[8px] font-bold text-slate-300">${new Date(log.data).toLocaleTimeString()}</span>
                         </div>
-                        <h4 class="text-[11px] font-black uppercase text-slate-700">${log.produto}</h4>
-                        <p class="text-[9px] font-black mt-1 px-2 py-0.5 rounded-lg inline-block ${userRef.cor}">${log.usuario}</p>
+                        <h4 class="text-[12px] font-black uppercase text-slate-800">${log.produto}</h4>
+                        <p class="text-[9px] font-black mt-2 px-3 py-1 rounded-full inline-block ${userRef.cor}">Responsável: ${log.usuario}</p>
                     </div>`;
                 });
-                container.innerHTML = html || '<p class="text-center py-10 font-bold text-slate-400">Sem registros.</p>';
+                container.innerHTML = html || '<p class="text-center py-10 font-bold text-slate-300">Sincronizando registros...</p>';
                 return;
             }
 
@@ -208,10 +219,10 @@
                 return m;
             });
 
-            document.getElementById('contador').innerText = `${filtrados.length} Itens`;
+            document.getElementById('contador').innerText = `${filtrados.length} ITENS ENCONTRADOS`;
             filtrados.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento)).forEach(item => {
                 const d = Math.ceil((new Date(item.vencimento) - new Date()) / (1000*60*60*24));
-                container.innerHTML += `<div class="bg-white p-5 rounded-3xl shadow-sm flex justify-between items-center ${d < 0 ? 'border-vencido' : (d <= 7 ? 'border-alerta' : 'border-ok')}">
+                container.innerHTML += `<div class="bg-white p-5 rounded-[2.5rem] shadow-sm flex justify-between items-center ${d < 0 ? 'border-vencido' : (d <= 7 ? 'border-alerta' : 'border-ok')}">
                     <div class="flex-1">
                         <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${d < 0 ? 'bg-red-500' : (d <= 7 ? 'bg-amber-500' : 'bg-emerald-500')} text-white uppercase mb-2 inline-block">${d < 0 ? 'Vencido' : d + ' Dias'}</span>
                         <h3 class="font-black text-slate-800 text-sm uppercase leading-tight">${item.produto}</h3>
@@ -225,6 +236,7 @@
             });
         }
 
+        // Funções de Controle permanecem as mesmas para estabilidade
         function prepararLogin(nome) { document.getElementById('nome-selecionado').innerText = nome; document.getElementById('modal-senha').classList.remove('hidden'); }
         function fecharSenha() { document.getElementById('modal-senha').classList.add('hidden'); document.getElementById('input-senha').value = ''; }
         function logout() { localStorage.removeItem('sessaoNewMarket'); location.reload(); }
@@ -308,10 +320,4 @@
             let msg = `*📢 NEW MARKET - RELATÓRIO*\n\n`;
             let alerta = estoque.filter(i => Math.ceil((new Date(i.vencimento) - new Date()) / (1000*60*60*24)) <= 7);
             alerta.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento)).forEach(i => {
-                msg += `• *${i.produto}* (${i.vencimento.split('-').reverse().join('/')})\n`;
-            });
-            window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-        }
-    </script>
-</body>
-</html>
+                msg += `• *${i.produto}* (${i.vencimento.split('-').rever
