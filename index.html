@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.4.0 - Paulo Souza</title>
+    <title>New Market v16.5.0 - Paulo Souza</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
     <style>
@@ -15,115 +14,88 @@
         .hidden-app { display: none !important; }
         .bg-empresa-azul { background-color: #003366; } 
         .bg-empresa-amarelo { background-color: #FFD700; }
-        .bg-gradient-premium { background: linear-gradient(180deg, #0f172a 0%, #1e40af 100%); }
-        .glass-btn { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .bg-gradient-premium { background: linear-gradient(180deg, #003366 0%, #1e40af 100%); }
+        
+        /* Ponto Online Pulsante */
         .online-pulse { width: 8px; height: 8px; background-color: #4ade80; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; margin-right: 6px; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); } 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } }
-        #lista-usuarios::-webkit-scrollbar { width: 4px; }
-        #lista-usuarios::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="lockdownView" class="hidden fixed inset-0 bg-slate-900 z-[500] flex items-center justify-center p-8 text-center">
+    <div id="modal-senha" class="hidden fixed inset-0 bg-slate-900/95 z-[600] flex items-center justify-center p-6 text-center">
+        <div class="bg-white w-full max-w-xs rounded-[3rem] p-8 shadow-2xl">
+            <h3 id="nome-selecionado" class="font-black text-[#003366] uppercase mb-6 tracking-widest text-xl"></h3>
+            <input type="password" id="input-senha" placeholder="••••" class="w-full p-5 bg-slate-100 rounded-2xl text-center font-black outline-none mb-6 text-4xl tracking-widest border-2 border-transparent focus:border-blue-500">
+            <div class="flex gap-3">
+                <button onclick="fecharSenha()" class="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-[10px] uppercase">Sair</button>
+                <button id="btn-confirmar-senha" class="flex-[2] py-4 bg-[#003366] text-white rounded-2xl font-black text-[10px] uppercase shadow-lg">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="lockdownView" class="hidden fixed inset-0 bg-[#0f172a] z-[500] flex items-center justify-center p-8 text-center">
         <div class="max-w-xs">
             <div class="text-6xl mb-6">🛠️</div>
             <h2 class="text-white font-black uppercase text-2xl mb-4 italic">Manutenção</h2>
-            <p class="text-slate-400 text-sm font-bold uppercase mb-8">O sistema está em atualização técnica. Voltamos em instantes!</p>
+            <p class="text-slate-400 text-sm font-bold uppercase mb-8">O sistema está sendo ajustado por Paulo Souza.</p>
             <div class="h-1 w-20 bg-empresa-amarelo mx-auto rounded-full"></div>
-            <p class="text-[10px] text-slate-500 mt-10 font-black uppercase italic">Paulo Souza by 2026</p>
         </div>
     </div>
 
     <div id="loginView" class="fixed inset-0 bg-gradient-premium z-[100] flex items-center justify-center p-6 text-center">
         <div class="bg-white w-full max-w-sm rounded-[3.5rem] p-8 shadow-2xl flex flex-col min-h-[580px]">
             <div class="flex-grow">
-                <div class="w-20 h-20 bg-empresa-azul rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-empresa-amarelo text-3xl font-black italic shadow-xl border-4 border-slate-50">NM</div>
+                <div class="w-20 h-20 bg-empresa-azul rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-empresa-amarelo text-3xl font-black italic shadow-xl">NM</div>
                 <h2 class="text-xl font-black uppercase text-slate-800 italic mb-8 tracking-tight">Controle de Validades</h2>
-                <div id="lista-usuarios" class="space-y-3 max-h-[300px] overflow-y-auto pr-1"></div>
+                <div id="lista-usuarios" class="space-y-3 max-h-[300px] overflow-y-auto pr-2 text-left"></div>
             </div>
-            <div class="mt-8 pt-6 border-t border-slate-100">
-                <p class="text-[13px] font-black text-blue-700 uppercase tracking-widest italic">Paulo Souza by 2026</p>
-            </div>
+            <p class="text-[13px] font-black text-blue-700 uppercase tracking-widest mt-6 italic">Paulo Souza by 2026</p>
         </div>
     </div>
 
     <div id="appView" class="hidden-app">
-        <header class="bg-[#003366] p-6 sticky top-0 z-30 shadow-[0_10px_30px_rgba(0,0,0,0.3)] rounded-b-[3rem] border-b-4 border-[#FFD700]">
+        <header class="bg-[#003366] p-6 sticky top-0 z-30 shadow-xl rounded-b-[3rem] border-b-4 border-[#FFD700]">
             <div class="flex justify-between items-start mb-6">
                 <div>
-                    <h1 class="font-black text-3xl italic text-[#FFD700] uppercase tracking-tighter drop-shadow-lg">New Market</h1>
+                    <h1 class="font-black text-3xl italic text-[#FFD700] uppercase tracking-tighter">New Market</h1>
                     <div class="flex items-center mt-2">
                         <span class="online-pulse"></span>
-                        <p id="user-display" onclick="abrirPerfil()" class="text-[11px] font-black text-white uppercase tracking-widest cursor-pointer"></p>
+                        <p id="user-display" class="text-[11px] font-black text-white uppercase tracking-widest"></p>
                     </div>
                 </div>
-                <div class="flex gap-2">
-                    <button id="btn-manutencao" onclick="abrirModalManutencao()" class="hidden glass-btn p-3 rounded-2xl text-white">⚙️</button>
-                    <button onclick="logout()" class="glass-btn p-3 rounded-2xl text-white bg-red-500/10">🚪</button>
-                </div>
+                <button onclick="logout()" class="bg-white/10 p-4 rounded-2xl text-white border border-white/20">🚪</button>
             </div>
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR PRODUTO..." class="w-full bg-white p-5 rounded-[1.5rem] text-sm font-black uppercase outline-none shadow-inner border-4 border-transparent focus:border-[#FFD700] transition-all">
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR PRODUTO..." class="w-full bg-white p-5 rounded-2xl text-sm font-black uppercase outline-none shadow-inner border-4 border-transparent focus:border-[#FFD700]">
         </header>
 
         <main class="max-w-lg mx-auto p-5 pb-40">
             <div class="grid grid-cols-3 gap-3 mb-8">
-                <div onclick="filtrarDash('vencidos')" class="bg-red-600 p-4 rounded-[2rem] text-center shadow-lg active:scale-95 transition-all border-b-4 border-red-800">
-                    <p class="text-[8px] font-black text-white/60 uppercase">Vencidos</p>
-                    <p id="dash-vencidos" class="text-xl font-black text-white">0</p>
+                <div class="bg-red-600 p-4 rounded-[2rem] text-center text-white border-b-4 border-red-800 shadow-lg">
+                    <p class="text-[8px] font-black opacity-60 uppercase">Vencidos</p>
+                    <p id="dash-vencidos" class="text-xl font-black">0</p>
                 </div>
-                <div onclick="filtrarDash('alerta')" class="bg-[#FFD700] p-4 rounded-[2rem] text-center shadow-lg active:scale-95 transition-all border-b-4 border-yellow-600">
-                    <p class="text-[8px] font-black text-slate-800/60 uppercase">Alerta</p>
-                    <p id="dash-alerta" class="text-xl font-black text-slate-900">0</p>
+                <div class="bg-[#FFD700] p-4 rounded-[2rem] text-center text-slate-900 border-b-4 border-yellow-600 shadow-lg">
+                    <p class="text-[8px] font-black opacity-60 uppercase">Alerta</p>
+                    <p id="dash-alerta" class="text-xl font-black">0</p>
                 </div>
-                <div onclick="filtrarDash('todos')" class="bg-white p-4 rounded-[2rem] text-center shadow-lg active:scale-95 transition-all border-b-4 border-slate-200">
-                    <p class="text-[8px] font-black text-slate-400 uppercase">Total</p>
-                    <p id="dash-total" class="text-xl font-black text-empresa-azul">0</p>
+                <div class="bg-white p-4 rounded-[2rem] text-center text-slate-800 border-b-4 border-slate-200 shadow-lg">
+                    <p class="text-[8px] font-black opacity-40 uppercase">Total</p>
+                    <p id="dash-total" class="text-xl font-black">0</p>
                 </div>
             </div>
 
             <div id="container-produtos" class="space-y-4"></div>
         </main>
-
-        <div class="fixed bottom-8 left-0 right-0 flex justify-center z-40 px-8 gap-3">
-            <button onclick="abrirModalScanner()" class="w-full max-w-sm bg-[#FFD700] text-slate-900 py-6 rounded-[2.5rem] shadow-2xl font-black text-xs uppercase border-4 border-white active:scale-95">📸 ESCANEAR / CADASTRAR</button>
-        </div>
-    </div>
-
-    <div id="modal-senha" class="hidden fixed inset-0 bg-slate-900/95 z-[600] flex items-center justify-center p-6 text-center">
-        <div class="bg-white w-full max-w-xs rounded-[3.5rem] p-10 shadow-2xl">
-            <h3 id="nome-selecionado" class="font-black text-empresa-azul uppercase mb-6 tracking-widest text-xl leading-tight"></h3>
-            <input type="password" id="input-senha" placeholder="••••" class="w-full p-5 bg-slate-100 rounded-2xl text-center font-black outline-none mb-8 text-4xl tracking-widest border-2 border-transparent focus:border-blue-500">
-            <div class="flex gap-3">
-                <button onclick="fecharSenha()" class="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-[10px] uppercase">Sair</button>
-                <button id="btn-confirmar-senha" class="flex-[2] py-4 bg-empresa-azul text-white rounded-2xl font-black text-[10px] uppercase shadow-lg">Entrar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-cadastro" class="hidden fixed inset-0 bg-white z-[120] overflow-y-auto p-8">
-        <div class="max-w-lg mx-auto">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-2xl font-black uppercase text-empresa-azul italic">Registro</h2>
-                <button onclick="fecharModalScanner()" class="text-4xl">&times;</button>
-            </div>
-            <div id="reader-container" class="mb-8 rounded-[3rem] overflow-hidden bg-black min-h-[250px] shadow-2xl border-4 border-slate-100"><div id="reader"></div></div>
-            <div class="space-y-4">
-                <input type="text" id="ean" placeholder="CÓDIGO DE BARRAS (EAN)" class="w-full p-5 bg-slate-50 rounded-2xl font-mono text-blue-600 font-bold border-2 border-slate-100 outline-none">
-                <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-5 bg-slate-50 rounded-2xl font-black uppercase outline-none border-2 border-transparent focus:border-yellow-400">
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="date" id="data" class="w-full p-5 bg-slate-50 rounded-2xl font-bold outline-none border-2 border-transparent focus:border-yellow-400">
-                    <input type="tel" id="qtd" placeholder="QTD" class="w-full p-5 bg-slate-50 rounded-2xl font-black text-center text-xl border-2 border-transparent focus:border-yellow-400">
-                </div>
-                <input type="hidden" id="edit-id">
-                <button onclick="salvarItem()" id="btn-salvar" class="w-full py-6 bg-empresa-azul text-white rounded-[2.5rem] font-black uppercase shadow-xl tracking-widest">Salvar Dados</button>
-                <button id="btn-excluir" onclick="solicitarSenhaExclusao()" class="hidden w-full py-4 text-red-600 font-black uppercase text-xs mt-4">Apagar Produto</button>
+        
+        <div class="fixed bottom-8 left-0 right-0 flex justify-center px-8 z-40">
+            <button onclick="abrirCadastro()" class="w-full max-w-sm bg-[#FFD700] text-slate-900 py-6 rounded-[2.5rem] shadow-2xl font-black text-xs uppercase border-4 border-white active:scale-95 transition-all">
+                + CADASTRAR PRODUTO
             </div>
         </div>
     </div>
 
     <script>
-        // FIREBASE E CONFIGS
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -146,10 +118,10 @@
             { nome: "TAMIRIS", cargo: "EQUIPE", pass: "tamiris123" }
         ];
 
-        let usuarioSessao = null, estoque = [], filtroDash = 'todos', emManutencao = false, html5QrCode = null;
+        let usuarioSessao = null, estoque = [], emManutencao = false;
 
-        // SISTEMA DE LOCKDOWN (VALORIZANDO O DESENVOLVEDOR PAULO)
-        function checkLockdown() {
+        // SISTEMA DE LOCKDOWN
+        function monitorarLockdown() {
             db.collection("config").doc("status").onSnapshot(doc => {
                 if (doc.exists) emManutencao = doc.data().manutencao;
                 aplicarLockdown();
@@ -158,59 +130,46 @@
 
         function aplicarLockdown() {
             const isPaulo = usuarioSessao && usuarioSessao.nome === "PAULO";
-            const lockdownDiv = document.getElementById('lockdownView');
-            if (usuarioSessao && emManutencao && !isPaulo) {
-                lockdownDiv.classList.remove('hidden');
-            } else {
-                lockdownDiv.classList.add('hidden');
-            }
+            const div = document.getElementById('lockdownView');
+            (usuarioSessao && emManutencao && !isPaulo) ? div.classList.remove('hidden') : div.classList.add('hidden');
         }
 
-        // LOGIN E INFRA
+        // LOGIN E UI
         window.onload = function() {
-            checkLockdown();
+            monitorarLockdown();
             const lista = document.getElementById('lista-usuarios');
-            lista.innerHTML = '';
             EQUIPE.forEach(u => {
-                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-5 bg-slate-50 border border-slate-100 rounded-2xl font-black uppercase text-[11px] flex justify-between px-8 mb-2"><span>${u.nome}</span><span class="text-blue-600 opacity-40 font-bold">${u.cargo}</span></button>`;
+                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-5 px-6 bg-slate-50 border border-slate-100 rounded-2xl font-black uppercase text-[11px] flex justify-between items-center active:bg-blue-50 transition-all mb-2"><span>${u.nome}</span><span class="opacity-30 text-[9px]">${u.cargo}</span></button>`;
             });
             const salvo = localStorage.getItem('sessaoNewMarket');
             if (salvo) { usuarioSessao = EQUIPE.find(u => u.nome === salvo); if (usuarioSessao) entrarNoApp(); }
         };
 
-        function prepararLogin(n) {
-            document.getElementById('nome-selecionado').innerText = n;
+        function prepararLogin(nome) {
+            document.getElementById('nome-selecionado').innerText = nome;
             document.getElementById('modal-senha').classList.remove('hidden');
-            document.getElementById('btn-confirmar-senha').onclick = validarAcesso;
+            document.getElementById('btn-confirmar-senha').onclick = validarLogin;
         }
 
-        function validarAcesso() {
+        function validarLogin() {
             const p = document.getElementById('input-senha').value;
             const u = EQUIPE.find(x => x.nome === document.getElementById('nome-selecionado').innerText);
-            if (p === u.pass) { 
-                usuarioSessao = u; 
-                localStorage.setItem('sessaoNewMarket', u.nome); 
-                entrarNoApp(); 
-                fecharSenha(); 
+            if (p === u.pass) {
+                usuarioSessao = u;
+                localStorage.setItem('sessaoNewMarket', u.nome);
+                fecharSenha(); entrarNoApp();
             } else alert("Senha Incorreta!");
         }
 
         function entrarNoApp() {
             document.getElementById('loginView').classList.add('hidden-app');
             document.getElementById('appView').classList.remove('hidden-app');
-            if (usuarioSessao.cargo === "GERENTE" || usuarioSessao.nome === "PAULO") {
-                document.getElementById('btn-manutencao').classList.remove('hidden');
-            }
-            const h = new Date().getHours();
-            let msg = (h < 12) ? "BOM DIA" : (h < 18) ? "BOA TARDE" : "BOA NOITE";
-            document.getElementById('user-display').innerHTML = `${msg}, <span class="text-[#FFD700]">${usuarioSessao.nome}</span>`;
-            escutarNuvem();
-            aplicarLockdown();
+            document.getElementById('user-display').innerHTML = `BOM DIA, <span class="text-[#FFD700]">${usuarioSessao.nome}</span>`;
+            escutarDados(); aplicarLockdown();
         }
 
-        // LOGICA DE DADOS (DASHBOARD)
-        function escutarNuvem() {
-            db.collection("validades").onSnapshot(snap => {
+        function escutarDados() {
+            db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
                 estoque = [];
                 snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
                 renderizar();
@@ -219,111 +178,38 @@
 
         function renderizar() {
             const container = document.getElementById('container-produtos');
-            const termo = document.getElementById('input-busca').value.toUpperCase();
+            const busca = document.getElementById('input-busca').value.toUpperCase();
             let cV = 0, cA = 0; container.innerHTML = '';
 
-            let fil = estoque.filter(i => {
-                const d = Math.ceil((new Date(i.vencimento) - new Date()) / (1000 * 60 * 60 * 24));
-                if (d < 0) cV++; if (d >= 0 && d <= 7) cA++;
-                const m = (i.produto || "").toUpperCase().includes(termo) || (i.ean || "").includes(termo);
-                if (filtroDash === 'vencidos') return m && d < 0;
-                if (filtroDash === 'alerta') return m && (d >= 0 && d <= 7);
-                return m;
+            estoque.filter(i => i.produto.includes(busca)).forEach(item => {
+                const dias = Math.ceil((new Date(item.vencimento) - new Date()) / (1000*60*60*24));
+                let status = "bg-emerald-500", card = "border-emerald-500", txt = dias + " DIAS";
+                
+                if (dias < 0) { status = "bg-red-700"; card = "border-red-700"; txt = "VENCIDO"; cV++; }
+                else if (dias <= 7) { status = "bg-yellow-500"; card = "border-yellow-500"; txt = "ALERTA"; cA++; }
+
+                container.innerHTML += `
+                    <div class="bg-white p-5 rounded-[2.5rem] border-l-8 ${card} shadow-sm flex justify-between items-center active:scale-95 transition-all">
+                        <div>
+                            <span class="${status} text-[8px] font-black px-3 py-1 rounded-full text-white uppercase">${txt}</span>
+                            <h3 class="font-black text-slate-800 text-sm uppercase mt-2">${item.produto}</h3>
+                            <p class="text-[10px] font-bold text-slate-400">VAL: ${item.vencimento.split('-').reverse().join('/')}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[9px] font-black text-slate-300">QTD</p>
+                            <p class="text-2xl font-black text-[#003366]">${item.quantidade}</p>
+                        </div>
+                    </div>`;
             });
 
             document.getElementById('dash-vencidos').innerText = cV;
             document.getElementById('dash-alerta').innerText = cA;
             document.getElementById('dash-total').innerText = estoque.length;
-
-            fil.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento)).forEach(item => {
-                const d = Math.ceil((new Date(item.vencimento) - new Date()) / (1000 * 60 * 60 * 24));
-                let lbl = d + " DIAS", bg = "bg-emerald-500", card = "bg-white border-l-8 border-emerald-500 shadow-sm";
-                if (d < 0) { lbl = "VENCIDO"; card = "bg-white border-l-8 border-red-700"; bg = "bg-red-700"; }
-                else if (d <= 7) { lbl = d + " DIAS"; card = "bg-white border-l-8 border-yellow-400"; bg = "bg-yellow-400 text-slate-900"; }
-                
-                container.innerHTML += `
-                <div class="${card} p-5 rounded-[2.5rem] flex justify-between items-center mb-4 active:scale-95 transition-all">
-                    <div class="max-w-[70%]">
-                        <span class="${bg} text-[8px] font-black px-3 py-1 rounded-full uppercase mb-2 inline-block">${lbl}</span>
-                        <h3 class="font-black text-slate-800 text-sm uppercase truncate">${item.produto}</h3>
-                        <p class="text-[10px] text-slate-400 font-bold uppercase mt-1">VAL: <span class="text-blue-600">${item.vencimento.split('-').reverse().join('/')}</span></p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[9px] font-black text-slate-400 uppercase">Qtd</p>
-                        <p class="font-black text-empresa-azul text-2xl">${item.quantidade}</p>
-                        <button onclick='prepararEdicao(${JSON.stringify(item)})' class="mt-2 text-[10px] font-black text-blue-500 uppercase">Editar</button>
-                    </div>
-                </div>`;
-            });
         }
 
-        // FUNÇÕES DE AÇÃO
-        function filtrarDash(t) { filtroDash = t; renderizar(); }
         function fecharSenha() { document.getElementById('modal-senha').classList.add('hidden'); document.getElementById('input-senha').value = ''; }
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
-        function fecharModalScanner() { 
-            if(html5QrCode) html5QrCode.stop(); 
-            document.getElementById('modal-cadastro').classList.add('hidden'); 
-            limparForm();
-        }
-
-        function abrirModalScanner() {
-            document.getElementById('modal-cadastro').classList.remove('hidden');
-            document.getElementById('btn-excluir').classList.add('hidden');
-            html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {
-                document.getElementById('ean').value = txt;
-                navigator.vibrate(100);
-                html5QrCode.stop();
-            });
-        }
-
-        function limparForm() {
-            document.getElementById('edit-id').value = '';
-            document.getElementById('ean').value = '';
-            document.getElementById('nome').value = '';
-            document.getElementById('data').value = '';
-            document.getElementById('qtd').value = '';
-        }
-
-        async function salvarItem() {
-            const id = document.getElementById('edit-id').value;
-            const dados = {
-                produto: document.getElementById('nome').value.toUpperCase(),
-                vencimento: document.getElementById('data').value,
-                ean: document.getElementById('ean').value,
-                quantidade: parseInt(document.getElementById('qtd').value) || 0,
-                cadastrado_por: usuarioSessao.nome
-            };
-            if(!dados.produto || !dados.vencimento) return alert("Preencha os campos!");
-            id ? await db.collection("validades").doc(id).update(dados) : await db.collection("validades").add(dados);
-            fecharModalScanner();
-        }
-
-        function prepararEdicao(item) {
-            document.getElementById('modal-cadastro').classList.remove('hidden');
-            document.getElementById('edit-id').value = item.id;
-            document.getElementById('nome').value = item.produto;
-            document.getElementById('data').value = item.vencimento;
-            document.getElementById('ean').value = item.ean || '';
-            document.getElementById('qtd').value = item.quantidade;
-            document.getElementById('btn-excluir').classList.remove('hidden');
-        }
-
-        async function excluirItem() {
-            const id = document.getElementById('edit-id').value;
-            if(id) { await db.collection("validades").doc(id).delete(); fecharModalScanner(); }
-        }
-
-        function solicitarSenhaExclusao() {
-            document.getElementById('nome-selecionado').innerText = "Confirmar Exclusão";
-            document.getElementById('modal-senha').classList.remove('hidden');
-            document.getElementById('btn-confirmar-senha').onclick = () => {
-                const p = document.getElementById('input-senha').value;
-                const sC = localStorage.getItem(`pass_${usuarioSessao.nome}`) || usuarioSessao.pass;
-                if(p === sC) { excluirItem(); fecharSenha(); } else alert("Senha Errada!");
-            };
-        }
+        function abrirCadastro() { alert("Módulo de Cadastro: Use o botão de Scan ou formulário (v16.5.1 em breve)"); }
     </script>
 </body>
 </html>
