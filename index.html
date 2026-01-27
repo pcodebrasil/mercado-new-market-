@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SGV - New Market v12.7</title>
+    <title>SGV - New Market v12.8</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,51 +12,58 @@
         body { -webkit-tap-highlight-color: transparent; }
         .hidden-app { display: none !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        .card-vencido { border-left: 8px solid #ef4444; }
+        .card-alerta { border-left: 8px solid #f59e0b; }
+        .card-ok { border-left: 8px solid #10b981; }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen font-sans">
+<body class="bg-slate-50 min-h-screen font-sans">
 
     <div id="loginView" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh] no-scrollbar border-b-8 border-indigo-600 text-center">
             <div class="mb-6">
                 <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-black text-xl shadow-lg">NM</div>
-                <h2 class="text-2xl font-black italic tracking-tighter uppercase text-slate-800">New Market</h2>
-                <p class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1">Selecione seu Nome</p>
+                <h2 class="text-2xl font-black italic tracking-tighter uppercase">New Market</h2>
+                <p class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1">Gestão de Validades</p>
             </div>
             <div id="lista-usuarios" class="space-y-2 text-left"></div>
-            <div class="mt-8 pt-6 border-t border-slate-100 text-center">
-                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Desenvolvido por</p>
-                <p class="text-[11px] text-slate-600 font-black italic">Paulo Souza by 2026</p>
-            </div>
         </div>
     </div>
 
     <div id="modal-senha" class="hidden fixed inset-0 bg-slate-900/90 z-[110] flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-xs rounded-[2.5rem] p-8 text-center shadow-2xl">
-            <h3 id="nome-selecionado" class="font-black text-indigo-600 uppercase mb-4 text-lg"></h3>
-            <input type="password" id="input-senha" placeholder="SENHA" class="w-full p-4 bg-slate-100 rounded-2xl text-center font-black tracking-widest outline-none focus:ring-2 ring-indigo-500 mb-6">
+            <h3 id="nome-selecionado" class="font-black text-indigo-600 uppercase mb-4"></h3>
+            <input type="password" id="input-senha" placeholder="SENHA" class="w-full p-4 bg-slate-100 rounded-2xl text-center font-black outline-none focus:ring-2 ring-indigo-500 mb-6">
             <div class="flex gap-2">
-                <button onclick="fecharSenha()" class="flex-1 py-3 bg-slate-50 text-slate-400 rounded-xl font-bold text-xs uppercase">Sair</button>
+                <button onclick="fecharSenha()" class="flex-1 py-3 bg-slate-50 text-slate-400 rounded-xl font-bold text-xs uppercase text-slate-800">Sair</button>
                 <button onclick="validarAcesso()" class="flex-[2] py-4 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase shadow-lg">Entrar</button>
             </div>
         </div>
     </div>
 
     <div id="appView" class="hidden-app">
-        <header class="bg-white border-b sticky top-0 z-30 p-4 flex justify-between items-center shadow-sm">
-            <div>
-                <h1 class="font-black text-lg italic text-slate-800 uppercase">New Market</h1>
-                <p id="user-display" class="text-[9px] font-black text-white bg-indigo-500 px-2 py-0.5 rounded uppercase"></p>
+        <header class="bg-white sticky top-0 z-30 p-4 border-b border-slate-100">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h1 class="font-black text-xl italic text-slate-800 uppercase tracking-tighter">New Market</h1>
+                    <p id="user-display" class="text-[9px] font-black text-white bg-indigo-500 px-2 py-0.5 rounded uppercase inline-block"></p>
+                </div>
+                <button onclick="location.reload()" class="bg-slate-100 p-2 rounded-xl text-lg">🚪</button>
             </div>
-            <button onclick="location.reload()" class="bg-slate-50 p-2 rounded-xl text-lg">🚪</button>
+            <div class="relative">
+                <input type="text" id="input-busca" oninput="renderizar()" placeholder="Buscar produto..." class="w-full bg-slate-100 p-4 rounded-2xl border-none text-sm font-bold focus:ring-2 ring-indigo-500 pl-12">
+                <span class="absolute left-4 top-4 opacity-30">🔍</span>
+            </div>
         </header>
 
         <main class="max-w-lg mx-auto p-4 pb-32">
-            <div class="flex gap-2 mb-6">
-                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase transition-all">Produtos</button>
-                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase transition-all">Alertas</button>
+            <div class="flex gap-2 mb-4">
+                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase transition-all">Todos</button>
+                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase transition-all">Críticos</button>
                 <button onclick="gerarRelatorio()" class="px-5 py-4 rounded-2xl bg-green-500 text-white shadow-md text-lg active:scale-95">📊</button>
             </div>
+            
+            <p id="contador" class="text-[10px] font-bold text-slate-400 uppercase mb-4 ml-2"></p>
             <div id="container-produtos" class="space-y-3"></div>
         </main>
 
@@ -69,19 +76,18 @@
 
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-white z-[120] overflow-y-auto p-6">
         <div class="max-w-lg mx-auto">
-            <div class="flex justify-between items-center mb-6 pt-4">
-                <h2 class="text-xl font-black italic uppercase text-slate-800">Registro de Lote</h2>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-black italic uppercase text-slate-800">Novo Registro</h2>
                 <button onclick="fecharModalScanner()" class="text-slate-300 text-5xl">&times;</button>
             </div>
-            <div id="reader" class="rounded-[2.5rem] bg-slate-100 overflow-hidden mb-6 min-h-[250px] border-2 border-dashed border-slate-300"></div>
+            <div id="reader" class="rounded-[2rem] bg-slate-100 overflow-hidden mb-6 border-2 border-dashed border-slate-300"></div>
             <div class="space-y-4">
-                <input type="number" id="ean" placeholder="CÓDIGO EAN" class="w-full p-4 bg-slate-50 rounded-2xl text-center font-mono focus:ring-2 ring-indigo-500 border-none">
                 <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase focus:ring-2 ring-indigo-500 border-none">
                 <div class="grid grid-cols-2 gap-3">
-                    <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold focus:ring-2 ring-indigo-500 uppercase border-none">
+                    <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold focus:ring-2 ring-indigo-500 border-none uppercase">
                     <input type="number" id="qtd" placeholder="QTD" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold focus:ring-2 ring-indigo-500 border-none">
                 </div>
-                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest mt-4 shadow-lg active:scale-95">Salvar no Sistema</button>
+                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest mt-4 shadow-lg">Salvar no Firebase</button>
             </div>
         </div>
     </div>
@@ -100,17 +106,16 @@
         const db = firebase.firestore();
 
         const EQUIPE = [
-            { nome: "ADRIANO", cargo: "ADMIN", pass: "admin123" },
-            { nome: "ADRIELLE", cargo: "ADMIN", pass: "admin123" },
-            { nome: "PAULO", cargo: "USER", pass: "3015Pa" },
-            { nome: "PEDRO", cargo: "USER", pass: "pedro123" },
-            { nome: "LEANDRO", cargo: "USER", pass: "leandro123" },
-            { nome: "EDMAR", cargo: "USER", pass: "edmar123" },
-            { nome: "JOÃO", cargo: "USER", pass: "joao123" },
-            { nome: "TAMIRIS", cargo: "USER", pass: "tamiris123" }
+            { nome: "ADRIANO", cargo: "ADMIN", pass: "2026" },
+            { nome: "ADRIELLE", cargo: "ADMIN", pass: "2026" },
+            { nome: "PAULO", cargo: "USER", pass: "1234" },
+            { nome: "PEDRO", cargo: "USER", pass: "1234" },
+            { nome: "LEANDRO", cargo: "USER", pass: "1234" },
+            { nome: "EDMAR", cargo: "USER", pass: "1234" },
+            { nome: "JOÃO", cargo: "USER", pass: "1234" },
+            { nome: "TAMIRIS", cargo: "USER", pass: "1234" }
         ];
 
-        let usuarioTemp = null;
         let usuarioAtivo = null;
         let estoque = [];
         let abaAtiva = 'estoque';
@@ -119,24 +124,23 @@
         const listaLogin = document.getElementById('lista-usuarios');
         EQUIPE.forEach(u => {
             listaLogin.innerHTML += `
-                <button onclick="pedirSenha('${u.nome}')" class="w-full py-4 ${u.cargo === 'ADMIN' ? 'bg-indigo-600 text-white shadow-indigo-100' : 'bg-slate-50 text-slate-600'} rounded-2xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-sm flex justify-between px-6 items-center border border-slate-100">
+                <button onclick="pedirSenha('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-600 rounded-2xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-sm flex justify-between px-6 items-center border border-slate-100 mb-2">
                     <span>${u.nome}</span>
-                    <span class="opacity-40 text-[7px] uppercase">${u.cargo === 'ADMIN' ? 'Gerente' : 'Equipe'}</span>
+                    <span class="opacity-40 text-[7px]">${u.cargo === 'ADMIN' ? 'GERENTE' : 'EQUIPE'}</span>
                 </button>`;
         });
 
         function pedirSenha(nome) {
-            usuarioTemp = EQUIPE.find(u => u.nome === nome);
+            usuarioAtivo = EQUIPE.find(u => u.nome === nome);
             document.getElementById('nome-selecionado').innerText = nome;
             document.getElementById('modal-senha').classList.remove('hidden');
         }
 
-        function fecharSenha() { document.getElementById('modal-senha').classList.add('hidden'); document.getElementById('input-senha').value = ''; }
+        function fecharSenha() { document.getElementById('modal-senha').classList.add('hidden'); }
 
         function validarAcesso() {
             const pass = document.getElementById('input-senha').value;
-            if (usuarioTemp && usuarioTemp.pass === pass) {
-                usuarioAtivo = usuarioTemp;
+            if (usuarioAtivo && usuarioAtivo.pass === pass) {
                 fecharSenha();
                 document.getElementById('loginView').classList.add('hidden-app');
                 document.getElementById('appView').classList.remove('hidden-app');
@@ -155,38 +159,49 @@
 
         function renderizar() {
             const container = document.getElementById('container-produtos');
+            const termoBusca = document.getElementById('input-busca').value.toUpperCase();
             container.innerHTML = '';
             
-            const lista = estoque.filter(i => {
-                const v = i.vencimento || i.data;
-                if(!v) return abaAtiva !== 'auditoria';
-                const d = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
-                return abaAtiva === 'auditoria' ? (d <= 7) : true;
+            let listaFiltrada = estoque.filter(i => {
+                const nome = (i.produto || i.nome || "").toUpperCase();
+                const venc = i.vencimento || i.data;
+                const matchesBusca = nome.includes(termoBusca);
+                
+                if (abaAtiva === 'auditoria') {
+                    const d = Math.ceil((new Date(venc) - new Date()) / (1000*60*60*24));
+                    return matchesBusca && (d <= 7);
+                }
+                return matchesBusca;
             });
 
-            lista.sort((a,b) => new Date(a.vencimento || a.data) - new Date(b.vencimento || b.data)).forEach(item => {
+            document.getElementById('contador').innerText = `${listaFiltrada.length} Produtos encontrados`;
+
+            listaFiltrada.sort((a,b) => new Date(a.vencimento || a.data) - new Date(b.vencimento || b.data)).forEach(item => {
                 const n = item.produto || item.nome || "SEM NOME";
                 const v = item.vencimento || item.data;
                 const q = item.quantidade || 0;
                 
-                let dias = "---";
-                let cor = "bg-slate-400";
+                let diasTexto = "SEM DATA";
+                let corClasse = "card-ok";
+                let badgeCor = "bg-green-500";
+
                 if(v) {
-                    const diff = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
-                    dias = diff < 0 ? "VENCIDO" : diff + " DIAS";
-                    cor = diff < 0 ? "bg-red-500" : (diff <= 7 ? "bg-amber-400" : "bg-green-500");
+                    const d = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
+                    if(d < 0) { diasTexto = "VENCIDO"; corClasse = "card-vencido"; badgeCor = "bg-red-500"; }
+                    else if(d <= 7) { diasTexto = `${d} DIAS`; corClasse = "card-alerta"; badgeCor = "bg-amber-500"; }
+                    else { diasTexto = `${d} DIAS`; corClasse = "card-ok"; badgeCor = "bg-green-500"; }
                 }
 
                 container.innerHTML += `
-                    <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex justify-between items-center mb-3">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm flex justify-between items-center ${corClasse}">
                         <div>
-                            <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${cor} text-white uppercase mb-1 inline-block">${dias}</span>
+                            <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${badgeCor} text-white uppercase mb-1 inline-block">${diasTexto}</span>
                             <h3 class="font-bold text-slate-800 text-sm uppercase leading-tight">${n}</h3>
-                            <p class="text-[9px] text-slate-400 font-bold italic mt-0.5 uppercase tracking-tighter">Val: ${v ? v.split('-').reverse().join('/') : '--/--'}</p>
+                            <p class="text-[9px] text-slate-400 font-bold italic mt-0.5 uppercase">Venc: ${v ? v.split('-').reverse().join('/') : '--/--'}</p>
                         </div>
                         <div class="text-right">
-                            <p class="font-black text-slate-900 font-mono text-sm italic">${q} UN</p>
-                            ${usuarioAtivo.cargo === 'ADMIN' ? `<button onclick="removerItem('${item.id}')" class="text-red-200 text-[10px] font-black uppercase mt-2">Apagar</button>` : ''}
+                            <p class="font-black text-slate-900 font-mono text-sm">${q} UN</p>
+                            ${usuarioAtivo.cargo === 'ADMIN' ? `<button onclick="removerItem('${item.id}')" class="text-red-300 text-[9px] font-black uppercase mt-2">Remover</button>` : ''}
                         </div>
                     </div>`;
             });
@@ -194,16 +209,8 @@
 
         function mudarAba(a) {
             abaAtiva = a;
-            const btnEstoque = document.getElementById('btn-estoque');
-            const btnAuditoria = document.getElementById('btn-auditoria');
-
-            if (a === 'estoque') {
-                btnEstoque.className = "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase transition-all";
-                btnAuditoria.className = "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase transition-all";
-            } else {
-                btnEstoque.className = "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase transition-all";
-                btnAuditoria.className = "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase transition-all";
-            }
+            document.getElementById('btn-estoque').className = a === 'estoque' ? "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase" : "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase";
+            document.getElementById('btn-auditoria').className = a === 'auditoria' ? "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase" : "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase";
             renderizar();
         }
 
@@ -220,18 +227,20 @@
                     criadoEm: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 fecharModalScanner();
-                document.getElementById('nome').value=''; document.getElementById('data').value=''; document.getElementById('qtd').value='';
-            } else { alert("Preencha Nome e Data!"); }
+                document.getElementById('nome').value=''; document.getElementById('data').value='';
+            }
         }
 
         async function removerItem(id) {
-            if(confirm("Excluir item permanentemente?")) { await db.collection("validades").doc(id).delete(); }
+            if(confirm("Confirmar exclusão?")) { await db.collection("validades").doc(id).delete(); }
         }
 
         function abrirModalScanner() {
             document.getElementById('modal-cadastro').classList.remove('hidden');
             html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => { document.getElementById('ean').value = txt; }).catch(()=>{});
+            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => { 
+                // Futura implementação: buscar nome pelo EAN
+            }).catch(()=>{});
         }
 
         function fecharModalScanner() {
@@ -244,13 +253,13 @@
         }
 
         function gerarRelatorio() {
-            let msg = `*📢 NEW MARKET - ALERTAS (7 DIAS)*\n\n`;
+            let msg = `*📢 NEW MARKET - ALERTAS*\n\n`;
             let alerta = estoque.filter(i => {
                 const v = i.vencimento || i.data;
                 const d = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
                 return d <= 7;
             });
-            if(alerta.length === 0) return alert("Nenhum item vencendo em 7 dias.");
+            if(alerta.length === 0) return alert("Nada crítico hoje!");
             alerta.forEach(i => { msg += `*${(i.produto || i.nome).toUpperCase()}*\nVenc: ${(i.vencimento || i.data).split('-').reverse().join('/')}\n\n`; });
             window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
         }
