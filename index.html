@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SGV - New Market v13.8</title>
+    <title>SGV - New Market v13.9</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,7 +15,6 @@
         .card-vencido { border-left: 8px solid #ef4444; }
         .card-alerta { border-left: 8px solid #f59e0b; }
         .card-ok { border-left: 8px solid #10b981; }
-        
         @keyframes slideDown {
             0% { transform: translate(-50%, -100%); opacity: 0; }
             20% { transform: translate(-50%, 20px); opacity: 1; }
@@ -23,7 +22,6 @@
             100% { transform: translate(-50%, -100%); opacity: 0; }
         }
         .toast-welcome { animation: slideDown 3.5s ease-in-out forwards; }
-
         input[type="date"]::-webkit-calendar-picker-indicator {
             width: 100%; height: 100%; position: absolute; top: 0; left: 0; opacity: 0; cursor: pointer;
         }
@@ -71,16 +69,16 @@
 
         <main class="max-w-lg mx-auto p-4 pb-32">
             <div class="flex gap-2 mb-4">
-                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase transition-all">Todos</button>
-                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase transition-all">Alertas</button>
-                <button onclick="gerarRelatorio()" class="px-5 py-4 rounded-2xl bg-green-500 text-white shadow-md text-lg active:scale-95 transition-transform">📊</button>
+                <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase">Todos</button>
+                <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase">Alertas</button>
+                <button onclick="gerarRelatorio()" class="px-5 py-4 rounded-2xl bg-green-500 text-white shadow-md text-lg">📊</button>
             </div>
             <p id="contador" class="text-[10px] font-bold text-slate-400 uppercase mb-4 ml-2 tracking-widest"></p>
             <div id="container-produtos" class="space-y-3"></div>
         </main>
 
         <div class="fixed bottom-8 left-0 right-0 flex justify-center z-40 px-6">
-            <button onclick="abrirModalScanner()" class="w-full max-w-sm bg-slate-900 text-white py-5 rounded-full shadow-2xl font-black flex items-center justify-center gap-3 text-xs uppercase tracking-widest border-4 border-white active:scale-95 transition-all">
+            <button onclick="abrirModalScanner()" class="w-full max-w-sm bg-slate-900 text-white py-5 rounded-full shadow-2xl font-black flex items-center justify-center gap-3 text-xs uppercase tracking-widest border-4 border-white active:scale-95">
                 <span>📸</span> ESCANEAR PRODUTO
             </button>
         </div>
@@ -89,12 +87,12 @@
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-white z-[120] overflow-y-auto p-6">
         <div class="max-w-lg mx-auto">
             <div class="flex justify-between items-center mb-6 pt-4">
-                <h2 class="text-xl font-black italic uppercase text-slate-800">Novo Registro</h2>
+                <h2 id="titulo-modal" class="text-xl font-black italic uppercase text-slate-800">Novo Registro</h2>
                 <button onclick="fecharModalScanner()" class="text-slate-300 text-5xl">&times;</button>
             </div>
             <div id="reader" class="rounded-[2rem] bg-slate-100 overflow-hidden mb-6 border-2 border-dashed border-slate-300 min-h-[250px]"></div>
             <div class="space-y-4">
-                <input type="text" id="ean" placeholder="EAN (CÓDIGO DE BARRAS)" class="w-full p-4 bg-slate-100 rounded-2xl font-mono text-xs text-indigo-600 border-none shadow-inner">
+                <input type="hidden" id="edit-id"> <input type="text" id="ean" placeholder="EAN (CÓDIGO DE BARRAS)" class="w-full p-4 bg-slate-100 rounded-2xl font-mono text-xs text-indigo-600 border-none">
                 <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase focus:ring-2 ring-indigo-500 border-none">
                 <div class="grid grid-cols-2 gap-3">
                     <div class="relative bg-slate-50 rounded-2xl flex items-center justify-center min-h-[56px]">
@@ -103,7 +101,7 @@
                     </div>
                     <input type="number" id="qtd" placeholder="QTD" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold border-none text-center focus:ring-2 ring-indigo-500">
                 </div>
-                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95 transition-all">Salvar</button>
+                <button onclick="salvarItem()" id="btn-salvar" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95">Salvar Registro</button>
             </div>
         </div>
     </div>
@@ -132,7 +130,6 @@
         ];
 
         let usuarioSessao = null;
-        let nomeSelecionadoNoMomento = "";
         let estoque = [];
         let abaAtiva = 'estoque';
         let html5QrCode = null;
@@ -236,44 +233,70 @@
                         <div class="flex-1">
                             <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${badge} text-white uppercase mb-1 inline-block">${d < 0 ? 'Vencido' : d + ' Dias'}</span>
                             <h3 class="font-bold text-slate-800 text-sm uppercase leading-tight">${item.produto || item.nome}</h3>
-                            
                             <div class="flex items-center gap-1 mt-1">
-                                <span class="text-[7px] text-indigo-300 font-black uppercase">EAN</span>
-                                <p class="text-[9px] font-mono text-indigo-500 font-bold tracking-tighter">
-                                    ${item.ean ? item.ean : 'NÃO CADASTRADO'}
-                                </p>
+                                <span class="text-[7px] text-indigo-300 font-black uppercase tracking-tighter">EAN: ${item.ean || '---'}</span>
                             </div>
-
                             <p class="text-[9px] text-slate-400 font-bold mt-1 uppercase italic">Val: ${v.split('-').reverse().join('/')}</p>
                         </div>
                         <div class="text-right ml-4">
                             <p class="font-black text-slate-900 text-sm uppercase">${item.quantidade || 0} UN</p>
-                            ${usuarioSessao.cargo === 'GERENTE' ? `<button onclick="removerItem('${item.id}')" class="text-red-200 text-[9px] font-black mt-3 uppercase">Apagar</button>` : ''}
+                            <div class="flex flex-col gap-2 mt-2">
+                                <button onclick='prepararEdicao(${JSON.stringify(item)})' class="bg-slate-100 text-slate-400 p-2 rounded-lg text-[10px] uppercase font-black">✏️ Editar</button>
+                                ${usuarioSessao.cargo === 'GERENTE' ? `<button onclick="removerItem('${item.id}')" class="text-red-200 text-[8px] font-black uppercase">Apagar</button>` : ''}
+                            </div>
                         </div>
                     </div>`;
             });
         }
 
+        // NOVIDADE v13.9: PREPARAR EDIÇÃO
+        function prepararEdicao(item) {
+            document.getElementById('titulo-modal').innerText = "Editar Registro";
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('ean').value = item.ean || '';
+            document.getElementById('nome').value = item.produto || item.nome;
+            document.getElementById('data').value = item.vencimento || item.data;
+            document.getElementById('qtd').value = item.quantidade || 0;
+            document.getElementById('label-data').style.display = 'none';
+            document.getElementById('modal-cadastro').classList.remove('hidden');
+            document.getElementById('reader').classList.add('hidden'); // Esconde scanner na edição
+        }
+
         async function salvarItem() {
+            const id = document.getElementById('edit-id').value;
             const n = document.getElementById('nome').value;
             const d = document.getElementById('data').value;
+            
             if (n && d) {
-                await db.collection("validades").add({
-                    produto: n.toUpperCase(), vencimento: d,
+                const dados = {
+                    produto: n.toUpperCase(),
+                    vencimento: d,
                     ean: document.getElementById('ean').value,
                     quantidade: document.getElementById('qtd').value || 0,
-                    by: usuarioSessao.nome, criadoEm: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                fecharModalScanner(); limparCampos();
+                    by: usuarioSessao.nome,
+                    editadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                if (id) {
+                    await db.collection("validades").doc(id).update(dados);
+                } else {
+                    await db.collection("validades").add(dados);
+                }
+                
+                fecharModalScanner();
+                limparCampos();
             } else { alert("Preencha Nome e Data!"); }
         }
 
         function limparCampos() {
-            ['nome','data','ean','qtd'].forEach(id => document.getElementById(id).value='');
+            ['edit-id','nome','data','ean','qtd'].forEach(id => document.getElementById(id).value='');
             document.getElementById('label-data').style.display = 'flex';
+            document.getElementById('titulo-modal').innerText = "Novo Registro";
+            document.getElementById('reader').classList.remove('hidden');
         }
 
         function abrirModalScanner() {
+            limparCampos();
             document.getElementById('modal-cadastro').classList.remove('hidden');
             html5QrCode = new Html5Qrcode("reader");
             html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (txt) => {
@@ -301,12 +324,10 @@
 
         function mudarAba(a) {
             abaAtiva = a;
-            document.getElementById('btn-estoque').className = a === 'estoque' ? "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase" : "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase";
-            document.getElementById('btn-auditoria').className = a === 'auditoria' ? "flex-1 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase" : "flex-1 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase";
             renderizar();
         }
 
-        function removerItem(id) { if(confirm("Apagar este registro permanentemente?")) db.collection("validades").doc(id).delete(); }
+        function removerItem(id) { if(confirm("Apagar permanentemente?")) db.collection("validades").doc(id).delete(); }
 
         function gerarRelatorio() {
             let msg = `*📢 NEW MARKET - ALERTAS*\n\n`;
