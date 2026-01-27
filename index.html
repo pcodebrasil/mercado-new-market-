@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SGV - New Market v14.1 STABLE</title>
+    <title>SGV - New Market v14.2</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body { -webkit-tap-highlight-color: transparent; font-family: sans-serif; }
+        body { -webkit-tap-highlight-color: transparent; font-family: sans-serif; background-color: #0f172a; }
         .hidden-app { display: none !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .card-vencido { border-left: 8px solid #ef4444; }
@@ -22,25 +22,23 @@
             100% { transform: translate(-50%, -100%); opacity: 0; }
         }
         .toast-welcome { animation: slideDown 3.5s ease-in-out forwards; }
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            width: 100%; height: 100%; position: absolute; top: 0; left: 0; opacity: 0; cursor: pointer;
-        }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="min-h-screen">
 
     <div id="loginView" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border-b-8 border-indigo-600">
+        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border-b-8 border-indigo-600 transition-all">
             <div class="text-center mb-6">
                 <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-black text-xl">NM</div>
                 <h2 class="text-2xl font-black italic uppercase text-slate-800 tracking-tighter">New Market</h2>
-                <p class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1">v14.1 Estável</p>
+                <p id="status-login" class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1">v14.2 | Carregando...</p>
             </div>
-            <div id="lista-usuarios" class="space-y-2"></div>
+            <div id="lista-usuarios" class="space-y-2 max-h-[40vh] overflow-y-auto no-scrollbar">
+                </div>
         </div>
     </div>
 
-    <div id="modal-senha" class="hidden fixed inset-0 bg-slate-900/90 z-[110] flex items-center justify-center p-6 text-center">
+    <div id="modal-senha" class="hidden fixed inset-0 bg-slate-900/95 z-[110] flex items-center justify-center p-6 text-center">
         <div class="bg-white w-full max-w-xs rounded-[2.5rem] p-8 shadow-2xl">
             <h3 id="nome-selecionado" class="font-black text-indigo-600 uppercase mb-4 text-lg"></h3>
             <input type="password" id="input-senha" placeholder="SENHA" class="w-full p-4 bg-slate-100 rounded-2xl text-center font-black outline-none focus:ring-2 ring-indigo-500 mb-6 tracking-widest">
@@ -51,7 +49,7 @@
         </div>
     </div>
 
-    <div id="appView" class="hidden-app">
+    <div id="appView" class="hidden-app bg-slate-50 min-h-screen">
         <header class="bg-white sticky top-0 z-30 p-4 border-b border-slate-100 shadow-sm">
             <div class="flex justify-between items-center mb-4">
                 <div>
@@ -61,24 +59,24 @@
                 <button onclick="logout()" class="bg-slate-100 p-2 rounded-xl">🚪</button>
             </div>
             <div class="relative">
-                <input type="text" id="input-busca" oninput="renderizar()" placeholder="Buscar Produto ou EAN..." class="w-full bg-slate-100 p-4 rounded-2xl text-sm font-bold pl-12 uppercase border-none focus:ring-2 ring-indigo-500">
+                <input type="text" id="input-busca" oninput="renderizar()" placeholder="Buscar Produto ou EAN..." class="w-full bg-slate-100 p-4 rounded-2xl text-sm font-bold pl-12 uppercase border-none focus:ring-2 ring-indigo-500 shadow-inner">
                 <span class="absolute left-4 top-4 opacity-30">🔍</span>
             </div>
         </header>
 
         <main class="max-w-lg mx-auto p-4 pb-32">
             <div class="flex gap-2 mb-4 overflow-x-auto no-scrollbar">
-                <button onclick="mudarAba('estoque')" id="btn-estoque" class="px-6 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white uppercase whitespace-nowrap">Estoque</button>
+                <button onclick="mudarAba('estoque')" id="btn-estoque" class="px-6 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white uppercase whitespace-nowrap shadow-md">Estoque</button>
                 <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="px-6 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase whitespace-nowrap">Alertas</button>
                 <button onclick="mudarAba('logs')" id="btn-logs" class="px-6 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase whitespace-nowrap">Histórico</button>
-                <button onclick="gerarRelatorio()" class="px-5 py-4 rounded-2xl bg-green-500 text-white shadow-md text-lg active:scale-90">📊</button>
+                <button onclick="gerarRelatorio()" class="px-5 py-4 rounded-2xl bg-green-500 text-white shadow-md text-lg">📊</button>
             </div>
             <p id="contador" class="text-[10px] font-bold text-slate-400 uppercase mb-4 ml-2 tracking-widest"></p>
             <div id="container-produtos" class="space-y-3"></div>
         </main>
 
         <div id="wrapper-scanner" class="fixed bottom-8 left-0 right-0 flex justify-center z-40 px-6">
-            <button onclick="abrirModalScanner()" class="w-full max-w-sm bg-slate-900 text-white py-5 rounded-full shadow-2xl font-black flex items-center justify-center gap-3 text-xs uppercase border-4 border-white active:scale-95">
+            <button onclick="abrirModalScanner()" class="w-full max-w-sm bg-slate-900 text-white py-5 rounded-full shadow-2xl font-black flex items-center justify-center gap-3 text-xs uppercase border-4 border-white active:scale-95 transition-all">
                 <span>📸</span> ESCANEAR PRODUTO
             </button>
         </div>
@@ -87,22 +85,19 @@
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-white z-[120] overflow-y-auto p-6">
         <div class="max-w-lg mx-auto">
             <div class="flex justify-between items-center mb-6 pt-4">
-                <h2 id="titulo-modal" class="text-xl font-black italic uppercase text-slate-800">Novo Registro</h2>
+                <h2 id="titulo-modal" class="text-xl font-black italic uppercase text-slate-800">Registro</h2>
                 <button onclick="fecharModalScanner()" class="text-slate-300 text-5xl">&times;</button>
             </div>
             <div id="reader" class="rounded-[2rem] bg-slate-100 overflow-hidden mb-6 border-2 border-dashed border-slate-300 min-h-[250px]"></div>
             <div class="space-y-4">
                 <input type="hidden" id="edit-id">
-                <input type="text" id="ean" placeholder="EAN (CÓDIGO DE BARRAS)" class="w-full p-4 bg-slate-100 rounded-2xl font-mono text-xs text-indigo-600 border-none">
+                <input type="text" id="ean" placeholder="CÓDIGO EAN" class="w-full p-4 bg-slate-100 rounded-2xl font-mono text-xs text-indigo-600 border-none">
                 <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase focus:ring-2 ring-indigo-500 border-none">
                 <div class="grid grid-cols-2 gap-3">
-                    <div class="relative bg-slate-50 rounded-2xl flex items-center justify-center min-h-[56px]">
-                        <span id="label-data" class="absolute font-black text-[10px] text-slate-400 uppercase">Definir Data</span>
-                        <input type="date" id="data" oninput="document.getElementById('label-data').style.display = this.value ? 'none' : 'flex'" class="w-full h-full p-4 bg-transparent rounded-2xl text-sm font-bold border-none uppercase text-center z-10">
-                    </div>
+                    <input type="date" id="data" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold border-none uppercase text-center">
                     <input type="number" id="qtd" placeholder="QTD" class="w-full p-4 bg-slate-50 rounded-2xl text-sm font-bold border-none text-center">
                 </div>
-                <button onclick="salvarItem()" id="btn-salvar" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95">Confirmar</button>
+                <button onclick="salvarItem()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase text-xs shadow-lg">Confirmar</button>
             </div>
         </div>
     </div>
@@ -137,21 +132,44 @@
         let html5QrCode = null;
 
         window.onload = function() {
+            // VERIFICAÇÃO DE SESSÃO IMEDIATA
             const salvo = localStorage.getItem('sessaoNewMarket');
             if (salvo) {
-                usuarioSessao = EQUIPE.find(u => u.nome === salvo);
-                if (usuarioSessao) entrarNoApp();
+                const user = EQUIPE.find(u => u.nome === salvo);
+                if (user) {
+                    usuarioSessao = user;
+                    entrarNoApp();
+                }
+            } else {
+                document.getElementById('status-login').innerText = "Selecione seu usuário";
             }
+
+            // Renderiza lista de usuários caso precise logar
             const lista = document.getElementById('lista-usuarios');
             EQUIPE.forEach(u => {
-                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-600 rounded-2xl font-black uppercase text-[10px] flex justify-between px-6 border border-slate-100 mb-2"><span>${u.nome}</span><span class="opacity-30 text-[7px]">${u.cargo}</span></button>`;
+                lista.innerHTML += `
+                    <button onclick="prepararLogin('${u.nome}')" class="w-full py-4 bg-slate-50 text-slate-600 rounded-2xl font-black uppercase text-[10px] flex justify-between px-6 border border-slate-100 active:bg-indigo-50 transition-colors">
+                        <span>${u.nome}</span>
+                        <span class="opacity-30 text-[7px]">${u.cargo}</span>
+                    </button>`;
             });
         };
+
+        function entrarNoApp() {
+            // Remove a tela de login da frente
+            document.getElementById('loginView').classList.add('hidden-app');
+            document.getElementById('appView').classList.remove('hidden-app');
+            document.getElementById('user-display').innerText = usuarioSessao.nome;
+            
+            // Inicia os ouvintes do banco
+            escutarNuvem();
+        }
 
         function prepararLogin(nome) {
             document.getElementById('nome-selecionado').innerText = nome;
             document.getElementById('modal-senha').classList.remove('hidden');
         }
+
         function fecharSenha() { document.getElementById('modal-senha').classList.add('hidden'); }
 
         function validarAcesso() {
@@ -162,15 +180,8 @@
                 usuarioSessao = user;
                 localStorage.setItem('sessaoNewMarket', user.nome);
                 entrarNoApp();
+                document.getElementById('modal-senha').classList.add('hidden');
             } else { alert("Senha Incorreta!"); }
-        }
-
-        function entrarNoApp() {
-            document.getElementById('loginView').classList.add('hidden-app');
-            document.getElementById('appView').classList.remove('hidden-app');
-            document.getElementById('user-display').innerText = usuarioSessao.nome;
-            document.getElementById('modal-senha').classList.add('hidden');
-            escutarNuvem();
         }
 
         function logout() { localStorage.removeItem('sessaoNewMarket'); location.reload(); }
@@ -193,10 +204,10 @@
                 await db.collection("logs").add({
                     usuario: usuarioSessao.nome,
                     acao: acao,
-                    produto: produto ? produto.toUpperCase() : "PRODUTO",
+                    produto: produto.toUpperCase(),
                     data: new Date().getTime()
                 });
-            } catch(e) { console.error("Erro Log:", e); }
+            } catch(e) {}
         }
 
         function renderizar() {
@@ -205,17 +216,17 @@
             container.innerHTML = '';
             
             if (abaAtiva === 'logs') {
-                document.getElementById('contador').innerText = "Histórico Recente";
+                document.getElementById('contador').innerText = "Log de Operações";
                 document.getElementById('wrapper-scanner').classList.add('hidden');
                 logsAtividades.forEach(log => {
-                    let corAcao = log.acao === 'CADASTROU' ? 'text-green-500' : (log.acao === 'EDITOU' ? 'text-blue-500' : 'text-red-500');
+                    let cor = log.acao === 'CADASTROU' ? 'text-green-500' : (log.acao === 'EDITOU' ? 'text-blue-500' : 'text-red-500');
                     container.innerHTML += `
                         <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-slate-200 mb-2">
                             <div class="flex justify-between items-start">
-                                <span class="text-[9px] font-black uppercase ${corAcao}">${log.acao || 'Ação'}</span>
+                                <span class="text-[9px] font-black uppercase ${cor}">${log.acao}</span>
                                 <span class="text-[8px] font-bold text-slate-300">${new Date(log.data).toLocaleTimeString()}</span>
                             </div>
-                            <h4 class="text-[10px] font-black uppercase text-slate-700 mt-1">${log.produto || '---'}</h4>
+                            <h4 class="text-[10px] font-black uppercase text-slate-700 mt-1">${log.produto}</h4>
                             <p class="text-[8px] font-bold text-slate-400">Por: ${log.usuario}</p>
                         </div>`;
                 });
@@ -226,32 +237,32 @@
             let filtrados = estoque.filter(i => {
                 const n = (i.produto || "").toUpperCase();
                 const e = (i.ean || "").toString();
-                const matches = n.includes(termo) || e.includes(termo);
-                if (abaAtiva === 'auditoria') {
-                    const d = Math.ceil((new Date(i.vencimento) - new Date()) / (1000*60*60*24));
-                    return matches && (d <= 7);
-                }
-                return matches;
+                return n.includes(termo) || e.includes(termo);
             });
+
+            if (abaAtiva === 'auditoria') {
+                filtrados = filtrados.filter(i => {
+                    const d = Math.ceil((new Date(i.vencimento) - new Date()) / (1000*60*60*24));
+                    return d <= 7;
+                });
+            }
 
             document.getElementById('contador').innerText = `${filtrados.length} Itens`;
 
             filtrados.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento)).forEach(item => {
-                const v = item.vencimento;
-                const d = Math.ceil((new Date(v) - new Date()) / (1000*60*60*24));
+                const d = Math.ceil((new Date(item.vencimento) - new Date()) / (1000*60*60*24));
                 const cor = d < 0 ? "card-vencido" : (d <= 7 ? "card-alerta" : "card-ok");
                 const badge = d < 0 ? "bg-red-500" : (d <= 7 ? "bg-amber-500" : "bg-green-500");
 
                 container.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl shadow-sm flex justify-between items-center ${cor} mb-3 transition-all">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm flex justify-between items-center ${cor} mb-3">
                         <div class="flex-1">
                             <span class="text-[8px] font-black px-2 py-0.5 rounded-full ${badge} text-white uppercase mb-1 inline-block">${d < 0 ? 'Vencido' : d + ' Dias'}</span>
                             <h3 class="font-bold text-slate-800 text-sm uppercase leading-tight">${item.produto}</h3>
-                            <span class="text-[7px] text-indigo-300 font-black uppercase">EAN: ${item.ean || '---'}</span>
-                            <p class="text-[9px] text-slate-400 font-bold mt-1 uppercase italic">Val: ${v.split('-').reverse().join('/')}</p>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase italic">Val: ${item.vencimento.split('-').reverse().join('/')}</p>
                         </div>
                         <div class="text-right ml-4">
-                            <p class="font-black text-slate-900 text-sm uppercase">${item.quantidade} UN</p>
+                            <p class="font-black text-slate-900 text-sm">${item.quantidade} UN</p>
                             <div class="flex flex-col gap-2 mt-2">
                                 <button onclick='prepararEdicao(${JSON.stringify(item)})' class="bg-slate-50 text-slate-400 p-2 rounded-lg text-[9px] font-black uppercase">✏️ Editar</button>
                                 ${usuarioSessao.cargo === 'GERENTE' ? `<button onclick="removerItem('${item.id}', '${item.produto}')" class="text-red-200 text-[8px] font-black uppercase">Apagar</button>` : ''}
@@ -280,7 +291,7 @@
                     registrarLog('CADASTROU', n);
                 }
                 fecharModalScanner();
-            } else { alert("Nome e Data são obrigatórios!"); }
+            } else { alert("Preencha Nome e Data!"); }
         }
 
         function removerItem(id, nome) { 
@@ -294,42 +305,9 @@
             abaAtiva = a;
             ['estoque', 'auditoria', 'logs'].forEach(id => {
                 const btn = document.getElementById('btn-' + id);
-                if(id === a) {
-                    btn.className = "px-6 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase whitespace-nowrap";
-                } else {
-                    btn.className = "px-6 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase whitespace-nowrap";
-                }
+                btn.className = (id === a) ? "px-6 py-4 rounded-2xl font-black text-[10px] bg-indigo-600 text-white shadow-md uppercase" : "px-6 py-4 rounded-2xl font-black text-[10px] bg-white text-slate-400 border border-slate-100 uppercase";
             });
             renderizar();
-        }
-
-        function prepararEdicao(item) {
-            document.getElementById('titulo-modal').innerText = "Editar Registro";
-            document.getElementById('edit-id').value = item.id;
-            document.getElementById('ean').value = item.ean || '';
-            document.getElementById('nome').value = item.produto;
-            document.getElementById('data').value = item.vencimento;
-            document.getElementById('qtd').value = item.quantidade;
-            document.getElementById('label-data').style.display = 'none';
-            document.getElementById('modal-cadastro').classList.remove('hidden');
-            document.getElementById('reader').classList.add('hidden');
-        }
-
-        function fecharModalScanner() {
-            if(html5QrCode) {
-                html5QrCode.stop().finally(() => {
-                    html5QrCode = null;
-                    finalizarFechamento();
-                });
-            } else { finalizarFechamento(); }
-        }
-
-        function finalizarFechamento() {
-            document.getElementById('modal-cadastro').classList.add('hidden');
-            ['edit-id','nome','data','ean','qtd'].forEach(id => document.getElementById(id).value='');
-            document.getElementById('label-data').style.display = 'flex';
-            document.getElementById('titulo-modal').innerText = "Novo Registro";
-            document.getElementById('reader').classList.remove('hidden');
         }
 
         function abrirModalScanner() {
@@ -346,4 +324,35 @@
             if (!snap.empty) {
                 const dados = snap.docs[0].data();
                 if(!document.getElementById('nome').value) document.getElementById('nome').value = dados.produto;
- 
+            }
+        }
+
+        function fecharModalScanner() {
+            if(html5QrCode) html5QrCode.stop().finally(() => { 
+                html5QrCode = null; 
+                document.getElementById('modal-cadastro').classList.add('hidden');
+                ['edit-id','nome','data','ean','qtd'].forEach(id => document.getElementById(id).value='');
+            });
+            else document.getElementById('modal-cadastro').classList.add('hidden');
+        }
+
+        function prepararEdicao(item) {
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('ean').value = item.ean || '';
+            document.getElementById('nome').value = item.produto;
+            document.getElementById('data').value = item.vencimento;
+            document.getElementById('qtd').value = item.quantidade;
+            document.getElementById('modal-cadastro').classList.remove('hidden');
+            document.getElementById('reader').classList.add('hidden');
+        }
+
+        function gerarRelatorio() {
+            let msg = `*📢 NEW MARKET - RELATÓRIO*\n\n`;
+            let alerta = estoque.filter(i => Math.ceil((new Date(i.vencimento) - new Date()) / (1000*60*60*24)) <= 7);
+            if(alerta.length === 0) return alert("Sem alertas.");
+            alerta.forEach(i => { msg += `• *${i.produto}*\nVal: ${i.vencimento.split('-').reverse().join('/')}\nEAN: ${i.ean || '---'}\n\n`; });
+            window.location.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        }
+    </script>
+</body>
+</html>
