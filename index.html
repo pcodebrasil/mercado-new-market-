@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.7.3 - Midnight Laser</title>
+    <title>New Market v16.7.3 - Big View</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -11,136 +11,132 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     
     <style>
-        /* ESTILIZAÇÃO MODO ESCURO MASTER */
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
-        body { font-family: sans-serif; background-color: #020617; color: #f8fafc; overflow-x: hidden; margin: 0; }
+        body { font-family: sans-serif; background-color: #020617; color: #f8fafc; margin: 0; }
         
-        input, button { -webkit-appearance: none; appearance: none; }
         .hidden-app { display: none !important; }
         
-        /* CAMPO EAN COM LISTRAS PARA LEITURA LASER */
+        /* CAMPO EAN AMPLIADO COM LISTRAS LASER */
         #p-ean {
             background-color: #ffffff !important;
             background-image: 
-                linear-gradient(90deg, #000 1px, transparent 1px),
-                linear-gradient(90deg, #000 3px, transparent 3px),
-                linear-gradient(90deg, #000 2px, transparent 2px);
-            background-size: 8px 100%, 15px 100%, 12px 100%;
+                linear-gradient(90deg, #000 2px, transparent 2px),
+                linear-gradient(90deg, #000 4px, transparent 4px);
+            background-size: 10px 100%, 20px 100%;
             background-repeat: repeat-x;
             color: #000 !important;
             font-family: 'Courier New', Courier, monospace;
             font-weight: 900;
+            font-size: 1.8rem; /* Fonte maior */
             text-align: center;
-            letter-spacing: 4px;
-            border: 4px solid #003366;
-            text-shadow: 2px 2px 0px #fff, -2px -2px 0px #fff;
+            border: 5px solid #003366;
+            height: 100px; /* Campo bem grande */
+            border-radius: 1.5rem;
         }
 
-        /* ANIMAÇÃO RADAR BRILHANTE */
+        .card-produto { 
+            background: #0f172a; 
+            border: 1px solid #1e293b; 
+            border-radius: 2rem; 
+            padding: 1.5rem; /* Mais espaço interno */
+        }
+        
         .radar-active { position: relative; background: #22c55e; box-shadow: 0 0 15px #22c55e; }
         .radar-active::before {
-            content: ''; position: absolute; inset: -6px; border: 2px solid #22c55e;
-            border-radius: 9999px; animation: radar-pulse 2s infinite ease-out; opacity: 0;
+            content: ''; position: absolute; inset: -8px; border: 3px solid #22c55e;
+            border-radius: 9999px; animation: radar-pulse 2s infinite ease-out;
         }
-        @keyframes radar-pulse {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(3); opacity: 0; }
-        }
+        @keyframes radar-pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
 
-        #reader video { object-fit: cover !important; border-radius: 2rem; }
-        #reader { border: none !important; }
-        
+        /* Ajuste do calendário */
         #p-validade { 
-            min-height: 58px !important; background: #1e293b; color: #ffffff; 
-            border: 2px solid #334155; border-radius: 1rem; width: 100%; padding: 0 15px;
+            height: 70px; background: #1e293b; color: #ffffff; 
+            font-size: 1.5rem; font-weight: bold; border-radius: 1.2rem;
+            width: 100%; padding: 0 20px; border: 2px solid #334155;
         }
-
-        .card-produto { background: #0f172a; border: 1px solid #1e293b; border-radius: 1.5rem; transition: transform 0.2s; }
-        .filtro-ativo { border: 2px solid #FFD700 !important; transform: scale(1.05); }
     </style>
 </head>
 <body>
 
-    <div id="loginView" class="fixed inset-0 bg-[#020617] z-[100] flex items-center justify-center p-6 text-center text-white">
-        <div class="bg-slate-900 w-full max-w-sm rounded-[3rem] p-8 shadow-2xl flex flex-col min-h-[550px] border border-slate-800">
-            <div class="flex-grow">
-                <div class="w-16 h-16 bg-[#003366] rounded-2xl flex items-center justify-center mx-auto mb-6 text-[#FFD700] text-2xl font-black italic shadow-xl">NM</div>
-                <h2 class="text-xl font-black uppercase italic mb-8 text-slate-100">Equipe New Market</h2>
-                <div id="lista-usuarios" class="space-y-2 max-h-[300px] overflow-y-auto pr-2"></div>
-            </div>
-            <p onclick="toggleManutencaoSecreto()" class="cursor-pointer text-[10px] font-black text-slate-500 uppercase tracking-widest mt-6 italic select-none">Paulo Souza by 2026</p>
+    <div id="loginView" class="fixed inset-0 bg-[#020617] z-[100] flex items-center justify-center p-6 text-center">
+        <div class="bg-slate-900 w-full max-w-md rounded-[3.5rem] p-10 shadow-2xl border border-slate-800">
+            <div class="w-24 h-24 bg-[#003366] rounded-3xl flex items-center justify-center mx-auto mb-8 text-[#FFD700] text-4xl font-black italic">NM</div>
+            <h2 class="text-2xl font-black uppercase italic mb-10 text-white tracking-widest">Equipe New Market</h2>
+            <div id="lista-usuarios" class="space-y-4"></div>
         </div>
     </div>
 
     <div id="appView" class="hidden-app">
-        <header class="bg-[#001e3c] p-6 sticky top-0 z-30 shadow-2xl rounded-b-[2.5rem] border-b-2 border-[#FFD700]">
-            <div class="flex justify-between items-center mb-6">
-                <div class="flex items-center gap-3">
-                    <div id="radar-status" class="w-3 h-3 rounded-full radar-active"></div>
-                    <div>
-                        <h1 class="font-black text-2xl italic text-[#FFD700] uppercase leading-none">New Market</h1>
-                        <p id="user-display" class="text-[9px] font-black uppercase text-slate-400 mt-1 tracking-tighter"></p>
-                    </div>
+        <header class="bg-[#001e3c] p-8 sticky top-0 z-30 shadow-2xl rounded-b-[3rem] border-b-4 border-[#FFD700]">
+            <div class="flex justify-between items-center mb-8">
+                <div class="flex items-center gap-5">
+                    <div id="radar-status" class="w-5 h-5 rounded-full radar-active"></div>
+                    <h1 class="font-black text-3xl italic text-[#FFD700] uppercase">New Market</h1>
                 </div>
-                <button onclick="logout()" class="bg-slate-800/50 p-3 rounded-xl border border-slate-700 text-xl">🚪</button>
+                <button onclick="logout()" class="bg-slate-800 p-4 rounded-2xl text-2xl">🚪</button>
             </div>
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO..." class="w-full bg-slate-900 p-4 rounded-xl text-xs font-black uppercase outline-none border border-slate-700 text-slate-200">
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO..." class="w-full bg-slate-900 p-6 rounded-2xl text-lg font-black uppercase border-2 border-slate-700 text-white">
         </header>
 
-        <main class="max-w-lg mx-auto p-5 pb-36">
-            <div class="grid grid-cols-3 gap-2 mb-8 text-center">
-                <div id="btn-vencidos" onclick="setFiltro('vencidos')" class="bg-red-900/40 p-3 rounded-2xl text-red-400 border-2 border-transparent shadow-lg">
-                    <p class="text-[7px] font-black uppercase">Vencidos</p>
-                    <p id="dash-vencidos" class="text-xl font-black">0</p>
+        <main class="max-w-xl mx-auto p-6 pb-44">
+            <div class="grid grid-cols-3 gap-4 mb-10">
+                <div onclick="setFiltro('vencidos')" class="bg-red-900/40 p-5 rounded-[2rem] text-red-400 text-center">
+                    <p class="text-[10px] font-black uppercase mb-1">Vencidos</p>
+                    <p id="dash-vencidos" class="text-3xl font-black">0</p>
                 </div>
-                <div id="btn-urgente" onclick="setFiltro('urgente')" class="bg-yellow-900/40 p-3 rounded-2xl text-yellow-400 border-2 border-transparent shadow-lg">
-                    <p class="text-[7px] font-black uppercase">Urgente</p>
-                    <p id="dash-alerta" class="text-xl font-black">0</p>
+                <div onclick="setFiltro('urgente')" class="bg-yellow-900/40 p-5 rounded-[2rem] text-yellow-400 text-center">
+                    <p class="text-[10px] font-black uppercase mb-1">Urgente</p>
+                    <p id="dash-alerta" class="text-3xl font-black">0</p>
                 </div>
-                <div id="btn-todos" onclick="setFiltro('todos')" class="bg-slate-800 p-3 rounded-2xl text-slate-100 border-2 border-transparent filtro-ativo">
-                    <p class="text-[7px] font-black uppercase opacity-40">Total</p>
-                    <p id="dash-total" class="text-xl font-black">0</p>
+                <div onclick="setFiltro('todos')" class="bg-slate-800 p-5 rounded-[2rem] text-white text-center">
+                    <p class="text-[10px] font-black uppercase mb-1">Total</p>
+                    <p id="dash-total" class="text-3xl font-black">0</p>
                 </div>
             </div>
-            <div id="container-produtos" class="space-y-4"></div>
+            <div id="container-produtos" class="space-y-6"></div>
         </main>
         
-        <div class="fixed bottom-8 left-0 right-0 flex justify-center px-10 z-40">
-            <button onclick="abrirCadastro()" class="w-full bg-[#FFD700] text-slate-950 py-5 rounded-2xl shadow-[0_10px_30px_rgba(255,215,0,0.2)] font-black text-xs uppercase border-none active:scale-95 transition-all">
+        <div class="fixed bottom-10 left-0 right-0 px-8 z-40">
+            <button onclick="abrirCadastro()" class="w-full bg-[#FFD700] text-slate-950 py-7 rounded-[2rem] shadow-2xl font-black text-lg uppercase active:scale-95 transition-all">
                 + CADASTRAR / SCANNER
             </button>
         </div>
     </div>
 
-    <div id="modal-cadastro" class="hidden fixed inset-0 bg-[#020617] z-[800] overflow-y-auto">
-        <div class="max-w-lg mx-auto p-8">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-lg font-black uppercase italic text-[#FFD700]">Registro Laser</h2>
-                <button onclick="fecharModalCadastro()" class="text-3xl text-slate-600">&times;</button>
+    <div id="modal-cadastro" class="hidden fixed inset-0 bg-[#020617] z-[800] overflow-y-auto p-6">
+        <div class="max-w-xl mx-auto">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="text-2xl font-black uppercase italic text-[#FFD700]">Registro Dark</h2>
+                <button onclick="fecharModalCadastro()" class="text-5xl text-slate-600">&times;</button>
             </div>
-            <div id="reader-container" class="relative w-full aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden mb-8 border border-slate-800 shadow-2xl"><div id="reader"></div></div>
-            <div class="space-y-5">
-                <input type="text" id="p-ean" placeholder="EAN SCANNER" class="w-full p-6 rounded-2xl outline-none">
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-5 bg-slate-900 rounded-2xl font-black uppercase text-slate-100 border border-slate-800 outline-none">
-                <div class="grid grid-cols-2 gap-4">
+            
+            <div id="reader-container" class="w-full aspect-square bg-slate-900 rounded-[3rem] overflow-hidden mb-10 border-4 border-slate-800"><div id="reader"></div></div>
+            
+            <div class="space-y-6">
+                <input type="text" id="p-ean" placeholder="COD" class="w-full">
+                
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-7 bg-slate-900 rounded-2xl font-black text-xl uppercase text-white border-2 border-slate-800">
+                
+                <div class="grid grid-cols-2 gap-6">
                     <div>
-                        <label class="text-[9px] font-black text-slate-500 mb-2 block uppercase px-2">📅 Validade</label>
+                        <label class="text-xs font-black text-slate-500 mb-3 block uppercase">📅 Validade</label>
                         <input type="date" id="p-validade">
                     </div>
                     <div>
-                        <label class="text-[9px] font-black text-slate-500 mb-2 block uppercase px-2 text-center">📦 Qtd</label>
-                        <input type="tel" id="p-qtd" placeholder="0" class="w-full p-4 bg-slate-900 rounded-2xl font-black text-center text-2xl text-[#FFD700] border border-slate-800 outline-none">
+                        <label class="text-xs font-black text-slate-500 mb-3 block uppercase text-center">📦 Qtd</label>
+                        <input type="tel" id="p-qtd" placeholder="0" class="w-full h-[70px] bg-slate-900 rounded-2xl font-black text-center text-4xl text-[#FFD700] border-2 border-slate-800">
                     </div>
                 </div>
+                
                 <input type="hidden" id="edit-id">
-                <button onclick="salvarProduto()" class="w-full py-6 bg-[#003366] text-white rounded-2xl font-black uppercase shadow-xl mt-4 border-none">Salvar no Banco</button>
-                <button id="btn-deletar" onclick="deletarProduto()" class="hidden w-full py-4 text-red-500 font-black uppercase text-[10px] mt-2 bg-transparent border-none">🗑️ Apagar Registro</button>
+                <button onclick="salvarProduto()" class="w-full py-8 bg-[#003366] text-white rounded-[2rem] font-black text-xl uppercase shadow-2xl mt-6">Gravar no Banco</button>
+                <button id="btn-deletar" onclick="deletarProduto()" class="hidden w-full py-4 text-red-500 font-black uppercase text-sm mt-4">🗑️ Apagar Produto</button>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIG FIREBASE
+        // CONFIG FIREBASE MANTIDA
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -163,14 +159,13 @@
             { nome: "TAMIRIS", cargo: "EQUIPE", pass: "tamiris123" }
         ];
 
-        let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
-        let cliquesSegredo = 0, usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos';
+        let usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos';
 
         window.onload = () => {
             const lista = document.getElementById('lista-usuarios');
             EQUIPE.forEach(u => {
-                lista.innerHTML += `<button onclick="login('${u.nome}')" class="w-full py-4 px-6 bg-slate-800 rounded-2xl font-black uppercase text-[10px] flex justify-between items-center mb-2 border-none text-slate-300">
-                    <span>${u.nome}</span><span class="opacity-30">${u.cargo}</span>
+                lista.innerHTML += `<button onclick="login('${u.nome}')" class="w-full py-6 px-8 bg-slate-800 rounded-2xl font-black uppercase text-sm flex justify-between items-center text-slate-300">
+                    <span>${u.nome}</span><span class="opacity-40 text-[10px]">${u.cargo}</span>
                 </button>`;
             });
             const salvo = localStorage.getItem('sessaoNewMarket');
@@ -183,15 +178,12 @@
         function login(nome) {
             const u = EQUIPE.find(x => x.nome === nome);
             const p = prompt("SENHA:");
-            if (p === u.pass) {
-                usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome); entrarNoApp();
-            }
+            if (p === u.pass) { usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome); entrarNoApp(); }
         }
 
         function entrarNoApp() {
             document.getElementById('loginView').classList.add('hidden-app');
             document.getElementById('appView').classList.remove('hidden-app');
-            document.getElementById('user-display').innerText = `OPERADOR: ${usuarioSessao.nome}`;
             db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
                 estoque = []; snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()})); renderizar();
             });
@@ -211,16 +203,16 @@
                 return matches;
             }).forEach(item => {
                 const d = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
-                const corTexto = d < 0 ? 'text-red-500' : (d <= 7 ? 'text-yellow-400' : 'text-slate-400');
+                const corVal = d < 0 ? 'text-red-500' : (d <= 7 ? 'text-yellow-400' : 'text-slate-400');
                 container.innerHTML += `
-                    <div class="card-produto p-5 flex flex-col mb-4">
-                        <div class="flex justify-between items-start mb-3">
-                            <div><h3 class="font-black text-slate-100 text-sm uppercase">${item.produto}</h3><p class="text-[10px] font-bold ${corTexto}">Val: ${item.vencimento.split('-').reverse().join('/')}</p></div>
-                            <div class="text-2xl font-black text-[#FFD700]">${item.quantidade}</div>
+                    <div class="card-produto flex flex-col">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex-1"><h3 class="font-black text-white text-xl uppercase leading-tight">${item.produto}</h3><p class="text-sm font-bold ${corVal} mt-1">Val: ${item.vencimento.split('-').reverse().join('/')}</p></div>
+                            <div class="text-5xl font-black text-[#FFD700] ml-4">${item.quantidade}</div>
                         </div>
-                        <div class="flex justify-between items-center mt-2 border-t border-slate-800 pt-3">
-                            <span class="text-[8px] font-black uppercase text-slate-500">COD: ${item.ean || '---'}</span>
-                            <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[10px] font-black text-blue-400 uppercase bg-transparent border-none">Ajustar</button>
+                        <div class="flex justify-between items-center mt-4 border-t border-slate-800 pt-5">
+                            <span class="text-[10px] font-black uppercase text-slate-500 tracking-widest">COD: ${item.ean || '---'}</span>
+                            <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-xs font-black text-blue-400 uppercase tracking-widest">AJUSTAR</button>
                         </div>
                     </div>`;
             });
@@ -234,9 +226,9 @@
             document.getElementById('btn-deletar').classList.add('hidden');
             limparForm();
             scannerInstancia = new Html5Qrcode("reader");
-            scannerInstancia.start({ facingMode: "environment" }, { fps: 25, qrbox: 250, aspectRatio: 1.0 }, (txt) => {
+            scannerInstancia.start({ facingMode: "environment" }, { fps: 30, qrbox: 280 }, (txt) => {
                 document.getElementById('p-ean').value = txt;
-                if (navigator.vibrate) try { navigator.vibrate(100); } catch(e){}
+                if (navigator.vibrate) navigator.vibrate(100);
                 scannerInstancia.stop();
             }).catch(()=>{});
         }
@@ -249,9 +241,8 @@
         }
 
         async function deletarProduto() {
-            if(confirm("Deseja apagar este registro permanentemente?")) {
-                const id = document.getElementById('edit-id').value;
-                await db.collection("validades").doc(id).delete();
+            if(confirm("Deseja apagar este registro?")) {
+                await db.collection("validades").doc(document.getElementById('edit-id').value).delete();
                 fecharModalCadastro();
             }
         }
@@ -269,17 +260,6 @@
             document.getElementById('p-validade').value = item.vencimento;
             document.getElementById('p-ean').value = item.ean || '';
             document.getElementById('p-qtd').value = item.quantidade;
-        }
-
-        function toggleManutencaoSecreto() {
-            cliquesSegredo++;
-            if (cliquesSegredo >= 5) {
-                manutencaoAtiva = !manutencaoAtiva;
-                localStorage.setItem('manutencaoNewMarket', manutencaoAtiva);
-                alert("MANUTENÇÃO: " + (manutencaoAtiva ? "ON" : "OFF"));
-                window.location.reload();
-            }
-            setTimeout(() => cliquesSegredo = 0, 2000);
         }
     </script>
 </body>
