@@ -29,8 +29,7 @@
 </head>
 <body>
 
-    <!-- TELA DE MANUTENÇÃO -->
-    <div id="manutencaoView" class="fixed inset-0 bg-gradient-to-b from-slate-900 to-slate-800 z-[200] flex flex-col items-center justify-center p-6 text-center text-white">
+    <div id="manutencaoView" class="hidden-app fixed inset-0 bg-gradient-to-b from-slate-900 to-slate-800 z-[200] flex flex-col items-center justify-center p-6 text-center text-white">
         <div class="w-24 h-24 bg-empresa-amarelo rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl manutencao-pulse">
             <span class="text-3xl font-black text-[#003366]">⚠️</span>
         </div>
@@ -56,7 +55,7 @@
                 <h2 class="text-xl font-black uppercase italic mb-8">Controle de Equipe</h2>
                 <div id="lista-usuarios" class="space-y-2 max-h-[300px] overflow-y-auto"></div>
             </div>
-            <p class="text-[10px] font-black text-blue-700 uppercase tracking-widest mt-6 italic">Paulo Souza by 2026</p>
+            <p onclick="toggleManutencaoSecreto()" class="cursor-pointer text-[10px] font-black text-blue-700 uppercase tracking-widest mt-6 italic select-none">Paulo Souza by 2026</p>
         </div>
     </div>
 
@@ -139,21 +138,33 @@
             { nome: "TAMIRIS", cargo: "EQUIPE", pass: "tamiris123" }
         ];
 
+        // Lógica de Manutenção
+        let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
+        let cliquesSegredo = 0;
         let usuarioSessao = null, estoque = [], scannerInstancia = null;
-        
-        // ✅ MANUTENÇÃO ATIVADA POR PADRÃO
-        localStorage.setItem('manutencaoNewMarket', 'true');
-        const manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') !== 'false';
 
         window.onload = function() {
             document.getElementById('manutencaoView').classList.toggle('hidden-app', !manutencaoAtiva);
             inicializarApp();
         };
 
+        function toggleManutencaoSecreto() {
+            cliquesSegredo++;
+            if (cliquesSegredo >= 5) {
+                manutencaoAtiva = !manutencaoAtiva;
+                localStorage.setItem('manutencaoNewMarket', manutencaoAtiva);
+                alert("MODO MANUTENÇÃO: " + (manutencaoAtiva ? "ATIVADO" : "DESATIVADO"));
+                window.location.reload();
+            }
+            setTimeout(() => { cliquesSegredo = 0; }, 2000);
+        }
+
         function inicializarApp() {
             const lista = document.getElementById('lista-usuarios');
+            lista.innerHTML = '';
             EQUIPE.forEach(u => {
-                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 px-5 bg-slate-50 rounded-xl font-black uppercase text-[10px] flex justify-between items-center mb-1 ${manutencaoAtiva && u.nome !== 'PAULO' ? 'opacity-30 pointer-events-none' : ''}">
+                const bloqueado = manutencaoAtiva && u.nome !== 'PAULO';
+                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 px-5 bg-slate-50 rounded-xl font-black uppercase text-[10px] flex justify-between items-center mb-1 ${bloqueado ? 'opacity-30 pointer-events-none' : ''}">
                     <span>${u.nome}</span><span class="opacity-30">${u.cargo}</span>
                 </button>`;
             });
@@ -199,7 +210,6 @@
             if (modal) modal.remove();
         }
 
-        // ✅ AO CLICAR "FECHAR" VOLTA PARA LOGIN
         function fecharManutencao() {
             document.getElementById('manutencaoView').classList.add('hidden-app');
             document.getElementById('loginView').classList.remove('hidden-app');
@@ -214,28 +224,6 @@
                 snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
                 renderizar();
             });
-        }
-
-        function getAcaoSugerida(dias) {
-            if (dias < 0) return { acao: "RETIRAR AGORA", classe: "bg-red-600 text-white" };
-            if (dias <= 3) return { acao: "PROMOÇÃO (50%)", classe: "bg-orange-500 text-white" };
-            if (dias <= 7) return { acao: "REPOR / MONITORAR", classe: "bg-yellow-400 text-slate-900" };
-            return { acao: "PRODUTO EM DIA", classe: "bg-slate-50 text-slate-400" };
-        }
-
-        async function buscarNomePorEAN(ean) {
-            if (!ean || ean.length < 5) return;
-            const snap = await db.collection("validades").where("ean", "==", ean).limit(1).get();
-            if (!snap.empty) {
-                const prod = snap.docs[0].data();
-                const campoNome = document.getElementById('p-nome');
-                if (campoNome.value === "") {
-                    campoNome.value = prod.produto;
-                    campoNome.classList.add('bg-emerald-50', 'border-emerald-500');
-                    setTimeout(() => campoNome.classList.remove('bg-emerald-50', 'border-emerald-500'), 1500);
-                    if (navigator.vibrate) navigator.vibrate([30, 50]);
-                }
-            }
         }
 
         function renderizar() {
@@ -266,6 +254,28 @@
             document.getElementById('dash-alerta').innerText = cA;
             document.getElementById('dash-total').innerText = estoque.length;
             (cV > 0 || cA > 0) ? document.getElementById('btn-relatorio').classList.remove('hidden') : document.getElementById('btn-relatorio').classList.add('hidden');
+        }
+
+        function getAcaoSugerida(dias) {
+            if (dias < 0) return { acao: "RETIRAR AGORA", classe: "bg-red-600 text-white" };
+            if (dias <= 3) return { acao: "PROMOÇÃO (50%)", classe: "bg-orange-500 text-white" };
+            if (dias <= 7) return { acao: "REPOR / MONITORAR", classe: "bg-yellow-400 text-slate-900" };
+            return { acao: "PRODUTO EM DIA", classe: "bg-slate-50 text-slate-400" };
+        }
+
+        async function buscarNomePorEAN(ean) {
+            if (!ean || ean.length < 5) return;
+            const snap = await db.collection("validades").where("ean", "==", ean).limit(1).get();
+            if (!snap.empty) {
+                const prod = snap.docs[0].data();
+                const campoNome = document.getElementById('p-nome');
+                if (campoNome.value === "") {
+                    campoNome.value = prod.produto;
+                    campoNome.classList.add('bg-emerald-50', 'border-emerald-500');
+                    setTimeout(() => campoNome.classList.remove('bg-emerald-50', 'border-emerald-500'), 1500);
+                    if (navigator.vibrate) navigator.vibrate([30, 50]);
+                }
+            }
         }
 
         async function abrirCadastro() {
@@ -302,8 +312,7 @@
         }
 
         async function confirmarExclusao() {
-            if (confirm("🗑️ CONFIRMAR EXCLUSÃO?
-Este produto será removido permanentemente.")) {
+            if (confirm("🗑️ CONFIRMAR EXCLUSÃO?")) {
                 const id = document.getElementById('edit-id').value;
                 await db.collection("validades").doc(id).delete();
                 alert("✅ Produto excluído!");
@@ -322,24 +331,18 @@ Este produto será removido permanentemente.")) {
         }
 
         function prepararExclusao(item) {
-            if (confirm(`🗑️ Excluir "${item.produto}"?
-Qtd: ${item.quantidade}`)) {
+            if (confirm(`🗑️ Excluir "${item.produto}"?`)) {
                 db.collection("validades").doc(item.id).delete();
                 alert("✅ Produto excluído da lista!");
             }
         }
 
         function gerarRelatorioRetirada() {
-            let rel = `*NEW MARKET - LISTA DE RETIRADA*
-
-`;
+            let rel = `*NEW MARKET - LISTA DE RETIRADA*\n\n`;
             estoque.filter(i => Math.ceil((new Date(i.vencimento) - new Date()) / (1000*60*60*24)) <= 7).forEach(i => {
-                rel += `▪️ *${i.produto}* (${i.quantidade} un)
-Val: ${i.vencimento.split('-').reverse().join('/')}
-
-`;
+                rel += `▪️ *${i.produto}* (${i.quantidade} un)\nVal: ${i.vencimento.split('-').reverse().join('/')}\n\n`;
             });
-            navigator.share ? navigator.share({ title: 'Relatório', text: rel }) : alert("Relatório no console.");
+            navigator.share ? navigator.share({ title: 'Relatório', text: rel }) : alert("Relatório gerado.");
         }
 
         function fecharModalCadastro() { 
