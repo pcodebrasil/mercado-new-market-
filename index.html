@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.2.9 - Paulo Souza</title>
+    <title>New Market v16.3.0 Speed - Paulo Souza</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -54,15 +54,15 @@
 
         <main class="max-w-lg mx-auto p-5 pb-40">
             <div class="grid grid-cols-3 gap-3 mb-8">
-                <div onclick="filtrarDash('vencidos')" class="bg-red-600 p-4 rounded-[2rem] text-center shadow-lg active:scale-95 transition-all">
+                <div onclick="filtrarDash('vencidos')" class="bg-red-600 p-4 rounded-[2rem] text-center shadow-lg active:scale-95 transition-all cursor-pointer">
                     <p class="text-[8px] font-black text-white/60 uppercase">Vencidos</p>
                     <p id="dash-vencidos" class="text-xl font-black text-white">0</p>
                 </div>
-                <div onclick="filtrarDash('alerta')" class="bg-empresa-amarelo p-4 rounded-[2rem] text-center shadow-lg active:scale-95 transition-all">
+                <div onclick="filtrarDash('alerta')" class="bg-empresa-amarelo p-4 rounded-[2rem] text-center shadow-lg active:scale-95 transition-all cursor-pointer">
                     <p class="text-[8px] font-black text-slate-800/60 uppercase">Alerta</p>
                     <p id="dash-alerta" class="text-xl font-black text-slate-900">0</p>
                 </div>
-                <div onclick="filtrarDash('todos')" class="bg-white p-4 rounded-[2rem] text-center shadow-lg active:scale-95 transition-all">
+                <div onclick="filtrarDash('todos')" class="bg-white p-4 rounded-[2rem] text-center shadow-lg active:scale-95 transition-all cursor-pointer">
                     <p class="text-[8px] font-black text-slate-400 uppercase">Total</p>
                     <p id="dash-total" class="text-xl font-black text-empresa-azul">0</p>
                 </div>
@@ -72,12 +72,13 @@
                 <button onclick="mudarAba('estoque')" id="btn-estoque" class="flex-1 py-4 rounded-xl text-[10px] uppercase transition-all btn-nav-active">Estoque</button>
                 <button onclick="mudarAba('auditoria')" id="btn-auditoria" class="flex-1 py-4 rounded-xl text-[10px] uppercase transition-all btn-nav-inactive">Alertas</button>
             </div>
+            
             <div id="container-produtos" class="space-y-4"></div>
         </main>
 
-        <button id="btn-wa-float" onclick="gerarRelatorio()" class="hidden fixed bottom-32 right-6 w-16 h-16 bg-emerald-500 text-white rounded-full shadow-2xl flex items-center justify-center text-3xl border-4 border-white z-50">📊</button>
+        <button id="btn-wa-float" onclick="gerarRelatorio()" class="hidden fixed bottom-32 right-6 w-16 h-16 bg-emerald-500 text-white rounded-full shadow-2xl flex items-center justify-center text-3xl border-4 border-white z-50 active:scale-90 transition-transform">📊</button>
         <div class="fixed bottom-8 left-0 right-0 flex justify-center z-40 px-8">
-            <button onclick="abrirModalScanner()" class="w-full max-w-sm bg-empresa-amarelo text-slate-900 py-6 rounded-[2.5rem] shadow-2xl font-black text-xs uppercase border-4 border-white active:scale-95">📸 ESCANEAR PRODUTO</button>
+            <button onclick="abrirModalScanner()" class="w-full max-w-sm bg-empresa-amarelo text-slate-900 py-6 rounded-[2.5rem] shadow-2xl font-black text-xs uppercase border-4 border-white active:scale-95 transition-transform">📸 ESCANEAR PRODUTO</button>
         </div>
     </div>
 
@@ -112,7 +113,9 @@
                 <h2 class="text-2xl font-black uppercase text-empresa-azul">Registro</h2>
                 <button onclick="fecharModalScanner()" class="text-5xl font-light">&times;</button>
             </div>
-            <div id="reader-container" class="mb-8 rounded-[3rem] overflow-hidden bg-black min-h-[250px] shadow-2xl"><div id="reader"></div></div>
+            <div id="reader-container" class="mb-8 rounded-[3rem] overflow-hidden bg-black min-h-[250px] shadow-2xl relative">
+                <div id="reader"></div>
+            </div>
             <div class="space-y-4">
                 <input type="text" id="ean" placeholder="EAN" class="w-full p-5 bg-slate-50 rounded-2xl font-mono text-blue-600 font-bold border-2 border-slate-100 outline-none">
                 <input type="text" id="nome" placeholder="NOME DO PRODUTO" class="w-full p-5 bg-slate-50 rounded-2xl font-black uppercase outline-none">
@@ -121,8 +124,8 @@
                     <input type="tel" id="qtd" placeholder="QTD" class="w-full p-5 bg-slate-50 rounded-2xl font-black text-center text-xl outline-none">
                 </div>
                 <input type="hidden" id="edit-id">
-                <button onclick="salvarItem()" class="w-full py-6 bg-empresa-azul text-white rounded-[2.5rem] font-black uppercase shadow-xl">Salvar Dados</button>
-                <button id="btn-excluir" onclick="solicitarSenhaExclusao()" class="hidden w-full py-3 text-red-500 font-black uppercase text-[10px] mt-4 border-2 border-red-100 rounded-xl">Apagar com Senha</button>
+                <button onclick="salvarItem()" class="w-full py-6 bg-empresa-azul text-white rounded-[2.5rem] font-black uppercase shadow-xl active:scale-95 transition-transform">Salvar Dados</button>
+                <button id="btn-excluir" onclick="solicitarSenhaExclusao()" class="hidden w-full py-3 text-red-500 font-black uppercase text-[10px] mt-4 border-2 border-red-100 rounded-xl active:bg-red-50">Apagar com Senha</button>
             </div>
         </div>
     </div>
@@ -139,6 +142,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // EQUIPE DEFINIDA
         const EQUIPE = [
             { nome: "ADRIANO", cargo: "GERENTE", pass: "admin123" },
             { nome: "ADRIELLE", cargo: "GERENTE", pass: "admin123" },
@@ -216,7 +220,7 @@
             };
         }
 
-        // DADOS E RENDERIZAÇÃO (MANTIDOS)
+        // DADOS E RENDERIZAÇÃO OTIMIZADA
         function fecharSenha() { document.getElementById('modal-senha').classList.add('hidden'); document.getElementById('input-senha').value = ''; }
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
         function escutarNuvem() { db.collection("validades").onSnapshot(snap => { estoque = []; snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()})); renderizar(); }); }
@@ -226,9 +230,13 @@
         function renderizar() {
             const container = document.getElementById('container-produtos');
             const termo = document.getElementById('input-busca').value.toUpperCase();
-            let cV = 0, cA = 0; container.innerHTML = '';
+            let cV = 0, cA = 0;
+            
+            // Controle de abas
             document.getElementById('btn-estoque').className = (abaAtiva === 'estoque') ? "flex-1 py-4 rounded-xl text-[10px] uppercase btn-nav-active" : "flex-1 py-4 rounded-xl text-[10px] uppercase btn-nav-inactive";
             document.getElementById('btn-auditoria').className = (abaAtiva === 'auditoria') ? "flex-1 py-4 rounded-xl text-[10px] uppercase btn-nav-active" : "flex-1 py-4 rounded-xl text-[10px] uppercase btn-nav-inactive";
+            
+            // Filtragem
             let fil = estoque.filter(i => {
                 const d = difDias(i.vencimento);
                 if (d < 0) cV++; if (d >= 0 && d <= 7) cA++;
@@ -237,27 +245,74 @@
                 if (filtroDash === 'alerta') return m && (d >= 0 && d <= 7);
                 return abaAtiva === 'auditoria' ? (m && d <= 7) : m;
             });
+            
+            // Atualiza Dashboard
             document.getElementById('dash-vencidos').innerText = cV;
             document.getElementById('dash-alerta').innerText = cA;
             document.getElementById('dash-total').innerText = estoque.length;
             document.getElementById('btn-wa-float').classList.toggle('hidden', abaAtiva !== 'auditoria');
-            fil.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento)).forEach(item => {
+
+            // Ordenação
+            fil.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
+
+            // RENDERIZAÇÃO OTIMIZADA (LOTE)
+            let htmlBuffer = "";
+            let itemsParaBarcode = [];
+
+            fil.forEach(item => {
                 const d = difDias(item.vencimento);
                 let lbl = d + " DIAS", bg = "bg-emerald-500", card = "bg-white border-l-8 border-emerald-500 shadow-sm";
                 if (d < 0) { lbl = "VENCIDO"; card = "bg-white border-l-8 border-red-900"; bg = "bg-red-900"; }
                 else if (d === 0) { lbl = "HOJE"; card = "bg-white border-l-8 border-red-600 shadow-xl"; bg = "bg-red-600 font-black"; }
                 else if (d <= 7) { lbl = d + " DIAS"; card = "bg-white border-l-8 border-yellow-400"; bg = "bg-yellow-400 text-slate-900"; }
+                
                 const cId = `barcode-${item.id}`;
                 const vB = (item.ean && item.ean.length >= 8) ? item.ean : `NM-${item.id.substring(0,6)}`;
-                container.innerHTML += `<div class="${card} p-5 rounded-[2.5rem] flex justify-between items-center mb-4 transition-all">
-                    <div class="max-w-[65%]"><span class="${bg} text-[8px] font-black px-3 py-1 rounded-full uppercase mb-2 inline-block text-white shadow-sm">${lbl}</span>
-                    <h3 class="font-black text-slate-800 text-base uppercase leading-tight mb-2 truncate">${item.produto}</h3>
-                    <div class="bg-white p-2 rounded-xl border border-slate-50 mb-2 flex items-center justify-center min-h-[60px] overflow-hidden"><svg id="${cId}"></svg></div>
-                    <p class="text-[10px] text-slate-900 font-black uppercase">VAL: <span class="text-blue-700 text-sm font-black">${item.vencimento.split('-').reverse().join('/')}</span></p></div>
-                    <div class="text-right flex flex-col justify-between items-end h-[140px]"><div><p class="text-[9px] font-black text-slate-400 uppercase">Qtd</p><p class="font-black text-empresa-azul text-3xl -mt-1">${item.quantidade}</p></div>
-                    <button onclick='prepararEdicao(${JSON.stringify(item)})' class="bg-slate-50 px-5 py-2 rounded-xl text-[10px] font-black text-slate-400 border border-slate-200 uppercase">Editar</button></div></div>`;
-                setTimeout(() => { try { const isE13 = /^\d{13}$/.test(vB); JsBarcode(`#${cId}`, vB, { format: isE13 ? "EAN13" : "CODE128", lineColor: "#000", width: 2, height: 35, displayValue: true, fontSize: 12 }); } catch(e){} }, 150);
+                
+                // Armazena dados para renderizar barcode depois
+                itemsParaBarcode.push({ id: cId, value: vB });
+
+                // Monta HTML na memória (String)
+                htmlBuffer += `
+                <div class="${card} p-5 rounded-[2.5rem] flex justify-between items-center mb-4 transition-all hover:bg-slate-50">
+                    <div class="max-w-[65%]">
+                        <span class="${bg} text-[8px] font-black px-3 py-1 rounded-full uppercase mb-2 inline-block text-white shadow-sm">${lbl}</span>
+                        <h3 class="font-black text-slate-800 text-base uppercase leading-tight mb-2 truncate">${item.produto}</h3>
+                        <div class="bg-white p-2 rounded-xl border border-slate-50 mb-2 flex items-center justify-center min-h-[60px] overflow-hidden w-full max-w-[180px]">
+                            <svg id="${cId}"></svg>
+                        </div>
+                        <p class="text-[10px] text-slate-900 font-black uppercase">VAL: <span class="text-blue-700 text-sm font-black">${item.vencimento.split('-').reverse().join('/')}</span></p>
+                    </div>
+                    <div class="text-right flex flex-col justify-between items-end h-[140px]">
+                        <div>
+                            <p class="text-[9px] font-black text-slate-400 uppercase">Qtd</p>
+                            <p class="font-black text-empresa-azul text-3xl -mt-1">${item.quantidade}</p>
+                        </div>
+                        <button onclick='prepararEdicao(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="bg-slate-50 px-5 py-2 rounded-xl text-[10px] font-black text-slate-400 border border-slate-200 uppercase active:bg-slate-200">Editar</button>
+                    </div>
+                </div>`;
             });
+
+            // Escreve no DOM uma única vez (Muito mais rápido)
+            container.innerHTML = htmlBuffer;
+
+            // Gera Barcodes sem travar a interface (usando setTimeout 0 para jogar pro fim da fila de execução)
+            setTimeout(() => {
+                itemsParaBarcode.forEach(b => {
+                    try {
+                        const isE13 = /^\d{13}$/.test(b.value);
+                        JsBarcode(`#${b.id}`, b.value, { 
+                            format: isE13 ? "EAN13" : "CODE128", 
+                            lineColor: "#000", 
+                            width: 2, 
+                            height: 35, 
+                            displayValue: true, 
+                            fontSize: 12,
+                            margin: 0
+                        });
+                    } catch(e){ console.log("Erro barcode", e); }
+                });
+            }, 0);
         }
 
         async function salvarItem() {
