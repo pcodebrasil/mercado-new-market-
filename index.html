@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.6.7 - Paulo Souza</title>
+    <title>New Market v16.6.8 - Paulo Souza</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -29,7 +29,7 @@
 </head>
 <body>
 
-    <div id="manutencaoView" class="hidden-app fixed inset-0 bg-gradient-to-b from-slate-900 to-slate-800 z-[200] flex flex-col items-center justify-center p-6 text-center text-white">
+    <div id="manutencaoView" class="hidden-app fixed inset-0 bg-gradient-to-b from-slate-900 to-slate-800 z-[300] flex flex-col items-center justify-center p-6 text-center text-white">
         <div class="w-24 h-24 bg-empresa-amarelo rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl manutencao-pulse">
             <span class="text-3xl font-black text-[#003366]">⚠️</span>
         </div>
@@ -45,7 +45,7 @@
             </a>
         </div>
         
-        <button onclick="fecharManutencao()" class="py-4 px-8 bg-empresa-amarelo text-[#003366] rounded-2xl font-black uppercase text-sm shadow-xl hover:shadow-2xl transition-all">🔙 VOLTAR AO LOGIN</button>
+        <button onclick="fecharManutencao()" class="py-4 px-8 bg-empresa-amarelo text-[#003366] rounded-2xl font-black uppercase text-sm shadow-xl hover:shadow-2xl transition-all">🔙 VOLTAR</button>
     </div>
 
     <div id="loginView" class="fixed inset-0 bg-gradient-to-b from-[#003366] to-[#1e40af] z-[100] flex items-center justify-center p-6 text-center text-white">
@@ -71,7 +71,6 @@
                 </div>
                 <button onclick="logout()" class="bg-white/10 p-3 rounded-xl border border-white/20">🚪</button>
             </div>
-
             <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO OU EAN..." class="w-full bg-white p-4 rounded-xl text-xs font-black uppercase outline-none shadow-inner border-2 border-transparent">
         </header>
 
@@ -138,13 +137,11 @@
             { nome: "TAMIRIS", cargo: "EQUIPE", pass: "tamiris123" }
         ];
 
-        // Lógica de Manutenção
         let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
         let cliquesSegredo = 0;
         let usuarioSessao = null, estoque = [], scannerInstancia = null;
 
         window.onload = function() {
-            document.getElementById('manutencaoView').classList.toggle('hidden-app', !manutencaoAtiva);
             inicializarApp();
         };
 
@@ -163,31 +160,33 @@
             const lista = document.getElementById('lista-usuarios');
             lista.innerHTML = '';
             EQUIPE.forEach(u => {
-                const bloqueado = manutencaoAtiva && u.nome !== 'PAULO';
-                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 px-5 bg-slate-50 rounded-xl font-black uppercase text-[10px] flex justify-between items-center mb-1 ${bloqueado ? 'opacity-30 pointer-events-none' : ''}">
+                // Lista sempre liberada para o clique inicial
+                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 px-5 bg-slate-50 rounded-xl font-black uppercase text-[10px] flex justify-between items-center mb-1">
                     <span>${u.nome}</span><span class="opacity-30">${u.cargo}</span>
                 </button>`;
             });
             const salvo = localStorage.getItem('sessaoNewMarket');
             if (salvo) { 
-                usuarioSessao = EQUIPE.find(u => u.nome === salvo); 
-                if (usuarioSessao && (!manutencaoAtiva || usuarioSessao.nome === 'PAULO')) entrarNoApp(); 
+                const u = EQUIPE.find(x => x.nome === salvo);
+                if (u) {
+                    // Valida sessão salva contra manutenção
+                    if (manutencaoAtiva && u.nome !== 'PAULO') {
+                        localStorage.removeItem('sessaoNewMarket');
+                    } else {
+                        usuarioSessao = u;
+                        entrarNoApp();
+                    }
+                }
             }
         }
 
         function prepararLogin(nomeUsuario) {
-            if (manutencaoAtiva && nomeUsuario !== 'PAULO') {
-                document.getElementById('manutencaoView').classList.remove('hidden-app');
-                document.getElementById('loginView').classList.add('hidden-app');
-                return;
-            }
-
             const senhaModal = document.createElement('div');
             senhaModal.id = 'modal-senha';
             senhaModal.className = 'fixed inset-0 bg-slate-900/95 z-[600] flex items-center justify-center p-6 text-center';
             senhaModal.innerHTML = `
                 <div class="bg-white w-full max-w-xs rounded-[3rem] p-10 shadow-2xl">
-                    <h3 id="nome-selecionado" class="font-black text-[#003366] uppercase mb-6 text-xl tracking-tighter">${nomeUsuario}</h3>
+                    <h3 class="font-black text-[#003366] uppercase mb-6 text-xl tracking-tighter">${nomeUsuario}</h3>
                     <input type="password" id="input-senha" placeholder="••••" class="w-full p-5 bg-slate-100 rounded-2xl text-center font-black outline-none mb-8 text-4xl tracking-widest border-2 border-transparent">
                     <div class="flex gap-3">
                         <button onclick="fecharSenha()" class="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-[10px] uppercase">Sair</button>
@@ -198,10 +197,22 @@
             document.body.appendChild(senhaModal);
             document.getElementById('btn-confirmar-senha').onclick = () => {
                 const u = EQUIPE.find(x => x.nome === nomeUsuario);
-                if (document.getElementById('input-senha').value === u.pass) {
-                    usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome);
-                    fecharSenha(); entrarNoApp();
-                } else alert("Senha Incorreta");
+                const senhaDigitada = document.getElementById('input-senha').value;
+
+                if (senhaDigitada === u.pass) {
+                    // VERIFICAÇÃO DE MANUTENÇÃO APÓS CLICAR EM ENTRAR
+                    if (manutencaoAtiva && u.nome !== 'PAULO') {
+                        fecharSenha();
+                        document.getElementById('manutencaoView').classList.remove('hidden-app');
+                    } else {
+                        usuarioSessao = u; 
+                        localStorage.setItem('sessaoNewMarket', u.nome);
+                        fecharSenha(); 
+                        entrarNoApp();
+                    }
+                } else {
+                    alert("Senha Incorreta");
+                }
             };
         }
 
@@ -212,7 +223,6 @@
 
         function fecharManutencao() {
             document.getElementById('manutencaoView').classList.add('hidden-app');
-            document.getElementById('loginView').classList.remove('hidden-app');
         }
 
         function entrarNoApp() {
@@ -247,7 +257,6 @@
                         </div>
                         <div class="${decisao.classe} text-[8px] font-black p-2 rounded-xl text-center uppercase mb-3">${decisao.acao}</div>
                         <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[9px] font-black text-blue-500 uppercase self-end mb-1">Ajustar</button>
-                        <button onclick='prepararExclusao(${JSON.stringify(item)})' class="text-[9px] font-black text-red-500 uppercase self-end">Excluir</button>
                     </div>`;
             });
             document.getElementById('dash-vencidos').innerText = cV;
@@ -271,9 +280,7 @@
                 const campoNome = document.getElementById('p-nome');
                 if (campoNome.value === "") {
                     campoNome.value = prod.produto;
-                    campoNome.classList.add('bg-emerald-50', 'border-emerald-500');
-                    setTimeout(() => campoNome.classList.remove('bg-emerald-50', 'border-emerald-500'), 1500);
-                    if (navigator.vibrate) navigator.vibrate([30, 50]);
+                    if (navigator.vibrate) navigator.vibrate(50);
                 }
             }
         }
@@ -285,7 +292,6 @@
             scannerInstancia.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (txt) => {
                 document.getElementById('p-ean').value = txt;
                 buscarNomePorEAN(txt);
-                if(navigator.vibrate) navigator.vibrate(50);
                 scannerInstancia.stop();
             }).catch(()=>{});
         }
@@ -299,23 +305,16 @@
                 quantidade: parseInt(document.getElementById('p-qtd').value) || 0, 
                 usuario: usuarioSessao.nome 
             };
-            if(!dados.produto || !dados.vencimento) return alert("Nome e validade obrigatórios!");
-            
-            if (id) {
-                await db.collection("validades").doc(id).update(dados);
-                alert("✅ Produto atualizado!");
-            } else {
-                await db.collection("validades").add(dados);
-                alert("✅ Produto cadastrado!");
-            }
+            if(!dados.produto || !dados.vencimento) return alert("Obrigatório!");
+            if (id) await db.collection("validades").doc(id).update(dados);
+            else await db.collection("validades").add(dados);
             fecharModalCadastro();
         }
 
         async function confirmarExclusao() {
-            if (confirm("🗑️ CONFIRMAR EXCLUSÃO?")) {
+            if (confirm("🗑️ EXCLUIR?")) {
                 const id = document.getElementById('edit-id').value;
                 await db.collection("validades").doc(id).delete();
-                alert("✅ Produto excluído!");
                 fecharModalCadastro();
             }
         }
@@ -330,27 +329,14 @@
             document.getElementById('btn-excluir').classList.remove('hidden');
         }
 
-        function prepararExclusao(item) {
-            if (confirm(`🗑️ Excluir "${item.produto}"?`)) {
-                db.collection("validades").doc(item.id).delete();
-                alert("✅ Produto excluído da lista!");
-            }
-        }
-
-        function gerarRelatorioRetirada() {
-            let rel = `*NEW MARKET - LISTA DE RETIRADA*\n\n`;
-            estoque.filter(i => Math.ceil((new Date(i.vencimento) - new Date()) / (1000*60*60*24)) <= 7).forEach(i => {
-                rel += `▪️ *${i.produto}* (${i.quantidade} un)\nVal: ${i.vencimento.split('-').reverse().join('/')}\n\n`;
-            });
-            navigator.share ? navigator.share({ title: 'Relatório', text: rel }) : alert("Relatório gerado.");
-        }
-
         function fecharModalCadastro() { 
             if(scannerInstancia) scannerInstancia.stop().catch(()=>{}); 
             document.getElementById('modal-cadastro').classList.add('hidden'); 
             limparForm();
         }
+
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
+        
         function limparForm() { 
             document.getElementById('edit-id').value = ''; 
             document.getElementById('p-nome').value = ''; 
@@ -358,6 +344,14 @@
             document.getElementById('p-ean').value = ''; 
             document.getElementById('p-qtd').value = ''; 
             document.getElementById('btn-excluir').classList.add('hidden'); 
+        }
+
+        function gerarRelatorioRetirada() {
+            let rel = `*NEW MARKET - RETIRADA*\n\n`;
+            estoque.filter(i => Math.ceil((new Date(i.vencimento) - new Date()) / (1000*60*60*24)) <= 7).forEach(i => {
+                rel += `▪️ *${i.produto}* (${i.quantidade} un) - Val: ${i.vencimento.split('-').reverse().join('/')}\n\n`;
+            });
+            navigator.share ? navigator.share({ title: 'Relatório', text: rel }) : console.log(rel);
         }
     </script>
 </body>
