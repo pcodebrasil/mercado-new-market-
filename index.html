@@ -142,7 +142,7 @@
         let usuarioSessao = null, estoque = [], scannerInstancia = null;
         
         // ✅ MANUTENÇÃO ATIVADA POR PADRÃO
-        localStorage.setItem('manutencaoNewMarket', 'true');
+        localStorage.setItem('manutencaoNewMarket', 'false');
         const manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') !== 'false';
 
         window.onload = function() {
