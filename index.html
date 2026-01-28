@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.7.3 - PROD</title>
+    <title>New Market v16.7.3</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -11,75 +11,92 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     
     <style>
-        body { -webkit-tap-highlight-color: transparent; font-family: sans-serif; background-color: #f8fafc; overflow-x: hidden; }
+        body { -webkit-tap-highlight-color: transparent; font-family: sans-serif; background-color: #f1f5f9; }
         .hidden-app { display: none !important; }
-        .radar-active { position: relative; background: #4ade80; border-radius: 50%; width: 12px; height: 12px; }
-        #reader video { object-fit: cover !important; border-radius: 1.5rem; }
-        #reader { border: none !important; }
-        .filtro-ativo { border: 3px solid #000 !important; transform: scale(1.05); }
+        .radar-active { position: relative; background: #4ade80; }
+        .radar-active::before { content: ''; position: absolute; inset: -3px; border: 2px solid #4ade80; border-radius: 9999px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2); opacity: 0; } }
+        #reader video { object-fit: cover !important; border-radius: 2rem; }
     </style>
 </head>
-<body>
+<body class="antialiased">
 
-    <div id="loginView" class="fixed inset-0 bg-gradient-to-b from-[#003366] to-[#1e40af] z-[100] flex items-center justify-center p-6 text-center text-white">
-        <div class="bg-white w-full max-w-sm rounded-[3.5rem] p-8 shadow-2xl flex flex-col min-h-[550px] text-slate-800">
+    <div id="loginView" class="fixed inset-0 bg-[#003366] z-[100] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-[3rem] p-8 shadow-2xl flex flex-col min-h-[580px]">
             <div class="flex-grow">
-                <div class="w-16 h-16 bg-[#003366] rounded-2xl flex items-center justify-center mx-auto mb-6 text-[#FFD700] text-2xl font-black italic">NM</div>
-                <h2 class="text-xl font-black uppercase italic mb-8">Controle de Equipe</h2>
-                <div id="lista-usuarios" class="space-y-2 max-h-[300px] overflow-y-auto"></div>
+                <div class="w-20 h-20 bg-[#003366] rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                    <span class="text-[#FFD700] text-3xl font-black italic">NM</span>
+                </div>
+                <h2 class="text-center text-xl font-black text-slate-800 uppercase tracking-tighter mb-8">Controle de Equipe</h2>
+                <div id="lista-usuarios" class="space-y-3"></div>
             </div>
-            <p class="text-[10px] font-black text-blue-700 uppercase mt-6 italic">Projeto: Mercado-c3e95</p>
+            <div class="text-center mt-6">
+                <p class="text-[10px] font-black text-blue-900/30 uppercase italic">Projeto: Mercado-c3e95</p>
+            </div>
         </div>
     </div>
 
-    <div id="appView" class="hidden-app">
-        <header class="bg-[#003366] p-6 sticky top-0 z-30 shadow-xl rounded-b-[2.5rem] border-b-4 border-[#FFD700]">
-            <div class="flex justify-between items-center mb-6 text-white">
-                <div class="flex items-center gap-3">
-                    <div id="radar-status" class="radar-active"></div>
+    <div id="appView" class="hidden-app min-h-screen">
+        <header class="bg-[#003366] p-6 sticky top-0 z-50 shadow-2xl rounded-b-[2.5rem] border-b-4 border-[#FFD700]">
+            <div class="flex justify-between items-center text-white">
+                <div class="flex items-center gap-4">
+                    <div class="w-3 h-3 rounded-full radar-active"></div>
                     <div>
-                        <h1 class="font-black text-2xl italic text-[#FFD700] uppercase leading-none">New Market</h1>
-                        <p id="user-display" class="text-[9px] font-black uppercase opacity-60 mt-1"></p>
+                        <h1 class="text-2xl font-black italic text-[#FFD700] uppercase leading-none">New Market</h1>
+                        <p id="user-display" class="text-[10px] font-bold opacity-70 mt-1 uppercase"></p>
                     </div>
                 </div>
-                <button onclick="logout()" class="bg-white/10 p-3 rounded-xl border border-white/20">🚪</button>
+                <button onclick="logout()" class="bg-white/10 p-3 rounded-2xl backdrop-blur-sm border border-white/20">🚪</button>
             </div>
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO..." class="w-full bg-white p-4 rounded-xl text-xs font-black uppercase outline-none shadow-inner">
+            <div class="mt-6">
+                <input type="text" id="input-busca" oninput="renderizar()" placeholder="Pesquisar no estoque..." class="w-full bg-white/95 p-4 rounded-2xl text-sm font-bold shadow-inner outline-none text-slate-800">
+            </div>
         </header>
 
-        <main class="max-w-lg mx-auto p-5 pb-32">
-            <div id="container-produtos" class="space-y-3"></div>
+        <main class="p-4 pb-32">
+            <div id="container-produtos" class="grid gap-4"></div>
         </main>
-        
-        <div class="fixed bottom-6 left-0 right-0 flex justify-center px-6 z-40">
-            <button onclick="abrirCadastro()" class="w-full max-w-sm bg-[#FFD700] text-slate-900 py-5 rounded-2xl shadow-2xl font-black text-[10px] uppercase border-2 border-white">
-                + CADASTRAR PRODUTO / SCANNER
+
+        <div class="fixed bottom-8 left-0 right-0 flex justify-center px-6 z-40">
+            <button onclick="abrirCadastro()" class="w-full max-w-sm bg-[#FFD700] text-[#003366] py-5 rounded-[2rem] shadow-2xl font-black text-xs uppercase tracking-widest border-4 border-white active:scale-95 transition-transform">
+                + Novo Registro / Scanner
             </button>
         </div>
     </div>
 
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-white z-[800] overflow-y-auto">
-        <div class="max-w-lg mx-auto p-6">
-            <div class="flex justify-between items-center mb-6 text-[#003366]">
-                <h2 class="text-lg font-black uppercase italic">Scanner & Registro</h2>
-                <button onclick="fecharModalCadastro()" class="text-3xl text-slate-300">&times;</button>
+        <div class="p-6 max-w-lg mx-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-[#003366] font-black text-xl uppercase italic">Scanner</h2>
+                <button onclick="fecharModalCadastro()" class="w-12 h-12 flex items-center justify-center bg-slate-100 rounded-full text-2xl text-slate-400">&times;</button>
             </div>
-            <div id="reader-container" class="relative w-full aspect-square bg-black rounded-3xl overflow-hidden mb-6"><div id="reader"></div></div>
+            
+            <div id="reader" class="overflow-hidden mb-8 shadow-2xl border-4 border-slate-100 rounded-[2.5rem]"></div>
+
             <div class="space-y-4">
-                <input type="text" id="p-ean" placeholder="EAN" onblur="buscarNomePorEAN(this.value)" class="w-full p-4 bg-slate-50 rounded-2xl font-mono border-2 border-transparent outline-none">
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase outline-none">
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="date" id="p-validade" class="w-full p-4 bg-slate-50 rounded-2xl font-black text-[#003366] outline-none">
-                    <input type="tel" id="p-qtd" placeholder="Qtd" class="w-full p-4 bg-slate-50 rounded-2xl font-black text-center text-xl outline-none">
+                <div class="bg-slate-50 p-4 rounded-3xl border-2 border-slate-100">
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Nome do Produto</label>
+                    <input type="text" id="p-nome" class="w-full bg-transparent p-2 text-lg font-black uppercase outline-none text-slate-800">
                 </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-50 p-4 rounded-3xl border-2 border-slate-100">
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Validade</label>
+                        <input type="date" id="p-validade" class="w-full bg-transparent p-2 font-black outline-none text-slate-800">
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-3xl border-2 border-slate-100">
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Qtd</label>
+                        <input type="tel" id="p-qtd" class="w-full bg-transparent p-2 text-center text-xl font-black outline-none text-slate-800">
+                    </div>
+                </div>
+                <input type="hidden" id="p-ean">
                 <input type="hidden" id="edit-id">
-                <button onclick="salvarProduto()" class="w-full py-5 bg-[#003366] text-white rounded-2xl font-black uppercase shadow-xl">Salvar no Banco</button>
+                <button onclick="salvarProduto()" class="w-full py-6 bg-[#003366] text-white rounded-[2rem] font-black uppercase shadow-2xl tracking-widest mt-4">Confirmar e Salvar</button>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO RESTAURADA PARA PROJETO MERCADO
+        // CONFIGURAÇÃO MERCADO-C3E95
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -92,34 +109,37 @@
         const db = firebase.firestore();
 
         const EQUIPE = [
-            { nome: "ADRIANO", pass: "admin123" },
-            { nome: "PAULO", pass: "paulo123" }
+            { nome: "ADRIANO", cargo: "GERENTE", pass: "admin123" },
+            { nome: "PAULO", cargo: "DEVELOPER", pass: "paulo123" },
+            { nome: "PEDRO", cargo: "EQUIPE", pass: "pedro123" }
         ];
 
-        let usuarioSessao = null, estoque = [], scannerInstancia = null;
+        let usuarioSessao = null, estoque = [], scanner = null;
 
         window.onload = () => {
-            const lista = document.getElementById('lista-usuarios');
+            const container = document.getElementById('lista-usuarios');
             EQUIPE.forEach(u => {
-                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 px-5 bg-slate-50 rounded-xl font-black uppercase text-[10px] mb-1">
-                    ${u.nome}
-                </button>`;
+                container.innerHTML += `
+                    <button onclick="fazerLogin('${u.nome}')" class="w-full p-5 bg-slate-50 rounded-2xl flex justify-between items-center border border-slate-100 active:bg-slate-200 transition-colors">
+                        <span class="font-black text-slate-700 uppercase text-sm">${u.nome}</span>
+                        <span class="text-[9px] font-bold text-slate-300 uppercase">${u.cargo}</span>
+                    </button>`;
             });
         };
 
-        function prepararLogin(nome) {
-            const senha = prompt(`Senha:`);
-            const u = EQUIPE.find(x => x.nome === nome);
-            if (senha === u.pass) {
-                usuarioSessao = u;
+        function fazerLogin(nome) {
+            const senha = prompt(`Senha para ${nome}:`);
+            const user = EQUIPE.find(x => x.nome === nome);
+            if (senha === user.pass) {
+                usuarioSessao = user;
                 document.getElementById('loginView').classList.add('hidden-app');
                 document.getElementById('appView').classList.remove('hidden-app');
-                document.getElementById('user-display').innerText = `LOGADO COMO ${usuarioSessao.nome}`;
-                sincronizar();
+                document.getElementById('user-display').innerText = `Logado: ${user.nome}`;
+                iniciarEscuta();
             }
         }
 
-        function sincronizar() {
+        function iniciarEscuta() {
             db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
                 estoque = [];
                 snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
@@ -129,51 +149,71 @@
 
         async function salvarProduto() {
             const id = document.getElementById('edit-id').value;
-            const dados = { 
-                produto: document.getElementById('p-nome').value.toUpperCase(), 
-                vencimento: document.getElementById('p-validade').value, 
-                ean: document.getElementById('p-ean').value, 
-                quantidade: parseInt(document.getElementById('p-qtd').value) || 0
+            const dados = {
+                produto: document.getElementById('p-nome').value.toUpperCase(),
+                vencimento: document.getElementById('p-validade').value,
+                quantidade: parseInt(document.getElementById('p-qtd').value) || 0,
+                ean: document.getElementById('p-ean').value || "",
+                dataRegistro: new Date().toISOString()
             };
 
+            if(!dados.produto || !dados.vencimento) return alert("Preencha Nome e Validade!");
+
             try {
-                if(id) { await db.collection("validades").doc(id).update(dados); }
-                else { await db.collection("validades").add(dados); }
-                fecharModalCadastro(); // Fecha o modal após sucesso
-            } catch (error) {
-                alert("Erro ao salvar. Verifique a conexão.");
-            }
+                id ? await db.collection("validades").doc(id).update(dados) : await db.collection("validades").add(dados);
+                fecharModalCadastro();
+            } catch (e) { alert("Erro ao conectar ao banco."); }
         }
 
         function renderizar() {
             const container = document.getElementById('container-produtos');
             const busca = document.getElementById('input-busca').value.toUpperCase();
             container.innerHTML = '';
+
             estoque.forEach(item => {
                 if(item.produto.includes(busca)) {
-                    container.innerHTML += `<div class="bg-white p-4 rounded-2xl shadow mb-2 flex justify-between">
-                        <div><b>${item.produto}</b><br><small>Val: ${item.vencimento}</small></div>
-                        <div class="text-xl font-bold">${item.quantidade}</div>
-                    </div>`;
+                    container.innerHTML += `
+                        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex justify-between items-center">
+                            <div>
+                                <h3 class="font-black text-slate-800 text-sm uppercase">${item.produto}</h3>
+                                <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase">Val: ${item.vencimento.split('-').reverse().join('/')}</p>
+                            </div>
+                            <div class="flex flex-col items-end">
+                                <span class="text-2xl font-black text-[#003366]">${item.quantidade}</span>
+                                <button onclick='editar(${JSON.stringify(item)})' class="text-[9px] font-black text-blue-500 uppercase mt-2">Ajustar</button>
+                            </div>
+                        </div>`;
                 }
             });
         }
 
+        function editar(item) {
+            document.getElementById('modal-cadastro').classList.remove('hidden');
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('p-nome').value = item.produto;
+            document.getElementById('p-validade').value = item.vencimento;
+            document.getElementById('p-qtd').value = item.quantidade;
+            document.getElementById('p-ean').value = item.ean || "";
+        }
+
         async function abrirCadastro() {
             document.getElementById('modal-cadastro').classList.remove('hidden');
-            scannerInstancia = new Html5Qrcode("reader");
-            scannerInstancia.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {
+            scanner = new Html5Qrcode("reader");
+            scanner.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, (txt) => {
                 document.getElementById('p-ean').value = txt;
-                scannerInstancia.stop();
-            }).catch(()=>{});
+                // Busca nome se já existir no banco
+                const prod = estoque.find(x => x.ean === txt);
+                if(prod) document.getElementById('p-nome').value = prod.produto;
+                scanner.stop();
+            }).catch(() => {});
         }
 
         function fecharModalCadastro() {
-            scannerInstancia?.stop().catch(()=>{});
+            scanner?.stop().catch(() => {});
             document.getElementById('modal-cadastro').classList.add('hidden');
+            document.getElementById('edit-id').value = '';
             document.getElementById('p-nome').value = '';
             document.getElementById('p-validade').value = '';
-            document.getElementById('p-ean').value = '';
             document.getElementById('p-qtd').value = '';
         }
 
