@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.7.3</title>
+    <title>New Market v16.7.6</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,37 +18,22 @@
         body { -webkit-tap-highlight-color: transparent; font-family: sans-serif; background-color: #f8fafc; overflow-x: hidden; }
         .hidden-app { display: none !important; }
         
-        /* ANIMAÇÃO RADAR (PULSO BIP) */
-        .radar-active {
-            position: relative;
-            background: #4ade80;
+        /* ANIMAÇÃO RADAR */
+        .radar-active { position: relative; background: #4ade80; }
+        .radar-active::before { content: ''; position: absolute; inset: -4px; border: 2px solid #4ade80; border-radius: 9999px; animation: radar-pulse 2s infinite ease-out; opacity: 0; }
+        .radar-active::after { content: ''; position: absolute; inset: -4px; border: 2px solid #4ade80; border-radius: 9999px; animation: radar-pulse 2s infinite ease-out 0.5s; opacity: 0; }
+        @keyframes radar-pulse { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(2.5); opacity: 0; } }
+
+        /* ESTILO LISTRAS EAN */
+        .barcode-visual { position: relative; background: #f1f5f9; border-radius: 1rem; overflow: hidden; }
+        .stripes { 
+            position: absolute; inset: 0; opacity: 0.08; pointer-events: none;
+            background: repeating-linear-gradient(90deg, #000, #000 2px, #fff 2px, #fff 5px, #000 5px, #000 6px, #fff 6px, #fff 10px);
         }
-        .radar-active::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border: 2px solid #4ade80;
-            border-radius: 9999px;
-            animation: radar-pulse 2s infinite ease-out;
-            opacity: 0;
-        }
-        .radar-active::after {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border: 2px solid #4ade80;
-            border-radius: 9999px;
-            animation: radar-pulse 2s infinite ease-out 0.5s;
-            opacity: 0;
-        }
-        @keyframes radar-pulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(2.5); opacity: 0; }
-        }
+        #p-ean { background: transparent !important; position: relative; z-index: 5; text-align: center; letter-spacing: 0.2em; font-weight: 900; }
 
         #reader video { object-fit: cover !important; border-radius: 1.5rem; }
         #reader { border: none !important; }
-        
         .filtro-ativo { border: 3px solid #000 !important; transform: scale(1.05); }
         .manutencao-pulse { animation: pulse-manutencao 1.5s infinite; }
         @keyframes pulse-manutencao { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
@@ -124,7 +109,11 @@
             </div>
             <div id="reader-container" class="relative w-full aspect-square bg-black rounded-3xl overflow-hidden mb-6"><div id="reader"></div></div>
             <div class="space-y-4">
-                <input type="text" id="p-ean" placeholder="EAN" onblur="buscarNomePorEAN(this.value)" class="w-full p-4 bg-slate-50 rounded-2xl font-mono border-2 border-transparent outline-none">
+                <div class="barcode-visual mb-2">
+                    <div class="stripes"></div>
+                    <input type="text" id="p-ean" placeholder="EAN" onblur="buscarNomePorEAN(this.value)" class="w-full p-4 font-mono border-2 border-transparent outline-none">
+                </div>
+
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase outline-none">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="flex flex-col">
@@ -144,7 +133,6 @@
     </div>
 
     <script>
-        // Configurações Firebase mantidas do histórico
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -247,11 +235,8 @@
             document.getElementById('loginView').classList.add('hidden-app');
             document.getElementById('appView').classList.remove('hidden-app');
             document.getElementById('user-display').innerText = `LOGADO COMO ${usuarioSessao.nome}`;
-            
-            // Lógica do Radar: Desliga se perder conexão
             window.addEventListener('offline', () => document.getElementById('radar-status').classList.remove('radar-active'));
             window.addEventListener('online', () => document.getElementById('radar-status').classList.add('radar-active'));
-
             db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
                 estoque = [];
                 snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
@@ -263,12 +248,10 @@
             const container = document.getElementById('container-produtos');
             const busca = document.getElementById('input-busca').value.toUpperCase();
             let cV = 0, cA = 0; container.innerHTML = '';
-            
             estoque.forEach(item => {
                 const dias = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
                 if (dias < 0) cV++; else if (dias <= 7) cA++;
             });
-
             estoque.filter(i => {
                 const matchesBusca = (i.produto || "").includes(busca) || (i.ean || "").includes(busca);
                 if(!matchesBusca) return false;
@@ -365,12 +348,9 @@
 
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
         function limparForm() { 
-            document.getElementById('edit-id').value = ''; 
-            document.getElementById('p-nome').value = ''; 
-            document.getElementById('p-validade').value = ''; 
-            document.getElementById('p-ean').value = ''; 
-            document.getElementById('p-qtd').value = ''; 
-            document.getElementById('btn-excluir').classList.add('hidden'); 
+            document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; 
+            document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; 
+            document.getElementById('p-qtd').value = ''; document.getElementById('btn-excluir').classList.add('hidden'); 
         }
 
         function gerarRelatorioRetirada() {
