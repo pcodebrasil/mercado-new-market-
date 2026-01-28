@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.6.6 - Paulo Souza</title>
+    <title>New Market v16.6.7 - Paulo Souza</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -35,8 +35,8 @@
             <span class="text-3xl font-black text-[#003366]">⚠️</span>
         </div>
         <h1 class="font-black text-2xl uppercase mb-4 tracking-widest">Sistema em Manutenção</h1>
-        <p class="text-lg font-bold mb-8 opacity-90 max-w-sm mx-auto leading-relaxed">Volto <span class="text-empresa-amarelo font-black">logo</span> com melhorias incríveis</p>
-
+        <p class="text-lg font-bold mb-8 opacity-90 max-w-sm mx-auto leading-relaxed">👑 <span class="text-empresa-amarelo font-black">APENAS PAULO</span> autorizado durante este período</p>
+        
         <div class="space-y-6 mb-12">
             <p class="text-sm opacity-70 font-black uppercase tracking-wider">Paulo Souza by 2026</p>
             <a href="https://wa.me/5511932280031?text=Olá%20New%20Market!%20Preciso%20de%20ajuda%20com%20o%20app" 
@@ -46,7 +46,7 @@
             </a>
         </div>
         
-        <button onclick="fecharManutencao()" class="py-4 px-8 bg-empresa-amarelo text-[#003366] rounded-2xl font-black uppercase text-sm shadow-xl hover:shadow-2xl transition-all">FECHAR</button>
+        <button onclick="fecharManutencao()" class="py-4 px-8 bg-empresa-amarelo text-[#003366] rounded-2xl font-black uppercase text-sm shadow-xl hover:shadow-2xl transition-all">🔙 VOLTAR AO LOGIN</button>
     </div>
 
     <div id="loginView" class="fixed inset-0 bg-gradient-to-b from-[#003366] to-[#1e40af] z-[100] flex items-center justify-center p-6 text-center text-white">
@@ -142,7 +142,7 @@
         let usuarioSessao = null, estoque = [], scannerInstancia = null;
         
         // ✅ MANUTENÇÃO ATIVADA POR PADRÃO
-        localStorage.setItem('manutencaoNewMarket', 'false');
+        localStorage.setItem('manutencaoNewMarket', 'true');
         const manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') !== 'false';
 
         window.onload = function() {
@@ -199,9 +199,10 @@
             if (modal) modal.remove();
         }
 
+        // ✅ AO CLICAR "FECHAR" VOLTA PARA LOGIN
         function fecharManutencao() {
-            localStorage.setItem('manutencaoNewMarket', 'false');
-            window.location.reload();
+            document.getElementById('manutencaoView').classList.add('hidden-app');
+            document.getElementById('loginView').classList.remove('hidden-app');
         }
 
         function entrarNoApp() {
@@ -300,7 +301,6 @@
             fecharModalCadastro();
         }
 
-        // ✅ NOVA FUNÇÃO EXCLUIR
         async function confirmarExclusao() {
             if (confirm("🗑️ CONFIRMAR EXCLUSÃO?
 Este produto será removido permanentemente.")) {
@@ -321,7 +321,6 @@ Este produto será removido permanentemente.")) {
             document.getElementById('btn-excluir').classList.remove('hidden');
         }
 
-        // ✅ BOTÃO EXCLUIR DIRETO NA LISTA
         function prepararExclusao(item) {
             if (confirm(`🗑️ Excluir "${item.produto}"?
 Qtd: ${item.quantidade}`)) {
