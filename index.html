@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.6.8 - Paulo Souza</title>
+    <title>New Market v16.6.9</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -34,14 +34,15 @@
             <span class="text-3xl font-black text-[#003366]">⚠️</span>
         </div>
         <h1 class="font-black text-2xl uppercase mb-4 tracking-widest">Sistema em Manutenção</h1>
-        <p class="text-lg font-bold mb-8 opacity-90 max-w-sm mx-auto leading-relaxed">👑 <span class="text-empresa-amarelo font-black">APENAS PAULO</span> autorizado durante este período</p>
+        
+        <p class="text-lg font-bold mb-8 opacity-90 max-w-sm mx-auto leading-relaxed">🔒 <span class="text-empresa-amarelo font-black">ACESSO RESTRITO</span> para atualizações de segurança</p>
         
         <div class="space-y-6 mb-12">
-            <p class="text-sm opacity-70 font-black uppercase tracking-wider">Paulo Souza by 2026</p>
-            <a href="https://wa.me/5511932280031?text=Olá%20New%20Market!%20Preciso%20de%20ajuda%20com%20o%20app" 
+            <p class="text-sm opacity-70 font-black uppercase tracking-wider">New Market Intelligence 2026</p>
+            <a href="https://wa.me/5511932280031?text=Olá!%20O%20sistema%20está%20em%20manutenção?" 
                class="block w-full max-w-sm mx-auto bg-[#25D366] text-white py-6 px-8 rounded-3xl font-black text-lg uppercase shadow-2xl hover:shadow-3xl transition-all" 
                target="_blank">
-                📱 WhatsApp (11) 93228-0031
+                📱 Falar com Suporte
             </a>
         </div>
         
@@ -71,7 +72,7 @@
                 </div>
                 <button onclick="logout()" class="bg-white/10 p-3 rounded-xl border border-white/20">🚪</button>
             </div>
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO OU EAN..." class="w-full bg-white p-4 rounded-xl text-xs font-black uppercase outline-none shadow-inner border-2 border-transparent">
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO..." class="w-full bg-white p-4 rounded-xl text-xs font-black uppercase outline-none shadow-inner">
         </header>
 
         <main class="max-w-lg mx-auto p-5 pb-32">
@@ -81,13 +82,13 @@
                     <div class="bg-[#FFD700] p-3 rounded-2xl text-slate-900 shadow-lg"><p class="text-[7px] font-black uppercase opacity-70">Urgente</p><p id="dash-alerta" class="text-lg font-black">0</p></div>
                     <div class="bg-white p-3 rounded-2xl text-slate-800 shadow-lg"><p class="text-[7px] font-black uppercase opacity-40">Total</p><p id="dash-total" class="text-lg font-black">0</p></div>
                 </div>
-                <button id="btn-relatorio" onclick="gerarRelatorioRetirada()" class="hidden w-full bg-emerald-600 text-white py-4 rounded-xl font-black uppercase text-[10px] shadow-lg mb-6 flex items-center justify-center gap-2">📄 GERAR LISTA DE RETIRADA</button>
+                <button id="btn-relatorio" onclick="gerarRelatorioRetirada()" class="hidden w-full bg-emerald-600 text-white py-4 rounded-xl font-black uppercase text-[10px] shadow-lg mb-6">📄 GERAR LISTA DE RETIRADA</button>
                 <div id="container-produtos" class="space-y-3"></div>
             </div>
         </main>
         
         <div class="fixed bottom-6 left-0 right-0 flex justify-center px-6 z-40">
-            <button onclick="abrirCadastro()" class="w-full max-w-sm bg-[#FFD700] text-slate-900 py-5 rounded-2xl shadow-2xl font-black text-[10px] uppercase border-2 border-white active:scale-95 transition-all">
+            <button onclick="abrirCadastro()" class="w-full max-w-sm bg-[#FFD700] text-slate-900 py-5 rounded-2xl shadow-2xl font-black text-[10px] uppercase border-2 border-white">
                 + CADASTRAR PRODUTO / SCANNER
             </button>
         </div>
@@ -102,14 +103,14 @@
             <div id="reader-container" class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden mb-6"><div id="reader"></div></div>
             <div class="space-y-4">
                 <input type="text" id="p-ean" placeholder="EAN (SCANNER)" onblur="buscarNomePorEAN(this.value)" class="w-full p-4 bg-slate-50 rounded-xl font-mono text-blue-700 border-2 border-transparent outline-none">
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-xl font-black uppercase outline-none transition-all duration-500">
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-xl font-black uppercase outline-none">
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-[8px] font-black text-slate-400 ml-2 uppercase">Validade</label><input type="date" id="p-validade" class="w-full p-4 bg-slate-50 rounded-xl font-bold outline-none"></div>
-                    <div><label class="text-[8px] font-black text-slate-400 ml-2 uppercase">Qtd</label><input type="tel" id="p-qtd" placeholder="0" class="w-full p-4 bg-slate-50 rounded-xl font-black text-center text-xl outline-none"></div>
+                    <div><label class="text-[8px] font-black text-slate-400 ml-2 uppercase">Validade</label><input type="date" id="p-validade" class="w-full p-4 bg-slate-50 rounded-xl font-bold"></div>
+                    <div><label class="text-[8px] font-black text-slate-400 ml-2 uppercase">Qtd</label><input type="tel" id="p-qtd" placeholder="0" class="w-full p-4 bg-slate-50 rounded-xl font-black text-center text-xl"></div>
                 </div>
                 <input type="hidden" id="edit-id">
                 <button onclick="salvarProduto()" class="w-full py-5 bg-[#003366] text-white rounded-xl font-black uppercase shadow-xl tracking-widest mb-3">Salvar no Banco</button>
-                <button id="btn-excluir" onclick="confirmarExclusao()" class="hidden w-full py-3 bg-red-600 text-white font-black uppercase text-[10px] rounded-xl shadow-lg hover:shadow-xl transition-all">🗑️ EXCLUIR PRODUTO</button>
+                <button id="btn-excluir" onclick="confirmarExclusao()" class="hidden w-full py-3 bg-red-600 text-white font-black uppercase text-[10px] rounded-xl shadow-lg">🗑️ EXCLUIR PRODUTO</button>
             </div>
         </div>
     </div>
@@ -141,26 +142,23 @@
         let cliquesSegredo = 0;
         let usuarioSessao = null, estoque = [], scannerInstancia = null;
 
-        window.onload = function() {
-            inicializarApp();
-        };
+        window.onload = inicializarApp;
 
         function toggleManutencaoSecreto() {
             cliquesSegredo++;
             if (cliquesSegredo >= 5) {
                 manutencaoAtiva = !manutencaoAtiva;
                 localStorage.setItem('manutencaoNewMarket', manutencaoAtiva);
-                alert("MODO MANUTENÇÃO: " + (manutencaoAtiva ? "ATIVADO" : "DESATIVADO"));
+                alert("MANUTENÇÃO: " + (manutencaoAtiva ? "ON" : "OFF"));
                 window.location.reload();
             }
-            setTimeout(() => { cliquesSegredo = 0; }, 2000);
+            setTimeout(() => cliquesSegredo = 0, 2000);
         }
 
         function inicializarApp() {
             const lista = document.getElementById('lista-usuarios');
             lista.innerHTML = '';
             EQUIPE.forEach(u => {
-                // Lista sempre liberada para o clique inicial
                 lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 px-5 bg-slate-50 rounded-xl font-black uppercase text-[10px] flex justify-between items-center mb-1">
                     <span>${u.nome}</span><span class="opacity-30">${u.cargo}</span>
                 </button>`;
@@ -168,62 +166,46 @@
             const salvo = localStorage.getItem('sessaoNewMarket');
             if (salvo) { 
                 const u = EQUIPE.find(x => x.nome === salvo);
-                if (u) {
-                    // Valida sessão salva contra manutenção
-                    if (manutencaoAtiva && u.nome !== 'PAULO') {
-                        localStorage.removeItem('sessaoNewMarket');
-                    } else {
-                        usuarioSessao = u;
-                        entrarNoApp();
-                    }
+                if (u && (!manutencaoAtiva || u.nome === 'PAULO')) {
+                    usuarioSessao = u;
+                    entrarNoApp();
+                } else {
+                    localStorage.removeItem('sessaoNewMarket');
                 }
             }
         }
 
         function prepararLogin(nomeUsuario) {
-            const senhaModal = document.createElement('div');
-            senhaModal.id = 'modal-senha';
-            senhaModal.className = 'fixed inset-0 bg-slate-900/95 z-[600] flex items-center justify-center p-6 text-center';
-            senhaModal.innerHTML = `
+            const modal = document.createElement('div');
+            modal.id = 'modal-senha';
+            modal.className = 'fixed inset-0 bg-slate-900/95 z-[600] flex items-center justify-center p-6 text-center';
+            modal.innerHTML = `
                 <div class="bg-white w-full max-w-xs rounded-[3rem] p-10 shadow-2xl">
-                    <h3 class="font-black text-[#003366] uppercase mb-6 text-xl tracking-tighter">${nomeUsuario}</h3>
-                    <input type="password" id="input-senha" placeholder="••••" class="w-full p-5 bg-slate-100 rounded-2xl text-center font-black outline-none mb-8 text-4xl tracking-widest border-2 border-transparent">
+                    <h3 class="font-black text-[#003366] uppercase mb-6 text-xl">${nomeUsuario}</h3>
+                    <input type="password" id="input-senha" placeholder="••••" class="w-full p-5 bg-slate-100 rounded-2xl text-center font-black outline-none mb-8 text-4xl">
                     <div class="flex gap-3">
                         <button onclick="fecharSenha()" class="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-[10px] uppercase">Sair</button>
-                        <button id="btn-confirmar-senha" class="flex-[2] py-4 bg-[#003366] text-white rounded-2xl font-black text-[10px] uppercase shadow-lg">Entrar</button>
+                        <button id="btn-entrar" class="flex-[2] py-4 bg-[#003366] text-white rounded-2xl font-black text-[10px] uppercase shadow-lg">Entrar</button>
                     </div>
-                </div>
-            `;
-            document.body.appendChild(senhaModal);
-            document.getElementById('btn-confirmar-senha').onclick = () => {
+                </div>`;
+            document.body.appendChild(modal);
+            document.getElementById('btn-entrar').onclick = () => {
                 const u = EQUIPE.find(x => x.nome === nomeUsuario);
-                const senhaDigitada = document.getElementById('input-senha').value;
-
-                if (senhaDigitada === u.pass) {
-                    // VERIFICAÇÃO DE MANUTENÇÃO APÓS CLICAR EM ENTRAR
+                if (document.getElementById('input-senha').value === u.pass) {
                     if (manutencaoAtiva && u.nome !== 'PAULO') {
                         fecharSenha();
                         document.getElementById('manutencaoView').classList.remove('hidden-app');
                     } else {
                         usuarioSessao = u; 
                         localStorage.setItem('sessaoNewMarket', u.nome);
-                        fecharSenha(); 
-                        entrarNoApp();
+                        fecharSenha(); entrarNoApp();
                     }
-                } else {
-                    alert("Senha Incorreta");
-                }
+                } else alert("Senha Incorreta");
             };
         }
 
-        function fecharSenha() {
-            const modal = document.getElementById('modal-senha');
-            if (modal) modal.remove();
-        }
-
-        function fecharManutencao() {
-            document.getElementById('manutencaoView').classList.add('hidden-app');
-        }
+        function fecharSenha() { document.getElementById('modal-senha')?.remove(); }
+        function fecharManutencao() { document.getElementById('manutencaoView').classList.add('hidden-app'); }
 
         function entrarNoApp() {
             document.getElementById('loginView').classList.add('hidden-app');
@@ -242,21 +224,21 @@
             let cV = 0, cA = 0; container.innerHTML = '';
 
             estoque.filter(i => (i.produto || "").includes(busca) || (i.ean || "").includes(busca)).forEach(item => {
-                const dias = Math.ceil((new Date(item.vencimento) - new Date()) / (1000*60*60*24));
+                const dias = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
                 const decisao = getAcaoSugerida(dias);
                 if (dias < 0) cV++; else if (dias <= 7) cA++;
 
                 container.innerHTML += `
-                    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col mb-4 active:scale-95 transition-all">
+                    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col mb-4">
                         <div class="flex justify-between items-start mb-2">
                             <div class="max-w-[70%]">
                                 <h3 class="font-black text-slate-800 text-sm uppercase truncate">${item.produto}</h3>
                                 <p class="text-[9px] font-bold text-slate-400">Val: <span class="text-blue-700">${item.vencimento.split('-').reverse().join('/')}</span></p>
                             </div>
-                            <div class="text-right"><p class="text-2xl font-black text-[#003366] leading-none">${item.quantidade}</p><p class="text-[8px] font-black text-slate-300">QTD</p></div>
+                            <div class="text-right"><p class="text-2xl font-black text-[#003366] leading-none">${item.quantidade}</p></div>
                         </div>
                         <div class="${decisao.classe} text-[8px] font-black p-2 rounded-xl text-center uppercase mb-3">${decisao.acao}</div>
-                        <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[9px] font-black text-blue-500 uppercase self-end mb-1">Ajustar</button>
+                        <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[9px] font-black text-blue-500 uppercase self-end">Ajustar</button>
                     </div>`;
             });
             document.getElementById('dash-vencidos').innerText = cV;
@@ -273,15 +255,11 @@
         }
 
         async function buscarNomePorEAN(ean) {
-            if (!ean || ean.length < 5) return;
+            if (!ean) return;
             const snap = await db.collection("validades").where("ean", "==", ean).limit(1).get();
             if (!snap.empty) {
-                const prod = snap.docs[0].data();
-                const campoNome = document.getElementById('p-nome');
-                if (campoNome.value === "") {
-                    campoNome.value = prod.produto;
-                    if (navigator.vibrate) navigator.vibrate(50);
-                }
+                document.getElementById('p-nome').value = snap.docs[0].data().produto;
+                if (navigator.vibrate) navigator.vibrate(50);
             }
         }
 
@@ -306,15 +284,13 @@
                 usuario: usuarioSessao.nome 
             };
             if(!dados.produto || !dados.vencimento) return alert("Obrigatório!");
-            if (id) await db.collection("validades").doc(id).update(dados);
-            else await db.collection("validades").add(dados);
+            id ? await db.collection("validades").doc(id).update(dados) : await db.collection("validades").add(dados);
             fecharModalCadastro();
         }
 
         async function confirmarExclusao() {
             if (confirm("🗑️ EXCLUIR?")) {
-                const id = document.getElementById('edit-id').value;
-                await db.collection("validades").doc(id).delete();
+                await db.collection("validades").doc(document.getElementById('edit-id').value).delete();
                 fecharModalCadastro();
             }
         }
@@ -330,13 +306,12 @@
         }
 
         function fecharModalCadastro() { 
-            if(scannerInstancia) scannerInstancia.stop().catch(()=>{}); 
+            scannerInstancia?.stop().catch(()=>{}); 
             document.getElementById('modal-cadastro').classList.add('hidden'); 
             limparForm();
         }
 
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
-        
         function limparForm() { 
             document.getElementById('edit-id').value = ''; 
             document.getElementById('p-nome').value = ''; 
@@ -348,7 +323,7 @@
 
         function gerarRelatorioRetirada() {
             let rel = `*NEW MARKET - RETIRADA*\n\n`;
-            estoque.filter(i => Math.ceil((new Date(i.vencimento) - new Date()) / (1000*60*60*24)) <= 7).forEach(i => {
+            estoque.filter(i => (Math.ceil((new Date(i.vencimento) - new Date()) / 86400000)) <= 7).forEach(i => {
                 rel += `▪️ *${i.produto}* (${i.quantidade} un) - Val: ${i.vencimento.split('-').reverse().join('/')}\n\n`;
             });
             navigator.share ? navigator.share({ title: 'Relatório', text: rel }) : console.log(rel);
