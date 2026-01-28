@@ -337,6 +337,7 @@
             }).catch(()=>{});
         }
 
+        // FUNÇÃO CORRIGIDA: SALVAR E FECHAR MODAL
         async function salvarProduto() {
             const id = document.getElementById('edit-id').value;
             const dados = { 
@@ -344,17 +345,35 @@
                 vencimento: document.getElementById('p-validade').value, 
                 ean: document.getElementById('p-ean').value, 
                 quantidade: parseInt(document.getElementById('p-qtd').value) || 0, 
-                usuario: usuarioSessao.nome 
+                usuario: usuarioSessao.nome,
+                lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
             };
-            if(!dados.produto || !dados.vencimento) return alert("Obrigatório!");
-            id ? await db.collection("validades").doc(id).update(dados) : await db.collection("validades").add(dados);
-            fecharModalCadastro();
+
+            if(!dados.produto || !dados.vencimento) return alert("Obrigatório: Nome e Validade!");
+
+            try {
+                if(id) {
+                    await db.collection("validades").doc(id).update(dados);
+                } else {
+                    await db.collection("validades").add(dados);
+                }
+                
+                // Só executa o fechamento se a promessa acima for resolvida com sucesso
+                fecharModalCadastro();
+                if (navigator.vibrate) navigator.vibrate(50);
+                
+            } catch (error) {
+                console.error("Erro ao salvar:", error);
+                alert("Erro ao conectar ao banco. Tente novamente.");
+            }
         }
 
         async function confirmarExclusao() {
             if (confirm("🗑️ EXCLUIR?")) {
-                await db.collection("validades").doc(document.getElementById('edit-id').value).delete();
-                fecharModalCadastro();
+                try {
+                    await db.collection("validades").doc(document.getElementById('edit-id').value).delete();
+                    fecharModalCadastro();
+                } catch(e) { alert("Erro ao excluir."); }
             }
         }
 
