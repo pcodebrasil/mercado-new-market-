@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.7.3 - Legacy</title>
+    <title>New Market v16.7.3 - PROD</title>
     
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,9 +13,7 @@
     <style>
         body { -webkit-tap-highlight-color: transparent; font-family: sans-serif; background-color: #f8fafc; overflow-x: hidden; }
         .hidden-app { display: none !important; }
-        .radar-active { position: relative; background: #4ade80; }
-        .radar-active::before { content: ''; position: absolute; inset: -4px; border: 2px solid #4ade80; border-radius: 9999px; animation: radar-pulse 2s infinite ease-out; opacity: 0; }
-        @keyframes radar-pulse { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(2.5); opacity: 0; } }
+        .radar-active { position: relative; background: #4ade80; border-radius: 50%; width: 12px; height: 12px; }
         #reader video { object-fit: cover !important; border-radius: 1.5rem; }
         #reader { border: none !important; }
         .filtro-ativo { border: 3px solid #000 !important; transform: scale(1.05); }
@@ -33,7 +28,7 @@
                 <h2 class="text-xl font-black uppercase italic mb-8">Controle de Equipe</h2>
                 <div id="lista-usuarios" class="space-y-2 max-h-[300px] overflow-y-auto"></div>
             </div>
-            <p class="text-[10px] font-black text-blue-700 uppercase mt-6 italic">Agenda Fácil Back-end</p>
+            <p class="text-[10px] font-black text-blue-700 uppercase mt-6 italic">Projeto: Mercado-c3e95</p>
         </div>
     </div>
 
@@ -41,38 +36,24 @@
         <header class="bg-[#003366] p-6 sticky top-0 z-30 shadow-xl rounded-b-[2.5rem] border-b-4 border-[#FFD700]">
             <div class="flex justify-between items-center mb-6 text-white">
                 <div class="flex items-center gap-3">
-                    <div id="radar-status" class="w-3 h-3 rounded-full radar-active"></div>
+                    <div id="radar-status" class="radar-active"></div>
                     <div>
-                        <h1 class="font-black text-2xl italic text-[#FFD700] uppercase">New Market</h1>
-                        <p id="user-display" class="text-[9px] font-black uppercase opacity-60"></p>
+                        <h1 class="font-black text-2xl italic text-[#FFD700] uppercase leading-none">New Market</h1>
+                        <p id="user-display" class="text-[9px] font-black uppercase opacity-60 mt-1"></p>
                     </div>
                 </div>
-                <button onclick="logout()" class="bg-white/10 p-3 rounded-xl">🚪</button>
+                <button onclick="logout()" class="bg-white/10 p-3 rounded-xl border border-white/20">🚪</button>
             </div>
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO..." class="w-full bg-white p-4 rounded-xl text-xs font-black uppercase shadow-inner outline-none">
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO..." class="w-full bg-white p-4 rounded-xl text-xs font-black uppercase outline-none shadow-inner">
         </header>
 
         <main class="max-w-lg mx-auto p-5 pb-32">
-            <div class="grid grid-cols-3 gap-2 mb-6 text-center">
-                <div id="btn-vencidos" onclick="setFiltro('vencidos')" class="bg-red-600 p-3 rounded-2xl text-white shadow-lg transition-all border-3 border-transparent">
-                    <p class="text-[7px] font-black uppercase opacity-70">Vencidos</p>
-                    <p id="dash-vencidos" class="text-lg font-black">0</p>
-                </div>
-                <div id="btn-urgente" onclick="setFiltro('urgente')" class="bg-[#FFD700] p-3 rounded-2xl text-slate-900 shadow-lg transition-all border-3 border-transparent">
-                    <p class="text-[7px] font-black uppercase opacity-70">Urgente</p>
-                    <p id="dash-alerta" class="text-lg font-black">0</p>
-                </div>
-                <div id="btn-todos" onclick="setFiltro('todos')" class="bg-white p-3 rounded-2xl text-slate-800 shadow-lg transition-all border-3 border-transparent filtro-ativo">
-                    <p class="text-[7px] font-black uppercase opacity-40">Total</p>
-                    <p id="dash-total" class="text-lg font-black">0</p>
-                </div>
-            </div>
             <div id="container-produtos" class="space-y-3"></div>
         </main>
         
         <div class="fixed bottom-6 left-0 right-0 flex justify-center px-6 z-40">
             <button onclick="abrirCadastro()" class="w-full max-w-sm bg-[#FFD700] text-slate-900 py-5 rounded-2xl shadow-2xl font-black text-[10px] uppercase border-2 border-white">
-                + SCANNER / REGISTRO
+                + CADASTRAR PRODUTO / SCANNER
             </button>
         </div>
     </div>
@@ -88,42 +69,34 @@
                 <input type="text" id="p-ean" placeholder="EAN" onblur="buscarNomePorEAN(this.value)" class="w-full p-4 bg-slate-50 rounded-2xl font-mono border-2 border-transparent outline-none">
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase outline-none">
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="flex flex-col">
-                        <label class="text-[9px] font-black text-slate-400 ml-4 mb-1 uppercase">📅 Validade</label>
-                        <input type="date" id="p-validade" class="w-full px-4 bg-slate-50 rounded-2xl font-black text-[#003366] outline-none min-h-[58px]">
-                    </div>
-                    <div class="flex flex-col">
-                        <label class="text-[9px] font-black text-slate-400 ml-4 mb-1 uppercase">📦 Qtd</label>
-                        <input type="tel" id="p-qtd" placeholder="0" class="w-full p-4 bg-slate-50 rounded-2xl font-black text-center text-xl text-[#003366] outline-none">
-                    </div>
+                    <input type="date" id="p-validade" class="w-full p-4 bg-slate-50 rounded-2xl font-black text-[#003366] outline-none">
+                    <input type="tel" id="p-qtd" placeholder="Qtd" class="w-full p-4 bg-slate-50 rounded-2xl font-black text-center text-xl outline-none">
                 </div>
                 <input type="hidden" id="edit-id">
                 <button onclick="salvarProduto()" class="w-full py-5 bg-[#003366] text-white rounded-2xl font-black uppercase shadow-xl">Salvar no Banco</button>
-                <button id="btn-excluir" onclick="confirmarExclusao()" class="hidden w-full py-3 bg-red-600 text-white font-black uppercase text-[10px] rounded-2xl">🗑️ EXCLUIR</button>
             </div>
         </div>
     </div>
 
     <script>
-        // CREDENCIAIS RESTAURADAS - PROJETO AGENDA-FACIL-B5542
+        // CONFIGURAÇÃO RESTAURADA PARA PROJETO MERCADO
         const firebaseConfig = {
-            apiKey: "AIzaSyBylSqY9gUtjygPD6X20LQOH0kVg-NRczA",
-            authDomain: "agenda-facil-b5542.firebaseapp.com",
-            projectId: "agenda-facil-b5542",
-            storageBucket: "agenda-facil-b5542.firebasestorage.app",
-            messagingSenderId: "862816221186",
-            appId: "1:862816221186:web:e4339102a644f8abf60f1b"
+            apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
+            authDomain: "mercado-c3e95.firebaseapp.com",
+            projectId: "mercado-c3e95",
+            storageBucket: "mercado-c3e95.firebasestorage.app",
+            messagingSenderId: "883539091925",
+            appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         const EQUIPE = [
             { nome: "ADRIANO", pass: "admin123" },
-            { nome: "PAULO", pass: "paulo123" },
-            { nome: "PEDRO", pass: "pedro123" }
+            { nome: "PAULO", pass: "paulo123" }
         ];
 
-        let usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos';
+        let usuarioSessao = null, estoque = [], scannerInstancia = null;
 
         window.onload = () => {
             const lista = document.getElementById('lista-usuarios');
@@ -132,22 +105,21 @@
                     ${u.nome}
                 </button>`;
             });
-            const salvo = localStorage.getItem('sessaoNewMarket');
-            if (salvo) { usuarioSessao = EQUIPE.find(x => x.nome === salvo); entrarNoApp(); }
         };
 
         function prepararLogin(nome) {
-            const senha = prompt(`Senha para ${nome}:`);
+            const senha = prompt(`Senha:`);
             const u = EQUIPE.find(x => x.nome === nome);
             if (senha === u.pass) {
-                usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome); entrarNoApp();
-            } else if (senha !== null) alert("Incorreta");
+                usuarioSessao = u;
+                document.getElementById('loginView').classList.add('hidden-app');
+                document.getElementById('appView').classList.remove('hidden-app');
+                document.getElementById('user-display').innerText = `LOGADO COMO ${usuarioSessao.nome}`;
+                sincronizar();
+            }
         }
 
-        function entrarNoApp() {
-            document.getElementById('loginView').classList.add('hidden-app');
-            document.getElementById('appView').classList.remove('hidden-app');
-            document.getElementById('user-display').innerText = `LOGADO COMO ${usuarioSessao.nome}`;
+        function sincronizar() {
             db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
                 estoque = [];
                 snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
@@ -161,16 +133,15 @@
                 produto: document.getElementById('p-nome').value.toUpperCase(), 
                 vencimento: document.getElementById('p-validade').value, 
                 ean: document.getElementById('p-ean').value, 
-                quantidade: parseInt(document.getElementById('p-qtd').value) || 0,
-                lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                quantidade: parseInt(document.getElementById('p-qtd').value) || 0
             };
 
             try {
-                id ? await db.collection("validades").doc(id).update(dados) : await db.collection("validades").add(dados);
-                fecharModalCadastro();
-                if (navigator.vibrate) navigator.vibrate(50);
+                if(id) { await db.collection("validades").doc(id).update(dados); }
+                else { await db.collection("validades").add(dados); }
+                fecharModalCadastro(); // Fecha o modal após sucesso
             } catch (error) {
-                alert("Erro ao conectar ao banco do Agenda Fácil. Verifique as regras de segurança.");
+                alert("Erro ao salvar. Verifique a conexão.");
             }
         }
 
@@ -178,18 +149,12 @@
             const container = document.getElementById('container-produtos');
             const busca = document.getElementById('input-busca').value.toUpperCase();
             container.innerHTML = '';
-            
             estoque.forEach(item => {
-                if (item.produto.includes(busca)) {
-                    container.innerHTML += `
-                        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col mb-4">
-                            <div class="flex justify-between items-start mb-2">
-                                <h3 class="font-black text-slate-800 text-sm uppercase">${item.produto}</h3>
-                                <p class="text-2xl font-black text-[#003366]">${item.quantidade}</p>
-                            </div>
-                            <p class="text-[9px] font-bold text-slate-400 mb-3">Val: ${item.vencimento.split('-').reverse().join('/')}</p>
-                            <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[9px] font-black text-blue-500 uppercase self-end">Ajustar</button>
-                        </div>`;
+                if(item.produto.includes(busca)) {
+                    container.innerHTML += `<div class="bg-white p-4 rounded-2xl shadow mb-2 flex justify-between">
+                        <div><b>${item.produto}</b><br><small>Val: ${item.vencimento}</small></div>
+                        <div class="text-xl font-bold">${item.quantidade}</div>
+                    </div>`;
                 }
             });
         }
@@ -197,45 +162,22 @@
         async function abrirCadastro() {
             document.getElementById('modal-cadastro').classList.remove('hidden');
             scannerInstancia = new Html5Qrcode("reader");
-            scannerInstancia.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (txt) => {
+            scannerInstancia.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {
                 document.getElementById('p-ean').value = txt;
-                buscarNomePorEAN(txt);
                 scannerInstancia.stop();
             }).catch(()=>{});
         }
 
-        async function buscarNomePorEAN(ean) {
-            const snap = await db.collection("validades").where("ean", "==", ean).limit(1).get();
-            if (!snap.empty) document.getElementById('p-nome').value = snap.docs[0].data().produto;
-        }
-
-        function prepararEdicao(item) {
-            document.getElementById('modal-cadastro').classList.remove('hidden');
-            document.getElementById('edit-id').value = item.id;
-            document.getElementById('p-nome').value = item.produto;
-            document.getElementById('p-validade').value = item.vencimento;
-            document.getElementById('p-ean').value = item.ean || '';
-            document.getElementById('p-qtd').value = item.quantidade;
-            document.getElementById('btn-excluir').classList.remove('hidden');
-        }
-
-        function fecharModalCadastro() { 
-            scannerInstancia?.stop().catch(()=>{}); 
-            document.getElementById('modal-cadastro').classList.add('hidden'); 
-            limparForm();
-        }
-
-        function limparForm() {
-            document.getElementById('edit-id').value = '';
+        function fecharModalCadastro() {
+            scannerInstancia?.stop().catch(()=>{});
+            document.getElementById('modal-cadastro').classList.add('hidden');
             document.getElementById('p-nome').value = '';
             document.getElementById('p-validade').value = '';
             document.getElementById('p-ean').value = '';
             document.getElementById('p-qtd').value = '';
-            document.getElementById('btn-excluir').classList.add('hidden');
         }
 
-        function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
-        function setFiltro(f) { filtroAtual = f; renderizar(); }
+        function logout() { window.location.reload(); }
     </script>
 </body>
 </html>
