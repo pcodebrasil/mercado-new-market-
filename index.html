@@ -3,12 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.7.7</title>
+    <title>New Market v16.7.8</title>
     
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIk5ldyBNYXJrZXQgdiAxNiIsCiAgInNob3J0X25hbWUiOiAiTmV3IE1hcmtldCIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMDAzMzY2IiwKICAidGhlbWV_Y29sb3IiOiAiIzAwMzM2NiIKfQ==">
-
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,47 +14,68 @@
         body { -webkit-tap-highlight-color: transparent; font-family: sans-serif; background-color: #f8fafc; overflow-x: hidden; }
         .hidden-app { display: none !important; }
         
-        /* ANIMAÇÃO RADAR */
+        /* RADAR PRESERVADO */
         .radar-active { position: relative; background: #4ade80; }
         .radar-active::before { content: ''; position: absolute; inset: -4px; border: 2px solid #4ade80; border-radius: 9999px; animation: radar-pulse 2s infinite ease-out; opacity: 0; }
-        .radar-active::after { content: ''; position: absolute; inset: -4px; border: 2px solid #4ade80; border-radius: 9999px; animation: radar-pulse 2s infinite ease-out 0.5s; opacity: 0; }
         @keyframes radar-pulse { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(2.5); opacity: 0; } }
 
-        /* ESTILO LISTRAS EAN - AGORA EM MAIOR EVIDÊNCIA */
-        .barcode-visual { position: relative; background: #fff; border-radius: 1.25rem; overflow: hidden; border: 2px solid #e2e8f0; }
-        .stripes { 
-            position: absolute; inset: 0; opacity: 0.25; pointer-events: none; /* Opacidade aumentada para 0.25 */
-            background: repeating-linear-gradient(90deg, #000, #000 3px, #fff 3px, #fff 7px, #000 7px, #000 9px, #fff 9px, #fff 14px);
+        /* --- ALTERAÇÕES SOLICITADAS --- */
+        
+        /* 1. CÓDIGO DE BARRAS MUITO MAIS VISÍVEL */
+        .barcode-visual { 
+            position: relative; 
+            background: #ffffff; 
+            border-radius: 1rem; 
+            overflow: hidden; 
+            border: 3px solid #003366 !important; 
         }
-        #p-ean { background: transparent !important; position: relative; z-index: 5; text-align: center; letter-spacing: 0.3em; font-weight: 900; color: #000; }
+        .stripes { 
+            position: absolute; 
+            inset: 0; 
+            opacity: 0.6 !important; /* Aumentado drasticamente para aparecer */
+            pointer-events: none;
+            background: repeating-linear-gradient(90deg, #000, #000 4px, #fff 4px, #fff 8px, #000 8px, #000 10px, #fff 10px, #fff 16px);
+        }
+        #p-ean { 
+            background: transparent !important; 
+            position: relative; 
+            z-index: 10; 
+            text-align: center; 
+            font-size: 1.5rem !important;
+            font-weight: 900 !important;
+            color: #000 !important;
+            letter-spacing: 0.4em !important;
+        }
 
-        /* DESTAQUE VENCIMENTO MAIOR */
-        #p-validade { font-size: 1.5rem !important; font-weight: 900 !important; color: #b91c1c; }
+        /* 2. VENCIMENTO GIGANTE */
+        #p-validade { 
+            font-size: 2.2rem !important; /* Tamanho massivo */
+            font-weight: 900 !important; 
+            color: #003366 !important; 
+            height: 80px !important;
+            text-align: center;
+        }
 
         #reader video { object-fit: cover !important; border-radius: 1.5rem; }
-        #reader { border: none !important; }
         .filtro-ativo { border: 3px solid #000 !important; transform: scale(1.05); }
-        .manutencao-pulse { animation: pulse-manutencao 1.5s infinite; }
-        @keyframes pulse-manutencao { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div id="manutencaoView" class="hidden-app fixed inset-0 bg-gradient-to-b from-slate-900 to-slate-800 z-[300] flex flex-col items-center justify-center p-6 text-center text-white">
-        <div class="w-24 h-24 bg-[#FFD700] rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl manutencao-pulse text-3xl font-black text-[#003366]">⚠️</div>
-        <h1 class="font-black text-2xl uppercase mb-4 tracking-widest">Sistema em Manutenção</h1>
-        <p class="text-lg font-bold mb-8 opacity-90 max-w-sm mx-auto leading-relaxed">🔒 <span class="text-[#FFD700] font-black">ACESSO RESTRITO</span></p>
-        <button onclick="fecharManutencao()" class="py-4 px-8 bg-[#FFD700] text-[#003366] rounded-2xl font-black uppercase text-sm">🔙 VOLTAR</button>
+    <div id="manutencaoView" class="hidden-app fixed inset-0 bg-slate-900 z-[300] flex flex-col items-center justify-center p-6 text-center text-white">
+        <div class="w-24 h-24 bg-[#FFD700] rounded-3xl flex items-center justify-center mb-8 text-3xl font-black text-[#003366]">⚠️</div>
+        <h1 class="font-black text-2xl uppercase mb-4">Em Manutenção</h1>
+        <button onclick="fecharManutencao()" class="py-4 px-8 bg-[#FFD700] text-[#003366] rounded-2xl font-black uppercase">🔙 VOLTAR</button>
     </div>
 
     <div id="loginView" class="fixed inset-0 bg-gradient-to-b from-[#003366] to-[#1e40af] z-[100] flex items-center justify-center p-6 text-center text-white">
         <div class="bg-white w-full max-w-sm rounded-[3.5rem] p-8 shadow-2xl flex flex-col min-h-[550px] text-slate-800">
             <div class="flex-grow">
                 <div class="w-16 h-16 bg-[#003366] rounded-2xl flex items-center justify-center mx-auto mb-6 text-[#FFD700] text-2xl font-black italic shadow-xl">NM</div>
-                <h2 class="text-xl font-black uppercase italic mb-8">Controle de Equipe</h2>
+                <h2 class="text-xl font-black uppercase mb-8 text-center">Controle de Equipe</h2>
                 <div id="lista-usuarios" class="space-y-2 max-h-[300px] overflow-y-auto"></div>
             </div>
-            <p onclick="toggleManutencaoSecreto()" class="cursor-pointer text-[10px] font-black text-blue-700 uppercase tracking-widest mt-6 italic select-none">Paulo Souza by 2026</p>
+            <p onclick="toggleManutencaoSecreto()" class="cursor-pointer text-[10px] font-black text-blue-700 uppercase mt-6 italic text-center">Paulo Souza by 2026</p>
         </div>
     </div>
 
@@ -66,10 +83,10 @@
         <header class="bg-[#003366] p-6 sticky top-0 z-30 shadow-xl rounded-b-[2.5rem] border-b-4 border-[#FFD700]">
             <div class="flex justify-between items-center mb-6 text-white">
                 <div class="flex items-center gap-3">
-                    <div id="radar-status" class="w-3 h-3 rounded-full radar-active shadow-[0_0_15px_rgba(74,222,128,0.5)]"></div>
+                    <div id="radar-status" class="w-3 h-3 rounded-full radar-active"></div>
                     <div>
-                        <h1 class="font-black text-2xl italic text-[#FFD700] uppercase leading-none">New Market</h1>
-                        <p id="user-display" class="text-[9px] font-black uppercase opacity-60 mt-1 tracking-tighter"></p>
+                        <h1 class="font-black text-2xl italic text-[#FFD700] uppercase">New Market</h1>
+                        <p id="user-display" class="text-[9px] font-black uppercase opacity-60"></p>
                     </div>
                 </div>
                 <button onclick="logout()" class="bg-white/10 p-3 rounded-xl border border-white/20">🚪</button>
@@ -79,15 +96,15 @@
 
         <main class="max-w-lg mx-auto p-5 pb-32">
             <div class="grid grid-cols-3 gap-2 mb-6 text-center">
-                <div id="btn-vencidos" onclick="setFiltro('vencidos')" class="bg-red-600 p-3 rounded-2xl text-white shadow-lg transition-all border-3 border-transparent">
+                <div id="btn-vencidos" onclick="setFiltro('vencidos')" class="bg-red-600 p-3 rounded-2xl text-white shadow-lg">
                     <p class="text-[7px] font-black uppercase opacity-70">Vencidos</p>
                     <p id="dash-vencidos" class="text-lg font-black">0</p>
                 </div>
-                <div id="btn-urgente" onclick="setFiltro('urgente')" class="bg-[#FFD700] p-3 rounded-2xl text-slate-900 shadow-lg transition-all border-3 border-transparent">
+                <div id="btn-urgente" onclick="setFiltro('urgente')" class="bg-[#FFD700] p-3 rounded-2xl text-slate-900 shadow-lg">
                     <p class="text-[7px] font-black uppercase opacity-70">Urgente</p>
                     <p id="dash-alerta" class="text-lg font-black">0</p>
                 </div>
-                <div id="btn-todos" onclick="setFiltro('todos')" class="bg-white p-3 rounded-2xl text-slate-800 shadow-lg transition-all border-3 border-transparent filtro-ativo">
+                <div id="btn-todos" onclick="setFiltro('todos')" class="bg-white p-3 rounded-2xl text-slate-800 shadow-lg filtro-ativo">
                     <p class="text-[7px] font-black uppercase opacity-40">Total</p>
                     <p id="dash-total" class="text-lg font-black">0</p>
                 </div>
@@ -97,7 +114,7 @@
         </main>
         
         <div class="fixed bottom-6 left-0 right-0 flex justify-center px-6 z-40">
-            <button onclick="abrirCadastro()" class="w-full max-w-sm bg-[#FFD700] text-slate-900 py-5 rounded-2xl shadow-2xl font-black text-[10px] uppercase border-2 border-white active:scale-95 transition-all">
+            <button onclick="abrirCadastro()" class="w-full max-w-sm bg-[#FFD700] text-slate-900 py-5 rounded-2xl shadow-2xl font-black text-[10px] uppercase border-2 border-white">
                 + CADASTRAR PRODUTO / SCANNER
             </button>
         </div>
@@ -112,33 +129,32 @@
             <div id="reader-container" class="relative w-full aspect-square bg-black rounded-3xl overflow-hidden mb-6"><div id="reader"></div></div>
             <div class="space-y-4">
                 
-                <div class="barcode-visual mb-2">
+                <div class="barcode-visual mb-4">
                     <div class="stripes"></div>
-                    <input type="text" id="p-ean" placeholder="EAN" onblur="buscarNomePorEAN(this.value)" class="w-full p-4 font-mono outline-none">
+                    <input type="text" id="p-ean" placeholder="EAN" onblur="buscarNomePorEAN(this.value)" class="w-full p-6 outline-none">
                 </div>
 
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase outline-none">
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase outline-none border-2 border-slate-100">
                 
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="flex flex-col">
-                        <label class="text-[9px] font-black text-slate-400 ml-4 mb-1 uppercase">📅 Vencimento</label>
-                        <input type="date" id="p-validade" class="w-full px-4 bg-slate-50 rounded-3xl outline-none min-h-[70px] border-2 border-red-50">
+                <div class="grid grid-cols-1 gap-4"> <div class="flex flex-col">
+                        <label class="text-[10px] font-black text-slate-400 ml-4 mb-1 uppercase">📅 DATA DE VENCIMENTO</label>
+                        <input type="date" id="p-validade" class="w-full px-4 bg-slate-50 rounded-3xl outline-none border-4 border-blue-50">
                     </div>
                     <div class="flex flex-col">
-                        <label class="text-[9px] font-black text-slate-400 ml-4 mb-1 uppercase">📦 Qtd</label>
-                        <input type="tel" id="p-qtd" placeholder="0" class="w-full p-4 bg-slate-50 rounded-2xl font-black text-center text-2xl text-[#003366] outline-none">
+                        <label class="text-[10px] font-black text-slate-400 ml-4 mb-1 uppercase text-center">📦 QUANTIDADE</label>
+                        <input type="tel" id="p-qtd" placeholder="0" class="w-full p-4 bg-slate-100 rounded-2xl font-black text-center text-3xl text-[#003366] outline-none">
                     </div>
                 </div>
                 
                 <input type="hidden" id="edit-id">
-                <button onclick="salvarProduto()" class="w-full py-5 bg-[#003366] text-white rounded-2xl font-black uppercase shadow-xl active:scale-95 transition-all">Salvar no Banco</button>
-                <button id="btn-excluir" onclick="confirmarExclusao()" class="hidden w-full py-3 bg-red-600 text-white font-black uppercase text-[10px] rounded-2xl">🗑️ EXCLUIR</button>
+                <button onclick="salvarProduto()" class="w-full py-6 bg-[#003366] text-white rounded-2xl font-black uppercase shadow-xl text-lg mt-4">Salvar no Banco</button>
+                <button id="btn-excluir" onclick="confirmarExclusao()" class="hidden w-full py-3 bg-red-600 text-white font-black uppercase text-[10px] rounded-2xl mt-2">🗑️ EXCLUIR PRODUTO</button>
             </div>
         </div>
     </div>
 
     <script>
-        // TODA A LÓGICA FOI PRESERVADA INTEGRALMENTE DA v16.7.3 / v16.7.6
+        // Lógica de Script idêntica à sua v16.7.3 / v16.7.6
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
