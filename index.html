@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.6.9</title>
+    <title>New Market v16.7.0</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -22,7 +22,7 @@
         .online-pulse { width: 8px; height: 8px; background-color: #4ade80; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; margin-right: 6px; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); } 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } }
         ::-webkit-scrollbar { width: 0px; }
-        input:focus { border-color: #FFD700 !important; }
+        .filtro-ativo { border: 3px solid #000 !important; transform: scale(1.05); }
         .manutencao-pulse { animation: pulse-manutencao 1.5s infinite; }
         @keyframes pulse-manutencao { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
     </style>
@@ -34,19 +34,8 @@
             <span class="text-3xl font-black text-[#003366]">⚠️</span>
         </div>
         <h1 class="font-black text-2xl uppercase mb-4 tracking-widest">Sistema em Manutenção</h1>
-        
         <p class="text-lg font-bold mb-8 opacity-90 max-w-sm mx-auto leading-relaxed">🔒 <span class="text-empresa-amarelo font-black">ACESSO RESTRITO</span> para atualizações de segurança</p>
-        
-        <div class="space-y-6 mb-12">
-            <p class="text-sm opacity-70 font-black uppercase tracking-wider">New Market Intelligence 2026</p>
-            <a href="https://wa.me/5511932280031?text=Olá!%20O%20sistema%20está%20em%20manutenção?" 
-               class="block w-full max-w-sm mx-auto bg-[#25D366] text-white py-6 px-8 rounded-3xl font-black text-lg uppercase shadow-2xl hover:shadow-3xl transition-all" 
-               target="_blank">
-                📱 Falar com Suporte
-            </a>
-        </div>
-        
-        <button onclick="fecharManutencao()" class="py-4 px-8 bg-empresa-amarelo text-[#003366] rounded-2xl font-black uppercase text-sm shadow-xl hover:shadow-2xl transition-all">🔙 VOLTAR</button>
+        <button onclick="fecharManutencao()" class="py-4 px-8 bg-empresa-amarelo text-[#003366] rounded-2xl font-black uppercase text-sm">🔙 VOLTAR</button>
     </div>
 
     <div id="loginView" class="fixed inset-0 bg-gradient-to-b from-[#003366] to-[#1e40af] z-[100] flex items-center justify-center p-6 text-center text-white">
@@ -70,21 +59,29 @@
                         <p id="user-display" class="text-[10px] font-black uppercase opacity-80"></p>
                     </div>
                 </div>
-                <button onclick="logout()" class="bg-white/10 p-3 rounded-xl border border-white/20">🚪</button>
+                <button onclick="logout()" class="bg-white/10 p-3 rounded-xl">🚪</button>
             </div>
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO..." class="w-full bg-white p-4 rounded-xl text-xs font-black uppercase outline-none shadow-inner">
+            <input type="text" id="input-busca" oninput="setFiltro('todos')" placeholder="BUSCAR PRODUTO..." class="w-full bg-white p-4 rounded-xl text-xs font-black uppercase outline-none">
         </header>
 
         <main class="max-w-lg mx-auto p-5 pb-32">
-            <div id="view-produtos">
-                <div class="grid grid-cols-3 gap-2 mb-6 text-center">
-                    <div class="bg-red-600 p-3 rounded-2xl text-white shadow-lg"><p class="text-[7px] font-black uppercase opacity-70">Vencidos</p><p id="dash-vencidos" class="text-lg font-black">0</p></div>
-                    <div class="bg-[#FFD700] p-3 rounded-2xl text-slate-900 shadow-lg"><p class="text-[7px] font-black uppercase opacity-70">Urgente</p><p id="dash-alerta" class="text-lg font-black">0</p></div>
-                    <div class="bg-white p-3 rounded-2xl text-slate-800 shadow-lg"><p class="text-[7px] font-black uppercase opacity-40">Total</p><p id="dash-total" class="text-lg font-black">0</p></div>
+            <div class="grid grid-cols-3 gap-2 mb-6 text-center">
+                <div id="btn-vencidos" onclick="setFiltro('vencidos')" class="bg-red-600 p-3 rounded-2xl text-white shadow-lg transition-all cursor-pointer border-3 border-transparent">
+                    <p class="text-[7px] font-black uppercase opacity-70">Vencidos</p>
+                    <p id="dash-vencidos" class="text-lg font-black">0</p>
                 </div>
-                <button id="btn-relatorio" onclick="gerarRelatorioRetirada()" class="hidden w-full bg-emerald-600 text-white py-4 rounded-xl font-black uppercase text-[10px] shadow-lg mb-6">📄 GERAR LISTA DE RETIRADA</button>
-                <div id="container-produtos" class="space-y-3"></div>
+                <div id="btn-urgente" onclick="setFiltro('urgente')" class="bg-[#FFD700] p-3 rounded-2xl text-slate-900 shadow-lg transition-all cursor-pointer border-3 border-transparent">
+                    <p class="text-[7px] font-black uppercase opacity-70">Urgente</p>
+                    <p id="dash-alerta" class="text-lg font-black">0</p>
+                </div>
+                <div id="btn-todos" onclick="setFiltro('todos')" class="bg-white p-3 rounded-2xl text-slate-800 shadow-lg transition-all cursor-pointer border-3 border-transparent filtro-ativo">
+                    <p class="text-[7px] font-black uppercase opacity-40">Total</p>
+                    <p id="dash-total" class="text-lg font-black">0</p>
+                </div>
             </div>
+
+            <button id="btn-relatorio" onclick="gerarRelatorioRetirada()" class="hidden w-full bg-emerald-600 text-white py-4 rounded-xl font-black uppercase text-[10px] shadow-lg mb-6">📄 GERAR LISTA DE RETIRADA</button>
+            <div id="container-produtos" class="space-y-3"></div>
         </main>
         
         <div class="fixed bottom-6 left-0 right-0 flex justify-center px-6 z-40">
@@ -102,15 +99,15 @@
             </div>
             <div id="reader-container" class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden mb-6"><div id="reader"></div></div>
             <div class="space-y-4">
-                <input type="text" id="p-ean" placeholder="EAN (SCANNER)" onblur="buscarNomePorEAN(this.value)" class="w-full p-4 bg-slate-50 rounded-xl font-mono text-blue-700 border-2 border-transparent outline-none">
+                <input type="text" id="p-ean" placeholder="EAN" onblur="buscarNomePorEAN(this.value)" class="w-full p-4 bg-slate-50 rounded-xl font-mono border-2 border-transparent outline-none">
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-xl font-black uppercase outline-none">
                 <div class="grid grid-cols-2 gap-4">
                     <div><label class="text-[8px] font-black text-slate-400 ml-2 uppercase">Validade</label><input type="date" id="p-validade" class="w-full p-4 bg-slate-50 rounded-xl font-bold"></div>
                     <div><label class="text-[8px] font-black text-slate-400 ml-2 uppercase">Qtd</label><input type="tel" id="p-qtd" placeholder="0" class="w-full p-4 bg-slate-50 rounded-xl font-black text-center text-xl"></div>
                 </div>
                 <input type="hidden" id="edit-id">
-                <button onclick="salvarProduto()" class="w-full py-5 bg-[#003366] text-white rounded-xl font-black uppercase shadow-xl tracking-widest mb-3">Salvar no Banco</button>
-                <button id="btn-excluir" onclick="confirmarExclusao()" class="hidden w-full py-3 bg-red-600 text-white font-black uppercase text-[10px] rounded-xl shadow-lg">🗑️ EXCLUIR PRODUTO</button>
+                <button onclick="salvarProduto()" class="w-full py-5 bg-[#003366] text-white rounded-xl font-black uppercase shadow-xl">Salvar no Banco</button>
+                <button id="btn-excluir" onclick="confirmarExclusao()" class="hidden w-full py-3 bg-red-600 text-white font-black uppercase text-[10px] rounded-xl">🗑️ EXCLUIR PRODUTO</button>
             </div>
         </div>
     </div>
@@ -141,8 +138,23 @@
         let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
         let cliquesSegredo = 0;
         let usuarioSessao = null, estoque = [], scannerInstancia = null;
+        let filtroAtual = 'todos';
 
         window.onload = inicializarApp;
+
+        function setFiltro(tipo) {
+            filtroAtual = tipo;
+            // Estilizar botões
+            document.getElementById('btn-vencidos').classList.remove('filtro-ativo');
+            document.getElementById('btn-urgente').classList.remove('filtro-ativo');
+            document.getElementById('btn-todos').classList.remove('filtro-ativo');
+            
+            if(tipo === 'vencidos') document.getElementById('btn-vencidos').classList.add('filtro-ativo');
+            if(tipo === 'urgente') document.getElementById('btn-urgente').classList.add('filtro-ativo');
+            if(tipo === 'todos') document.getElementById('btn-todos').classList.add('filtro-ativo');
+            
+            renderizar();
+        }
 
         function toggleManutencaoSecreto() {
             cliquesSegredo++;
@@ -182,7 +194,7 @@
             modal.innerHTML = `
                 <div class="bg-white w-full max-w-xs rounded-[3rem] p-10 shadow-2xl">
                     <h3 class="font-black text-[#003366] uppercase mb-6 text-xl">${nomeUsuario}</h3>
-                    <input type="password" id="input-senha" placeholder="••••" class="w-full p-5 bg-slate-100 rounded-2xl text-center font-black outline-none mb-8 text-4xl">
+                    <input type="password" id="input-senha" placeholder="••••" class="w-full p-5 bg-slate-100 rounded-2xl text-center font-black outline-none mb-8 text-4xl tracking-widest">
                     <div class="flex gap-3">
                         <button onclick="fecharSenha()" class="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-[10px] uppercase">Sair</button>
                         <button id="btn-entrar" class="flex-[2] py-4 bg-[#003366] text-white rounded-2xl font-black text-[10px] uppercase shadow-lg">Entrar</button>
@@ -223,13 +235,27 @@
             const busca = document.getElementById('input-busca').value.toUpperCase();
             let cV = 0, cA = 0; container.innerHTML = '';
 
-            estoque.filter(i => (i.produto || "").includes(busca) || (i.ean || "").includes(busca)).forEach(item => {
+            // 1. Calcular contadores globais
+            estoque.forEach(item => {
+                const dias = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
+                if (dias < 0) cV++; else if (dias <= 7) cA++;
+            });
+
+            // 2. Filtrar e exibir
+            estoque.filter(i => {
+                const matchesBusca = (i.produto || "").includes(busca) || (i.ean || "").includes(busca);
+                if(!matchesBusca) return false;
+
+                const dias = Math.ceil((new Date(i.vencimento) - new Date()) / 86400000);
+                if(filtroAtual === 'vencidos') return dias < 0;
+                if(filtroAtual === 'urgente') return dias >= 0 && dias <= 7;
+                return true; // 'todos'
+            }).forEach(item => {
                 const dias = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
                 const decisao = getAcaoSugerida(dias);
-                if (dias < 0) cV++; else if (dias <= 7) cA++;
 
                 container.innerHTML += `
-                    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col mb-4">
+                    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col mb-4 active:scale-95 transition-all">
                         <div class="flex justify-between items-start mb-2">
                             <div class="max-w-[70%]">
                                 <h3 class="font-black text-slate-800 text-sm uppercase truncate">${item.produto}</h3>
@@ -241,6 +267,7 @@
                         <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[9px] font-black text-blue-500 uppercase self-end">Ajustar</button>
                     </div>`;
             });
+
             document.getElementById('dash-vencidos').innerText = cV;
             document.getElementById('dash-alerta').innerText = cA;
             document.getElementById('dash-total').innerText = estoque.length;
