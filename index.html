@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.6.4 - Paulo Souza</title>
+    <title>New Market v16.6.5 - Paulo Souza</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -30,12 +30,12 @@
 <body>
 
     <!-- TELA DE MANUTENÇÃO -->
-    <div id="manutencaoView" class="fixed inset-0 bg-gradient-to-b from-slate-900 to-slate-800 z-[200] flex flex-col items-center justify-center p-6 text-center text-white">
+    <div id="manutencaoView" class="hidden-app fixed inset-0 bg-gradient-to-b from-slate-900 to-slate-800 z-[200] flex flex-col items-center justify-center p-6 text-center text-white">
         <div class="w-24 h-24 bg-empresa-amarelo rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl manutencao-pulse">
             <span class="text-3xl font-black text-[#003366]">⚠️</span>
         </div>
-        <h1 class="font-black text-2xl uppercase mb-4 tracking-widest">Estamos em Manutenção</h1>
-        <p class="text-lg font-bold mb-8 opacity-90 max-w-sm mx-auto leading-relaxed">Voltamos em breve com melhorias incríveis!</p>
+        <h1 class="font-black text-2xl uppercase mb-4 tracking-widest">Sistema em Manutenção</h1>
+        <p class="text-lg font-bold mb-8 opacity-90 max-w-sm mx-auto leading-relaxed">Apenas <span class="text-empresa-amarelo font-black">PAULO</span> tem acesso durante manutenção</p>
         
         <div class="space-y-6 mb-12">
             <p class="text-sm opacity-70 font-black uppercase tracking-wider">Paulo Souza by 2026</p>
@@ -46,7 +46,7 @@
             </a>
         </div>
         
-        <button onclick="fecharManutencao()" class="py-4 px-8 bg-empresa-amarelo text-[#003366] rounded-2xl font-black uppercase text-sm shadow-xl hover:shadow-2xl transition-all">SAIR DA TELA</button>
+        <button onclick="fecharManutencao()" class="py-4 px-8 bg-empresa-amarelo text-[#003366] rounded-2xl font-black uppercase text-sm shadow-xl hover:shadow-2xl transition-all">FECHAR</button>
     </div>
 
     <div id="loginView" class="fixed inset-0 bg-gradient-to-b from-[#003366] to-[#1e40af] z-[100] flex items-center justify-center p-6 text-center text-white">
@@ -149,41 +149,40 @@
         ];
 
         let usuarioSessao = null, estoque = [], scannerInstancia = null;
+        const manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') !== 'false';
 
-        // MANUTENÇÃO ATIVA POR PADRÃO
         window.onload = function() {
-            // Verifica se deve mostrar manutenção (pode ser controlado por localStorage ou Firebase)
-            const manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') !== 'false';
-            if (manutencaoAtiva) {
-                document.getElementById('manutencaoView').classList.remove('hidden-app');
-                return;
-            }
-            
+            document.getElementById('manutencaoView').classList.toggle('hidden-app', !manutencaoAtiva);
             inicializarApp();
         };
 
         function inicializarApp() {
             const lista = document.getElementById('lista-usuarios');
             EQUIPE.forEach(u => {
-                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 px-5 bg-slate-50 rounded-xl font-black uppercase text-[10px] flex justify-between items-center mb-1"><span>${u.nome}</span><span class="opacity-30">${u.cargo}</span></button>`;
+                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 px-5 bg-slate-50 rounded-xl font-black uppercase text-[10px] flex justify-between items-center mb-1 ${manutencaoAtiva && u.nome !== 'PAULO' ? 'opacity-30 pointer-events-none' : ''}">
+                    <span>${u.nome}</span><span class="opacity-30">${u.cargo}</span>
+                </button>`;
             });
             const salvo = localStorage.getItem('sessaoNewMarket');
-            if (salvo) { usuarioSessao = EQUIPE.find(u => u.nome === salvo); if (usuarioSessao) entrarNoApp(); }
+            if (salvo) { 
+                usuarioSessao = EQUIPE.find(u => u.nome === salvo); 
+                if (usuarioSessao && (!manutencaoAtiva || usuarioSessao.nome === 'PAULO')) entrarNoApp(); 
+            }
         }
 
-        function fecharManutencao() {
-            localStorage.setItem('manutencaoNewMarket', 'false');
-            document.getElementById('manutencaoView').classList.add('hidden-app');
-            inicializarApp();
-        }
+        function prepararLogin(nomeUsuario) {
+            if (manutencaoAtiva && nomeUsuario !== 'PAULO') {
+                document.getElementById('manutencaoView').classList.remove('hidden-app');
+                document.getElementById('loginView').classList.add('hidden-app');
+                return;
+            }
 
-        function prepararLogin(n) {
             const senhaModal = document.createElement('div');
             senhaModal.id = 'modal-senha';
             senhaModal.className = 'fixed inset-0 bg-slate-900/95 z-[600] flex items-center justify-center p-6 text-center';
             senhaModal.innerHTML = `
                 <div class="bg-white w-full max-w-xs rounded-[3rem] p-10 shadow-2xl">
-                    <h3 id="nome-selecionado" class="font-black text-[#003366] uppercase mb-6 text-xl tracking-tighter">${n}</h3>
+                    <h3 id="nome-selecionado" class="font-black text-[#003366] uppercase mb-6 text-xl tracking-tighter">${nomeUsuario}</h3>
                     <input type="password" id="input-senha" placeholder="••••" class="w-full p-5 bg-slate-100 rounded-2xl text-center font-black outline-none mb-8 text-4xl tracking-widest border-2 border-transparent">
                     <div class="flex gap-3">
                         <button onclick="fecharSenha()" class="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-[10px] uppercase">Sair</button>
@@ -193,7 +192,7 @@
             `;
             document.body.appendChild(senhaModal);
             document.getElementById('btn-confirmar-senha').onclick = () => {
-                const u = EQUIPE.find(x => x.nome === n);
+                const u = EQUIPE.find(x => x.nome === nomeUsuario);
                 if (document.getElementById('input-senha').value === u.pass) {
                     usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome);
                     fecharSenha(); entrarNoApp();
@@ -206,7 +205,25 @@
             if (modal) modal.remove();
         }
 
-        // RESTO DO CÓDIGO MANTIDO IGUAL...
+        function fecharManutencao() {
+            localStorage.setItem('manutencaoNewMarket', 'false');
+            document.getElementById('manutencaoView').classList.add('hidden-app');
+            window.location.reload();
+        }
+
+        function entrarNoApp() {
+            document.getElementById('loginView').classList.add('hidden-app');
+            document.getElementById('appView').classList.remove('hidden-app');
+            document.getElementById('user-display').innerText = `OLÁ, ${usuarioSessao.nome}`;
+            if (usuarioSessao.cargo === "GERENTE" || usuarioSessao.nome === "PAULO") document.getElementById('nav-gerente').classList.remove('hidden');
+            db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
+                estoque = [];
+                snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
+                renderizar();
+            });
+        }
+
+        // RESTO DO CÓDIGO MANTIDO...
         function getAcaoSugerida(dias) {
             if (dias < 0) return { acao: "RETIRAR AGORA", classe: "bg-red-600 text-white" };
             if (dias <= 3) return { acao: "PROMOÇÃO (50%)", classe: "bg-orange-500 text-white" };
@@ -237,18 +254,6 @@
                     if (navigator.vibrate) navigator.vibrate([30, 50]);
                 }
             }
-        }
-
-        function entrarNoApp() {
-            document.getElementById('loginView').classList.add('hidden-app');
-            document.getElementById('appView').classList.remove('hidden-app');
-            document.getElementById('user-display').innerText = `OLÁ, ${usuarioSessao.nome}`;
-            if (usuarioSessao.cargo === "GERENTE" || usuarioSessao.nome === "PAULO") document.getElementById('nav-gerente').classList.remove('hidden');
-            db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
-                estoque = [];
-                snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
-                renderizar();
-            });
         }
 
         function renderizar() {
