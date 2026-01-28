@@ -1,22 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>New Market</title>
 
-<!-- Firebase CDN (v9 compat) -->
+<!-- Firebase (compat estável) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
-:root {
-  --azul: #083b66;
-  --amarelo: #f7c600;
-  --vermelho: #d32f2f;
-  --cinza: #f4f6f8;
-}
-
 * {
   box-sizing: border-box;
   font-family: Arial, sans-serif;
@@ -24,7 +17,7 @@
 
 body {
   margin: 0;
-  background: var(--azul);
+  background: #0a3d62;
 }
 
 /* LOGIN */
@@ -40,25 +33,22 @@ body {
   width: 90%;
   max-width: 360px;
   padding: 20px;
-  border-radius: 16px;
+  border-radius: 12px;
 }
 
 .login-box h2 {
   text-align: center;
-  margin-bottom: 20px;
 }
 
 select, input, button {
   width: 100%;
   padding: 14px;
-  margin-bottom: 12px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
+  margin-top: 10px;
   font-size: 16px;
 }
 
 button {
-  background: var(--amarelo);
+  background: #f1c40f;
   border: none;
   font-weight: bold;
 }
@@ -67,36 +57,14 @@ button {
 #app {
   display: none;
   min-height: 100vh;
-  background: var(--cinza);
+  background: #f4f6f8;
 }
 
 header {
-  background: var(--azul);
+  background: #0a3d62;
   color: #fff;
-  padding: 20px;
+  padding: 15px;
 }
-
-header h1 {
-  margin: 0;
-}
-
-.badges {
-  display: flex;
-  gap: 10px;
-  margin-top: 15px;
-}
-
-.badge {
-  flex: 1;
-  padding: 12px;
-  border-radius: 12px;
-  text-align: center;
-  font-weight: bold;
-}
-
-.vencido { background: var(--vermelho); color: #fff; }
-.alerta { background: var(--amarelo); }
-.total { background: #fff; }
 
 main {
   padding: 15px;
@@ -105,34 +73,23 @@ main {
 .card {
   background: #fff;
   padding: 15px;
-  border-radius: 14px;
-  margin-bottom: 12px;
-}
-
-.card b {
-  font-size: 18px;
+  border-radius: 10px;
+  margin-bottom: 10px;
 }
 
 .actions {
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
-.actions span {
-  margin-right: 15px;
-  cursor: pointer;
+.actions button {
+  margin-right: 8px;
 }
 
-.add {
+.fab {
   position: fixed;
   bottom: 20px;
   left: 20px;
   right: 20px;
-}
-
-.add button {
-  width: 100%;
-  padding: 18px;
-  font-size: 18px;
 }
 </style>
 </head>
@@ -143,13 +100,8 @@ main {
 <div id="login">
   <div class="login-box">
     <h2>New Market</h2>
-
-    <select id="user">
-      <option value="">Selecione o usuário</option>
-    </select>
-
-    <input type="password" id="password" placeholder="Senha" />
-
+    <select id="usuario"></select>
+    <input type="password" id="senha" placeholder="Senha">
     <button onclick="login()">Entrar</button>
   </div>
 </div>
@@ -157,34 +109,28 @@ main {
 <!-- APP -->
 <div id="app">
   <header>
-    <h1>New Market</h1>
-    <div id="perfil"></div>
-
-    <div class="badges">
-      <div class="badge vencido">Vencidos<br><span id="vencidos">0</span></div>
-      <div class="badge alerta">Alerta<br><span id="alerta">0</span></div>
-      <div class="badge total">Total<br><span id="total">0</span></div>
-    </div>
+    <h3 id="infoUsuario"></h3>
   </header>
 
   <main id="lista"></main>
 
-  <div class="add">
-    <button onclick="adicionar()">+ CADASTRAR</button>
+  <div class="fab">
+    <button onclick="adicionar()">+ Cadastrar Produto</button>
   </div>
 </div>
 
 <script>
-/* ================== FIREBASE ================== */
+/* ================= FIREBASE ================= */
 const firebaseConfig = {
   apiKey: "SUA_API_KEY",
   authDomain: "SEU_PROJETO.firebaseapp.com",
   projectId: "SEU_PROJETO"
 };
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-/* ================== USUÁRIOS ================== */
+/* ================= USUÁRIOS ================= */
 const usuarios = {
   Adriano:   { senha: "1234", cargo: "GERENTE" },
   Adrielle: { senha: "1234", cargo: "GERENTE" },
@@ -196,95 +142,94 @@ const usuarios = {
   Tamiris:  { senha: "1234", cargo: "FUNCIONÁRIO" }
 };
 
-let usuarioLogado = null;
+let usuarioAtual = null;
 
-/* ================== LOGIN ================== */
-const selectUser = document.getElementById("user");
-Object.keys(usuarios).forEach(u => {
+/* ================= LOGIN ================= */
+const selectUsuario = document.getElementById("usuario");
+selectUsuario.innerHTML = `<option value="">Selecione</option>`;
+
+Object.keys(usuarios).forEach(nome => {
   const opt = document.createElement("option");
-  opt.value = u;
-  opt.textContent = u;
-  selectUser.appendChild(opt);
+  opt.value = nome;
+  opt.textContent = nome;
+  selectUsuario.appendChild(opt);
 });
 
 function login() {
-  const nome = selectUser.value;
-  const senha = document.getElementById("password").value;
+  const nome = selectUsuario.value;
+  const senha = document.getElementById("senha").value;
 
   if (!usuarios[nome] || usuarios[nome].senha !== senha) {
     alert("Usuário ou senha inválidos");
     return;
   }
 
-  usuarioLogado = nome;
-  document.getElementById("perfil").innerText =
+  usuarioAtual = nome;
+  document.getElementById("infoUsuario").innerText =
     `${nome} (${usuarios[nome].cargo})`;
 
   document.getElementById("login").style.display = "none";
   document.getElementById("app").style.display = "block";
 
-  carregar();
+  carregarProdutos();
 }
 
-/* ================== PRODUTOS ================== */
-function carregar() {
-  db.collection("produtos").onSnapshot(snap => {
+/* ================= PRODUTOS ================= */
+function carregarProdutos() {
+  db.collection("produtos").onSnapshot(snapshot => {
     const lista = document.getElementById("lista");
     lista.innerHTML = "";
 
-    let total = 0;
-    snap.forEach(doc => {
+    snapshot.forEach(doc => {
       const p = doc.data();
-      total++;
 
-      const div = document.createElement("div");
-      div.className = "card";
-      div.innerHTML = `
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
         <b>${p.nome}</b><br>
-        Val: ${p.validade}<br>
-        Qtd: ${p.quantidade}
+        Validade: ${p.validade || "-"}<br>
+        Quantidade: ${p.quantidade ?? 0}
         <div class="actions">
-          <span onclick="editar('${doc.id}')">Editar</span>
-          <span onclick="excluir('${doc.id}')">Excluir</span>
+          <button onclick="editar('${doc.id}', ${p.quantidade ?? 0})">Editar</button>
+          <button onclick="excluir('${doc.id}')">Excluir</button>
         </div>
       `;
-      lista.appendChild(div);
+      lista.appendChild(card);
     });
-
-    document.getElementById("total").innerText = total;
   });
 }
 
 function adicionar() {
   const nome = prompt("Nome do produto:");
-  const validade = prompt("Validade:");
-  const quantidade = prompt("Quantidade:");
+  if (!nome) return;
 
-  if (!nome || !quantidade) return;
+  const validade = prompt("Validade:");
+  const quantidade = Number(prompt("Quantidade:") || 0);
 
   db.collection("produtos").add({
     nome,
     validade,
-    quantidade: Number(quantidade)
+    quantidade
+  });
+}
+
+function editar(id, atual) {
+  const nova = Number(prompt("Nova quantidade:", atual));
+  if (isNaN(nova)) return;
+
+  db.collection("produtos").doc(id).update({
+    quantidade: nova
   });
 }
 
 function excluir(id) {
-  if (usuarios[usuarioLogado].cargo !== "GERENTE") {
-    alert("Apenas gerentes podem excluir");
+  if (usuarios[usuarioAtual].cargo !== "GERENTE") {
+    alert("Somente gerentes podem excluir");
     return;
   }
   db.collection("produtos").doc(id).delete();
 }
-
-function editar(id) {
-  const quantidade = prompt("Nova quantidade:");
-  if (!quantidade) return;
-
-  db.collection("produtos").doc(id).update({
-    quantidade: Number(quantidade)
-  });
-}
 </script>
+
 </body>
 </html>
