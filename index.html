@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.6.3 - Paulo Souza</title>
+    <title>New Market v16.6.4 - Paulo Souza</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -23,9 +23,31 @@
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); } 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } }
         ::-webkit-scrollbar { width: 0px; }
         input:focus { border-color: #FFD700 !important; }
+        .manutencao-pulse { animation: pulse-manutencao 1.5s infinite; }
+        @keyframes pulse-manutencao { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
+
+    <!-- TELA DE MANUTENÇÃO -->
+    <div id="manutencaoView" class="fixed inset-0 bg-gradient-to-b from-slate-900 to-slate-800 z-[200] flex flex-col items-center justify-center p-6 text-center text-white">
+        <div class="w-24 h-24 bg-empresa-amarelo rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl manutencao-pulse">
+            <span class="text-3xl font-black text-[#003366]">⚠️</span>
+        </div>
+        <h1 class="font-black text-2xl uppercase mb-4 tracking-widest">Estamos em Manutenção</h1>
+        <p class="text-lg font-bold mb-8 opacity-90 max-w-sm mx-auto leading-relaxed">Voltamos em breve com melhorias incríveis!</p>
+        
+        <div class="space-y-6 mb-12">
+            <p class="text-sm opacity-70 font-black uppercase tracking-wider">Paulo Souza by 2026</p>
+            <a href="https://wa.me/5511932280031?text=Olá%20New%20Market!%20Preciso%20de%20ajuda%20com%20o%20app" 
+               class="block w-full max-w-sm mx-auto bg-[#25D366] text-white py-6 px-8 rounded-3xl font-black text-lg uppercase shadow-2xl hover:shadow-3xl transition-all" 
+               target="_blank">
+                📱 WhatsApp (11) 93228-0031
+            </a>
+        </div>
+        
+        <button onclick="fecharManutencao()" class="py-4 px-8 bg-empresa-amarelo text-[#003366] rounded-2xl font-black uppercase text-sm shadow-xl hover:shadow-2xl transition-all">SAIR DA TELA</button>
+    </div>
 
     <div id="loginView" class="fixed inset-0 bg-gradient-to-b from-[#003366] to-[#1e40af] z-[100] flex items-center justify-center p-6 text-center text-white">
         <div class="bg-white w-full max-w-sm rounded-[3.5rem] p-8 shadow-2xl flex flex-col min-h-[550px] text-slate-800">
@@ -128,6 +150,63 @@
 
         let usuarioSessao = null, estoque = [], scannerInstancia = null;
 
+        // MANUTENÇÃO ATIVA POR PADRÃO
+        window.onload = function() {
+            // Verifica se deve mostrar manutenção (pode ser controlado por localStorage ou Firebase)
+            const manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') !== 'false';
+            if (manutencaoAtiva) {
+                document.getElementById('manutencaoView').classList.remove('hidden-app');
+                return;
+            }
+            
+            inicializarApp();
+        };
+
+        function inicializarApp() {
+            const lista = document.getElementById('lista-usuarios');
+            EQUIPE.forEach(u => {
+                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 px-5 bg-slate-50 rounded-xl font-black uppercase text-[10px] flex justify-between items-center mb-1"><span>${u.nome}</span><span class="opacity-30">${u.cargo}</span></button>`;
+            });
+            const salvo = localStorage.getItem('sessaoNewMarket');
+            if (salvo) { usuarioSessao = EQUIPE.find(u => u.nome === salvo); if (usuarioSessao) entrarNoApp(); }
+        }
+
+        function fecharManutencao() {
+            localStorage.setItem('manutencaoNewMarket', 'false');
+            document.getElementById('manutencaoView').classList.add('hidden-app');
+            inicializarApp();
+        }
+
+        function prepararLogin(n) {
+            const senhaModal = document.createElement('div');
+            senhaModal.id = 'modal-senha';
+            senhaModal.className = 'fixed inset-0 bg-slate-900/95 z-[600] flex items-center justify-center p-6 text-center';
+            senhaModal.innerHTML = `
+                <div class="bg-white w-full max-w-xs rounded-[3rem] p-10 shadow-2xl">
+                    <h3 id="nome-selecionado" class="font-black text-[#003366] uppercase mb-6 text-xl tracking-tighter">${n}</h3>
+                    <input type="password" id="input-senha" placeholder="••••" class="w-full p-5 bg-slate-100 rounded-2xl text-center font-black outline-none mb-8 text-4xl tracking-widest border-2 border-transparent">
+                    <div class="flex gap-3">
+                        <button onclick="fecharSenha()" class="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-[10px] uppercase">Sair</button>
+                        <button id="btn-confirmar-senha" class="flex-[2] py-4 bg-[#003366] text-white rounded-2xl font-black text-[10px] uppercase shadow-lg">Entrar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(senhaModal);
+            document.getElementById('btn-confirmar-senha').onclick = () => {
+                const u = EQUIPE.find(x => x.nome === n);
+                if (document.getElementById('input-senha').value === u.pass) {
+                    usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome);
+                    fecharSenha(); entrarNoApp();
+                } else alert("Senha Incorreta");
+            };
+        }
+
+        function fecharSenha() {
+            const modal = document.getElementById('modal-senha');
+            if (modal) modal.remove();
+        }
+
+        // RESTO DO CÓDIGO MANTIDO IGUAL...
         function getAcaoSugerida(dias) {
             if (dias < 0) return { acao: "RETIRAR AGORA", classe: "bg-red-600 text-white" };
             if (dias <= 3) return { acao: "PROMOÇÃO (50%)", classe: "bg-orange-500 text-white" };
@@ -158,44 +237,6 @@
                     if (navigator.vibrate) navigator.vibrate([30, 50]);
                 }
             }
-        }
-
-        window.onload = function() {
-            const lista = document.getElementById('lista-usuarios');
-            EQUIPE.forEach(u => {
-                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 px-5 bg-slate-50 rounded-xl font-black uppercase text-[10px] flex justify-between items-center mb-1"><span>${u.nome}</span><span class="opacity-30">${u.cargo}</span></button>`;
-            });
-            const salvo = localStorage.getItem('sessaoNewMarket');
-            if (salvo) { usuarioSessao = EQUIPE.find(u => u.nome === salvo); if (usuarioSessao) entrarNoApp(); }
-        };
-
-        function prepararLogin(n) {
-            const senhaModal = document.createElement('div');
-            senhaModal.id = 'modal-senha';
-            senhaModal.className = 'fixed inset-0 bg-slate-900/95 z-[600] flex items-center justify-center p-6 text-center';
-            senhaModal.innerHTML = `
-                <div class="bg-white w-full max-w-xs rounded-[3rem] p-10 shadow-2xl">
-                    <h3 id="nome-selecionado" class="font-black text-[#003366] uppercase mb-6 text-xl tracking-tighter">${n}</h3>
-                    <input type="password" id="input-senha" placeholder="••••" class="w-full p-5 bg-slate-100 rounded-2xl text-center font-black outline-none mb-8 text-4xl tracking-widest border-2 border-transparent">
-                    <div class="flex gap-3">
-                        <button onclick="fecharSenha()" class="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-[10px] uppercase">Sair</button>
-                        <button id="btn-confirmar-senha" class="flex-[2] py-4 bg-[#003366] text-white rounded-2xl font-black text-[10px] uppercase shadow-lg">Entrar</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(senhaModal);
-            document.getElementById('btn-confirmar-senha').onclick = () => {
-                const u = EQUIPE.find(x => x.nome === n);
-                if (document.getElementById('input-senha').value === u.pass) {
-                    usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome);
-                    fecharSenha(); entrarNoApp();
-                } else alert("Senha Incorreta");
-            };
-        }
-
-        function fecharSenha() {
-            const modal = document.getElementById('modal-senha');
-            if (modal) modal.remove();
         }
 
         function entrarNoApp() {
