@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.7.3</title>
+    <title>New Market v16.7.3 - Legacy</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIk5ldyBNYXJrZXQgdiAxNiIsCiAgInNob3J0X25hbWUiOiAiTmV3IE1hcmtldCIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMDAzMzY2IiwKICAidGhlbWV_Y29sb3IiOiAiIzAwMzM2NiIKfQ==">
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -23,22 +22,9 @@
         #reader video { object-fit: cover !important; border-radius: 1.5rem; }
         #reader { border: none !important; }
         .filtro-ativo { border: 3px solid #000 !important; transform: scale(1.05); }
-        .manutencao-pulse { animation: pulse-manutencao 1.5s infinite; }
-        @keyframes pulse-manutencao { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
-
-    <div id="manutencaoView" class="hidden-app fixed inset-0 bg-gradient-to-b from-slate-900 to-slate-800 z-[300] flex flex-col items-center justify-center p-6 text-center text-white">
-        <div class="w-24 h-24 bg-[#FFD700] rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl manutencao-pulse text-3xl font-black text-[#003366]">⚠️</div>
-        <h1 class="font-black text-2xl uppercase mb-4 tracking-widest">Sistema em Manutenção</h1>
-        <div class="mb-8 space-y-4">
-            <p class="text-lg font-bold opacity-90 max-w-sm mx-auto">🔒 <span class="text-[#FFD700] font-black">ACESSO RESTRITO</span></p>
-            <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest italic">Paulo Souza by 2026</p>
-            <a href="https://wa.me/5511932280031" target="_blank" class="inline-block bg-emerald-500 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase shadow-lg">💬 Suporte: (11) 93228-0031</a>
-        </div>
-        <button onclick="fecharManutencao()" class="py-4 px-8 bg-[#FFD700] text-[#003366] rounded-2xl font-black uppercase text-sm">🔙 VOLTAR</button>
-    </div>
 
     <div id="loginView" class="fixed inset-0 bg-gradient-to-b from-[#003366] to-[#1e40af] z-[100] flex items-center justify-center p-6 text-center text-white">
         <div class="bg-white w-full max-w-sm rounded-[3.5rem] p-8 shadow-2xl flex flex-col min-h-[550px] text-slate-800">
@@ -47,7 +33,7 @@
                 <h2 class="text-xl font-black uppercase italic mb-8">Controle de Equipe</h2>
                 <div id="lista-usuarios" class="space-y-2 max-h-[300px] overflow-y-auto"></div>
             </div>
-            <p onclick="toggleManutencaoSecreto()" class="cursor-pointer text-[10px] font-black text-blue-700 uppercase mt-6 italic">Paulo Souza by 2026</p>
+            <p class="text-[10px] font-black text-blue-700 uppercase mt-6 italic">Agenda Fácil Back-end</p>
         </div>
     </div>
 
@@ -63,7 +49,7 @@
                 </div>
                 <button onclick="logout()" class="bg-white/10 p-3 rounded-xl">🚪</button>
             </div>
-            <input type="text" id="input-busca" oninput="setFiltro('todos')" placeholder="BUSCAR PRODUTO..." class="w-full bg-white p-4 rounded-xl text-xs font-black uppercase shadow-inner outline-none">
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO..." class="w-full bg-white p-4 rounded-xl text-xs font-black uppercase shadow-inner outline-none">
         </header>
 
         <main class="max-w-lg mx-auto p-5 pb-32">
@@ -86,7 +72,7 @@
         
         <div class="fixed bottom-6 left-0 right-0 flex justify-center px-6 z-40">
             <button onclick="abrirCadastro()" class="w-full max-w-sm bg-[#FFD700] text-slate-900 py-5 rounded-2xl shadow-2xl font-black text-[10px] uppercase border-2 border-white">
-                + CADASTRAR PRODUTO / SCANNER
+                + SCANNER / REGISTRO
             </button>
         </div>
     </div>
@@ -119,71 +105,42 @@
     </div>
 
     <script>
-        // CONFIGURAÇÕES ATUALIZADAS
+        // CREDENCIAIS RESTAURADAS - PROJETO AGENDA-FACIL-B5542
         const firebaseConfig = {
-            apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
-            authDomain: "mercado-c3e95.firebaseapp.com",
-            projectId: "mercado-c3e95",
-            storageBucket: "mercado-c3e95.firebasestorage.app",
-            messagingSenderId: "883539091925",
-            appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c"
+            apiKey: "AIzaSyBylSqY9gUtjygPD6X20LQOH0kVg-NRczA",
+            authDomain: "agenda-facil-b5542.firebaseapp.com",
+            projectId: "agenda-facil-b5542",
+            storageBucket: "agenda-facil-b5542.firebasestorage.app",
+            messagingSenderId: "862816221186",
+            appId: "1:862816221186:web:e4339102a644f8abf60f1b"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         const EQUIPE = [
-            { nome: "ADRIANO", cargo: "GERENTE", pass: "admin123" },
-            { nome: "ADRIELLE", cargo: "GERENTE", pass: "admin123" },
-            { nome: "PAULO", cargo: "DESENVOLVEDOR", pass: "paulo123" },
-            { nome: "PEDRO", cargo: "EQUIPE", pass: "pedro123" },
-            { nome: "LEANDRO", cargo: "EQUIPE", pass: "leandro123" },
-            { nome: "EDMAR", cargo: "EQUIPE", pass: "edmar123" },
-            { nome: "JOÃO", cargo: "EQUIPE", pass: "joao123" },
-            { nome: "TAMIRIS", cargo: "EQUIPE", pass: "tamiris123" }
+            { nome: "ADRIANO", pass: "admin123" },
+            { nome: "PAULO", pass: "paulo123" },
+            { nome: "PEDRO", pass: "pedro123" }
         ];
 
-        let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
-        let cliquesSegredo = 0, usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos';
+        let usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos';
 
-        window.onload = inicializarApp;
-
-        function toggleManutencaoSecreto() {
-            cliquesSegredo++;
-            if (cliquesSegredo >= 5) {
-                manutencaoAtiva = !manutencaoAtiva;
-                localStorage.setItem('manutencaoNewMarket', manutencaoAtiva);
-                alert("MANUTENÇÃO: " + (manutencaoAtiva ? "ON" : "OFF"));
-                window.location.reload();
-            }
-            setTimeout(() => cliquesSegredo = 0, 2000);
-        }
-
-        function inicializarApp() {
+        window.onload = () => {
             const lista = document.getElementById('lista-usuarios');
-            lista.innerHTML = '';
             EQUIPE.forEach(u => {
-                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 px-5 bg-slate-50 rounded-xl font-black uppercase text-[10px] flex justify-between items-center mb-1">
-                    <span>${u.nome}</span><span class="opacity-30">${u.cargo}</span>
+                lista.innerHTML += `<button onclick="prepararLogin('${u.nome}')" class="w-full py-4 px-5 bg-slate-50 rounded-xl font-black uppercase text-[10px] mb-1">
+                    ${u.nome}
                 </button>`;
             });
             const salvo = localStorage.getItem('sessaoNewMarket');
-            if (salvo) { 
-                const u = EQUIPE.find(x => x.nome === salvo);
-                if (u && (!manutencaoAtiva || u.nome === 'PAULO')) {
-                    usuarioSessao = u; entrarNoApp();
-                }
-            }
-        }
+            if (salvo) { usuarioSessao = EQUIPE.find(x => x.nome === salvo); entrarNoApp(); }
+        };
 
-        function prepararLogin(nomeUsuario) {
-            const senha = prompt(`Senha para ${nomeUsuario}:`);
-            const u = EQUIPE.find(x => x.nome === nomeUsuario);
+        function prepararLogin(nome) {
+            const senha = prompt(`Senha para ${nome}:`);
+            const u = EQUIPE.find(x => x.nome === nome);
             if (senha === u.pass) {
-                if (manutencaoAtiva && u.nome !== 'PAULO') {
-                    document.getElementById('manutencaoView').classList.remove('hidden-app');
-                } else {
-                    usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome); entrarNoApp();
-                }
+                usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome); entrarNoApp();
             } else if (senha !== null) alert("Incorreta");
         }
 
@@ -198,31 +155,22 @@
             });
         }
 
-        // LÓGICA DE SALVAMENTO CORRIGIDA
         async function salvarProduto() {
             const id = document.getElementById('edit-id').value;
             const dados = { 
                 produto: document.getElementById('p-nome').value.toUpperCase(), 
                 vencimento: document.getElementById('p-validade').value, 
                 ean: document.getElementById('p-ean').value, 
-                quantidade: parseInt(document.getElementById('p-qtd').value) || 0, 
-                usuario: usuarioSessao.nome,
+                quantidade: parseInt(document.getElementById('p-qtd').value) || 0,
                 lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            if(!dados.produto || !dados.vencimento) return alert("Preencha Nome e Validade!");
-
             try {
-                if(id) {
-                    await db.collection("validades").doc(id).update(dados);
-                } else {
-                    await db.collection("validades").add(dados);
-                }
+                id ? await db.collection("validades").doc(id).update(dados) : await db.collection("validades").add(dados);
                 fecharModalCadastro();
                 if (navigator.vibrate) navigator.vibrate(50);
             } catch (error) {
-                console.error("Erro:", error);
-                alert("Erro ao conectar ao banco. Tente novamente.");
+                alert("Erro ao conectar ao banco do Agenda Fácil. Verifique as regras de segurança.");
             }
         }
 
@@ -231,37 +179,19 @@
             const busca = document.getElementById('input-busca').value.toUpperCase();
             container.innerHTML = '';
             
-            let cV = 0, cA = 0;
             estoque.forEach(item => {
-                const dias = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
-                if (dias < 0) cV++; else if (dias <= 7) cA++;
-
-                if (item.produto.includes(busca) || item.ean.includes(busca)) {
-                    const acao = getAcaoSugerida(dias);
+                if (item.produto.includes(busca)) {
                     container.innerHTML += `
                         <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col mb-4">
                             <div class="flex justify-between items-start mb-2">
-                                <div class="max-w-[70%]">
-                                    <h3 class="font-black text-slate-800 text-sm uppercase truncate">${item.produto}</h3>
-                                    <p class="text-[9px] font-bold text-slate-400">Val: ${item.vencimento.split('-').reverse().join('/')}</p>
-                                </div>
+                                <h3 class="font-black text-slate-800 text-sm uppercase">${item.produto}</h3>
                                 <p class="text-2xl font-black text-[#003366]">${item.quantidade}</p>
                             </div>
-                            <div class="${acao.classe} text-[8px] font-black p-2 rounded-xl text-center uppercase mb-3">${acao.msg}</div>
+                            <p class="text-[9px] font-bold text-slate-400 mb-3">Val: ${item.vencimento.split('-').reverse().join('/')}</p>
                             <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[9px] font-black text-blue-500 uppercase self-end">Ajustar</button>
                         </div>`;
                 }
             });
-            document.getElementById('dash-vencidos').innerText = cV;
-            document.getElementById('dash-alerta').innerText = cA;
-            document.getElementById('dash-total').innerText = estoque.length;
-        }
-
-        function getAcaoSugerida(dias) {
-            if (dias < 0) return { msg: "RETIRAR AGORA", classe: "bg-red-600 text-white" };
-            if (dias <= 3) return { msg: "PROMOÇÃO (50%)", classe: "bg-orange-500 text-white" };
-            if (dias <= 7) return { msg: "REPOR / MONITORAR", classe: "bg-yellow-400 text-slate-900" };
-            return { msg: "PRODUTO EM DIA", classe: "bg-slate-50 text-slate-400" };
         }
 
         async function abrirCadastro() {
@@ -284,7 +214,7 @@
             document.getElementById('edit-id').value = item.id;
             document.getElementById('p-nome').value = item.produto;
             document.getElementById('p-validade').value = item.vencimento;
-            document.getElementById('p-ean').value = item.ean;
+            document.getElementById('p-ean').value = item.ean || '';
             document.getElementById('p-qtd').value = item.quantidade;
             document.getElementById('btn-excluir').classList.remove('hidden');
         }
@@ -305,7 +235,6 @@
         }
 
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
-        function fecharManutencao() { document.getElementById('manutencaoView').classList.add('hidden-app'); }
         function setFiltro(f) { filtroAtual = f; renderizar(); }
     </script>
 </body>
