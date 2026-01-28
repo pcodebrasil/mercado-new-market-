@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.7.3 - Midnight</title>
+    <title>New Market v16.7.3 - Midnight COD</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -124,7 +124,7 @@
     </div>
 
     <script>
-        // CONFIG FIREBASE MANTIDA
+        // CONFIG FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -163,17 +163,6 @@
                 if (usuarioSessao) entrarNoApp();
             }
         };
-
-        function toggleManutencaoSecreto() {
-            cliquesSegredo++;
-            if (cliquesSegredo >= 5) {
-                manutencaoAtiva = !manutencaoAtiva;
-                localStorage.setItem('manutencaoNewMarket', manutencaoAtiva);
-                alert("DARK MODE MAINTENANCE: " + (manutencaoAtiva ? "ON" : "OFF"));
-                window.location.reload();
-            }
-            setTimeout(() => cliquesSegredo = 0, 2000);
-        }
 
         function login(nome) {
             const u = EQUIPE.find(x => x.nome === nome);
@@ -214,7 +203,7 @@
                             <div class="text-2xl font-black text-[#FFD700]">${item.quantidade}</div>
                         </div>
                         <div class="flex justify-between items-center mt-2 border-t border-slate-800 pt-3">
-                            <span class="text-[8px] font-black uppercase text-slate-500">ID: ${item.ean || '---'}</span>
+                            <span class="text-[8px] font-black uppercase text-slate-500">COD: ${item.ean || '---'}</span>
                             <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[10px] font-black text-blue-400 uppercase bg-transparent border-none">Ajustar</button>
                         </div>
                     </div>`;
@@ -259,6 +248,16 @@
             document.getElementById('p-validade').value = item.vencimento;
             document.getElementById('p-ean').value = item.ean || '';
             document.getElementById('p-qtd').value = item.quantidade;
+        }
+        function toggleManutencaoSecreto() {
+            cliquesSegredo++;
+            if (cliquesSegredo >= 5) {
+                manutencaoAtiva = !manutencaoAtiva;
+                localStorage.setItem('manutencaoNewMarket', manutencaoAtiva);
+                alert("MANUTENÇÃO: " + (manutencaoAtiva ? "ON" : "OFF"));
+                window.location.reload();
+            }
+            setTimeout(() => cliquesSegredo = 0, 2000);
         }
     </script>
 </body>
