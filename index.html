@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.7.0</title>
+    <title>New Market v16.7.1</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -19,9 +19,29 @@
         .hidden-app { display: none !important; }
         .bg-empresa-azul { background-color: #003366; } 
         .bg-empresa-amarelo { background-color: #FFD700; }
-        .online-pulse { width: 8px; height: 8px; background-color: #4ade80; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; margin-right: 6px; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); } 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } }
-        ::-webkit-scrollbar { width: 0px; }
+        
+        /* Estilização melhorada para o campo de data */
+        input[type="date"] {
+            position: relative;
+            appearance: none;
+            -webkit-appearance: none;
+            min-height: 58px;
+        }
+        
+        /* Ajuste para que o ícone do calendário não quebre o layout mobile */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            background: transparent;
+            bottom: 0;
+            color: transparent;
+            cursor: pointer;
+            height: auto;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
+        }
+
         .filtro-ativo { border: 3px solid #000 !important; transform: scale(1.05); }
         .manutencao-pulse { animation: pulse-manutencao 1.5s infinite; }
         @keyframes pulse-manutencao { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
@@ -54,14 +74,11 @@
             <div class="flex justify-between items-start mb-6 text-white">
                 <div>
                     <h1 class="font-black text-2xl italic text-[#FFD700] uppercase">New Market</h1>
-                    <div class="flex items-center mt-1">
-                        <span class="online-pulse"></span>
-                        <p id="user-display" class="text-[10px] font-black uppercase opacity-80"></p>
-                    </div>
+                    <p id="user-display" class="text-[10px] font-black uppercase opacity-80 mt-1"></p>
                 </div>
                 <button onclick="logout()" class="bg-white/10 p-3 rounded-xl">🚪</button>
             </div>
-            <input type="text" id="input-busca" oninput="setFiltro('todos')" placeholder="BUSCAR PRODUTO..." class="w-full bg-white p-4 rounded-xl text-xs font-black uppercase outline-none">
+            <input type="text" id="input-busca" oninput="setFiltro('todos')" placeholder="BUSCAR PRODUTO..." class="w-full bg-white p-4 rounded-xl text-xs font-black uppercase outline-none shadow-inner">
         </header>
 
         <main class="max-w-lg mx-auto p-5 pb-32">
@@ -99,20 +116,30 @@
             </div>
             <div id="reader-container" class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden mb-6"><div id="reader"></div></div>
             <div class="space-y-4">
-                <input type="text" id="p-ean" placeholder="EAN" onblur="buscarNomePorEAN(this.value)" class="w-full p-4 bg-slate-50 rounded-xl font-mono border-2 border-transparent outline-none">
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-xl font-black uppercase outline-none">
+                <input type="text" id="p-ean" placeholder="EAN" onblur="buscarNomePorEAN(this.value)" class="w-full p-4 bg-slate-50 rounded-2xl font-mono border-2 border-transparent outline-none">
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-4 bg-slate-50 rounded-2xl font-black uppercase outline-none">
+                
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-[8px] font-black text-slate-400 ml-2 uppercase">Validade</label><input type="date" id="p-validade" class="w-full p-4 bg-slate-50 rounded-xl font-bold"></div>
-                    <div><label class="text-[8px] font-black text-slate-400 ml-2 uppercase">Qtd</label><input type="tel" id="p-qtd" placeholder="0" class="w-full p-4 bg-slate-50 rounded-xl font-black text-center text-xl"></div>
+                    <div class="flex flex-col">
+                        <label class="text-[9px] font-black text-slate-400 ml-4 mb-1 uppercase tracking-tighter">📅 Data de Validade</label>
+                        <input type="date" id="p-validade" class="w-full px-4 bg-slate-50 rounded-2xl font-black text-[#003366] outline-none border-2 border-transparent focus:border-blue-200">
+                    </div>
+                    
+                    <div class="flex flex-col">
+                        <label class="text-[9px] font-black text-slate-400 ml-4 mb-1 uppercase tracking-tighter">📦 Quantidade</label>
+                        <input type="tel" id="p-qtd" placeholder="0" class="w-full p-4 bg-slate-50 rounded-2xl font-black text-center text-xl text-[#003366] outline-none border-2 border-transparent focus:border-blue-200">
+                    </div>
                 </div>
+
                 <input type="hidden" id="edit-id">
-                <button onclick="salvarProduto()" class="w-full py-5 bg-[#003366] text-white rounded-xl font-black uppercase shadow-xl">Salvar no Banco</button>
-                <button id="btn-excluir" onclick="confirmarExclusao()" class="hidden w-full py-3 bg-red-600 text-white font-black uppercase text-[10px] rounded-xl">🗑️ EXCLUIR PRODUTO</button>
+                <button onclick="salvarProduto()" class="w-full py-5 bg-[#003366] text-white rounded-2xl font-black uppercase shadow-xl tracking-widest mt-2 active:scale-95 transition-all">Salvar no Banco</button>
+                <button id="btn-excluir" onclick="confirmarExclusao()" class="hidden w-full py-3 bg-red-600 text-white font-black uppercase text-[10px] rounded-2xl mt-2">🗑️ EXCLUIR PRODUTO</button>
             </div>
         </div>
     </div>
 
     <script>
+        // Configuração Firebase (Sua configuração mantida)
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4",
             authDomain: "mercado-c3e95.firebaseapp.com",
@@ -144,15 +171,12 @@
 
         function setFiltro(tipo) {
             filtroAtual = tipo;
-            // Estilizar botões
             document.getElementById('btn-vencidos').classList.remove('filtro-ativo');
             document.getElementById('btn-urgente').classList.remove('filtro-ativo');
             document.getElementById('btn-todos').classList.remove('filtro-ativo');
-            
             if(tipo === 'vencidos') document.getElementById('btn-vencidos').classList.add('filtro-ativo');
             if(tipo === 'urgente') document.getElementById('btn-urgente').classList.add('filtro-ativo');
             if(tipo === 'todos') document.getElementById('btn-todos').classList.add('filtro-ativo');
-            
             renderizar();
         }
 
@@ -234,26 +258,20 @@
             const container = document.getElementById('container-produtos');
             const busca = document.getElementById('input-busca').value.toUpperCase();
             let cV = 0, cA = 0; container.innerHTML = '';
-
-            // 1. Calcular contadores globais
             estoque.forEach(item => {
                 const dias = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
                 if (dias < 0) cV++; else if (dias <= 7) cA++;
             });
-
-            // 2. Filtrar e exibir
             estoque.filter(i => {
                 const matchesBusca = (i.produto || "").includes(busca) || (i.ean || "").includes(busca);
                 if(!matchesBusca) return false;
-
                 const dias = Math.ceil((new Date(i.vencimento) - new Date()) / 86400000);
                 if(filtroAtual === 'vencidos') return dias < 0;
                 if(filtroAtual === 'urgente') return dias >= 0 && dias <= 7;
-                return true; // 'todos'
+                return true;
             }).forEach(item => {
                 const dias = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
                 const decisao = getAcaoSugerida(dias);
-
                 container.innerHTML += `
                     <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col mb-4 active:scale-95 transition-all">
                         <div class="flex justify-between items-start mb-2">
@@ -267,7 +285,6 @@
                         <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[9px] font-black text-blue-500 uppercase self-end">Ajustar</button>
                     </div>`;
             });
-
             document.getElementById('dash-vencidos').innerText = cV;
             document.getElementById('dash-alerta').innerText = cA;
             document.getElementById('dash-total').innerText = estoque.length;
