@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v16.6.5 - Paulo Souza</title>
+    <title>New Market v16.6.6 - Paulo Souza</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -30,7 +30,7 @@
 <body>
 
     <!-- TELA DE MANUTENÇÃO -->
-    <div id="manutencaoView" class="hidden-app fixed inset-0 bg-gradient-to-b from-slate-900 to-slate-800 z-[200] flex flex-col items-center justify-center p-6 text-center text-white">
+    <div id="manutencaoView" class="fixed inset-0 bg-gradient-to-b from-slate-900 to-slate-800 z-[200] flex flex-col items-center justify-center p-6 text-center text-white">
         <div class="w-24 h-24 bg-empresa-amarelo rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl manutencao-pulse">
             <span class="text-3xl font-black text-[#003366]">⚠️</span>
         </div>
@@ -72,11 +72,6 @@
                 </div>
                 <button onclick="logout()" class="bg-white/10 p-3 rounded-xl border border-white/20">🚪</button>
             </div>
-            
-            <div id="nav-gerente" class="hidden flex gap-2 mb-4">
-                <button onclick="alternarAba('produtos')" id="btn-tab-produtos" class="flex-1 py-3 bg-[#FFD700] text-slate-900 rounded-xl font-black text-[9px] uppercase shadow-md transition-all">📦 Inventário</button>
-                <button onclick="alternarAba('logs')" id="btn-tab-logs" class="flex-1 py-3 bg-white/10 text-white rounded-xl font-black text-[9px] uppercase transition-all">📜 Auditoria</button>
-            </div>
 
             <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO OU EAN..." class="w-full bg-white p-4 rounded-xl text-xs font-black uppercase outline-none shadow-inner border-2 border-transparent">
         </header>
@@ -90,11 +85,6 @@
                 </div>
                 <button id="btn-relatorio" onclick="gerarRelatorioRetirada()" class="hidden w-full bg-emerald-600 text-white py-4 rounded-xl font-black uppercase text-[10px] shadow-lg mb-6 flex items-center justify-center gap-2">📄 GERAR LISTA DE RETIRADA</button>
                 <div id="container-produtos" class="space-y-3"></div>
-            </div>
-
-            <div id="view-auditoria" class="hidden space-y-3">
-                <h2 class="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest">Atividade Recente</h2>
-                <div id="container-logs" class="space-y-2"></div>
             </div>
         </main>
         
@@ -120,7 +110,8 @@
                     <div><label class="text-[8px] font-black text-slate-400 ml-2 uppercase">Qtd</label><input type="tel" id="p-qtd" placeholder="0" class="w-full p-4 bg-slate-50 rounded-xl font-black text-center text-xl outline-none"></div>
                 </div>
                 <input type="hidden" id="edit-id">
-                <button onclick="salvarProduto()" class="w-full py-5 bg-[#003366] text-white rounded-xl font-black uppercase shadow-xl tracking-widest">Salvar no Banco</button>
+                <button onclick="salvarProduto()" class="w-full py-5 bg-[#003366] text-white rounded-xl font-black uppercase shadow-xl tracking-widest mb-3">Salvar no Banco</button>
+                <button id="btn-excluir" onclick="confirmarExclusao()" class="hidden w-full py-3 bg-red-600 text-white font-black uppercase text-[10px] rounded-xl shadow-lg hover:shadow-xl transition-all">🗑️ EXCLUIR PRODUTO</button>
             </div>
         </div>
     </div>
@@ -149,6 +140,9 @@
         ];
 
         let usuarioSessao = null, estoque = [], scannerInstancia = null;
+        
+        // ✅ MANUTENÇÃO ATIVADA POR PADRÃO
+        localStorage.setItem('manutencaoNewMarket', 'true');
         const manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') !== 'false';
 
         window.onload = function() {
@@ -207,7 +201,6 @@
 
         function fecharManutencao() {
             localStorage.setItem('manutencaoNewMarket', 'false');
-            document.getElementById('manutencaoView').classList.add('hidden-app');
             window.location.reload();
         }
 
@@ -215,7 +208,6 @@
             document.getElementById('loginView').classList.add('hidden-app');
             document.getElementById('appView').classList.remove('hidden-app');
             document.getElementById('user-display').innerText = `OLÁ, ${usuarioSessao.nome}`;
-            if (usuarioSessao.cargo === "GERENTE" || usuarioSessao.nome === "PAULO") document.getElementById('nav-gerente').classList.remove('hidden');
             db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
                 estoque = [];
                 snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
@@ -223,22 +215,11 @@
             });
         }
 
-        // RESTO DO CÓDIGO MANTIDO...
         function getAcaoSugerida(dias) {
             if (dias < 0) return { acao: "RETIRAR AGORA", classe: "bg-red-600 text-white" };
             if (dias <= 3) return { acao: "PROMOÇÃO (50%)", classe: "bg-orange-500 text-white" };
             if (dias <= 7) return { acao: "REPOR / MONITORAR", classe: "bg-yellow-400 text-slate-900" };
             return { acao: "PRODUTO EM DIA", classe: "bg-slate-50 text-slate-400" };
-        }
-
-        async function registrarLog(acao, produto, detalhes = "") {
-            await db.collection("logs").add({
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                usuario: usuarioSessao.nome,
-                acao: acao,
-                produto: produto,
-                detalhes: detalhes
-            });
         }
 
         async function buscarNomePorEAN(ean) {
@@ -276,34 +257,14 @@
                             <div class="text-right"><p class="text-2xl font-black text-[#003366] leading-none">${item.quantidade}</p><p class="text-[8px] font-black text-slate-300">QTD</p></div>
                         </div>
                         <div class="${decisao.classe} text-[8px] font-black p-2 rounded-xl text-center uppercase mb-3">${decisao.acao}</div>
-                        <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[9px] font-black text-blue-500 uppercase self-end">Ajustar</button>
+                        <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[9px] font-black text-blue-500 uppercase self-end mb-1">Ajustar</button>
+                        <button onclick='prepararExclusao(${JSON.stringify(item)})' class="text-[9px] font-black text-red-500 uppercase self-end">Excluir</button>
                     </div>`;
             });
             document.getElementById('dash-vencidos').innerText = cV;
             document.getElementById('dash-alerta').innerText = cA;
             document.getElementById('dash-total').innerText = estoque.length;
             (cV > 0 || cA > 0) ? document.getElementById('btn-relatorio').classList.remove('hidden') : document.getElementById('btn-relatorio').classList.add('hidden');
-        }
-
-        async function carregarLogs() {
-            const container = document.getElementById('container-logs');
-            container.innerHTML = '<p class="text-center py-10 text-[10px] font-black opacity-20 uppercase">Auditando registros...</p>';
-            const snap = await db.collection("logs").orderBy("timestamp", "desc").limit(30).get();
-            container.innerHTML = '';
-            snap.forEach(doc => {
-                const log = doc.data();
-                const icon = log.acao === 'CADASTRO' ? '🟢' : log.acao === 'EDIÇÃO' ? '🟡' : '🔴';
-                container.innerHTML += `<div class="bg-white p-3 rounded-2xl shadow-sm flex items-center gap-3 border border-slate-50"><span class="text-xs">${icon}</span><div class="flex-1"><p class="text-[8px] font-black text-slate-400 uppercase">${log.usuario} • ${log.acao}</p><p class="text-[10px] font-black text-blue-900 uppercase">${log.produto}</p></div></div>`;
-            });
-        }
-
-        function alternarAba(aba) {
-            const isLogs = aba === 'logs';
-            document.getElementById('view-produtos').classList.toggle('hidden', isLogs);
-            document.getElementById('view-auditoria').classList.toggle('hidden', !isLogs);
-            document.getElementById('btn-tab-logs').className = isLogs ? "flex-1 py-3 bg-[#003366] text-white rounded-xl font-black text-[9px] uppercase shadow-md" : "flex-1 py-3 bg-white/10 text-white rounded-xl font-black text-[9px] uppercase";
-            document.getElementById('btn-tab-produtos').className = !isLogs ? "flex-1 py-3 bg-[#FFD700] text-slate-900 rounded-xl font-black text-[9px] uppercase shadow-md" : "flex-1 py-3 bg-white/10 text-white rounded-xl font-black text-[9px] uppercase";
-            if(isLogs) carregarLogs();
         }
 
         async function abrirCadastro() {
@@ -320,11 +281,53 @@
 
         async function salvarProduto() {
             const id = document.getElementById('edit-id').value;
-            const dados = { produto: document.getElementById('p-nome').value.toUpperCase(), vencimento: document.getElementById('p-validade').value, ean: document.getElementById('p-ean').value, quantidade: parseInt(document.getElementById('p-qtd').value) || 0, usuario: usuarioSessao.nome };
-            if(!dados.produto || !dados.vencimento) return;
-            id ? await db.collection("validades").doc(id).update(dados) : await db.collection("validades").add(dados);
-            registrarLog(id ? "EDIÇÃO" : "CADASTRO", dados.produto, `Qtd: ${dados.quantidade}`);
+            const dados = { 
+                produto: document.getElementById('p-nome').value.toUpperCase(), 
+                vencimento: document.getElementById('p-validade').value, 
+                ean: document.getElementById('p-ean').value, 
+                quantidade: parseInt(document.getElementById('p-qtd').value) || 0, 
+                usuario: usuarioSessao.nome 
+            };
+            if(!dados.produto || !dados.vencimento) return alert("Nome e validade obrigatórios!");
+            
+            if (id) {
+                await db.collection("validades").doc(id).update(dados);
+                alert("✅ Produto atualizado!");
+            } else {
+                await db.collection("validades").add(dados);
+                alert("✅ Produto cadastrado!");
+            }
             fecharModalCadastro();
+        }
+
+        // ✅ NOVA FUNÇÃO EXCLUIR
+        async function confirmarExclusao() {
+            if (confirm("🗑️ CONFIRMAR EXCLUSÃO?
+Este produto será removido permanentemente.")) {
+                const id = document.getElementById('edit-id').value;
+                await db.collection("validades").doc(id).delete();
+                alert("✅ Produto excluído!");
+                fecharModalCadastro();
+            }
+        }
+
+        function prepararEdicao(item) {
+            document.getElementById('modal-cadastro').classList.remove('hidden');
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('p-nome').value = item.produto;
+            document.getElementById('p-validade').value = item.vencimento;
+            document.getElementById('p-ean').value = item.ean || '';
+            document.getElementById('p-qtd').value = item.quantidade;
+            document.getElementById('btn-excluir').classList.remove('hidden');
+        }
+
+        // ✅ BOTÃO EXCLUIR DIRETO NA LISTA
+        function prepararExclusao(item) {
+            if (confirm(`🗑️ Excluir "${item.produto}"?
+Qtd: ${item.quantidade}`)) {
+                db.collection("validades").doc(item.id).delete();
+                alert("✅ Produto excluído da lista!");
+            }
         }
 
         function gerarRelatorioRetirada() {
@@ -340,18 +343,20 @@ Val: ${i.vencimento.split('-').reverse().join('/')}
             navigator.share ? navigator.share({ title: 'Relatório', text: rel }) : alert("Relatório no console.");
         }
 
-        function prepararEdicao(item) {
-            document.getElementById('modal-cadastro').classList.remove('hidden');
-            document.getElementById('edit-id').value = item.id;
-            document.getElementById('p-nome').value = item.produto;
-            document.getElementById('p-validade').value = item.vencimento;
-            document.getElementById('p-ean').value = item.ean || '';
-            document.getElementById('p-qtd').value = item.quantidade;
+        function fecharModalCadastro() { 
+            if(scannerInstancia) scannerInstancia.stop().catch(()=>{}); 
+            document.getElementById('modal-cadastro').classList.add('hidden'); 
+            limparForm();
         }
-
-        function fecharModalCadastro() { if(scannerInstancia) scannerInstancia.stop().catch(()=>{}); document.getElementById('modal-cadastro').classList.add('hidden'); }
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
-        function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; }
+        function limparForm() { 
+            document.getElementById('edit-id').value = ''; 
+            document.getElementById('p-nome').value = ''; 
+            document.getElementById('p-validade').value = ''; 
+            document.getElementById('p-ean').value = ''; 
+            document.getElementById('p-qtd').value = ''; 
+            document.getElementById('btn-excluir').classList.add('hidden'); 
+        }
     </script>
 </body>
 </html>
