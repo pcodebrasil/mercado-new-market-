@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.4.9</title>
+    <title>New Market - v1.5.0 Final</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -13,10 +13,10 @@
     
     <style>
         /* Desenvolvido por: Paulo Pkacci by 2026 */
-        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; -webkit-font-smoothing: antialiased; user-select: none; }
         body { font-family: sans-serif; background-color: #020617; color: #f8fafc; overflow-x: hidden; margin: 0; }
         .hidden-app { display: none !important; }
-        .input-dark { background: #1e293b; border: 2px solid #334155; color: white; padding: 1rem; border-radius: 1rem; text-align: center; font-size: 1.5rem; outline: none; width: 100%; }
+        .input-dark { background: #1e293b; border: 2px solid #334155; color: white; padding: 1rem; border-radius: 1rem; text-align: center; font-size: 1.5rem; outline: none; width: 100%; user-select: text; }
         .bg-maintenance { background: repeating-linear-gradient(45deg, #020617, #020617 10px, #0f172a 10px, #0f172a 20px); }
         .card-produto { background: #0f172a; border: 1px solid #1e293b; border-radius: 1.5rem; transition: all 0.2s; }
         .status-pulse { position: relative; width: 10px; height: 10px; background-color: #22c55e; border-radius: 50%; }
@@ -26,7 +26,7 @@
         .check-in-input:checked { background: #FFD700; border-color: #FFD700; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-size: contain; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
     <div id="maintenanceView" class="hidden-app fixed inset-0 bg-maintenance z-[200] flex items-center justify-center p-6 text-center">
         <div class="bg-slate-900 border-2 border-yellow-500 p-8 rounded-[3rem] max-w-sm">
@@ -94,47 +94,45 @@
     </div>
 
     <script>
-        // Configuração Firebase (Mercado C3E95)
+        // [Eng. Sistemas] Proteção de Interface v1.5.0
+        document.addEventListener('contextmenu', event => event.preventDefault()); 
+        document.onkeydown = (e) => {
+            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
+                return false; 
+            }
+        };
+
         const firebaseConfig = { apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4", authDomain: "mercado-c3e95.firebaseapp.com", projectId: "mercado-c3e95", storageBucket: "mercado-c3e95.firebasestorage.app", messagingSenderId: "883539091925", appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Equipe e Credenciais
-        const EQUIPE = [ { nome: "ADRIANO", pass: "admin123", cargo: "GERENTE" }, { nome: "ADRIELLE", pass: "admin123", cargo: "GERENTE" }, { nome: "PAULO", pass: "paulo123", cargo: "DESENVOLVEDOR" }, { nome: "PEDRO", pass: "pedro123", cargo: "EQUIPE" }, { nome: "LEANDRO", pass: "leandro123", cargo: "EQUIPE" }, { nome: "EDMAR", pass: "edmar123", cargo: "EQUIPE" }, { nome: "JOÃO", pass: "joao123", cargo: "EQUIPE" }, { nome: "TAMIRIS", pass: "tamiris123", cargo: "EQUIPE" } ];
+        // [Eng. Sistemas] Ofuscação de Senhas em Base64
+        const EQUIPE = [ 
+            { nome: "ADRIANO", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
+            { nome: "ADRIELLE", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
+            { nome: "PAULO", pass: "cGF1bG8xMjM=", cargo: "DESENVOLVEDOR" }, 
+            { nome: "PEDRO", pass: "cGVkcm8xMjM=", cargo: "EQUIPE" }, 
+            { nome: "LEANDRO", pass: "bGVhbmRybzEyMw==", cargo: "EQUIPE" }, 
+            { nome: "EDMAR", pass: "ZWRtYXIxMjM=", cargo: "EQUIPE" }, 
+            { nome: "JOÃO", pass: "am9hbzEyMw==", cargo: "EQUIPE" }, 
+            { nome: "TAMIRIS", pass: "dGFtaXJpczEyMw==", cargo: "EQUIPE" } 
+        ];
 
-        // Estados Globais
         let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
         let usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos', itensSelecionados = new Set(), segundosTotais = 900, cliquesSegredo = 0;
 
-        // [Eng. Sistemas] Inicialização Corrigida v1.4.9
         window.onload = () => {
-            const salvo = localStorage.getItem('sessaoNewMarket');
-            
-            // Força a renderização da lista de usuários logo no início para evitar tela vazia
             renderizarListaUsuarios();
-
+            const salvo = localStorage.getItem('sessaoNewMarket');
             if (manutencaoAtiva) {
-                if (salvo === 'PAULO') {
-                    usuarioSessao = EQUIPE.find(x => x.nome === 'PAULO');
-                    entrarNoApp();
-                } else {
-                    mostrarManutencao();
-                }
+                if (salvo === 'PAULO') { usuarioSessao = EQUIPE.find(x => x.nome === 'PAULO'); entrarNoApp(); } 
+                else { mostrarManutencao(); }
             } else {
-                if (salvo) {
-                    usuarioSessao = EQUIPE.find(x => x.nome === salvo);
-                    if(usuarioSessao) {
-                        entrarNoApp();
-                    } else {
-                        mostrarLogin();
-                    }
-                } else {
-                    mostrarLogin();
-                }
+                if (salvo) { usuarioSessao = EQUIPE.find(x => x.nome === salvo); usuarioSessao ? entrarNoApp() : mostrarLogin(); } 
+                else { mostrarLogin(); }
             }
         };
 
-        // --- Gerenciamento de Telas (Views) ---
         function mostrarLogin() {
             document.getElementById('maintenanceView').classList.add('hidden-app');
             document.getElementById('appView').classList.add('hidden-app');
@@ -149,14 +147,11 @@
             iniciarTimerManutencao();
         }
 
-        function irParaLoginDesdeManutencao() {
-            mostrarLogin();
-        }
+        function irParaLoginDesdeManutencao() { mostrarLogin(); }
 
         function renderizarListaUsuarios() {
             const container = document.getElementById('auth-container');
-            if(!container) return; // Evita erro de null se o DOM não estiver pronto
-            
+            if(!container) return;
             let h = '';
             EQUIPE.forEach(u => {
                 h += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-800 rounded-2xl font-black text-[10px] flex justify-between items-center text-slate-300 mb-2">
@@ -178,18 +173,17 @@
         function confirmarSenha(n) {
             const u = EQUIPE.find(x => x.nome === n);
             const pass = document.getElementById('pass-input').value;
-            if (pass === u.pass) {
+            // [Eng. Sistemas] Comparação usando conversão Base64 (btoa)
+            if (btoa(pass) === u.pass) {
                 if (manutencaoAtiva && u.nome !== 'PAULO') {
-                    alert("SISTEMA EM MANUTENÇÃO. Apenas desenvolvedor autorizado.");
+                    alert("SISTEMA EM MANUTENÇÃO.");
                     mostrarManutencao();
                     return;
                 }
                 usuarioSessao = u;
                 localStorage.setItem('sessaoNewMarket', u.nome);
                 entrarNoApp();
-            } else { 
-                alert("Senha incorreta."); 
-            }
+            } else { alert("Senha incorreta."); }
         }
 
         function entrarNoApp() {
@@ -197,8 +191,6 @@
             document.getElementById('loginView').classList.add('hidden-app');
             document.getElementById('appView').classList.remove('hidden-app');
             document.getElementById('user-display').innerText = `OPERADOR: ${usuarioSessao.nome}`;
-            
-            // Listener em tempo real para o estoque
             db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
                 estoque = [];
                 snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
@@ -206,20 +198,14 @@
             });
         }
 
-        function logout() {
-            localStorage.removeItem('sessaoNewMarket');
-            window.location.reload();
-        }
+        function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
 
-        // --- Core: Produtos e Barcode ---
         function renderizar() {
             const container = document.getElementById('container-produtos'), busca = document.getElementById('input-busca').value.toUpperCase();
             let cV = 0, cA = 0; container.innerHTML = '';
-            
             estoque.forEach(item => {
                 const dV = new Date(item.vencimento + 'T00:00:00'), d = Math.floor((dV - new Date().setHours(0,0,0,0)) / 86400000);
                 if (d < 0) cV++; else if (d <= 7) cA++;
-                
                 if (((item.produto || "").includes(busca) || (item.ean || "").includes(busca)) && (filtroAtual === 'vencidos' ? d < 0 : filtroAtual === 'urgente' ? (d >= 0 && d <= 7) : true)) {
                     const isChecked = itensSelecionados.has(item.id) ? 'checked' : '';
                     container.innerHTML += `<div class="card-produto p-5 flex items-center gap-4 mb-4">
@@ -272,50 +258,22 @@
 
         function gerarGraficoBarras(valor) {
             const area = document.getElementById('barcode-area');
-            if (!valor || valor.length < 5) {
-                area.classList.add('hidden');
-                return;
-            }
+            if (!valor || valor.length < 5) { area.classList.add('hidden'); return; }
             try {
                 area.classList.remove('hidden');
-                JsBarcode("#barcode-canvas", valor, {
-                    format: valor.length === 13 ? "EAN13" : "CODE128",
-                    lineColor: "#000",
-                    width: 2.5,
-                    height: 80,
-                    displayValue: true,
-                    fontSize: 18,
-                    background: "#ffffff"
-                });
-            } catch (e) {
-                area.classList.add('hidden');
-            }
+                JsBarcode("#barcode-canvas", valor, { format: valor.length === 13 ? "EAN13" : "CODE128", lineColor: "#000", width: 2.5, height: 80, displayValue: true, fontSize: 18, background: "#ffffff" });
+            } catch (e) { area.classList.add('hidden'); }
         }
 
         async function salvarProduto() {
-            const id = document.getElementById('edit-id').value,
-                  d = { 
-                      produto: document.getElementById('p-nome').value.toUpperCase(), 
-                      vencimento: document.getElementById('p-validade').value, 
-                      ean: document.getElementById('p-ean').value, 
-                      quantidade: parseInt(document.getElementById('p-qtd').value) || 0 
-                  };
+            const id = document.getElementById('edit-id').value, d = { produto: document.getElementById('p-nome').value.toUpperCase(), vencimento: document.getElementById('p-validade').value, ean: document.getElementById('p-ean').value, quantidade: parseInt(document.getElementById('p-qtd').value) || 0 };
             id ? await db.collection("validades").doc(id).update(d) : await db.collection("validades").add(d);
             fecharModalCadastro();
         }
 
-        function excluirProduto(id, nome) {
-            if (confirm(`EXCLUIR DEFINITIVAMENTE:\n"${nome}"?`)) {
-                db.collection("validades").doc(id).delete();
-            }
-        }
+        function excluirProduto(id, nome) { if (confirm(`EXCLUIR:\n"${nome}"?`)) { db.collection("validades").doc(id).delete(); } }
+        function fecharModalCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if(scannerInstancia) scannerInstancia.stop().catch(() => {}); }
 
-        function fecharModalCadastro() {
-            document.getElementById('modal-cadastro').classList.add('hidden');
-            if(scannerInstancia) scannerInstancia.stop().catch(() => {});
-        }
-
-        // --- Relatório e Auxiliares ---
         function enviarRelatorioWhatsApp() {
             const agora = new Date();
             const hoje = new Date(); hoje.setHours(0,0,0,0);
@@ -332,7 +290,7 @@
                 let icone = diff < 0 ? "🚨 *VENCIDO*" : (diff <= 7 ? "⚠️ *URGENTE*" : "✅ *OK*");
                 msg += `${icone}%0A*PROD:* *${i.produto}*%0A*VAL:* *${i.vencimento.split('-').reverse().join('/')}*%0A*QTD:* *${i.quantidade}*%0A----------------------------%0A`;
             });
-            msg += `%0A_Enviado via New Market v1.4.9_`;
+            msg += `%0A_Enviado via New Market v1.5.0_`;
             window.open(`https://wa.me/?text=${msg}`);
         }
 
@@ -347,38 +305,10 @@
         }
 
         function setFiltro(f) { filtroAtual = f; renderizar(); }
-
-        function limparForm() {
-            document.getElementById('edit-id').value = '';
-            document.getElementById('p-nome').value = '';
-            document.getElementById('p-validade').value = '';
-            document.getElementById('p-ean').value = '';
-            document.getElementById('p-qtd').value = '';
-            document.getElementById('barcode-area').classList.add('hidden');
-        }
-
-        function iniciarTimerManutencao() {
-            setInterval(() => {
-                if (segundosTotais <= 0) segundosTotais = 900;
-                let m = Math.floor(segundosTotais / 60), s = segundosTotais % 60;
-                document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-                segundosTotais--;
-            }, 1000);
-        }
-
-        function checkInTodos() {
-            if (itensSelecionados.size === estoque.length) {
-                itensSelecionados.clear();
-            } else {
-                estoque.forEach(i => itensSelecionados.add(i.id));
-            }
-            renderizar();
-        }
-
-        function toggleCheckIn(id) {
-            itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id);
-            renderizar();
-        }
+        function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; document.getElementById('barcode-area').classList.add('hidden'); }
+        function iniciarTimerManutencao() { setInterval(() => { if (segundosTotais <= 0) segundosTotais = 900; let m = Math.floor(segundosTotais / 60), s = segundosTotais % 60; document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; segundosTotais--; }, 1000); }
+        function checkInTodos() { if (itensSelecionados.size === estoque.length) { itensSelecionados.clear(); } else { estoque.forEach(i => itensSelecionados.add(i.id)); } renderizar(); }
+        function toggleCheckIn(id) { itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id); renderizar(); }
     </script>
 </body>
 </html>
