@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market</title>
+    <title>New Market - v1.4.4</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -93,8 +93,12 @@
 
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-[#020617] z-[800] overflow-y-auto">
         <div class="max-w-lg mx-auto p-8">
-            <div class="flex justify-between items-center mb-8"><h2 class="text-lg font-black uppercase text-[#FFD700]">Entrada de Produto</h2><button onclick="fecharModalCadastro()" class="text-4xl text-slate-500">&times;</button></div>
-            <div id="reader-container" class="relative w-full aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden mb-8 border border-slate-800"><div id="reader"></div></div>
+            <div class="flex justify-between items-center mb-8"><h2 class="text-lg font-black uppercase text-[#FFD700]">Dados do Produto</h2><button onclick="fecharModalCadastro()" class="text-4xl text-slate-500">&times;</button></div>
+            
+            <div id="reader-container" class="hidden relative w-full aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden mb-8 border border-slate-800">
+                <div id="reader"></div>
+            </div>
+
             <div class="space-y-5">
                 <input type="text" id="p-ean" placeholder="CÓDIGO EAN" class="w-full p-5 bg-slate-900 rounded-2xl font-mono text-slate-300 border border-slate-800 outline-none">
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-5 bg-slate-900 rounded-2xl font-black uppercase text-slate-100 border border-slate-800 outline-none">
@@ -109,7 +113,6 @@
     </div>
 
     <script>
-        // Configuração do Firebase
         const firebaseConfig = { apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4", authDomain: "mercado-c3e95.firebaseapp.com", projectId: "mercado-c3e95", storageBucket: "mercado-c3e95.firebasestorage.app", messagingSenderId: "883539091925", appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -130,13 +133,10 @@
             } else { mostrarLogin(); }
         };
 
-        // Funções de Navegação
         function mostrarManutencao() { document.getElementById('maintenanceView').classList.remove('hidden-app'); iniciarTimerManutencao(); }
         function irParaLoginDesdeManutencao() { document.getElementById('maintenanceView').classList.add('hidden-app'); document.getElementById('loginView').classList.remove('hidden-app'); renderizarListaUsuarios(); }
-        function mostrarLogin() { document.getElementById('loginView').classList.remove('hidden-app'); renderizarListaUsuarios(); }
-        function toggleManutencaoSecreto() { cliquesSegredo++; if (cliquesSegredo >= 5) { const est = !manutencaoAtiva; localStorage.setItem('manutencaoNewMarket', est); alert("SISTEMA: " + (est ? "MANUTENÇÃO" : "OPERAÇÃO")); window.location.reload(); } clearTimeout(window.cTimer); window.cTimer = setTimeout(() => cliquesSegredo = 0, 3000); }
+        function toggleManutencaoSecreto() { cliquesSegredo++; if (cliquesSegredo >= 5) { const est = !manutencaoAtiva; localStorage.setItem('manutencaoNewMarket', est); window.location.reload(); } clearTimeout(window.cTimer); window.cTimer = setTimeout(() => cliquesSegredo = 0, 3000); }
 
-        // [Eng. Sistemas] Relatório com Data, Hora, Negrito e Emojis
         function enviarRelatorioWhatsApp() {
             const agora = new Date();
             const hoje = new Date(); hoje.setHours(0,0,0,0);
@@ -147,13 +147,9 @@
             });
             if (lista.length === 0) return alert("Nada para relatar!");
             lista.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
-            
             const dF = agora.toLocaleDateString('pt-BR');
             const hF = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
-            let msg = `*📦 RELATÓRIO DE ESTOQUE - NEW MARKET*%0A`;
-            msg += `_Gerado em: ${dF} às ${hF}_%0A%0A`;
-            
+            let msg = `*📦 RELATÓRIO DE ESTOQUE - NEW MARKET*%0A_Gerado em: ${dF} às ${hF}_%0A%0A`;
             lista.forEach(i => {
                 const dV = new Date(i.vencimento + 'T00:00:00');
                 const diff = Math.floor((dV - hoje) / 86400000);
@@ -164,21 +160,15 @@
             window.open(`https://wa.me/?text=${msg}`);
         }
 
-        // [Eng. Sistemas] Renderização com Alta Legibilidade
         function renderizar() {
             const container = document.getElementById('container-produtos'), busca = document.getElementById('input-busca').value.toUpperCase();
             let cV = 0, cA = 0; container.innerHTML = '';
-            
-            const btnSel = document.getElementById('btn-selecao-geral');
-            if(btnSel) btnSel.innerText = (itensSelecionados.size === estoque.length && estoque.length > 0) ? 'Desmarcar Tudo' : 'Selecionar Tudo';
-
             estoque.forEach(item => {
                 const dV = new Date(item.vencimento + 'T00:00:00');
                 const d = Math.floor((dV - new Date().setHours(0,0,0,0)) / 86400000);
                 if (d < 0) cV++; else if (d <= 7) cA++;
                 const match = (item.produto || "").includes(busca) || (item.ean || "").includes(busca);
                 const filtrar = filtroAtual === 'vencidos' ? d < 0 : filtroAtual === 'urgente' ? (d >= 0 && d <= 7) : true;
-                
                 if (match && filtrar) {
                     const isChecked = itensSelecionados.has(item.id) ? 'checked' : '';
                     container.innerHTML += `
@@ -206,20 +196,50 @@
             document.getElementById('dash-vencidos').innerText = cV; document.getElementById('dash-alerta').innerText = cA; document.getElementById('dash-total').innerText = estoque.length;
         }
 
-        async function excluirProduto(id, nome) { if (confirm(`EXCLUIR DEFINITIVAMENTE:\n"${nome}"?`)) { try { await db.collection("validades").doc(id).delete(); itensSelecionados.delete(id); } catch(e){ alert("Erro ao excluir."); } } }
+        // [Eng. Sistemas] FUNÇÃO ABRIR NOVO (MOSTRA SCANNER)
+        async function abrirCadastro() {
+            limparForm();
+            document.getElementById('modal-cadastro').classList.remove('hidden');
+            const readerCont = document.getElementById('reader-container');
+            readerCont.classList.remove('hidden'); // MOSTRA SCANNER
+            scannerInstancia = new Html5Qrcode("reader");
+            await scannerInstancia.start({ facingMode: "environment" }, { fps: 25, qrbox: 250 }, (txt) => { 
+                document.getElementById('p-ean').value = txt; 
+                scannerInstancia.stop(); 
+                readerCont.classList.add('hidden'); // ESCONDE APÓS LER
+            });
+        }
+
+        // [Eng. Sistemas] FUNÇÃO PREPARAR EDIÇÃO (ESCONDE SCANNER)
+        function prepararEdicao(item) {
+            limparForm();
+            document.getElementById('modal-cadastro').classList.remove('hidden');
+            document.getElementById('reader-container').classList.add('hidden'); // ESCONDE SCANNER
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('p-nome').value = item.produto;
+            document.getElementById('p-validade').value = item.vencimento;
+            document.getElementById('p-ean').value = item.ean || '';
+            document.getElementById('p-qtd').value = item.quantidade;
+        }
+
+        function fecharModalCadastro() { 
+            document.getElementById('modal-cadastro').classList.add('hidden'); 
+            if(scannerInstancia) {
+                scannerInstancia.stop().catch(e => console.log("Câmara já desligada"));
+            }
+        }
+
+        async function salvarProduto() { const id = document.getElementById('edit-id').value, d = { produto: document.getElementById('p-nome').value.toUpperCase(), vencimento: document.getElementById('p-validade').value, ean: document.getElementById('p-ean').value, quantidade: parseInt(document.getElementById('p-qtd').value) || 0 }; id ? await db.collection("validades").doc(id).update(d) : await db.collection("validades").add(d); fecharModalCadastro(); }
+        function excluirProduto(id, nome) { if (confirm(`EXCLUIR DEFINITIVAMENTE:\n"${nome}"?`)) { db.collection("validades").doc(id).delete(); } }
         function checkInTodos() { if (itensSelecionados.size === estoque.length) { itensSelecionados.clear(); } else { estoque.forEach(i => itensSelecionados.add(i.id)); } renderizar(); }
         function toggleCheckIn(id) { itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id); renderizar(); }
         function entrarNoApp() { document.getElementById('maintenanceView').classList.add('hidden-app'); document.getElementById('loginView').classList.add('hidden-app'); document.getElementById('appView').classList.remove('hidden-app'); document.getElementById('user-display').innerText = `OPERADOR: ${usuarioSessao.nome}`; db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => { estoque = []; snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()})); renderizar(); }); }
         function renderizarListaUsuarios() { let h = ''; EQUIPE.forEach(u => h += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-800 rounded-2xl font-black text-[10px] flex justify-between items-center text-slate-300 mb-2"><span>${u.nome}</span><span class="opacity-30">${u.cargo}</span></button>`); document.getElementById('auth-container').innerHTML = h; }
         function prepararSenha(n) { document.getElementById('login-title').innerText = `SENHA: ${n}`; document.getElementById('auth-container').innerHTML = `<input type="password" id="pass-input" class="input-dark mb-4" autofocus><button onclick="confirmarSenha('${n}')" class="w-full py-5 bg-[#FFD700] text-slate-900 rounded-2xl font-black">ENTRAR</button>`; }
         function confirmarSenha(n) { const u = EQUIPE.find(x => x.nome === n); if (document.getElementById('pass-input').value === u.pass) { usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome); entrarNoApp(); } else { alert("Senha incorreta."); } }
-        async function salvarProduto() { const id = document.getElementById('edit-id').value, d = { produto: document.getElementById('p-nome').value.toUpperCase(), vencimento: document.getElementById('p-validade').value, ean: document.getElementById('p-ean').value, quantidade: parseInt(document.getElementById('p-qtd').value) || 0 }; id ? await db.collection("validades").doc(id).update(d) : await db.collection("validades").add(d); fecharModalCadastro(); }
-        async function abrirCadastro() { document.getElementById('modal-cadastro').classList.remove('hidden'); limparForm(); scannerInstancia = new Html5Qrcode("reader"); await scannerInstancia.start({ facingMode: "environment" }, { fps: 25, qrbox: 250 }, (txt) => { document.getElementById('p-ean').value = txt; scannerInstancia.stop(); }); }
-        function fecharModalCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if(scannerInstancia) scannerInstancia.stop(); }
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
         function setFiltro(f) { filtroAtual = f; renderizar(); }
         function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; }
-        function prepararEdicao(item) { document.getElementById('modal-cadastro').classList.remove('hidden'); document.getElementById('edit-id').value = item.id; document.getElementById('p-nome').value = item.produto; document.getElementById('p-validade').value = item.vencimento; document.getElementById('p-ean').value = item.ean || ''; document.getElementById('p-qtd').value = item.quantidade; }
         function iniciarTimerManutencao() { setInterval(() => { if (segundosTotais <= 0) segundosTotais = 900; let m = Math.floor(segundosTotais / 60), s = segundosTotais % 60; document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; segundosTotais--; }, 1000); }
     </script>
 </body>
