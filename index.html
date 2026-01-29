@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v1.3.1 - Report & Check-in</title>
+    <title>New Market v1.3.2 - Final Fix & Report</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -18,7 +18,6 @@
         .bg-maintenance { background: repeating-linear-gradient(45deg, #020617, #020617 10px, #0f172a 10px, #0f172a 20px); }
         .card-produto { background: #0f172a; border: 1px solid #1e293b; border-radius: 1.5rem; transition: all 0.2s; }
         .filtro-ativo { border: 2px solid #FFD700 !important; transform: scale(1.05); }
-        /* Estilo para o Checkbox de Check-in */
         .check-in-input { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #334155; appearance: none; -webkit-appearance: none; outline: none; cursor: pointer; transition: 0.2s; background: #020617; }
         .check-in-input:checked { background: #FFD700; border-color: #FFD700; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-size: contain; }
     </style>
@@ -37,11 +36,11 @@
     <div id="loginView" class="fixed inset-0 bg-[#020617] z-[100] flex items-center justify-center p-6 text-center">
         <div class="bg-slate-900 w-full max-w-sm rounded-[3rem] p-8 border border-slate-800 flex flex-col min-h-[550px]">
             <div id="login-content" class="flex-grow">
-                <div class="w-16 h-16 bg-[#003366] rounded-2xl flex items-center justify-center mx-auto mb-6 text-[#FFD700] text-2xl font-black italic shadow-xl">NM</div>
+                <div class="w-16 h-16 bg-[#003366] rounded-2xl flex items-center justify-center mx-auto mb-6 text-[#FFD700] text-2xl font-black italic">NM</div>
                 <h2 id="login-title" class="text-xl font-black uppercase italic mb-8 text-slate-100">Equipe New Market</h2>
                 <div id="auth-container"></div>
             </div>
-            <p onclick="toggleManutencaoSecreto()" class="cursor-pointer text-[10px] font-black text-slate-500 uppercase tracking-widest mt-6 italic">v1.3.1 Report</p>
+            <p onclick="toggleManutencaoSecreto()" class="cursor-pointer text-[10px] font-black text-slate-500 uppercase mt-6">v1.3.2 Stable Fix</p>
         </div>
     </div>
 
@@ -58,14 +57,12 @@
                 <button onclick="logout()" class="bg-slate-800/50 p-3 rounded-xl text-xl">🚪</button>
             </div>
             
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO OU EAN..." class="w-full bg-slate-900 p-4 rounded-xl text-xs font-black uppercase outline-none border border-slate-700 text-slate-200 mb-4">
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO..." class="w-full bg-slate-900 p-4 rounded-xl text-xs font-black uppercase outline-none border border-slate-700 text-slate-200 mb-4">
             
             <div class="flex gap-2">
-                <button onclick="enviarRelatorioWhatsApp()" class="flex-grow bg-green-600 text-white py-3 rounded-xl font-black text-[9px] uppercase shadow-lg flex items-center justify-center gap-2">
-                    <span>Relatório WhatsApp</span>
-                </button>
-                <button onclick="checkInTodos(true)" class="bg-slate-800 text-slate-300 px-4 py-3 rounded-xl font-black text-[9px] uppercase border border-slate-700">Check Total</button>
-                <button onclick="checkInTodos(false)" class="bg-slate-800 text-slate-500 px-3 py-3 rounded-xl font-black text-[9px] uppercase border border-slate-700">Limpar</button>
+                <button onclick="enviarRelatorioWhatsApp()" class="flex-grow bg-green-600 text-white py-3 rounded-xl font-black text-[9px] uppercase shadow-lg">Relatório WhatsApp</button>
+                <button onclick="checkInTodos(true)" class="bg-slate-800 text-slate-300 px-4 py-3 rounded-xl font-black text-[9px] uppercase">Check Total</button>
+                <button onclick="checkInTodos(false)" class="bg-slate-800 text-slate-500 px-3 py-3 rounded-xl font-black text-[9px] uppercase">Limpar</button>
             </div>
         </header>
 
@@ -79,7 +76,7 @@
         </main>
 
         <div class="fixed bottom-8 left-0 right-0 px-10 z-40">
-            <button onclick="abrirCadastro()" class="w-full bg-[#FFD700] text-slate-950 py-5 rounded-2xl shadow-xl font-black text-xs uppercase">+ NOVO REGISTRO / SCANNER</button>
+            <button onclick="abrirCadastro()" class="w-full bg-[#FFD700] text-slate-950 py-5 rounded-2xl shadow-xl font-black text-xs uppercase">+ CADASTRAR / SCANNER</button>
         </div>
     </div>
 
@@ -101,28 +98,48 @@
     </div>
 
     <script>
-        // CONFIGURAÇÕES FIREBASE
+        // CONFIGURAÇÃO FIREBASE (DATABASE)
         const firebaseConfig = { apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4", authDomain: "mercado-c3e95.firebaseapp.com", projectId: "mercado-c3e95", storageBucket: "mercado-c3e95.firebasestorage.app", messagingSenderId: "883539091925", appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // LISTA DE EQUIPE E CARGOS
         const EQUIPE = [ { nome: "ADRIANO", pass: "admin123", cargo: "GERENTE" }, { nome: "ADRIELLE", pass: "admin123", cargo: "GERENTE" }, { nome: "PAULO", pass: "paulo123", cargo: "DESENVOLVEDOR" }, { nome: "PEDRO", pass: "pedro123", cargo: "EQUIPE" }, { nome: "LEANDRO", pass: "leandro123", cargo: "EQUIPE" }, { nome: "EDMAR", pass: "edmar123", cargo: "EQUIPE" }, { nome: "JOÃO", pass: "joao123", cargo: "EQUIPE" }, { nome: "TAMIRIS", pass: "tamiris123", cargo: "EQUIPE" } ];
 
+        // ESTADOS GLOBAIS
         let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
-        let cliquesSegredo = 0, usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos', intervaloManutencao = null, segundosTotais = 900;
-        
-        // NOVO: Conjunto de IDs selecionados para Check-in (v1.3.1)
-        let itensSelecionados = new Set();
+        let permitindoLoginNaManutencao = false; // Flag v1.3.2 para destravar login
+        let usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos', itensSelecionados = new Set(), intervaloManutencao = null, segundosTotais = 900, cliquesSegredo = 0;
 
+        // INICIALIZAÇÃO DO SISTEMA (Boot Logic)
         window.onload = () => {
             const salvo = localStorage.getItem('sessaoNewMarket');
             if (manutencaoAtiva) {
+                // Se manutenção ativa, só entra se já estiver salvo como PAULO
                 if (salvo === 'PAULO') { usuarioSessao = EQUIPE.find(x => x.nome === 'PAULO'); entrarNoApp(); } 
-                else { document.getElementById('loginView').classList.add('hidden-app'); document.getElementById('maintenanceView').classList.remove('hidden-app'); iniciarTimerManutencao(); }
-            } else if (salvo) { usuarioSessao = EQUIPE.find(x => x.nome === salvo); usuarioSessao ? entrarNoApp() : mostrarLogin(); } 
-            else { mostrarLogin(); }
+                else { mostrarManutencao(); }
+            } else if (salvo) { 
+                usuarioSessao = EQUIPE.find(x => x.nome === salvo);
+                usuarioSessao ? entrarNoApp() : mostrarLogin(); 
+            } else { mostrarLogin(); }
         };
 
+        // EXIBE TELA DE MANUTENÇÃO
+        function mostrarManutencao() {
+            document.getElementById('loginView').classList.add('hidden-app');
+            document.getElementById('appView').classList.add('hidden-app');
+            document.getElementById('maintenanceView').classList.remove('hidden-app');
+            iniciarTimerManutencao();
+        }
+
+        // DESTRAVA LOGIN DURANTE MANUTENÇÃO (v1.3.2 Fix)
+        function irParaLoginDesdeManutencao() {
+            if (intervaloManutencao) { clearInterval(intervaloManutencao); intervaloManutencao = null; }
+            permitindoLoginNaManutencao = true; // Libera bypass visual
+            mostrarLogin();
+        }
+
+        // EXIBE TELA DE LOGIN
         function mostrarLogin() {
             document.getElementById('maintenanceView').classList.add('hidden-app');
             document.getElementById('appView').classList.add('hidden-app');
@@ -130,55 +147,40 @@
             renderizarListaUsuarios();
         }
 
-        // LÓGICA DE CHECK-IN (v1.3.1)
+        // GESTÃO DE CHECK-IN (v1.3.1)
         function toggleCheckIn(id) {
             itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id);
-            // Não renderizamos tudo de novo para não perder foco, apenas o estado está salvo
         }
 
         function checkInTodos(marcar) {
-            // Pega a lista filtrada no momento
-            const listaExibida = filtrarEstoqueParaRelatorio();
-            listaExibida.forEach(item => {
-                marcar ? itensSelecionados.add(item.id) : itensSelecionados.delete(item.id);
+            estoque.forEach(item => {
+                const d = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
+                const matches = filtroAtual === 'vencidos' ? d < 0 : filtroAtual === 'urgente' ? (d >= 0 && d <= 7) : true;
+                if(matches) marcar ? itensSelecionados.add(item.id) : itensSelecionados.delete(item.id);
             });
             renderizar();
         }
 
-        // MOTOR DE RELATÓRIO WHATSAPP (v1.3.1)
+        // ENVIO DE RELATÓRIO PARA WHATSAPP
         function enviarRelatorioWhatsApp() {
-            // Regra: Enviar selecionados OU (Vencidos e Urgentes se nada estiver selecionado)
-            let listaParaRelatorio = estoque.filter(item => {
+            let lista = estoque.filter(item => {
                 const d = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
-                return itensSelecionados.has(item.id) || d <= 7;
+                return itensSelecionados.has(item.id) || d <= 7; // Selecionados ou Críticos
             });
-
-            if (listaParaRelatorio.length === 0) {
-                alert("Selecione itens ou filtre por Vencidos/Urgentes primeiro!");
-                return;
-            }
-
+            if (lista.length === 0) return alert("Nada selecionado ou em alerta!");
             const agora = new Date().toLocaleString('pt-BR');
-            let msg = `*RELATÓRIO DE ESTOQUE - NEW MARKET*%0A`;
-            msg += `_Enviado em: ${agora}_%0A%0A`;
-
-            listaParaRelatorio.forEach(item => {
-                const d = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
-                let icone = d < 0 ? "🚨 *VENCIDO*" : (d <= 7 ? "⚠️ *URGENTE*" : "✅ *CHECKED*");
-                
-                msg += `${icone}%0A`;
-                msg += `*PROD:* ${item.produto}%0A`;
-                msg += `*VAL:* ${item.vencimento.split('-').reverse().join('/')}%0A`;
-                msg += `*EAN:* ${item.ean || 'S/ COD'}%0A`;
-                msg += `*QTD:* ${item.quantidade}%0A`;
-                msg += `----------------------------%0A`;
+            let msg = `*RELATÓRIO NEW MARKET v1.3.2*%0A_Gerado: ${agora}_%0A%0A`;
+            lista.forEach(i => {
+                const d = Math.ceil((new Date(i.vencimento) - new Date()) / 86400000);
+                let icone = d < 0 ? "🚨 *VENCIDO*" : (d <= 7 ? "⚠️ *URGENTE*" : "✅ *CHECK*");
+                msg += `${icone}%0A*PROD:* ${i.produto}%0A*VAL:* ${i.vencimento.split('-').reverse().join('/')}%0A*EAN:* ${i.ean || '---'}%0A*QTD:* ${i.quantidade}%0A----------------------------%0A`;
             });
-
             window.open(`https://wa.me/?text=${msg}`);
         }
 
-        // LÓGICA CORE (MANTIDA E AJUSTADA)
+        // ENTRADA NO APP (Lockdown Logic)
         function entrarNoApp() {
+            // Se estiver em manutenção e não for o Paulo, expulsa
             if (manutencaoAtiva && usuarioSessao.nome !== 'PAULO') { window.location.reload(); return; }
             document.getElementById('loginView').classList.add('hidden-app');
             document.getElementById('maintenanceView').classList.add('hidden-app');
@@ -189,81 +191,56 @@
             });
         }
 
+        // RENDERIZAÇÃO DA LISTA DE PRODUTOS
         function renderizar() {
             const container = document.getElementById('container-produtos'), busca = document.getElementById('input-busca').value.toUpperCase();
             let cV = 0, cA = 0; container.innerHTML = '';
-            
-            const listaFiltrada = estoque.filter(i => {
-                const d = Math.ceil((new Date(i.vencimento) - new Date()) / 86400000);
+            estoque.forEach(item => {
+                const d = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
                 if (d < 0) cV++; else if (d <= 7) cA++;
-                const matches = (i.produto || "").includes(busca) || (i.ean || "").includes(busca);
-                return filtroAtual === 'vencidos' ? (matches && d < 0) : filtroAtual === 'urgente' ? (matches && d >= 0 && d <= 7) : matches;
-            });
-
-            listaFiltrada.forEach(item => {
-                const d = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000), cor = d < 0 ? 'text-red-500' : (d <= 7 ? 'text-yellow-400' : 'text-slate-400');
-                const isChecked = itensSelecionados.has(item.id) ? 'checked' : '';
-                
-                container.innerHTML += `
-                    <div class="card-produto p-5 flex items-center gap-4">
+                const matches = (item.produto || "").includes(busca) || (item.ean || "").includes(busca);
+                const filtrar = filtroAtual === 'vencidos' ? d < 0 : filtroAtual === 'urgente' ? (d >= 0 && d <= 7) : true;
+                if (matches && filtrar) {
+                    const cor = d < 0 ? 'text-red-500' : (d <= 7 ? 'text-yellow-400' : 'text-slate-400');
+                    const isChecked = itensSelecionados.has(item.id) ? 'checked' : '';
+                    container.innerHTML += `
+                    <div class="card-produto p-5 flex items-center gap-4 mb-4">
                         <input type="checkbox" ${isChecked} onchange="toggleCheckIn('${item.id}')" class="check-in-input">
                         <div class="flex-grow">
                             <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="font-black text-slate-100 text-[11px] uppercase">${item.produto}</h3>
-                                    <p class="text-[9px] font-bold ${cor}">${d < 0 ? '🚨 VENCIDO' : (d <= 7 ? '⚠️ URGENTE' : '📅 OK')} - ${item.vencimento.split('-').reverse().join('/')}</p>
-                                </div>
+                                <div><h3 class="font-black text-slate-100 text-[11px] uppercase">${item.produto}</h3><p class="text-[9px] font-bold ${cor}">${d < 0 ? '🚨' : (d <= 7 ? '⚠️' : '📅')} ${item.vencimento.split('-').reverse().join('/')}</p></div>
                                 <div class="text-xl font-black text-[#FFD700]">${item.quantidade}</div>
                             </div>
-                            <div class="flex justify-between items-center mt-2 border-t border-slate-800 pt-2">
-                                <span class="text-[7px] font-black text-slate-500">EAN: ${item.ean || '---'}</span>
-                                <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[9px] font-black text-blue-400 uppercase">Editar</button>
-                            </div>
+                            <div class="flex justify-between items-center mt-2 border-t border-slate-800 pt-2"><span class="text-[7px] text-slate-500">EAN: ${item.ean || '---'}</span><button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[9px] text-blue-400 uppercase font-black">Editar</button></div>
                         </div>
                     </div>`;
+                }
             });
             document.getElementById('dash-vencidos').innerText = cV; document.getElementById('dash-alerta').innerText = cA; document.getElementById('dash-total').innerText = estoque.length;
         }
 
-        function filtrarEstoqueParaRelatorio() {
-            const busca = document.getElementById('input-busca').value.toUpperCase();
-            return estoque.filter(i => {
-                const d = Math.ceil((new Date(i.vencimento) - new Date()) / 86400000);
-                const matches = (i.produto || "").includes(busca) || (i.ean || "").includes(busca);
-                return filtroAtual === 'vencidos' ? (matches && d < 0) : filtroAtual === 'urgente' ? (matches && d >= 0 && d <= 7) : matches;
-            });
-        }
-
-        // Funções de apoio (Scanner, Manutenção, Logout) mantidas conforme v1.3.0 estável
-        async function abrirCadastro() {
-            document.getElementById('modal-cadastro').classList.remove('hidden'); 
-            limparForm();
-            try {
-                scannerInstancia = new Html5Qrcode("reader");
-                await scannerInstancia.start({ facingMode: "environment" }, { fps: 25, qrbox: 250, aspectRatio: 1.0 }, (txt) => {
-                    document.getElementById('p-ean').value = txt;
-                    if (scannerInstancia) scannerInstancia.stop().then(() => { document.getElementById('reader').innerHTML = "<p class='text-center p-10 text-slate-500 font-black text-[8px]'>CÓDIGO CAPTURADO</p>"; });
-                });
-            } catch (err) {}
-        }
-        async function fecharModalCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if (scannerInstancia) { try { await scannerInstancia.stop(); } catch(e){} scannerInstancia = null; } }
-        async function salvarProduto() {
-            const id = document.getElementById('edit-id').value, dados = { produto: document.getElementById('p-nome').value.toUpperCase(), vencimento: document.getElementById('p-validade').value, ean: document.getElementById('p-ean').value, quantidade: parseInt(document.getElementById('p-qtd').value) || 0 };
-            if(!dados.produto || !dados.vencimento) return alert("Preencha Nome e Validade!");
-            id ? await db.collection("validades").doc(id).update(dados) : await db.collection("validades").add(dados);
-            fecharModalCadastro();
-        }
+        // AUTH FUNCTIONS (Corrigidas v1.3.2)
         function renderizarListaUsuarios() {
-            const container = document.getElementById('auth-container');
-            let html = '<div class="space-y-2 max-h-[350px] overflow-y-auto pr-2">';
-            EQUIPE.forEach(u => { html += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-800 rounded-2xl font-black uppercase text-[10px] flex justify-between items-center text-slate-300"><span>${u.nome}</span><span class="opacity-30">${u.cargo}</span></button>`; });
-            container.innerHTML = html + '</div>';
+            let h = '<div class="space-y-2 max-h-[350px] overflow-y-auto pr-2">';
+            EQUIPE.forEach(u => h += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-800 rounded-2xl font-black text-[10px] flex justify-between items-center text-slate-300"><span>${u.nome}</span><span class="opacity-30 italic">${u.cargo}</span></button>`);
+            document.getElementById('auth-container').innerHTML = h + '</div>';
         }
         function prepararSenha(nome) {
             document.getElementById('login-title').innerText = `SENHA: ${nome}`;
             document.getElementById('auth-container').innerHTML = `<div class="space-y-4"><input type="password" id="pass-input" class="input-dark" autofocus><button onclick="confirmarSenha('${nome}')" class="w-full py-5 bg-[#FFD700] text-slate-900 rounded-2xl font-black uppercase">Entrar</button><button onclick="mostrarLogin()" class="w-full text-[10px] text-slate-500 font-black py-2">← Voltar</button></div>`;
         }
-        function confirmarSenha(nome) { const u = EQUIPE.find(x => x.nome === nome); if (document.getElementById('pass-input').value === u.pass) { usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome); entrarNoApp(); } else { alert("Senha Incorreta!"); } }
+        function confirmarSenha(nome) {
+            const u = EQUIPE.find(x => x.nome === nome);
+            if (document.getElementById('pass-input').value === u.pass) {
+                if (!manutencaoAtiva || u.nome === 'PAULO') { usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome); entrarNoApp(); } 
+                else { alert("Acesso negado: Manutenção ativa."); window.location.reload(); }
+            } else { alert("Senha Incorreta!"); }
+        }
+
+        // SUPPORT FUNCTIONS
+        async function abrirCadastro() { document.getElementById('modal-cadastro').classList.remove('hidden'); limparForm(); scannerInstancia = new Html5Qrcode("reader"); await scannerInstancia.start({ facingMode: "environment" }, { fps: 25, qrbox: 250, aspectRatio: 1.0 }, (txt) => { document.getElementById('p-ean').value = txt; scannerInstancia.stop(); }); }
+        function fecharModalCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if(scannerInstancia) scannerInstancia.stop(); }
+        async function salvarProduto() { const id = document.getElementById('edit-id').value, d = { produto: document.getElementById('p-nome').value.toUpperCase(), vencimento: document.getElementById('p-validade').value, ean: document.getElementById('p-ean').value, quantidade: parseInt(document.getElementById('p-qtd').value) || 0 }; id ? await db.collection("validades").doc(id).update(d) : await db.collection("validades").add(d); fecharModalCadastro(); }
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
         function setFiltro(f) { filtroAtual = f; renderizar(); }
         function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; }
