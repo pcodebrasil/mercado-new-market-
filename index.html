@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.5.1 Final</title>
+    <title>New Market - v1.5.2</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -13,6 +13,7 @@
     
     <style>
         /* Desenvolvido por: Paulo Pkacci by 2026 */
+        /* Estilos globais para prevenir zoom acidental e melhorar toque em dispositivos móveis */
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; -webkit-font-smoothing: antialiased; user-select: none; }
         body { font-family: sans-serif; background-color: #020617; color: #f8fafc; overflow-x: hidden; margin: 0; }
         .hidden-app { display: none !important; }
@@ -94,7 +95,7 @@
     </div>
 
     <script>
-        // [Eng. Sistemas] Proteção Anti-Inspecionar (v1.5.1)
+        // Função para impedir o menu de contexto e inspecionar elemento
         document.addEventListener('contextmenu', event => event.preventDefault()); 
         document.onkeydown = (e) => {
             if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
@@ -102,11 +103,12 @@
             }
         };
 
+        // Configuração e Inicialização do Firebase
         const firebaseConfig = { apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4", authDomain: "mercado-c3e95.firebaseapp.com", projectId: "mercado-c3e95", storageBucket: "mercado-c3e95.firebasestorage.app", messagingSenderId: "883539091925", appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // [Eng. Sistemas] Equipe Unificada com Senhas Ofuscadas (Base64)
+        // Lista de Equipe com Senhas em Base64 para proteção básica
         const EQUIPE = [ 
             { nome: "ADRIANO", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
             { nome: "ADRIELLE", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
@@ -118,9 +120,11 @@
             { nome: "TAMIRIS", pass: "dGFtaXJpczEyMw==", cargo: "EQUIPE" } 
         ];
 
+        // Variáveis de Estado Global
         let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
         let usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos', itensSelecionados = new Set(), segundosTotais = 900, cliquesSegredo = 0;
 
+        // Inicialização do App ao carregar a janela
         window.onload = () => {
             renderizarListaUsuarios();
             const salvo = localStorage.getItem('sessaoNewMarket');
@@ -133,6 +137,7 @@
             }
         };
 
+        // Gerenciamento de Visibilidade das Telas
         function mostrarLogin() {
             document.getElementById('maintenanceView').classList.add('hidden-app');
             document.getElementById('appView').classList.add('hidden-app');
@@ -149,13 +154,12 @@
 
         function irParaLoginDesdeManutencao() { mostrarLogin(); }
 
-        // [Eng. Sistemas] Renderização com disfarce de cargo para o Desenvolvedor
+        // Renderiza botões de login ocultando o cargo do desenvolvedor
         function renderizarListaUsuarios() {
             const container = document.getElementById('auth-container');
             if(!container) return;
             let h = '';
             EQUIPE.forEach(u => {
-                // Paulo aparece como EQUIPE visualmente, mas mantém seu cargo real internamente
                 let cargoVisual = u.cargo === 'DESENVOLVEDOR' ? 'EQUIPE' : u.cargo;
                 h += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-800 rounded-2xl font-black text-[10px] flex justify-between items-center text-slate-300 mb-2">
                         <span>${u.nome}</span>
@@ -165,6 +169,7 @@
             container.innerHTML = h;
         }
 
+        // Interface para digitação de senha
         function prepararSenha(n) {
             document.getElementById('login-title').innerText = `SENHA: ${n}`;
             document.getElementById('auth-container').innerHTML = `
@@ -173,12 +178,11 @@
             `;
         }
 
-        // [Eng. Sistemas] Validação com Bypass de Manutenção para o Desenvolvedor
+        // Validação de senha e controle de acesso em manutenção
         function confirmarSenha(n) {
             const u = EQUIPE.find(x => x.nome === n);
             const pass = document.getElementById('pass-input').value;
             if (btoa(pass) === u.pass) {
-                // Libera acesso se for Desenvolvedor mesmo em manutenção
                 if (manutencaoAtiva && u.cargo !== 'DESENVOLVEDOR') {
                     alert("SISTEMA EM MANUTENÇÃO.");
                     mostrarManutencao();
@@ -190,6 +194,7 @@
             } else { alert("Senha incorreta."); }
         }
 
+        // Inicialização dos dados e escuta em tempo real do Firestore
         function entrarNoApp() {
             document.getElementById('maintenanceView').classList.add('hidden-app');
             document.getElementById('loginView').classList.add('hidden-app');
@@ -202,8 +207,10 @@
             });
         }
 
+        // Finaliza sessão do usuário
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
 
+        // Renderiza a lista de produtos com base nos filtros e busca
         function renderizar() {
             const container = document.getElementById('container-produtos'), busca = document.getElementById('input-busca').value.toUpperCase();
             let cV = 0, cA = 0; container.innerHTML = '';
@@ -233,6 +240,7 @@
             document.getElementById('dash-total').innerText = estoque.length;
         }
 
+        // Abre modal e inicializa scanner de código de barras
         async function abrirCadastro() {
             limparForm();
             document.getElementById('modal-cadastro').classList.remove('hidden');
@@ -248,6 +256,7 @@
             });
         }
 
+        // Carrega dados de um produto existente para edição
         function prepararEdicao(item) {
             limparForm();
             document.getElementById('modal-cadastro').classList.remove('hidden');
@@ -260,6 +269,7 @@
             if(item.ean) gerarGraficoBarras(item.ean);
         }
 
+        // Gera a representação visual do código de barras
         function gerarGraficoBarras(valor) {
             const area = document.getElementById('barcode-area');
             if (!valor || valor.length < 5) { area.classList.add('hidden'); return; }
@@ -269,35 +279,52 @@
             } catch (e) { area.classList.add('hidden'); }
         }
 
+        // Salva ou Atualiza produto no banco de dados
         async function salvarProduto() {
             const id = document.getElementById('edit-id').value, d = { produto: document.getElementById('p-nome').value.toUpperCase(), vencimento: document.getElementById('p-validade').value, ean: document.getElementById('p-ean').value, quantidade: parseInt(document.getElementById('p-qtd').value) || 0 };
             id ? await db.collection("validades").doc(id).update(d) : await db.collection("validades").add(d);
             fecharModalCadastro();
         }
 
+        // Remove produto do banco de dados
         function excluirProduto(id, nome) { if (confirm(`EXCLUIR:\n"${nome}"?`)) { db.collection("validades").doc(id).delete(); } }
+        
+        // Fecha modal e limpa instância do scanner
         function fecharModalCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if(scannerInstancia) scannerInstancia.stop().catch(() => {}); }
 
+        /**
+         * FUNÇÃO: enviarRelatorioWhatsApp
+         * DESCRIÇÃO: Gera o relatório formatado e envia via API do WhatsApp.
+         * ALTERAÇÃO v1.5.2: Inclusão do link do sistema no final da mensagem.
+         */
         function enviarRelatorioWhatsApp() {
             const agora = new Date();
             const hoje = new Date(); hoje.setHours(0,0,0,0);
+            const urlSistema = window.location.href; // Captura o link atual do sistema
+            
             let lista = estoque.filter(item => {
                 const dV = new Date(item.vencimento + 'T00:00:00'), diff = Math.floor((dV - hoje) / 86400000);
                 return itensSelecionados.has(item.id) || diff <= 7;
             });
+            
             if (lista.length === 0) return alert("Nada para relatar!");
             lista.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
+            
             const dF = agora.toLocaleDateString('pt-BR'), hF = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             let msg = `*📦 RELATÓRIO: ${usuarioSessao.nome}*%0A_Data: ${dF} | Hora: ${hF}_%0A%0A`;
+            
             lista.forEach(i => {
                 const dV = new Date(i.vencimento + 'T00:00:00'), diff = Math.floor((dV - hoje) / 86400000);
                 let icone = diff < 0 ? "🚨 *VENCIDO*" : (diff <= 7 ? "⚠️ *URGENTE*" : "✅ *OK*");
                 msg += `${icone}%0A*PROD:* *${i.produto}*%0A*VAL:* *${i.vencimento.split('-').reverse().join('/')}*%0A*QTD:* *${i.quantidade}*%0A----------------------------%0A`;
             });
-            msg += `%0A_Enviado via New Market v1.5.1_`;
+            
+            // Rodapé com assinatura e link do sistema
+            msg += `%0A_Enviado via New Market v1.5.2_%0A🔗 *Acessar Sistema:* ${urlSistema}`;
             window.open(`https://wa.me/?text=${msg}`);
         }
 
+        // Função secreta para ativar/desativar manutenção
         function toggleManutencaoSecreto() {
             cliquesSegredo++;
             if (cliquesSegredo >= 5) {
@@ -308,6 +335,7 @@
             setTimeout(() => cliquesSegredo = 0, 3000);
         }
 
+        // Filtros e Utilidades
         function setFiltro(f) { filtroAtual = f; renderizar(); }
         function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; document.getElementById('barcode-area').classList.add('hidden'); }
         function iniciarTimerManutencao() { setInterval(() => { if (segundosTotais <= 0) segundosTotais = 900; let m = Math.floor(segundosTotais / 60), s = segundosTotais % 60; document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; segundosTotais--; }, 1000); }
