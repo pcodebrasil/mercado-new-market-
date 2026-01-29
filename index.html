@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.5.0 Final</title>
+    <title>New Market - v1.5.1 Final</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -94,7 +94,7 @@
     </div>
 
     <script>
-        // [Eng. Sistemas] Proteção de Interface v1.5.0
+        // [Eng. Sistemas] Proteção Anti-Inspecionar (v1.5.1)
         document.addEventListener('contextmenu', event => event.preventDefault()); 
         document.onkeydown = (e) => {
             if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
@@ -106,7 +106,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // [Eng. Sistemas] Ofuscação de Senhas em Base64
+        // [Eng. Sistemas] Equipe Unificada com Senhas Ofuscadas (Base64)
         const EQUIPE = [ 
             { nome: "ADRIANO", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
             { nome: "ADRIELLE", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
@@ -149,14 +149,17 @@
 
         function irParaLoginDesdeManutencao() { mostrarLogin(); }
 
+        // [Eng. Sistemas] Renderização com disfarce de cargo para o Desenvolvedor
         function renderizarListaUsuarios() {
             const container = document.getElementById('auth-container');
             if(!container) return;
             let h = '';
             EQUIPE.forEach(u => {
+                // Paulo aparece como EQUIPE visualmente, mas mantém seu cargo real internamente
+                let cargoVisual = u.cargo === 'DESENVOLVEDOR' ? 'EQUIPE' : u.cargo;
                 h += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-800 rounded-2xl font-black text-[10px] flex justify-between items-center text-slate-300 mb-2">
                         <span>${u.nome}</span>
-                        <span class="opacity-30">${u.cargo}</span>
+                        <span class="opacity-30">${cargoVisual}</span>
                       </button>`;
             });
             container.innerHTML = h;
@@ -170,12 +173,13 @@
             `;
         }
 
+        // [Eng. Sistemas] Validação com Bypass de Manutenção para o Desenvolvedor
         function confirmarSenha(n) {
             const u = EQUIPE.find(x => x.nome === n);
             const pass = document.getElementById('pass-input').value;
-            // [Eng. Sistemas] Comparação usando conversão Base64 (btoa)
             if (btoa(pass) === u.pass) {
-                if (manutencaoAtiva && u.nome !== 'PAULO') {
+                // Libera acesso se for Desenvolvedor mesmo em manutenção
+                if (manutencaoAtiva && u.cargo !== 'DESENVOLVEDOR') {
                     alert("SISTEMA EM MANUTENÇÃO.");
                     mostrarManutencao();
                     return;
@@ -290,7 +294,7 @@
                 let icone = diff < 0 ? "🚨 *VENCIDO*" : (diff <= 7 ? "⚠️ *URGENTE*" : "✅ *OK*");
                 msg += `${icone}%0A*PROD:* *${i.produto}*%0A*VAL:* *${i.vencimento.split('-').reverse().join('/')}*%0A*QTD:* *${i.quantidade}*%0A----------------------------%0A`;
             });
-            msg += `%0A_Enviado via New Market v1.5.0_`;
+            msg += `%0A_Enviado via New Market v1.5.1_`;
             window.open(`https://wa.me/?text=${msg}`);
         }
 
