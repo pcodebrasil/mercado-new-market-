@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.5.5</title>
+    <title>New Market - v1.5.4</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -13,6 +13,7 @@
     
     <style>
         /* Desenvolvido por: Paulo Pkacci by 2026 */
+        /* Estilos globais para prevenir zoom acidental e melhorar toque em dispositivos móveis */
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; -webkit-font-smoothing: antialiased; user-select: none; }
         body { font-family: sans-serif; background-color: #020617; color: #f8fafc; overflow-x: hidden; margin: 0; }
         .hidden-app { display: none !important; }
@@ -94,14 +95,20 @@
     </div>
 
     <script>
-        // Funções de Proteção e Inicialização
+        // Função para impedir o menu de contexto e inspecionar elemento
         document.addEventListener('contextmenu', event => event.preventDefault()); 
-        document.onkeydown = (e) => { if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) return false; };
+        document.onkeydown = (e) => {
+            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
+                return false; 
+            }
+        };
 
+        // Configuração e Inicialização do Firebase
         const firebaseConfig = { apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4", authDomain: "mercado-c3e95.firebaseapp.com", projectId: "mercado-c3e95", storageBucket: "mercado-c3e95.firebasestorage.app", messagingSenderId: "883539091925", appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // Lista de Equipe com Senhas em Base64
         const EQUIPE = [ 
             { nome: "ADRIANO", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
             { nome: "ADRIELLE", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
@@ -113,9 +120,11 @@
             { nome: "TAMIRIS", pass: "dGFtaXJpczEyMw==", cargo: "EQUIPE" } 
         ];
 
+        // Variáveis de Estado Global
         let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
         let usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos', itensSelecionados = new Set(), segundosTotais = 900, cliquesSegredo = 0;
 
+        // Inicialização do App
         window.onload = () => {
             renderizarListaUsuarios();
             const salvo = localStorage.getItem('sessaoNewMarket');
@@ -150,22 +159,34 @@
             let h = '';
             EQUIPE.forEach(u => {
                 let cargoVisual = u.cargo === 'DESENVOLVEDOR' ? 'EQUIPE' : u.cargo;
-                h += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-800 rounded-2xl font-black text-[10px] flex justify-between items-center text-slate-300 mb-2"><span>${u.nome}</span><span class="opacity-30">${cargoVisual}</span></button>`;
+                h += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-800 rounded-2xl font-black text-[10px] flex justify-between items-center text-slate-300 mb-2">
+                        <span>${u.nome}</span>
+                        <span class="opacity-30">${cargoVisual}</span>
+                      </button>`;
             });
             container.innerHTML = h;
         }
 
         function prepararSenha(n) {
             document.getElementById('login-title').innerText = `SENHA: ${n}`;
-            document.getElementById('auth-container').innerHTML = `<input type="password" id="pass-input" class="input-dark mb-4" autofocus><button onclick="confirmarSenha('${n}')" class="w-full py-5 bg-[#FFD700] text-slate-900 rounded-2xl font-black">ENTRAR</button>`;
+            document.getElementById('auth-container').innerHTML = `
+                <input type="password" id="pass-input" class="input-dark mb-4" autofocus>
+                <button onclick="confirmarSenha('${n}')" class="w-full py-5 bg-[#FFD700] text-slate-900 rounded-2xl font-black">ENTRAR</button>
+            `;
         }
 
         function confirmarSenha(n) {
             const u = EQUIPE.find(x => x.nome === n);
             const pass = document.getElementById('pass-input').value;
             if (btoa(pass) === u.pass) {
-                if (manutencaoAtiva && u.cargo !== 'DESENVOLVEDOR') { alert("SISTEMA EM MANUTENÇÃO."); mostrarManutencao(); return; }
-                usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome); entrarNoApp();
+                if (manutencaoAtiva && u.cargo !== 'DESENVOLVEDOR') {
+                    alert("SISTEMA EM MANUTENÇÃO.");
+                    mostrarManutencao();
+                    return;
+                }
+                usuarioSessao = u;
+                localStorage.setItem('sessaoNewMarket', u.nome);
+                entrarNoApp();
             } else { alert("Senha incorreta."); }
         }
 
@@ -185,14 +206,16 @@
 
         /**
          * FUNÇÃO: renderizar
-         * DESCRIÇÃO: Gera os cards de produtos.
-         * OBS: Botão excluir visível apenas para ADRIANO, PAULO e ADRIELLE.
+         * DESCRIÇÃO: Gera a lista visual de produtos.
+         * ATUALIZAÇÃO v1.5.4: Controle de exibição do botão excluir baseado no usuário.
          */
         function renderizar() {
             const container = document.getElementById('container-produtos'), busca = document.getElementById('input-busca').value.toUpperCase();
             let cV = 0, cA = 0; container.innerHTML = '';
-            const podeExcluir = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
             
+            // [Eng. Sistemas] Verifica se o usuário atual tem permissão administrativa
+            const podeExcluir = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
+
             estoque.forEach(item => {
                 const dV = new Date(item.vencimento + 'T00:00:00'), d = Math.floor((dV - new Date().setHours(0,0,0,0)) / 86400000);
                 if (d < 0) cV++; else if (d <= 7) cA++;
@@ -222,15 +245,18 @@
             document.getElementById('dash-total').innerText = estoque.length;
         }
 
-        // Funções de Cadastro e Scanner
         async function abrirCadastro() {
             limparForm();
             document.getElementById('modal-cadastro').classList.remove('hidden');
-            const readerCont = document.getElementById('reader-container'); readerCont.classList.remove('hidden');
+            document.getElementById('barcode-area').classList.add('hidden');
+            const readerCont = document.getElementById('reader-container');
+            readerCont.classList.remove('hidden');
             scannerInstancia = new Html5Qrcode("reader");
             await scannerInstancia.start({ facingMode: "environment" }, { fps: 25, qrbox: 250 }, (txt) => {
                 document.getElementById('p-ean').value = txt;
-                scannerInstancia.stop(); readerCont.classList.add('hidden'); gerarGraficoBarras(txt);
+                scannerInstancia.stop();
+                readerCont.classList.add('hidden');
+                gerarGraficoBarras(txt);
             });
         }
 
@@ -261,25 +287,30 @@
             fecharModalCadastro();
         }
 
+        /**
+         * FUNÇÃO: excluirProduto
+         * DESCRIÇÃO: Remove um produto do banco de dados.
+         * ATUALIZAÇÃO v1.5.4: Trava de segurança lógica para usuários não autorizados.
+         */
         function excluirProduto(id, nome) { 
+            // [Eng. Sistemas] Trava de segurança interna
             const podeExcluir = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
-            if (!podeExcluir) { alert("ACESSO NEGADO."); return; }
-            if (confirm(`EXCLUIR:\n"${nome}"?`)) { db.collection("validades").doc(id).delete(); } 
+            if (!podeExcluir) {
+                alert("ACESSO NEGADO: Apenas administradores podem excluir produtos.");
+                return;
+            }
+            if (confirm(`EXCLUIR:\n"${nome}"?`)) { 
+                db.collection("validades").doc(id).delete(); 
+            } 
         }
         
         function fecharModalCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if(scannerInstancia) scannerInstancia.stop().catch(() => {}); }
 
-        /**
-         * FUNÇÃO: enviarRelatorioWhatsApp
-         * DESCRIÇÃO: Gera o relatório e verifica duplicidade.
-         * ATUALIZAÇÃO v1.5.5: Sistema de histórico local (LocalStorage) para evitar reenvios acidentais.
-         */
         function enviarRelatorioWhatsApp() {
             const agora = new Date();
             const hoje = new Date(); hoje.setHours(0,0,0,0);
             const urlSistema = window.location.href; 
             
-            // [Eng. Sistemas] Lógica de filtragem inteligente (Manual vs Automática)
             let lista = [];
             if (itensSelecionados.size > 0) {
                 lista = estoque.filter(item => itensSelecionados.has(item.id));
@@ -291,22 +322,6 @@
             }
             
             if (lista.length === 0) return alert("Nada para relatar!");
-
-            // [Eng. Sistemas] Verificação de Histórico Local de Envio
-            const historico = JSON.parse(localStorage.getItem('produtosEnviados') || "[]");
-            let jaEnviadosNaLista = lista.filter(item => historico.includes(item.id));
-
-            if (jaEnviadosNaLista.length > 0) {
-                const nomes = jaEnviadosNaLista.map(i => i.produto).slice(0, 2).join(", ");
-                if (!confirm(`AVISO: O produto "${nomes}..." (e outros) já foram enviados anteriormente.\n\nDeseja REENVIAR este relatório?`)) {
-                    return; // Cancela o envio
-                }
-            }
-            
-            // [Eng. Sistemas] Atualiza o histórico local com os novos IDs enviados
-            const novoHistorico = [...new Set([...historico, ...lista.map(i => i.id)])];
-            localStorage.setItem('produtosEnviados', JSON.stringify(novoHistorico.slice(-100))); // Mantém apenas os últimos 100
-
             lista.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
             
             const dF = agora.toLocaleDateString('pt-BR'), hF = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -318,12 +333,20 @@
                 msg += `${icone}%0A*PROD:* *${i.produto}*%0A*VAL:* *${i.vencimento.split('-').reverse().join('/')}*%0A*QTD:* *${i.quantidade}*%0A----------------------------%0A`;
             });
             
-            msg += `%0A_Enviado via New Market v1.5.5_%0A🔗 *Acessar Sistema:* ${urlSistema}`;
+            msg += `%0A_Enviado via New Market v1.5.4_%0A🔗 *Acessar Sistema:* ${urlSistema}`;
             window.open(`https://wa.me/?text=${msg}`);
         }
 
-        // Utilidades Gerais
-        function toggleManutencaoSecreto() { cliquesSegredo++; if (cliquesSegredo >= 5) { const est = !manutencaoAtiva; localStorage.setItem('manutencaoNewMarket', est); window.location.reload(); } setTimeout(() => cliquesSegredo = 0, 3000); }
+        function toggleManutencaoSecreto() {
+            cliquesSegredo++;
+            if (cliquesSegredo >= 5) {
+                const est = !manutencaoAtiva;
+                localStorage.setItem('manutencaoNewMarket', est);
+                window.location.reload();
+            }
+            setTimeout(() => cliquesSegredo = 0, 3000);
+        }
+
         function setFiltro(f) { filtroAtual = f; renderizar(); }
         function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; document.getElementById('barcode-area').classList.add('hidden'); }
         function iniciarTimerManutencao() { setInterval(() => { if (segundosTotais <= 0) segundosTotais = 900; let m = Math.floor(segundosTotais / 60), s = segundosTotais % 60; document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; segundosTotais--; }, 1000); }
