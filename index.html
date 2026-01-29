@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.4.6</title>
+    <title>New Market - v1.4.5</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
     <style>
         /* Desenvolvido por: Paulo Pkacci by 2026 */
@@ -20,6 +19,7 @@
         .bg-maintenance { background: repeating-linear-gradient(45deg, #020617, #020617 10px, #0f172a 10px, #0f172a 20px); }
         .card-produto { background: #0f172a; border: 1px solid #1e293b; border-radius: 1.5rem; transition: all 0.2s; }
         
+        /* Indicador de status ativo (Pulse) */
         .status-pulse { position: relative; width: 10px; height: 10px; background-color: #22c55e; border-radius: 50%; }
         .status-pulse::after {
             content: ''; position: absolute; width: 100%; height: 100%; background-color: #22c55e;
@@ -27,11 +27,9 @@
         }
         @keyframes pulse-ring { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(3); opacity: 0; } }
 
+        /* Estilo Checkbox Circular (Check-in) */
         .check-in-input { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #334155; appearance: none; -webkit-appearance: none; outline: none; background: #020617; }
         .check-in-input:checked { background: #FFD700; border-color: #FFD700; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-size: contain; }
-        
-        /* Estilo para o gráfico de barras */
-        #barcode { max-width: 100%; height: auto; }
     </style>
 </head>
 <body>
@@ -52,35 +50,46 @@
                 <h2 id="login-title" class="text-xl font-black uppercase italic mb-8 text-slate-100">Equipe New Market</h2>
                 <div id="auth-container"></div>
             </div>
-            <p onclick="toggleManutencaoSecreto()" class="cursor-pointer text-[9px] font-black text-slate-600 uppercase mt-6 tracking-[0.2em]">Paulo Pkacci by 2026</p>
+            <p onclick="toggleManutencaoSecreto()" class="cursor-pointer text-[9px] font-black text-slate-600 uppercase mt-6 tracking-[0.2em]">
+                Paulo Pkacci by 2026
+            </p>
         </div>
     </div>
 
     <div id="appView" class="hidden-app">
         <header class="bg-[#001e3c] p-6 sticky top-0 z-30 shadow-2xl rounded-b-[2.5rem] border-b-2 border-[#FFD700]">
             <div class="flex justify-between items-center mb-6">
-                <div class="flex items-center gap-3"><div class="status-pulse"></div>
-                <div><h1 class="font-black text-2xl italic text-[#FFD700] uppercase leading-none">New Market</h1><p id="user-display" class="text-[9px] font-black uppercase text-slate-400 mt-1"></p></div></div>
+                <div class="flex items-center gap-3">
+                    <div class="status-pulse"></div>
+                    <div>
+                        <h1 class="font-black text-2xl italic text-[#FFD700] uppercase leading-none">New Market</h1>
+                        <p id="user-display" class="text-[9px] font-black uppercase text-slate-400 mt-1"></p>
+                    </div>
+                </div>
                 <button onclick="logout()" class="bg-slate-800/50 p-3 rounded-xl text-xl">🚪</button>
             </div>
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR..." class="w-full bg-slate-900 p-4 rounded-xl text-xs font-black uppercase border border-slate-700 text-slate-200 mb-4">
+            
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR PRODUTO OU EAN..." class="w-full bg-slate-900 p-4 rounded-xl text-xs font-black uppercase outline-none border border-slate-700 text-slate-200 mb-4">
+            
             <div class="flex gap-2">
-                <button onclick="enviarRelatorioWhatsApp()" class="flex-grow bg-green-600 text-white py-3 rounded-xl font-black text-[9px] uppercase italic">Relatório WhatsApp</button>
-                <button onclick="checkInTodos()" class="bg-slate-800 text-slate-300 px-4 py-3 rounded-xl font-black text-[9px] uppercase">Selecionar Tudo</button>
+                <button onclick="enviarRelatorioWhatsApp()" class="flex-grow bg-green-600 text-white py-3 rounded-xl font-black text-[9px] uppercase shadow-lg italic">Relatório WhatsApp</button>
+                <button id="btn-selecao-geral" onclick="checkInTodos()" class="bg-slate-800 text-slate-300 px-4 py-3 rounded-xl font-black text-[9px] uppercase min-w-[120px]">
+                    Selecionar Tudo
+                </button>
             </div>
         </header>
 
         <main class="max-w-lg mx-auto p-5 pb-44">
             <div class="grid grid-cols-3 gap-2 mb-4 text-center">
-                <div onclick="setFiltro('vencidos')" class="bg-red-900/40 p-3 rounded-2xl text-red-400"><p id="dash-vencidos" class="text-xl font-black">0</p></div>
-                <div onclick="setFiltro('urgente')" class="bg-yellow-900/40 p-3 rounded-2xl text-yellow-400"><p id="dash-alerta" class="text-xl font-black">0</p></div>
-                <div onclick="setFiltro('todos')" class="bg-slate-800 p-3 rounded-2xl text-slate-100"><p id="dash-total" class="text-xl font-black">0</p></div>
+                <div onclick="setFiltro('vencidos')" class="bg-red-900/40 p-3 rounded-2xl text-red-400 border-2 border-transparent"><p id="dash-vencidos" class="text-xl font-black">0</p></div>
+                <div onclick="setFiltro('urgente')" class="bg-yellow-900/40 p-3 rounded-2xl text-yellow-400 border-2 border-transparent"><p id="dash-alerta" class="text-xl font-black">0</p></div>
+                <div onclick="setFiltro('todos')" class="bg-slate-800 p-3 rounded-2xl text-slate-100 border-2 border-transparent"><p id="dash-total" class="text-xl font-black">0</p></div>
             </div>
             <div id="container-produtos" class="space-y-4"></div>
         </main>
 
         <div class="fixed bottom-8 left-0 right-0 px-10 z-40">
-            <button onclick="abrirCadastro()" class="w-full bg-[#FFD700] text-slate-950 py-5 rounded-2xl shadow-xl font-black text-xs uppercase">+ NOVO / SCANNER</button>
+            <button onclick="abrirCadastro()" class="w-full bg-[#FFD700] text-slate-950 py-5 rounded-2xl shadow-xl font-black text-xs uppercase">+ NOVO REGISTRO / SCANNER</button>
         </div>
     </div>
 
@@ -92,24 +101,21 @@
                 <div id="reader"></div>
             </div>
 
-            <div id="barcode-area" class="hidden bg-white p-4 rounded-2xl mb-8 flex flex-col items-center justify-center">
-                <svg id="barcode-canvas"></svg>
-            </div>
-
             <div class="space-y-5">
-                <input type="text" id="p-ean" oninput="gerarGraficoBarras(this.value)" placeholder="CÓDIGO EAN" class="w-full p-5 bg-slate-900 rounded-2xl font-mono text-slate-300 border border-slate-800 outline-none">
+                <input type="text" id="p-ean" placeholder="CÓDIGO EAN" class="w-full p-5 bg-slate-900 rounded-2xl font-mono text-slate-300 border border-slate-800 outline-none">
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-5 bg-slate-900 rounded-2xl font-black uppercase text-slate-100 border border-slate-800 outline-none">
                 <div class="grid grid-cols-2 gap-4">
                     <input type="date" id="p-validade" class="w-full p-4 bg-slate-900 rounded-xl text-white border border-slate-800">
                     <input type="tel" id="p-qtd" placeholder="QTD" class="w-full p-4 bg-slate-900 rounded-2xl font-black text-center text-[#FFD700] border border-slate-800 outline-none">
                 </div>
                 <input type="hidden" id="edit-id">
-                <button onclick="salvarProduto()" class="w-full py-6 bg-[#003366] text-white rounded-2xl font-black uppercase shadow-lg">SALVAR NA NUVEM</button>
+                <button onclick="salvarProduto()" class="w-full py-6 bg-[#003366] text-white rounded-2xl font-black uppercase">SALVAR NA NUVEM</button>
             </div>
         </div>
     </div>
 
     <script>
+        // Configuração Firebase (Desenvolvimento)
         const firebaseConfig = { apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4", authDomain: "mercado-c3e95.firebaseapp.com", projectId: "mercado-c3e95", storageBucket: "mercado-c3e95.firebasestorage.app", messagingSenderId: "883539091925", appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -119,6 +125,7 @@
         let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
         let usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos', itensSelecionados = new Set(), segundosTotais = 900, cliquesSegredo = 0;
 
+        // Inicialização do App
         window.onload = () => {
             const salvo = localStorage.getItem('sessaoNewMarket');
             if (manutencaoAtiva) {
@@ -130,61 +137,13 @@
             } else { mostrarLogin(); }
         };
 
-        // [Eng. Sistemas] Funções de Interface e Scanner
-        async function abrirCadastro() {
-            limparForm();
-            document.getElementById('modal-cadastro').classList.remove('hidden');
-            document.getElementById('barcode-area').classList.add('hidden'); // Oculto inicialmente
-            const readerCont = document.getElementById('reader-container');
-            readerCont.classList.remove('hidden');
-            scannerInstancia = new Html5Qrcode("reader");
-            await scannerInstancia.start({ facingMode: "environment" }, { fps: 25, qrbox: 250 }, (txt) => { 
-                document.getElementById('p-ean').value = txt; 
-                scannerInstancia.stop(); 
-                readerCont.classList.add('hidden');
-                gerarGraficoBarras(txt); // Gera o gráfico após scannear
-            });
-        }
+        // Lógica de Manutenção e Navegação
+        function mostrarManutencao() { document.getElementById('maintenanceView').classList.remove('hidden-app'); iniciarTimerManutencao(); }
+        function irParaLoginDesdeManutencao() { document.getElementById('maintenanceView').classList.add('hidden-app'); document.getElementById('loginView').classList.remove('hidden-app'); renderizarListaUsuarios(); }
+        function mostrarLogin() { document.getElementById('loginView').classList.remove('hidden-app'); renderizarListaUsuarios(); }
+        function toggleManutencaoSecreto() { cliquesSegredo++; if (cliquesSegredo >= 5) { const est = !manutencaoAtiva; localStorage.setItem('manutencaoNewMarket', est); window.location.reload(); } clearTimeout(window.cTimer); window.cTimer = setTimeout(() => cliquesSegredo = 0, 3000); }
 
-        function prepararEdicao(item) {
-            limparForm();
-            document.getElementById('modal-cadastro').classList.remove('hidden');
-            document.getElementById('reader-container').classList.add('hidden');
-            document.getElementById('edit-id').value = item.id;
-            document.getElementById('p-nome').value = item.produto;
-            document.getElementById('p-validade').value = item.vencimento;
-            document.getElementById('p-ean').value = item.ean || '';
-            document.getElementById('p-qtd').value = item.quantidade;
-            
-            // [Eng. Sistemas] Gera as listras pretas se houver EAN
-            if(item.ean) gerarGraficoBarras(item.ean);
-        }
-
-        // [Eng. Sistemas] Função Core: Gerador de Listras Pretas (Barcode)
-        function gerarGraficoBarras(valor) {
-            const area = document.getElementById('barcode-area');
-            if (!valor || valor.length < 5) {
-                area.classList.add('hidden');
-                return;
-            }
-            try {
-                area.classList.remove('hidden');
-                JsBarcode("#barcode-canvas", valor, {
-                    format: valor.length === 13 ? "EAN13" : "CODE128",
-                    lineColor: "#000",
-                    width: 2.5,
-                    height: 80,
-                    displayValue: true,
-                    fontSize: 18,
-                    background: "#ffffff"
-                });
-            } catch (e) {
-                console.log("Erro ao gerar barcode: ", e);
-                area.classList.add('hidden');
-            }
-        }
-
-        // Funções de Relatório, Renderização e Firebase (Mantidas e Otimizadas)
+        // [Eng. Sistemas] Relatório WhatsApp v1.4.5 (Sem assinatura de autoria)
         function enviarRelatorioWhatsApp() {
             const agora = new Date();
             const hoje = new Date(); hoje.setHours(0,0,0,0);
@@ -195,10 +154,14 @@
             });
             if (lista.length === 0) return alert("Nada para relatar!");
             lista.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
-            const dF = agora.toLocaleDateString('pt-BR'), hF = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            
+            const dF = agora.toLocaleDateString('pt-BR');
+            const hF = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
             let msg = `*📦 RELATÓRIO DE ESTOQUE - NEW MARKET*%0A_Gerado em: ${dF} às ${hF}_%0A%0A`;
             lista.forEach(i => {
-                const dV = new Date(i.vencimento + 'T00:00:00'), diff = Math.floor((dV - hoje) / 86400000);
+                const dV = new Date(i.vencimento + 'T00:00:00');
+                const diff = Math.floor((dV - hoje) / 86400000);
                 let icone = diff < 0 ? "🚨 *VENCIDO*" : (diff <= 7 ? "⚠️ *URGENTE*" : "✅ *OK*");
                 msg += `${icone}%0A*PROD:* *${i.produto}*%0A*VAL:* *${i.vencimento.split('-').reverse().join('/')}*%0A*QTD:* *${i.quantidade}*%0A----------------------------%0A`;
             });
@@ -206,35 +169,94 @@
             window.open(`https://wa.me/?text=${msg}`);
         }
 
+        // Renderização dos cards de produto
         function renderizar() {
             const container = document.getElementById('container-produtos'), busca = document.getElementById('input-busca').value.toUpperCase();
             let cV = 0, cA = 0; container.innerHTML = '';
             estoque.forEach(item => {
-                const dV = new Date(item.vencimento + 'T00:00:00'), d = Math.floor((dV - new Date().setHours(0,0,0,0)) / 86400000);
+                const dV = new Date(item.vencimento + 'T00:00:00');
+                const d = Math.floor((dV - new Date().setHours(0,0,0,0)) / 86400000);
                 if (d < 0) cV++; else if (d <= 7) cA++;
-                if (((item.produto || "").includes(busca) || (item.ean || "").includes(busca)) && (filtroAtual === 'vencidos' ? d < 0 : filtroAtual === 'urgente' ? (d >= 0 && d <= 7) : true)) {
+                const match = (item.produto || "").includes(busca) || (item.ean || "").includes(busca);
+                const filtrar = filtroAtual === 'vencidos' ? d < 0 : filtroAtual === 'urgente' ? (d >= 0 && d <= 7) : true;
+                if (match && filtrar) {
                     const isChecked = itensSelecionados.has(item.id) ? 'checked' : '';
-                    container.innerHTML += `<div class="card-produto p-5 flex items-center gap-4 mb-4"><input type="checkbox" ${isChecked} onchange="toggleCheckIn('${item.id}')" class="check-in-input"><div class="flex-grow"><div class="flex justify-between items-start mb-3"><div class="max-w-[60%]"><h3 class="text-[10px] uppercase text-slate-500 font-black">Produto</h3><p class="font-black text-sm uppercase text-slate-100">${item.produto}</p></div><div class="text-right"><h3 class="text-[10px] uppercase text-[#FFD700] font-black">Validade</h3><p class="text-lg font-black text-white">${item.vencimento.split('-').reverse().join('/')}</p></div></div><div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center"><div class="flex flex-col"><span class="text-[9px] font-black text-slate-500 uppercase">EAN</span><span class="bg-slate-950 text-[#FFD700] px-3 py-1 rounded-lg font-mono text-sm border border-slate-800">${item.ean || '---'}</span></div><div class="flex gap-4 items-center"><div class="text-center mr-2"><span class="text-2xl font-black text-[#FFD700]">${item.quantidade}</span></div><div class="flex flex-col gap-2"><button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[10px] text-blue-400 font-black uppercase">Editar</button><button onclick="excluirProduto('${item.id}', '${item.produto}')" class="text-[10px] text-red-500 font-black uppercase">Excluir</button></div></div></div></div></div>`;
+                    container.innerHTML += `
+                        <div class="card-produto p-5 flex items-center gap-4 mb-4">
+                            <input type="checkbox" ${isChecked} onchange="toggleCheckIn('${item.id}')" class="check-in-input">
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="max-w-[60%]"><h3 class="font-black text-[10px] uppercase text-slate-500 mb-1">Produto</h3><p class="font-black text-sm uppercase leading-tight text-slate-100">${item.produto}</p></div>
+                                    <div class="text-right"><h3 class="font-black text-[10px] uppercase text-[#FFD700] mb-1">Validade</h3><p class="text-lg font-black text-white">${item.vencimento.split('-').reverse().join('/')}</p></div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center">
+                                    <div class="flex flex-col"><span class="text-[9px] font-black text-slate-500 uppercase mb-1">EAN</span><span class="bg-slate-950 text-[#FFD700] px-3 py-1 rounded-lg font-mono text-sm font-bold border border-slate-800">${item.ean || '---'}</span></div>
+                                    <div class="flex gap-4 items-center">
+                                        <div class="text-center mr-2"><span class="text-[9px] block font-black text-slate-500 uppercase">Qtd</span><span class="text-2xl font-black text-[#FFD700]">${item.quantidade}</span></div>
+                                        <div class="flex flex-col gap-2">
+                                            <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[10px] text-blue-400 font-black uppercase">Editar</button>
+                                            <button onclick="excluirProduto('${item.id}', '${item.produto}')" class="text-[10px] text-red-500 font-black uppercase">Excluir</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
                 }
             });
             document.getElementById('dash-vencidos').innerText = cV; document.getElementById('dash-alerta').innerText = cA; document.getElementById('dash-total').innerText = estoque.length;
         }
 
-        // Demais funções de suporte (Login, Manutenção, Logout)
-        function fecharModalCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if(scannerInstancia) scannerInstancia.stop().catch(() => {}); }
+        // [Eng. Sistemas] Fluxo inteligente de scanner
+        async function abrirCadastro() {
+            limparForm();
+            document.getElementById('modal-cadastro').classList.remove('hidden');
+            const readerCont = document.getElementById('reader-container');
+            readerCont.classList.remove('hidden');
+            scannerInstancia = new Html5Qrcode("reader");
+            await scannerInstancia.start({ facingMode: "environment" }, { fps: 25, qrbox: 250 }, (txt) => { 
+                document.getElementById('p-ean').value = txt; 
+                scannerInstancia.stop(); 
+                readerCont.classList.add('hidden');
+            });
+        }
+
+        function prepararEdicao(item) {
+            limparForm();
+            document.getElementById('modal-cadastro').classList.remove('hidden');
+            document.getElementById('reader-container').classList.add('hidden'); // Oculta scanner na edição
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('p-nome').value = item.produto;
+            document.getElementById('p-validade').value = item.vencimento;
+            document.getElementById('p-ean').value = item.ean || '';
+            document.getElementById('p-qtd').value = item.quantidade;
+        }
+
+        function fecharModalCadastro() { 
+            document.getElementById('modal-cadastro').classList.add('hidden'); 
+            if(scannerInstancia) scannerInstancia.stop().catch(() => {});
+        }
+
+        // Operações de Banco de Dados
         async function salvarProduto() { const id = document.getElementById('edit-id').value, d = { produto: document.getElementById('p-nome').value.toUpperCase(), vencimento: document.getElementById('p-validade').value, ean: document.getElementById('p-ean').value, quantidade: parseInt(document.getElementById('p-qtd').value) || 0 }; id ? await db.collection("validades").doc(id).update(d) : await db.collection("validades").add(d); fecharModalCadastro(); }
         function excluirProduto(id, nome) { if (confirm(`EXCLUIR DEFINITIVAMENTE:\n"${nome}"?`)) { db.collection("validades").doc(id).delete(); } }
-        function entrarNoApp() { document.getElementById('maintenanceView').classList.add('hidden-app'); document.getElementById('loginView').classList.add('hidden-app'); document.getElementById('appView').classList.remove('hidden-app'); document.getElementById('user-display').innerText = `OPERADOR: ${usuarioSessao.nome}`; db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => { estoque = []; snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()})); renderizar(); }); }
-        function toggleManutencaoSecreto() { cliquesSegredo++; if (cliquesSegredo >= 5) { const est = !manutencaoAtiva; localStorage.setItem('manutencaoNewMarket', est); window.location.reload(); } setTimeout(() => cliquesSegredo = 0, 3000); }
-        function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
-        function setFiltro(f) { filtroAtual = f; renderizar(); }
-        function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; document.getElementById('barcode-area').classList.add('hidden'); }
+        function checkInTodos() { if (itensSelecionados.size === estoque.length) { itensSelecionados.clear(); } else { estoque.forEach(i => itensSelecionados.add(i.id)); } renderizar(); }
+        function toggleCheckIn(id) { itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id); renderizar(); }
+        
+        // Autenticação e Sessão
+        function entrarNoApp() { 
+            document.getElementById('maintenanceView').classList.add('hidden-app'); 
+            document.getElementById('loginView').classList.add('hidden-app'); 
+            document.getElementById('appView').classList.remove('hidden-app'); 
+            document.getElementById('user-display').innerText = `OPERADOR: ${usuarioSessao.nome}`; 
+            db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => { estoque = []; snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()})); renderizar(); }); 
+        }
         function renderizarListaUsuarios() { let h = ''; EQUIPE.forEach(u => h += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-800 rounded-2xl font-black text-[10px] flex justify-between items-center text-slate-300 mb-2"><span>${u.nome}</span><span class="opacity-30">${u.cargo}</span></button>`); document.getElementById('auth-container').innerHTML = h; }
         function prepararSenha(n) { document.getElementById('login-title').innerText = `SENHA: ${n}`; document.getElementById('auth-container').innerHTML = `<input type="password" id="pass-input" class="input-dark mb-4" autofocus><button onclick="confirmarSenha('${n}')" class="w-full py-5 bg-[#FFD700] text-slate-900 rounded-2xl font-black">ENTRAR</button>`; }
         function confirmarSenha(n) { const u = EQUIPE.find(x => x.nome === n); if (document.getElementById('pass-input').value === u.pass) { usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome); entrarNoApp(); } else { alert("Senha incorreta."); } }
+        function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
+        function setFiltro(f) { filtroAtual = f; renderizar(); }
+        function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; }
         function iniciarTimerManutencao() { setInterval(() => { if (segundosTotais <= 0) segundosTotais = 900; let m = Math.floor(segundosTotais / 60), s = segundosTotais % 60; document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; segundosTotais--; }, 1000); }
-        function checkInTodos() { if (itensSelecionados.size === estoque.length) { itensSelecionados.clear(); } else { estoque.forEach(i => itensSelecionados.add(i.id)); } renderizar(); }
-        function toggleCheckIn(id) { itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id); renderizar(); }
     </script>
 </body>
 </html>
