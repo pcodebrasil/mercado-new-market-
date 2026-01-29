@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.6.4</title>
+    <title>New Market - v1.6.5</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -13,36 +13,40 @@
     
     <style>
         /* Desenvolvido por: Paulo Pkacci by 2026 */
-        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; -webkit-font-smoothing: antialiased; user-select: none; }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; user-select: none; }
         body { font-family: sans-serif; background-color: #020617; color: #f8fafc; overflow-x: hidden; margin: 0; }
         .hidden-app { display: none !important; }
-        .card-produto { background: #0f172a; border: 1px solid #1e293b; border-radius: 1.2rem; }
-        .barcode-area { background: white; padding: 15px; border-radius: 1rem; display: flex; justify-content: center; width: 100%; }
-        .check-in-input { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #334155; appearance: none; outline: none; background: #020617; }
+        .card-produto { background: #0f172a; border: 1px solid #1e293b; border-radius: 1.2rem; transition: background 0.2s; }
+        .card-produto.selecionado { background: #1e293b; border-color: #FFD700; }
+        #auth-container { max-height: 280px; overflow-y: auto; padding-right: 5px; }
+        #auth-container::-webkit-scrollbar { width: 4px; }
+        #auth-container::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .check-in-input { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #334155; appearance: none; outline: none; pointer-events: none; }
         .check-in-input:checked { background: #FFD700; border-color: #FFD700; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-size: contain; }
-        #reader { width: 100%; border-radius: 1rem; overflow: hidden; border: 2px solid #FFD700; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <div id="loginView" class="fixed inset-0 bg-[#020617] z-[100] flex items-center justify-center p-6 text-center">
+    <div id="loginView" class="fixed inset-0 bg-[#020617] z-[100] flex items-center justify-center p-6">
         <div class="bg-slate-900 w-full max-w-sm rounded-[3rem] p-8 border border-slate-800 shadow-2xl">
-            <div class="w-16 h-16 bg-[#003366] rounded-2xl flex items-center justify-center mx-auto mb-6 text-[#FFD700] text-2xl font-black italic shadow-lg">NM</div>
-            <h2 id="login-title" class="text-xl font-black uppercase italic mb-8 text-slate-100">Portal New Market</h2>
+            <div class="text-center">
+                <div class="w-14 h-14 bg-[#003366] rounded-2xl flex items-center justify-center mx-auto mb-4 text-[#FFD700] text-xl font-black shadow-lg">NM</div>
+                <h2 id="login-title" class="text-lg font-black uppercase italic mb-6 text-slate-100">Equipe New Market</h2>
+            </div>
             <div id="auth-container" class="space-y-3"></div>
-            <p class="text-[9px] font-black text-slate-600 uppercase mt-8 tracking-[0.2em]">Paulo Pkacci by 2026</p>
+            <p onclick="dispararManutencao()" class="text-[9px] font-black text-slate-600 uppercase mt-8 tracking-[0.2em] text-center cursor-pointer">Developed by: Paulo Pkacci by 2026</p>
         </div>
     </div>
 
     <div id="appView" class="hidden-app">
         <header class="bg-[#001e3c] p-6 sticky top-0 z-30 shadow-2xl rounded-b-[2.5rem] border-b-2 border-[#FFD700]">
             <div class="flex justify-between items-center mb-6">
-                <div><h1 class="font-black text-2xl italic text-[#FFD700] uppercase leading-none">New Market</h1><p id="user-display" class="text-[9px] font-black uppercase text-slate-400 mt-1"></p></div>
+                <div><h1 class="font-black text-2xl italic text-[#FFD700] uppercase">New Market</h1><p id="user-display" class="text-[9px] font-black uppercase text-slate-400"></p></div>
                 <button onclick="logout()" class="bg-slate-800/50 p-3 rounded-xl">🚪</button>
             </div>
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR PRODUTO..." class="w-full bg-slate-900 p-4 rounded-xl text-xs font-black border border-slate-700 text-slate-200 mb-4 outline-none placeholder:text-slate-600">
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR..." class="w-full bg-slate-900 p-4 rounded-xl text-xs font-black border border-slate-700 text-slate-200 mb-4 outline-none">
             <div class="flex gap-2">
-                <button onclick="enviarRelatorioWhatsApp()" class="flex-grow bg-green-600 text-white py-3 rounded-xl font-black text-[9px] uppercase italic">WhatsApp Report</button>
+                <button onclick="enviarRelatorioWhatsApp()" class="flex-grow bg-green-600 text-white py-3 rounded-xl font-black text-[9px] uppercase italic">Relatório WhatsApp</button>
                 <button onclick="checkInTodos()" class="bg-slate-800 text-slate-300 px-4 py-3 rounded-xl font-black text-[9px] uppercase">Marcar Tudo</button>
             </div>
         </header>
@@ -52,45 +56,32 @@
         </main>
 
         <div class="fixed bottom-8 left-0 right-0 px-10 z-40">
-            <button onclick="abrirCadastro()" class="w-full bg-[#FFD700] text-slate-950 py-5 rounded-2xl shadow-xl font-black text-xs uppercase hover:scale-[0.98] transition-all">+ CADASTRAR PRODUTO</button>
+            <button onclick="abrirCadastro()" class="w-full bg-[#FFD700] text-slate-950 py-5 rounded-2xl shadow-xl font-black text-xs uppercase">+ CADASTRAR ITEM</button>
         </div>
     </div>
 
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-[#020617] z-[800] overflow-y-auto p-6">
         <div class="max-w-md mx-auto">
             <div class="flex justify-between items-center mb-6">
-                <h2 id="modal-titulo" class="text-xl font-black text-[#FFD700] uppercase italic">Detalhes do Item</h2>
-                <button onclick="fecharCadastro()" class="bg-slate-800 w-10 h-10 rounded-full flex items-center justify-center text-slate-400 text-xl font-bold">✕</button>
+                <h2 id="modal-titulo" class="text-xl font-black text-[#FFD700] uppercase italic">Ajustes</h2>
+                <button onclick="fecharCadastro()" class="bg-slate-800 w-10 h-10 rounded-full flex items-center justify-center text-slate-400">✕</button>
             </div>
-            
             <input type="hidden" id="cad-id-doc">
-            
             <div id="reader" class="mb-4"></div>
-            
             <div class="space-y-4">
                 <input type="text" id="cad-produto" placeholder="NOME DO PRODUTO" class="w-full bg-slate-900 p-5 rounded-2xl text-white font-bold border border-slate-800 outline-none uppercase">
-                <input type="text" id="cad-ean" placeholder="CÓDIGO DE BARRAS" class="w-full bg-slate-900 p-5 rounded-2xl text-white font-bold border border-slate-800 outline-none">
-                
+                <input type="text" id="cad-ean" placeholder="EAN / CÓDIGO" class="w-full bg-slate-900 p-5 rounded-2xl text-white font-bold border border-slate-800 outline-none">
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="flex flex-col gap-1">
-                        <label class="text-[9px] font-black text-slate-500 ml-2">VENCIMENTO</label>
-                        <input type="date" id="cad-vencimento" class="bg-slate-900 p-5 rounded-2xl text-white font-bold border border-slate-800 outline-none">
-                    </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="text-[9px] font-black text-slate-500 ml-2">QUANTIDADE</label>
-                        <input type="number" id="cad-quantidade" placeholder="QTD" class="bg-slate-900 p-5 rounded-2xl text-white font-bold border border-slate-800 outline-none">
-                    </div>
+                    <input type="date" id="cad-vencimento" class="bg-slate-900 p-5 rounded-2xl text-white font-bold border border-slate-800 outline-none">
+                    <input type="number" id="cad-quantidade" placeholder="QTD" class="bg-slate-900 p-5 rounded-2xl text-white font-bold border border-slate-800 outline-none">
                 </div>
-
-                <div id="area-barcode-modal" class="flex justify-center"></div>
-
-                <button onclick="salvarProduto()" class="w-full bg-green-600 text-white py-5 rounded-2xl font-black text-xs uppercase shadow-lg hover:bg-green-500">Salvar Alterações</button>
+                <div id="area-barcode-modal" class="flex justify-center bg-white p-4 rounded-2xl hidden"></div>
+                <button onclick="salvarProduto()" class="w-full bg-green-600 text-white py-5 rounded-2xl font-black text-xs uppercase shadow-lg">Salvar</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Configuração Firebase
         const firebaseConfig = { apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4", authDomain: "mercado-c3e95.firebaseapp.com", projectId: "mercado-c3e95", storageBucket: "mercado-c3e95.firebasestorage.app", messagingSenderId: "883539091925", appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -103,7 +94,7 @@
             { nome: "LEANDRO", pass: "bGVhbmRybzEyMw==", cargo: "EQUIPE" }
         ];
 
-        let estoque = [], usuarioSessao = null, itensSelecionados = new Set(), html5QrCode = null;
+        let estoque = [], usuarioSessao = null, itensSelecionados = new Set(), html5QrCode = null, cliquesMaint = 0;
 
         window.onload = () => {
             renderizarListaUsuarios();
@@ -118,77 +109,70 @@
             const container = document.getElementById('auth-container');
             container.innerHTML = EQUIPE.map(u => `
                 <button onclick="prepararSenha('${u.nome}')" class="w-full py-5 px-6 bg-slate-800/50 rounded-2xl font-black text-[10px] flex justify-between items-center text-slate-300 border border-slate-800">
-                    <span>${u.nome}</span><span class="text-[#FFD700] opacity-50 text-[8px]">${u.cargo}</span>
+                    <span>${u.nome}</span><span class="text-[#FFD700] opacity-50 uppercase">${u.cargo}</span>
                 </button>
             `).join('');
         }
 
         function prepararSenha(n) {
-            document.getElementById('login-title').innerText = `SENHA DE ${n}`;
+            document.getElementById('login-title').innerText = `SENHA: ${n}`;
             document.getElementById('auth-container').innerHTML = `
                 <input type="password" id="pass-input" class="w-full bg-slate-800 p-5 rounded-2xl text-center text-white mb-4 outline-none border border-slate-700" autofocus>
-                <button onclick="confirmarSenha('${n}')" class="w-full py-5 bg-[#FFD700] text-slate-900 rounded-2xl font-black uppercase">Autenticar</button>
-                <button onclick="window.location.reload()" class="w-full py-3 text-slate-500 text-[9px] font-black uppercase mt-2">Voltar</button>
+                <button onclick="confirmarSenha('${n}')" class="w-full py-5 bg-[#FFD700] text-slate-900 rounded-2xl font-black uppercase">Entrar</button>
+                <button onclick="location.reload()" class="w-full py-3 text-slate-500 text-[9px] font-black uppercase">Voltar</button>
             `;
         }
 
         function confirmarSenha(n) {
             const u = EQUIPE.find(x => x.nome === n);
-            const pass = document.getElementById('pass-input').value;
-            if (btoa(pass) === u.pass) {
+            const p = document.getElementById('pass-input').value;
+            if (btoa(p) === u.pass) {
                 usuarioSessao = u;
                 localStorage.setItem('sessaoNewMarket', u.nome);
                 entrarNoApp();
-            } else { alert("Senha Incorreta!"); }
+            } else { alert("Senha Incorreta"); }
         }
 
         function entrarNoApp() {
             document.getElementById('loginView').classList.add('hidden-app');
             document.getElementById('appView').classList.remove('hidden-app');
             document.getElementById('user-display').innerText = `${usuarioSessao.nome} | ${usuarioSessao.cargo}`;
-            
             db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
-                estoque = [];
-                snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
+                estoque = []; snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
                 renderizar();
             });
         }
 
-        /**
-         * FUNÇÃO: renderizar (v1.6.4)
-         * DESCRIÇÃO: Lista limpa para conferência rápida. Listras removidas daqui.
-         */
         function renderizar() {
-            const container = document.getElementById('container-produtos'), 
-                  busca = document.getElementById('input-busca').value.toUpperCase();
+            const container = document.getElementById('container-produtos'), busca = document.getElementById('input-busca').value.toUpperCase();
             container.innerHTML = '';
-            
-            const historicoEnviados = JSON.parse(localStorage.getItem('itens_enviados') || "[]");
-            const temPermissaoExcluir = ["GERENTE", "DESENVOLVEDOR"].includes(usuarioSessao.cargo);
+            const hist = JSON.parse(localStorage.getItem('itens_enviados') || "[]");
+            const podeExcluir = ["GERENTE", "DESENVOLVEDOR"].includes(usuarioSessao.cargo);
 
-            estoque.forEach(item => {
-                if ((item.produto || "").includes(busca) || (item.ean || "").includes(busca)) {
-                    const isChecked = itensSelecionados.has(item.id) ? 'checked' : '';
-                    const iconeEnviado = historicoEnviados.includes(item.id) ? '🔵' : '';
-                    const botaoExcluir = temPermissaoExcluir ? `<button onclick="event.stopPropagation(); excluirProduto('${item.id}', '${item.produto}')" class="text-[9px] text-red-500 font-black uppercase ml-4">Excluir</button>` : '';
-
+            estoque.forEach(i => {
+                if ((i.produto || "").includes(busca) || (i.ean || "").includes(busca)) {
+                    const sel = itensSelecionados.has(i.id);
+                    const icone = hist.includes(i.id) ? '🔵' : '';
                     container.innerHTML += `
-                    <div class="card-produto p-5 flex items-center gap-4 active:scale-[0.98] transition-transform" onclick="abrirEdicao('${item.id}')">
-                        <input type="checkbox" ${isChecked} onchange="event.stopPropagation(); toggleCheckIn('${item.id}')" class="check-in-input">
+                    <div class="card-produto p-5 flex items-center gap-4 ${sel ? 'selecionado' : ''}" onclick="toggleCheckIn('${i.id}')">
+                        <input type="checkbox" ${sel ? 'checked' : ''} class="check-in-input">
                         <div class="flex-grow">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <h3 class="text-[8px] font-black uppercase text-slate-500 tracking-wider">Item ${iconeEnviado}</h3>
-                                    <p class="font-black text-sm uppercase text-slate-100 leading-tight">${item.produto}</p>
+                            <div class="flex justify-between items-start">
+                                <div class="max-w-[70%]">
+                                    <h3 class="text-[8px] font-black uppercase text-slate-500">Item ${icone}</h3>
+                                    <p class="font-black text-sm uppercase text-slate-100">${i.produto}</p>
                                 </div>
                                 <div class="text-right">
                                     <h3 class="text-[8px] font-black uppercase text-[#FFD700]">Validade</h3>
-                                    <p class="text-base font-black text-white">${item.vencimento.split('-').reverse().join('/')}</p>
+                                    <p class="text-base font-black text-white">${i.vencimento.split('-').reverse().join('/')}</p>
                                 </div>
                             </div>
-                            <div class="flex justify-between items-center mt-2 pt-2 border-t border-slate-800/50">
-                                <span class="text-[9px] font-black text-slate-500 uppercase">Estoque: <b class="text-[#FFD700]">x${item.quantidade || 0}</b></span>
-                                ${botaoExcluir}
+                            <div class="flex justify-between items-center mt-3 pt-2 border-t border-slate-800/50">
+                                <span class="text-[9px] font-black text-slate-500 uppercase">Qtd: <b class="text-white">x${i.quantidade || 0}</b></span>
+                                <div class="flex gap-2">
+                                    <button onclick="event.stopPropagation(); abrirEdicao('${i.id}')" class="bg-slate-800 p-2 rounded-lg text-[10px]">⚙️</button>
+                                    ${podeExcluir ? `<button onclick="event.stopPropagation(); excluirProduto('${i.id}', '${i.produto}')" class="text-red-500 text-[9px] font-black uppercase">Apagar</button>` : ''}
+                                </div>
                             </div>
                         </div>
                     </div>`;
@@ -196,113 +180,70 @@
             });
         }
 
-        /**
-         * FUNÇÃO: abrirEdicao (v1.6.4)
-         * DESCRIÇÃO: Abre modal, preenche dados e renderiza listra se for gestor.
-         */
         function abrirEdicao(id) {
-            const item = estoque.find(i => i.id === id);
-            if (!item) return;
-
-            document.getElementById('modal-titulo').innerText = "Editar Item";
-            document.getElementById('cad-id-doc').value = item.id;
-            document.getElementById('cad-produto').value = item.produto;
-            document.getElementById('cad-ean').value = item.ean || '';
-            document.getElementById('cad-vencimento').value = item.vencimento;
-            document.getElementById('cad-quantidade').value = item.quantidade;
-
-            document.getElementById('modal-cadastro').classList.remove('hidden');
+            const i = estoque.find(x => x.id === id);
+            document.getElementById('modal-titulo').innerText = "Editar Produto";
+            document.getElementById('cad-id-doc').value = i.id;
+            document.getElementById('cad-produto').value = i.produto;
+            document.getElementById('cad-ean').value = i.ean || '';
+            document.getElementById('cad-vencimento').value = i.vencimento;
+            document.getElementById('cad-quantidade').value = i.quantidade;
             
-            // [Governança] Visibilidade restrita da listra no modal
-            const podeVerListras = ["ADRIANO", "ADRIELLE"].includes(usuarioSessao.nome);
-            const areaBarcode = document.getElementById('area-barcode-modal');
-            
-            if (podeVerListras && item.ean) {
-                areaBarcode.innerHTML = `<div class="barcode-area"><svg id="barcode-modal"></svg></div>`;
-                setTimeout(() => {
-                    JsBarcode("#barcode-modal", item.ean, {
-                        format: "CODE128", width: 1.5, height: 60, displayValue: true, fontSize: 12
-                    });
-                }, 50);
-            } else { areaBarcode.innerHTML = ''; }
-        }
-
-        function abrirCadastro() {
-            document.getElementById('modal-titulo').innerText = "Novo Cadastro";
-            document.getElementById('cad-id-doc').value = '';
-            document.getElementById('cad-produto').value = '';
-            document.getElementById('cad-ean').value = '';
-            document.getElementById('cad-vencimento').value = '';
-            document.getElementById('cad-quantidade').value = '';
-            document.getElementById('area-barcode-modal').innerHTML = '';
+            const area = document.getElementById('area-barcode-modal');
+            const gestor = ["ADRIANO", "ADRIELLE"].includes(usuarioSessao.nome);
+            if (gestor && i.ean) {
+                area.classList.remove('hidden');
+                area.innerHTML = `<svg id="barcode-modal"></svg>`;
+                setTimeout(() => JsBarcode("#barcode-modal", i.ean, { format: "CODE128", width: 1.5, height: 50, displayValue: true }), 50);
+            } else { area.classList.add('hidden'); }
             document.getElementById('modal-cadastro').classList.remove('hidden');
-            iniciarScanner();
-        }
-
-        function fecharCadastro() {
-            if (html5QrCode) { html5QrCode.stop().catch(() => {}); html5QrCode = null; }
-            document.getElementById('modal-cadastro').classList.add('hidden');
-        }
-
-        function iniciarScanner() {
-            html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 200 }, (text) => {
-                document.getElementById('cad-ean').value = text;
-                if(navigator.vibrate) navigator.vibrate(50);
-                fecharCadastro(); // Opcional: fechar ao ler
-                abrirCadastro(); // Reabre para preencher o resto
-            }).catch(() => {});
         }
 
         function salvarProduto() {
-            const idDoc = document.getElementById('cad-id-doc').value;
-            const p = {
+            const id = document.getElementById('cad-id-doc').value;
+            const dados = {
                 produto: document.getElementById('cad-produto').value.toUpperCase(),
                 ean: document.getElementById('cad-ean').value,
                 vencimento: document.getElementById('cad-vencimento').value,
                 quantidade: Number(document.getElementById('cad-quantidade').value) || 1,
-                atualizado_por: usuarioSessao.nome
+                operador: usuarioSessao.nome
             };
-
-            if (!p.produto || !p.vencimento) return alert("Erro: Nome e Validade são obrigatórios!");
-
-            const acao = idDoc ? db.collection("validades").doc(idDoc).update(p) : db.collection("validades").add({...p, data_cadastro: new Date().toISOString()});
-
-            acao.then(() => {
-                fecharCadastro();
-                // O feedback visual de sucesso é o próprio onSnapshot atualizando a lista
-            }).catch(e => alert("Erro ao salvar: " + e));
+            if (!dados.produto || !dados.vencimento) return alert("Dados incompletos!");
+            const ref = id ? db.collection("validades").doc(id).update(dados) : db.collection("validades").add({...dados, data: new Date().toISOString()});
+            ref.then(() => { registrarLog(id ? 'EDITOU' : 'CRIOU', dados.produto); fecharCadastro(); });
         }
 
-        function excluirProduto(id, nome) {
-            if (confirm(`DESEJA EXCLUIR DEFINITIVAMENTE:\n${nome}?`)) {
-                db.collection("validades").doc(id).delete();
+        function registrarLog(acao, item) {
+            db.collection("logs_auditoria").add({ acao, item, user: usuarioSessao.nome, time: new Date().toISOString() });
+        }
+
+        function dispararManutencao() {
+            cliquesMaint++;
+            if (cliquesMaint === 5) {
+                alert("🛡️ PROTOCOLO DE MANUTENÇÃO ATIVO\nAuditoria v1.6.5 em execução.");
+                registrarLog("MANUTENÇÃO", "ATIVADA VIA EASTER EGG");
+                cliquesMaint = 0;
             }
+            setTimeout(() => cliquesMaint = 0, 3000);
         }
 
+        function toggleCheckIn(id) { itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id); renderizar(); }
+        function abrirCadastro() { document.getElementById('cad-id-doc').value = ''; document.getElementById('modal-titulo').innerText = "Novo Item"; document.getElementById('modal-cadastro').classList.remove('hidden'); }
+        function fecharCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if(html5QrCode) html5QrCode.stop(); }
+        function logout() { localStorage.clear(); location.reload(); }
+        function checkInTodos() { if(itensSelecionados.size === estoque.length) itensSelecionados.clear(); else estoque.forEach(i => itensSelecionados.add(i.id)); renderizar(); }
+        function excluirProduto(id, nome) { if(confirm(`Excluir ${nome}?`)) { db.collection("validades").doc(id).delete(); registrarLog("EXCLUIU", nome); } }
+        
         function enviarRelatorioWhatsApp() {
             let lista = itensSelecionados.size > 0 ? estoque.filter(i => itensSelecionados.has(i.id)) : estoque.filter(i => {
-                const dV = new Date(i.vencimento + 'T00:00:00');
-                return Math.floor((dV - new Date().setHours(0,0,0,0)) / 86400000) <= 7;
+                const dv = new Date(i.vencimento + 'T00:00:00');
+                return Math.floor((dv - new Date().setHours(0,0,0,0))/86400000) <= 7;
             });
-
-            if (lista.length === 0) return alert("Selecione itens ou aguarde produtos próximos do vencimento!");
-
-            const historico = JSON.parse(localStorage.getItem('itens_enviados') || "[]");
-            const atualizado = [...new Set([...historico, ...lista.map(i => i.id)])].slice(-200);
-            localStorage.setItem('itens_enviados', JSON.stringify(atualizado));
-
-            let msg = `*📦 RELATÓRIO NEW MARKET*\n*Operador:* ${usuarioSessao.nome}\n\n`;
+            if (lista.length === 0) return alert("Nada selecionado!");
+            let msg = `*📦 RELATÓRIO NEW MARKET*\n\n`;
             lista.forEach(i => msg += `• *${i.produto}*\n  Val: ${i.vencimento.split('-').reverse().join('/')} | Qtd: ${i.quantidade}\n\n`);
-            msg += `_Gerado em: ${new Date().toLocaleDateString()}_`;
-            
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
-            setTimeout(() => renderizar(), 1000);
         }
-
-        function toggleCheckIn(id) { itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id); }
-        function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
-        function checkInTodos() { if (itensSelecionados.size === estoque.length) itensSelecionados.clear(); else estoque.forEach(i => itensSelecionados.add(i.id)); renderizar(); }
     </script>
 </body>
 </html>
