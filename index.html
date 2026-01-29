@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.6.2</title>
+    <title>New Market - v1.5.4</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -13,108 +13,164 @@
     
     <style>
         /* Desenvolvido por: Paulo Pkacci by 2026 */
+        /* Estilos globais para prevenir zoom acidental e melhorar toque em dispositivos móveis */
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; -webkit-font-smoothing: antialiased; user-select: none; }
         body { font-family: sans-serif; background-color: #020617; color: #f8fafc; overflow-x: hidden; margin: 0; }
         .hidden-app { display: none !important; }
-        .card-produto { background: #0f172a; border: 1px solid #1e293b; border-radius: 1.5rem; position: relative; }
-        .barcode-container { background: white; padding: 6px; border-radius: 0.5rem; display: flex; justify-content: center; }
-        .check-in-input { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #334155; appearance: none; outline: none; background: #020617; }
+        .input-dark { background: #1e293b; border: 2px solid #334155; color: white; padding: 1rem; border-radius: 1rem; text-align: center; font-size: 1.5rem; outline: none; width: 100%; user-select: text; }
+        .bg-maintenance { background: repeating-linear-gradient(45deg, #020617, #020617 10px, #0f172a 10px, #0f172a 20px); }
+        .card-produto { background: #0f172a; border: 1px solid #1e293b; border-radius: 1.5rem; transition: all 0.2s; }
+        .status-pulse { position: relative; width: 10px; height: 10px; background-color: #22c55e; border-radius: 50%; }
+        .status-pulse::after { content: ''; position: absolute; width: 100%; height: 100%; background-color: #22c55e; border-radius: 50%; z-index: -1; animation: pulse-ring 2s infinite; }
+        @keyframes pulse-ring { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(3); opacity: 0; } }
+        .check-in-input { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #334155; appearance: none; -webkit-appearance: none; outline: none; background: #020617; }
         .check-in-input:checked { background: #FFD700; border-color: #FFD700; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-size: contain; }
-        #reader { width: 100%; border-radius: 1.5rem; overflow: hidden; border: 2px solid #FFD700; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <div id="loginView" class="fixed inset-0 bg-[#020617] z-[100] flex items-center justify-center p-6 text-center">
-        <div class="bg-slate-900 w-full max-w-sm rounded-[3rem] p-8 border border-slate-800">
-            <div class="w-16 h-16 bg-[#003366] rounded-2xl flex items-center justify-center mx-auto mb-6 text-[#FFD700] text-2xl font-black italic">NM</div>
-            <h2 id="login-title" class="text-xl font-black uppercase italic mb-8 text-slate-100">Equipe New Market</h2>
-            <div id="auth-container" class="space-y-3"></div>
-            <p class="text-[9px] font-black text-slate-600 uppercase mt-8 tracking-[0.2em]">Paulo Pkacci by 2026</p>
+    <div id="maintenanceView" class="hidden-app fixed inset-0 bg-maintenance z-[200] flex items-center justify-center p-6 text-center">
+        <div class="bg-slate-900 border-2 border-yellow-500 p-8 rounded-[3rem] max-w-sm">
+            <div class="text-5xl mb-4">⚙️</div>
+            <div id="timer-display" class="text-4xl font-mono font-black text-yellow-500 mb-2">15:00</div>
+            <h2 class="text-2xl font-black text-yellow-500 uppercase italic">Atualização</h2>
+            <button onclick="irParaLoginDesdeManutencao()" class="mt-8 w-full py-4 bg-yellow-500 text-slate-900 rounded-2xl font-black uppercase text-[11px]">Acesso Admin</button>
+        </div>
+    </div>
+
+    <div id="loginView" class="hidden-app fixed inset-0 bg-[#020617] z-[100] flex items-center justify-center p-6 text-center">
+        <div class="bg-slate-900 w-full max-w-sm rounded-[3rem] p-8 border border-slate-800 flex flex-col min-h-[550px]">
+            <div id="login-content" class="flex-grow">
+                <div class="w-16 h-16 bg-[#003366] rounded-2xl flex items-center justify-center mx-auto mb-6 text-[#FFD700] text-2xl font-black italic">NM</div>
+                <h2 id="login-title" class="text-xl font-black uppercase italic mb-8 text-slate-100">Equipe New Market</h2>
+                <div id="auth-container"></div>
+            </div>
+            <p onclick="toggleManutencaoSecreto()" class="cursor-pointer text-[9px] font-black text-slate-600 uppercase mt-6 tracking-[0.2em]">Paulo Pkacci by 2026</p>
         </div>
     </div>
 
     <div id="appView" class="hidden-app">
         <header class="bg-[#001e3c] p-6 sticky top-0 z-30 shadow-2xl rounded-b-[2.5rem] border-b-2 border-[#FFD700]">
             <div class="flex justify-between items-center mb-6">
-                <div><h1 class="font-black text-2xl italic text-[#FFD700] uppercase leading-none">New Market</h1><p id="user-display" class="text-[9px] font-black uppercase text-slate-400 mt-1"></p></div>
-                <button onclick="logout()" class="bg-slate-800/50 p-3 rounded-xl">🚪</button>
+                <div class="flex items-center gap-3"><div class="status-pulse"></div>
+                <div><h1 class="font-black text-2xl italic text-[#FFD700] uppercase leading-none">New Market</h1><p id="user-display" class="text-[9px] font-black uppercase text-slate-400 mt-1"></p></div></div>
+                <button onclick="logout()" class="bg-slate-800/50 p-3 rounded-xl text-xl">🚪</button>
             </div>
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR..." class="w-full bg-slate-900 p-4 rounded-xl text-xs font-black border border-slate-700 text-slate-200 mb-4 outline-none">
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR..." class="w-full bg-slate-900 p-4 rounded-xl text-xs font-black uppercase border border-slate-700 text-slate-200 mb-4 outline-none">
             <div class="flex gap-2">
                 <button onclick="enviarRelatorioWhatsApp()" class="flex-grow bg-green-600 text-white py-3 rounded-xl font-black text-[9px] uppercase italic">Relatório WhatsApp</button>
-                <button onclick="checkInTodos()" class="bg-slate-800 text-slate-300 px-4 py-3 rounded-xl font-black text-[9px] uppercase">Tudo</button>
+                <button onclick="checkInTodos()" class="bg-slate-800 text-slate-300 px-4 py-3 rounded-xl font-black text-[9px] uppercase">Selecionar Tudo</button>
             </div>
         </header>
 
         <main class="max-w-lg mx-auto p-5 pb-44">
+            <div class="grid grid-cols-3 gap-2 mb-4 text-center">
+                <div onclick="setFiltro('vencidos')" class="bg-red-900/40 p-3 rounded-2xl text-red-400"><p id="dash-vencidos" class="text-xl font-black">0</p></div>
+                <div onclick="setFiltro('urgente')" class="bg-yellow-900/40 p-3 rounded-2xl text-yellow-400"><p id="dash-alerta" class="text-xl font-black">0</p></div>
+                <div onclick="setFiltro('todos')" class="bg-slate-800 p-3 rounded-2xl text-slate-100"><p id="dash-total" class="text-xl font-black">0</p></div>
+            </div>
             <div id="container-produtos" class="space-y-4"></div>
         </main>
 
         <div class="fixed bottom-8 left-0 right-0 px-10 z-40">
-            <button onclick="abrirCadastro()" class="w-full bg-[#FFD700] text-slate-950 py-5 rounded-2xl shadow-xl font-black text-xs uppercase">+ NOVO PRODUTO</button>
+            <button onclick="abrirCadastro()" class="w-full bg-[#FFD700] text-slate-950 py-5 rounded-2xl shadow-xl font-black text-xs uppercase">+ NOVO / SCANNER</button>
         </div>
     </div>
 
-    <div id="modal-cadastro" class="hidden fixed inset-0 bg-[#020617] z-[800] overflow-y-auto p-6">
-        <div class="max-w-md mx-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-black text-[#FFD700] uppercase italic">Novo Cadastro</h2>
-                <button onclick="fecharCadastro()" class="text-slate-500 text-2xl">✕</button>
-            </div>
-            
-            <div id="reader" class="mb-4"></div>
-            
-            <div class="space-y-4">
-                <input type="text" id="cad-produto" placeholder="NOME DO PRODUTO" class="w-full bg-slate-900 p-5 rounded-2xl text-white font-bold border border-slate-800 outline-none uppercase">
-                <input type="text" id="cad-ean" placeholder="CÓDIGO EAN (SCANNER)" class="w-full bg-slate-900 p-5 rounded-2xl text-white font-bold border border-slate-800 outline-none">
+    <div id="modal-cadastro" class="hidden fixed inset-0 bg-[#020617] z-[800] overflow-y-auto">
+        <div class="max-w-lg mx-auto p-8">
+            <div class="flex justify-between items-center mb-8"><h2 class="text-lg font-black uppercase text-[#FFD700]">Dados do Produto</h2><button onclick="fecharModalCadastro()" class="text-4xl text-slate-500">&times;</button></div>
+            <div id="reader-container" class="hidden relative w-full aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden mb-8 border border-slate-800"><div id="reader"></div></div>
+            <div id="barcode-area" class="hidden bg-white p-4 rounded-2xl mb-8 flex flex-col items-center justify-center"><svg id="barcode-canvas"></svg></div>
+            <div class="space-y-5">
+                <input type="text" id="p-ean" oninput="gerarGraficoBarras(this.value)" placeholder="CÓDIGO EAN" class="w-full p-5 bg-slate-900 rounded-2xl font-mono text-slate-300 border border-slate-800 outline-none">
+                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-5 bg-slate-900 rounded-2xl font-black uppercase text-slate-100 border border-slate-800 outline-none">
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="date" id="cad-vencimento" class="bg-slate-900 p-5 rounded-2xl text-white font-bold border border-slate-800 outline-none uppercase">
-                    <input type="number" id="cad-quantidade" placeholder="QTD" class="bg-slate-900 p-5 rounded-2xl text-white font-bold border border-slate-800 outline-none">
+                    <input type="date" id="p-validade" class="w-full p-4 bg-slate-900 rounded-xl text-white border border-slate-800">
+                    <input type="tel" id="p-qtd" placeholder="QTD" class="w-full p-4 bg-slate-900 rounded-2xl font-black text-center text-[#FFD700] border border-slate-800 outline-none">
                 </div>
-                <button onclick="salvarProduto()" class="w-full bg-green-600 text-white py-5 rounded-2xl font-black text-xs uppercase shadow-lg">Salvar no Estoque</button>
+                <input type="hidden" id="edit-id"><button onclick="salvarProduto()" class="w-full py-6 bg-[#003366] text-white rounded-2xl font-black uppercase shadow-lg">SALVAR NA NUVEM</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Configuração Firebase
+        // Função para impedir o menu de contexto e inspecionar elemento
+        document.addEventListener('contextmenu', event => event.preventDefault()); 
+        document.onkeydown = (e) => {
+            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
+                return false; 
+            }
+        };
+
+        // Configuração e Inicialização do Firebase
         const firebaseConfig = { apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4", authDomain: "mercado-c3e95.firebaseapp.com", projectId: "mercado-c3e95", storageBucket: "mercado-c3e95.firebasestorage.app", messagingSenderId: "883539091925", appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // Lista de Equipe com Senhas em Base64
         const EQUIPE = [ 
             { nome: "ADRIANO", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
             { nome: "ADRIELLE", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
             { nome: "PAULO", pass: "cGF1bG8xMjM=", cargo: "DESENVOLVEDOR" }, 
-            { nome: "PEDRO", pass: "cGVkcm8xMjM=", cargo: "EQUIPE" },
-            { nome: "LEANDRO", pass: "bGVhbmRybzEyMw==", cargo: "EQUIPE" }
+            { nome: "PEDRO", pass: "cGVkcm8xMjM=", cargo: "EQUIPE" }, 
+            { nome: "LEANDRO", pass: "bGVhbmRybzEyMw==", cargo: "EQUIPE" }, 
+            { nome: "EDMAR", pass: "ZWRtYXIxMjM=", cargo: "EQUIPE" }, 
+            { nome: "JOÃO", pass: "am9hbzEyMw==", cargo: "EQUIPE" }, 
+            { nome: "TAMIRIS", pass: "dGFtaXJpczEyMw==", cargo: "EQUIPE" } 
         ];
 
-        let estoque = [], usuarioSessao = null, itensSelecionados = new Set(), html5QrCode = null;
+        // Variáveis de Estado Global
+        let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
+        let usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos', itensSelecionados = new Set(), segundosTotais = 900, cliquesSegredo = 0;
 
+        // Inicialização do App
         window.onload = () => {
             renderizarListaUsuarios();
             const salvo = localStorage.getItem('sessaoNewMarket');
-            if (salvo) {
-                usuarioSessao = EQUIPE.find(x => x.nome === salvo);
-                if (usuarioSessao) entrarNoApp();
+            if (manutencaoAtiva) {
+                if (salvo === 'PAULO') { usuarioSessao = EQUIPE.find(x => x.nome === 'PAULO'); entrarNoApp(); } 
+                else { mostrarManutencao(); }
+            } else {
+                if (salvo) { usuarioSessao = EQUIPE.find(x => x.nome === salvo); usuarioSessao ? entrarNoApp() : mostrarLogin(); } 
+                else { mostrarLogin(); }
             }
         };
 
+        function mostrarLogin() {
+            document.getElementById('maintenanceView').classList.add('hidden-app');
+            document.getElementById('appView').classList.add('hidden-app');
+            document.getElementById('loginView').classList.remove('hidden-app');
+            renderizarListaUsuarios(); 
+        }
+
+        function mostrarManutencao() {
+            document.getElementById('loginView').classList.add('hidden-app');
+            document.getElementById('appView').classList.add('hidden-app');
+            document.getElementById('maintenanceView').classList.remove('hidden-app');
+            iniciarTimerManutencao();
+        }
+
+        function irParaLoginDesdeManutencao() { mostrarLogin(); }
+
         function renderizarListaUsuarios() {
             const container = document.getElementById('auth-container');
-            container.innerHTML = EQUIPE.map(u => `
-                <button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-800 rounded-2xl font-black text-[10px] flex justify-between items-center text-slate-300">
-                    <span>${u.nome}</span><span class="opacity-30">${u.cargo}</span>
-                </button>
-            `).join('');
+            if(!container) return;
+            let h = '';
+            EQUIPE.forEach(u => {
+                let cargoVisual = u.cargo === 'DESENVOLVEDOR' ? 'EQUIPE' : u.cargo;
+                h += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-800 rounded-2xl font-black text-[10px] flex justify-between items-center text-slate-300 mb-2">
+                        <span>${u.nome}</span>
+                        <span class="opacity-30">${cargoVisual}</span>
+                      </button>`;
+            });
+            container.innerHTML = h;
         }
 
         function prepararSenha(n) {
             document.getElementById('login-title').innerText = `SENHA: ${n}`;
             document.getElementById('auth-container').innerHTML = `
-                <input type="password" id="pass-input" class="w-full bg-slate-800 p-5 rounded-2xl text-center text-white mb-4 outline-none border border-slate-700" autofocus>
+                <input type="password" id="pass-input" class="input-dark mb-4" autofocus>
                 <button onclick="confirmarSenha('${n}')" class="w-full py-5 bg-[#FFD700] text-slate-900 rounded-2xl font-black">ENTRAR</button>
             `;
         }
@@ -123,17 +179,22 @@
             const u = EQUIPE.find(x => x.nome === n);
             const pass = document.getElementById('pass-input').value;
             if (btoa(pass) === u.pass) {
+                if (manutencaoAtiva && u.cargo !== 'DESENVOLVEDOR') {
+                    alert("SISTEMA EM MANUTENÇÃO.");
+                    mostrarManutencao();
+                    return;
+                }
                 usuarioSessao = u;
                 localStorage.setItem('sessaoNewMarket', u.nome);
                 entrarNoApp();
-            } else { alert("Senha Incorreta"); }
+            } else { alert("Senha incorreta."); }
         }
 
         function entrarNoApp() {
+            document.getElementById('maintenanceView').classList.add('hidden-app');
             document.getElementById('loginView').classList.add('hidden-app');
             document.getElementById('appView').classList.remove('hidden-app');
-            document.getElementById('user-display').innerText = `OPERADOR: ${usuarioSessao.nome} | ${usuarioSessao.cargo}`;
-            
+            document.getElementById('user-display').innerText = `OPERADOR: ${usuarioSessao.nome}`;
             db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
                 estoque = [];
                 snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
@@ -141,127 +202,156 @@
             });
         }
 
+        function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
+
+        /**
+         * FUNÇÃO: renderizar
+         * DESCRIÇÃO: Gera a lista visual de produtos.
+         * ATUALIZAÇÃO v1.5.4: Controle de exibição do botão excluir baseado no usuário.
+         */
         function renderizar() {
-            const container = document.getElementById('container-produtos'), 
-                  busca = document.getElementById('input-busca').value.toUpperCase();
-            container.innerHTML = '';
+            const container = document.getElementById('container-produtos'), busca = document.getElementById('input-busca').value.toUpperCase();
+            let cV = 0, cA = 0; container.innerHTML = '';
             
-            const historicoEnviados = JSON.parse(localStorage.getItem('itens_enviados') || "[]");
-            const temPermissaoExcluir = ["GERENTE", "DESENVOLVEDOR"].includes(usuarioSessao.cargo);
+            // [Eng. Sistemas] Verifica se o usuário atual tem permissão administrativa
+            const podeExcluir = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
 
             estoque.forEach(item => {
-                if ((item.produto || "").includes(busca) || (item.ean || "").includes(busca)) {
+                const dV = new Date(item.vencimento + 'T00:00:00'), d = Math.floor((dV - new Date().setHours(0,0,0,0)) / 86400000);
+                if (d < 0) cV++; else if (d <= 7) cA++;
+                if (((item.produto || "").includes(busca) || (item.ean || "").includes(busca)) && (filtroAtual === 'vencidos' ? d < 0 : filtroAtual === 'urgente' ? (d >= 0 && d <= 7) : true)) {
                     const isChecked = itensSelecionados.has(item.id) ? 'checked' : '';
-                    const iconeEnviado = historicoEnviados.includes(item.id) ? '🔵' : '';
-                    const botaoExcluir = temPermissaoExcluir ? `<button onclick="excluirProduto('${item.id}', '${item.produto}')" class="text-[9px] text-red-500 font-black uppercase mt-3">Excluir</button>` : '';
-
-                    container.innerHTML += `
-                    <div class="card-produto p-5 mb-4 shadow-lg border-l-4 border-[#FFD700]">
-                        <div class="flex items-start gap-4">
-                            <input type="checkbox" ${isChecked} onchange="toggleCheckIn('${item.id}')" class="check-in-input mt-1">
-                            <div class="flex-grow">
-                                <div class="flex justify-between items-start mb-2">
-                                    <div class="max-w-[70%]"><h3 class="text-[9px] font-black uppercase text-slate-500">Item ${iconeEnviado}</h3><p class="font-black text-sm uppercase text-slate-100">${item.produto}</p></div>
-                                    <div class="text-right"><h3 class="text-[9px] font-black uppercase text-[#FFD700]">Validade</h3><p class="text-lg font-black text-white">${item.vencimento.split('-').reverse().join('/')}</p></div>
-                                </div>
-                                <div class="flex justify-between items-end">
-                                    <div class="flex-grow mr-4">
-                                        ${item.ean ? `<div class="barcode-container"><svg id="barcode-${item.id}"></svg></div>` : '<div class="h-10"></div>'}
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-2xl font-black text-[#FFD700]">x${item.quantidade || 1}</p>
-                                        ${botaoExcluir}
-                                    </div>
-                                </div>
+                    container.innerHTML += `<div class="card-produto p-5 flex items-center gap-4 mb-4">
+                        <input type="checkbox" ${isChecked} onchange="toggleCheckIn('${item.id}')" class="check-in-input">
+                        <div class="flex-grow">
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="max-w-[60%]"><h3 class="text-[10px] font-black uppercase text-slate-500">Produto</h3><p class="font-black text-sm uppercase text-slate-100">${item.produto}</p></div>
+                                <div class="text-right"><h3 class="text-[10px] font-black uppercase text-[#FFD700]">Validade</h3><p class="text-lg font-black text-white">${item.vencimento.split('-').reverse().join('/')}</p></div>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center">
+                                <div class="flex flex-col"><span class="text-[9px] font-black text-slate-500">EAN</span><span class="bg-slate-950 text-[#FFD700] px-3 py-1 rounded-lg font-mono text-sm border border-slate-800">${item.ean || '---'}</span></div>
+                                <div class="flex gap-4 items-center"><span class="text-2xl font-black text-[#FFD700]">${item.quantidade}</span>
+                                <div class="flex flex-col gap-2">
+                                    <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[10px] text-blue-400 font-black uppercase">Editar</button>
+                                    ${podeExcluir ? `<button onclick="excluirProduto('${item.id}', '${item.produto}')" class="text-[10px] text-red-500 font-black uppercase">Excluir</button>` : ''}
+                                </div></div>
                             </div>
                         </div>
                     </div>`;
                 }
             });
-
-            setTimeout(() => {
-                estoque.forEach(item => {
-                    const el = document.getElementById(`barcode-${item.id}`);
-                    if (item.ean && el) {
-                        try {
-                            JsBarcode(`#barcode-${item.id}`, item.ean, { format: "CODE128", width: 1.2, height: 35, displayValue: true, fontSize: 10 });
-                        } catch(e) {}
-                    }
-                });
-            }, 100);
+            document.getElementById('dash-vencidos').innerText = cV;
+            document.getElementById('dash-alerta').innerText = cA;
+            document.getElementById('dash-total').innerText = estoque.length;
         }
 
-        function excluirProduto(id, nome) {
-            if (confirm(`DESEJA EXCLUIR:\n${nome}?`)) {
-                db.collection("validades").doc(id).delete();
-            }
-        }
-
-        function abrirCadastro() {
+        async function abrirCadastro() {
+            limparForm();
             document.getElementById('modal-cadastro').classList.remove('hidden');
-            iniciarScanner();
-        }
-
-        function fecharCadastro() {
-            if (html5QrCode) html5QrCode.stop();
-            document.getElementById('modal-cadastro').classList.add('hidden');
-        }
-
-        function iniciarScanner() {
-            html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
-                document.getElementById('cad-ean').value = text;
-                // Vibrar celular ao ler (se suportado)
-                if(navigator.vibrate) navigator.vibrate(100);
-            }).catch(err => console.error("Câmera bloqueada."));
-        }
-
-        function salvarProduto() {
-            const p = {
-                produto: document.getElementById('cad-produto').value.toUpperCase(),
-                ean: document.getElementById('cad-ean').value,
-                vencimento: document.getElementById('cad-vencimento').value,
-                quantidade: Number(document.getElementById('cad-quantidade').value) || 1,
-                data_cadastro: new Date().toISOString()
-            };
-
-            if (!p.produto || !p.vencimento) return alert("Preencha Nome e Validade!");
-
-            db.collection("validades").add(p).then(() => {
-                fecharCadastro();
-                alert("Salvo com sucesso!");
-                // Limpar campos
-                document.getElementById('cad-produto').value = '';
-                document.getElementById('cad-ean').value = '';
-                document.getElementById('cad-vencimento').value = '';
-                document.getElementById('cad-quantidade').value = '';
+            document.getElementById('barcode-area').classList.add('hidden');
+            const readerCont = document.getElementById('reader-container');
+            readerCont.classList.remove('hidden');
+            scannerInstancia = new Html5Qrcode("reader");
+            await scannerInstancia.start({ facingMode: "environment" }, { fps: 25, qrbox: 250 }, (txt) => {
+                document.getElementById('p-ean').value = txt;
+                scannerInstancia.stop();
+                readerCont.classList.add('hidden');
+                gerarGraficoBarras(txt);
             });
         }
+
+        function prepararEdicao(item) {
+            limparForm();
+            document.getElementById('modal-cadastro').classList.remove('hidden');
+            document.getElementById('reader-container').classList.add('hidden');
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('p-nome').value = item.produto;
+            document.getElementById('p-validade').value = item.vencimento;
+            document.getElementById('p-ean').value = item.ean || '';
+            document.getElementById('p-qtd').value = item.quantidade;
+            if(item.ean) gerarGraficoBarras(item.ean);
+        }
+
+        function gerarGraficoBarras(valor) {
+            const area = document.getElementById('barcode-area');
+            if (!valor || valor.length < 5) { area.classList.add('hidden'); return; }
+            try {
+                area.classList.remove('hidden');
+                JsBarcode("#barcode-canvas", valor, { format: valor.length === 13 ? "EAN13" : "CODE128", lineColor: "#000", width: 2.5, height: 80, displayValue: true, fontSize: 18, background: "#ffffff" });
+            } catch (e) { area.classList.add('hidden'); }
+        }
+
+        async function salvarProduto() {
+            const id = document.getElementById('edit-id').value, d = { produto: document.getElementById('p-nome').value.toUpperCase(), vencimento: document.getElementById('p-validade').value, ean: document.getElementById('p-ean').value, quantidade: parseInt(document.getElementById('p-qtd').value) || 0 };
+            id ? await db.collection("validades").doc(id).update(d) : await db.collection("validades").add(d);
+            fecharModalCadastro();
+        }
+
+        /**
+         * FUNÇÃO: excluirProduto
+         * DESCRIÇÃO: Remove um produto do banco de dados.
+         * ATUALIZAÇÃO v1.5.4: Trava de segurança lógica para usuários não autorizados.
+         */
+        function excluirProduto(id, nome) { 
+            // [Eng. Sistemas] Trava de segurança interna
+            const podeExcluir = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
+            if (!podeExcluir) {
+                alert("ACESSO NEGADO: Apenas administradores podem excluir produtos.");
+                return;
+            }
+            if (confirm(`EXCLUIR:\n"${nome}"?`)) { 
+                db.collection("validades").doc(id).delete(); 
+            } 
+        }
+        
+        function fecharModalCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if(scannerInstancia) scannerInstancia.stop().catch(() => {}); }
 
         function enviarRelatorioWhatsApp() {
-            const urlSistema = window.location.href;
-            let lista = itensSelecionados.size > 0 ? estoque.filter(i => itensSelecionados.has(i.id)) : estoque.filter(i => {
-                const dV = new Date(i.vencimento + 'T00:00:00');
-                return Math.floor((dV - new Date().setHours(0,0,0,0)) / 86400000) <= 7;
-            });
-
-            if (lista.length === 0) return alert("Nada para relatar!");
-
-            const historico = JSON.parse(localStorage.getItem('itens_enviados') || "[]");
-            const atualizado = [...new Set([...historico, ...lista.map(i => i.id)])].slice(-200);
-            localStorage.setItem('itens_enviados', JSON.stringify(atualizado));
-
-            let msg = `*📦 RELATÓRIO: ${usuarioSessao.nome}*%0A%0A`;
-            lista.forEach(i => msg += `🔹 *${i.produto}* | VAL: *${i.vencimento.split('-').reverse().join('/')}* | QTD: ${i.quantidade}%0A`);
-            msg += `%0A🔗 *Acessar Sistema:* ${urlSistema}%0A_v1.6.2_`;
+            const agora = new Date();
+            const hoje = new Date(); hoje.setHours(0,0,0,0);
+            const urlSistema = window.location.href; 
             
+            let lista = [];
+            if (itensSelecionados.size > 0) {
+                lista = estoque.filter(item => itensSelecionados.has(item.id));
+            } else {
+                lista = estoque.filter(item => {
+                    const dV = new Date(item.vencimento + 'T00:00:00'), diff = Math.floor((dV - hoje) / 86400000);
+                    return diff <= 7;
+                });
+            }
+            
+            if (lista.length === 0) return alert("Nada para relatar!");
+            lista.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
+            
+            const dF = agora.toLocaleDateString('pt-BR'), hF = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            let msg = `*📦 RELATÓRIO: ${usuarioSessao.nome}*%0A_Data: ${dF} | Hora: ${hF}_%0A%0A`;
+            
+            lista.forEach(i => {
+                const dV = new Date(i.vencimento + 'T00:00:00'), diff = Math.floor((dV - hoje) / 86400000);
+                let icone = diff < 0 ? "🚨 *VENCIDO*" : (diff <= 7 ? "⚠️ *URGENTE*" : "✅ *OK*");
+                msg += `${icone}%0A*PROD:* *${i.produto}*%0A*VAL:* *${i.vencimento.split('-').reverse().join('/')}*%0A*QTD:* *${i.quantidade}*%0A----------------------------%0A`;
+            });
+            
+            msg += `%0A_Enviado via New Market v1.5.4_%0A🔗 *Acessar Sistema:* ${urlSistema}`;
             window.open(`https://wa.me/?text=${msg}`);
-            setTimeout(() => renderizar(), 1000);
         }
 
-        function toggleCheckIn(id) { itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id); }
-        function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
-        function checkInTodos() { if (itensSelecionados.size === estoque.length) itensSelecionados.clear(); else estoque.forEach(i => itensSelecionados.add(i.id)); renderizar(); }
+        function toggleManutencaoSecreto() {
+            cliquesSegredo++;
+            if (cliquesSegredo >= 5) {
+                const est = !manutencaoAtiva;
+                localStorage.setItem('manutencaoNewMarket', est);
+                window.location.reload();
+            }
+            setTimeout(() => cliquesSegredo = 0, 3000);
+        }
+
+        function setFiltro(f) { filtroAtual = f; renderizar(); }
+        function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; document.getElementById('barcode-area').classList.add('hidden'); }
+        function iniciarTimerManutencao() { setInterval(() => { if (segundosTotais <= 0) segundosTotais = 900; let m = Math.floor(segundosTotais / 60), s = segundosTotais % 60; document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; segundosTotais--; }, 1000); }
+        function checkInTodos() { if (itensSelecionados.size === estoque.length) { itensSelecionados.clear(); } else { estoque.forEach(i => itensSelecionados.add(i.id)); } renderizar(); }
+        function toggleCheckIn(id) { itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id); renderizar(); }
     </script>
 </body>
 </html>
