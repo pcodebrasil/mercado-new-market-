@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v1.2.0 - Midnight COD</title>
+    <title>New Market v1.2.4 - Master Edition</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -24,11 +24,14 @@
 <body>
 
     <div id="maintenanceView" class="hidden-app fixed inset-0 bg-maintenance z-[200] flex items-center justify-center p-6 text-center">
-        <div class="bg-slate-900 border-2 border-yellow-500 p-8 rounded-[2rem] max-w-sm">
-            <h1 class="text-4xl mb-4">🚧</h1>
-            <h2 class="text-xl font-black text-yellow-500 uppercase italic">Em Manutenção</h2>
-            <button onclick="irParaLoginDesdeManutencao()" class="mt-6 w-full py-3 bg-yellow-500 text-slate-900 rounded-xl font-black uppercase text-[10px]">Login Admin</button>
-            <button onclick="toggleManutencaoSecreto()" class="mt-8 text-[10px] text-slate-600 uppercase block mx-auto">Sair Admin</button>
+        <div class="bg-slate-900 border-2 border-yellow-500 p-8 rounded-[3rem] max-w-sm shadow-[0_0_50px_rgba(234,179,8,0.2)]">
+            <div class="text-5xl mb-4">⚙️</div>
+            <div id="timer-display" class="text-4xl font-mono font-black text-yellow-500 mb-2 drop-shadow-[0_0_10px_rgba(234,179,8,0.5)]">15:00</div>
+            <p class="text-[9px] text-yellow-500/50 font-black uppercase tracking-[0.2em] mb-6">Tempo Estimado</p>
+            <h2 class="text-2xl font-black text-yellow-500 uppercase italic leading-tight">Sistema em<br>Atualização</h2>
+            <p class="text-slate-400 text-[10px] mt-4 font-bold uppercase tracking-widest text-center">Estamos preparando novidades para o New Market. Voltamos em breve!</p>
+            <button onclick="irParaLoginDesdeManutencao()" class="mt-8 w-full py-4 bg-yellow-500 text-slate-900 rounded-2xl font-black uppercase text-[11px]">Acesso Administrativo</button>
+            <p class="mt-6 text-[9px] text-slate-600 font-black uppercase italic">Status: Syncing v1.2.4</p>
         </div>
     </div>
 
@@ -36,10 +39,10 @@
         <div class="bg-slate-900 w-full max-w-sm rounded-[3rem] p-8 shadow-2xl border border-slate-800 flex flex-col min-h-[550px]">
             <div id="login-content" class="flex-grow">
                 <div class="w-16 h-16 bg-[#003366] rounded-2xl flex items-center justify-center mx-auto mb-6 text-[#FFD700] text-2xl font-black italic shadow-xl">NM</div>
-                <h2 id="login-title" class="text-xl font-black uppercase italic mb-8 text-slate-100">Equipe New Market</h2>
+                <h2 id="login-title" class="text-xl font-black uppercase italic mb-8 text-slate-100 italic">Equipe New Market</h2>
                 <div id="auth-container"></div>
             </div>
-            <p onclick="toggleManutencaoSecreto()" class="cursor-pointer text-[10px] font-black text-slate-500 uppercase tracking-widest mt-6 italic">v1.2.0 Stable</p>
+            <p onclick="toggleManutencaoSecreto()" class="cursor-pointer text-[10px] font-black text-slate-500 uppercase tracking-widest mt-6 italic">v1.2.4 Stable</p>
         </div>
     </div>
 
@@ -60,16 +63,16 @@
 
         <main class="max-w-lg mx-auto p-5 pb-44">
             <div class="grid grid-cols-3 gap-2 mb-4 text-center">
-                <div id="btn-vencidos" onclick="setFiltro('vencidos')" class="bg-red-900/40 p-3 rounded-2xl text-red-400 border-2 border-transparent shadow-lg">
-                    <p class="text-[7px] font-black uppercase">Vencidos</p>
+                <div id="btn-vencidos" onclick="setFiltro('vencidos')" class="bg-red-900/40 p-3 rounded-2xl text-red-400 border-2 border-transparent">
+                    <p class="text-[7px] font-black uppercase italic">Vencidos</p>
                     <p id="dash-vencidos" class="text-xl font-black">0</p>
                 </div>
-                <div id="btn-urgente" onclick="setFiltro('urgente')" class="bg-yellow-900/40 p-3 rounded-2xl text-yellow-400 border-2 border-transparent shadow-lg">
-                    <p class="text-[7px] font-black uppercase">Urgente</p>
+                <div id="btn-urgente" onclick="setFiltro('urgente')" class="bg-yellow-900/40 p-3 rounded-2xl text-yellow-400 border-2 border-transparent">
+                    <p class="text-[7px] font-black uppercase italic">Urgente</p>
                     <p id="dash-alerta" class="text-xl font-black">0</p>
                 </div>
                 <div id="btn-todos" onclick="setFiltro('todos')" class="bg-slate-800 p-3 rounded-2xl text-slate-100 border-2 border-transparent filtro-ativo">
-                    <p class="text-[7px] font-black uppercase opacity-40">Total</p>
+                    <p class="text-[7px] font-black uppercase opacity-40 italic">Total</p>
                     <p id="dash-total" class="text-xl font-black">0</p>
                 </div>
             </div>
@@ -104,7 +107,7 @@
     </div>
 
     <script>
-        // CONFIGURAÇÕES FIREBASE (Originais conforme o prompt)
+        // CONFIGURAÇÕES FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4", authDomain: "mercado-c3e95.firebaseapp.com",
             projectId: "mercado-c3e95", storageBucket: "mercado-c3e95.firebasestorage.app",
@@ -113,7 +116,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Lista de Operadores
+        // GESTÃO DE EQUIPE
         const EQUIPE = [
             { nome: "ADRIANO", cargo: "GERENTE", pass: "admin123" },
             { nome: "ADRIELLE", cargo: "GERENTE", pass: "admin123" },
@@ -125,15 +128,19 @@
             { nome: "TAMIRIS", cargo: "EQUIPE", pass: "tamiris123" }
         ];
 
+        // VARIÁVEIS DE ESTADO
         let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
         let cliquesSegredo = 0, usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos';
+        const TEMPO_CICLO = 900; // 15 minutos em segundos
+        let segundosTotais = TEMPO_CICLO;
 
-        // Inicialização do App
+        // INICIALIZAÇÃO DO SISTEMA
         window.onload = () => {
             const salvo = localStorage.getItem('sessaoNewMarket');
             if (manutencaoAtiva && salvo !== 'PAULO') {
                 document.getElementById('loginView').classList.add('hidden-app');
                 document.getElementById('maintenanceView').classList.remove('hidden-app');
+                iniciarTimerManutencao();
             } else {
                 renderizarListaUsuarios();
                 if (salvo) { 
@@ -143,27 +150,32 @@
             }
         };
 
-        // Lógica de Login
+        // LÓGICA DO CRONÔMETRO DE MANUTENÇÃO (Loop Infinito)
+        function iniciarTimerManutencao() {
+            const display = document.getElementById('timer-display');
+            setInterval(() => {
+                if (segundosTotais < 0) segundosTotais = TEMPO_CICLO;
+                let m = Math.floor(segundosTotais / 60), s = segundosTotais % 60;
+                if(display) display.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                segundosTotais--;
+            }, 1000);
+        }
+
+        // LÓGICA DE LOGIN
         function renderizarListaUsuarios() {
             const container = document.getElementById('auth-container');
             document.getElementById('login-title').innerText = 'Equipe New Market';
             let html = '<div class="space-y-2 max-h-[350px] overflow-y-auto pr-2">';
             EQUIPE.forEach(u => {
-                html += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-800 rounded-2xl font-black uppercase text-[10px] flex justify-between items-center mb-2 text-slate-300"><span>${u.nome}</span><span class="opacity-30">${u.cargo}</span></button>`;
+                html += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-800 rounded-2xl font-black uppercase text-[10px] flex justify-between items-center mb-2 text-slate-300"><span>${u.nome}</span><span class="opacity-30 italic">${u.cargo}</span></button>`;
             });
-            html += '</div>';
-            container.innerHTML = html;
+            container.innerHTML = html + '</div>';
         }
 
         function prepararSenha(nome) {
             const container = document.getElementById('auth-container');
             document.getElementById('login-title').innerText = `SENHA: ${nome}`;
-            container.innerHTML = `
-                <div class="animate-in fade-in zoom-in duration-300 space-y-4">
-                    <input type="password" id="pass-input" placeholder="••••" class="input-dark" autofocus onkeypress="if(event.key==='Enter') confirmarSenha('${nome}')">
-                    <button onclick="confirmarSenha('${nome}')" class="w-full py-5 bg-[#FFD700] text-slate-900 rounded-2xl font-black uppercase shadow-lg">Entrar</button>
-                    <button onclick="renderizarListaUsuarios()" class="w-full text-[10px] text-slate-500 uppercase font-black py-2">← Voltar</button>
-                </div>`;
+            container.innerHTML = `<div class="animate-in fade-in zoom-in duration-300 space-y-4"><input type="password" id="pass-input" placeholder="••••" class="input-dark" autofocus onkeypress="if(event.key==='Enter') confirmarSenha('${nome}')"><button onclick="confirmarSenha('${nome}')" class="w-full py-5 bg-[#FFD700] text-slate-900 rounded-2xl font-black uppercase shadow-lg">Entrar</button><button onclick="renderizarListaUsuarios()" class="w-full text-[10px] text-slate-500 uppercase font-black py-2">← Voltar</button></div>`;
             setTimeout(() => document.getElementById('pass-input').focus(), 100);
         }
 
@@ -171,117 +183,81 @@
             const u = EQUIPE.find(x => x.nome === nome);
             const input = document.getElementById('pass-input');
             if (input.value === u.pass) {
-                if (manutencaoAtiva && nome !== 'PAULO') { alert("⚠️ SISTEMA EM MANUTENÇÃO!"); renderizarListaUsuarios(); return; }
+                if (manutencaoAtiva && nome !== 'PAULO') { alert("⚠️ SISTEMA EM MANUTENÇÃO!"); return; }
                 usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome); entrarNoApp();
             } else { alert("❌ SENHA INCORRETA!"); input.value = ''; input.focus(); }
         }
 
-        // Lógica do Relatório (WhatsApp)
+        // FUNÇÃO DE RELATÓRIO WHATSAPP (v1.2.0)
         function enviarRelatorioWhatsApp() {
-            if (estoque.length === 0) { alert("Sem dados para gerar relatório."); return; }
-            const hoje = new Date();
-            const dataFormatada = hoje.toLocaleDateString('pt-BR') + " às " + hoje.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
-            
+            if (estoque.length === 0) { alert("Sem dados."); return; }
+            const hoje = new Date(), dt = hoje.toLocaleDateString('pt-BR') + " às " + hoje.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
             const vencidos = estoque.filter(i => Math.ceil((new Date(i.vencimento) - hoje) / 86400000) < 0);
-            const urgentes = estoque.filter(i => {
-                const d = Math.ceil((new Date(i.vencimento) - hoje) / 86400000);
-                return d >= 0 && d <= 7;
-            });
+            const urgentes = estoque.filter(i => { const d = Math.ceil((new Date(i.vencimento) - hoje) / 86400000); return d >= 0 && d <= 7; });
 
-            let msg = `📋 *RELATÓRIO NEW MARKET*%0A`;
-            msg += `👤 Operador: ${usuarioSessao.nome}%0A`;
-            msg += `📅 Data: ${dataFormatada}%0A%0A`;
-
+            let msg = `📋 *RELATÓRIO NEW MARKET*%0A👤 Operador: ${usuarioSessao.nome}%0A📅 Data: ${dt}%0A%0A`;
             if (vencidos.length > 0) {
-                msg += `🚨 *ATENÇÃO: VENCIDOS (${vencidos.length})*%0A`;
-                vencidos.forEach(v => { msg += `• ${v.produto} (Val: ${v.vencimento.split('-').reverse().join('/')})%0A`; });
+                msg += `🚨 *VENCIDOS (${vencidos.length})*%0A`;
+                vencidos.forEach(v => msg += `• ${v.produto} (${v.vencimento.split('-').reverse().join('/')})%0A`);
                 msg += `%0A`;
             }
-
             if (urgentes.length > 0) {
-                msg += `⚠️ *URGENTE - PRÓX. 7 DIAS (${urgentes.length})*%0A`;
-                urgentes.forEach(u => { msg += `• ${u.produto} (Val: ${u.vencimento.split('-').reverse().join('/')})%0A`; });
+                msg += `⚠️ *URGENTE (${urgentes.length})*%0A`;
+                urgentes.forEach(u => msg += `• ${u.produto} (${u.vencimento.split('-').reverse().join('/')})%0A`);
                 msg += `%0A`;
             }
-
-            msg += `*Total monitorado: ${estoque.length}*%0A`;
-            msg += `_v1.2.0 Stable_`;
+            msg += `*Total: ${estoque.length} itens*%0A_v1.2.4 Stable_`;
             window.open(`https://wa.me/?text=${msg}`, '_blank');
         }
 
-        // Dashboard e Firestore
+        // NÚCLEO DO APLICATIVO
         function entrarNoApp() {
             document.getElementById('loginView').classList.add('hidden-app');
             document.getElementById('maintenanceView').classList.add('hidden-app');
             document.getElementById('appView').classList.remove('hidden-app');
             document.getElementById('user-display').innerText = `OPERADOR: ${usuarioSessao.nome}`;
-            
             db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
-                estoque = []; 
-                snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()})); 
-                renderizar();
+                estoque = []; snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()})); renderizar();
             });
         }
 
         function renderizar() {
-            const container = document.getElementById('container-produtos');
-            const busca = document.getElementById('input-busca').value.toUpperCase();
+            const container = document.getElementById('container-produtos'), busca = document.getElementById('input-busca').value.toUpperCase();
             let cV = 0, cA = 0; container.innerHTML = '';
-
             estoque.filter(i => {
                 const d = Math.ceil((new Date(i.vencimento) - new Date()) / 86400000);
                 if (d < 0) cV++; else if (d <= 7) cA++;
                 const matches = (i.produto || "").includes(busca) || (i.ean || "").includes(busca);
-                if(filtroAtual === 'vencidos') return matches && d < 0;
-                if(filtroAtual === 'urgente') return matches && d >= 0 && d <= 7;
-                return matches;
+                return filtroAtual === 'vencidos' ? (matches && d < 0) : filtroAtual === 'urgente' ? (matches && d >= 0 && d <= 7) : matches;
             }).forEach(item => {
-                const d = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
-                const corTexto = d < 0 ? 'text-red-500' : (d <= 7 ? 'text-yellow-400' : 'text-slate-400');
-                container.innerHTML += `<div class="card-produto p-5 flex flex-col mb-4"><div class="flex justify-between items-start mb-3"><div><h3 class="font-black text-slate-100 text-sm uppercase">${item.produto}</h3><p class="text-[10px] font-bold ${corTexto}">Val: ${item.vencimento.split('-').reverse().join('/')}</p></div><div class="text-2xl font-black text-[#FFD700]">${item.quantidade}</div></div><div class="flex justify-between items-center mt-2 border-t border-slate-800 pt-3"><span class="text-[8px] font-black uppercase text-slate-500">COD: ${item.ean || '---'}</span><button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[10px] font-black text-blue-400 uppercase">Ajustar</button></div></div>`;
+                const d = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000), cor = d < 0 ? 'text-red-500' : (d <= 7 ? 'text-yellow-400' : 'text-slate-400');
+                container.innerHTML += `<div class="card-produto p-5 flex flex-col mb-4"><div class="flex justify-between items-start mb-3"><div><h3 class="font-black text-slate-100 text-sm uppercase">${item.produto}</h3><p class="text-[10px] font-bold ${cor}">Val: ${item.vencimento.split('-').reverse().join('/')}</p></div><div class="text-2xl font-black text-[#FFD700]">${item.quantidade}</div></div><div class="flex justify-between items-center mt-2 border-t border-slate-800 pt-3"><span class="text-[8px] font-black uppercase text-slate-500">COD: ${item.ean || '---'}</span><button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[10px] font-black text-blue-400 uppercase">Ajustar</button></div></div>`;
             });
-
-            document.getElementById('dash-vencidos').innerText = cV; 
-            document.getElementById('dash-alerta').innerText = cA; 
-            document.getElementById('dash-total').innerText = estoque.length;
+            document.getElementById('dash-vencidos').innerText = cV; document.getElementById('dash-alerta').innerText = cA; document.getElementById('dash-total').innerText = estoque.length;
         }
 
-        // Funções de Cadastro, Edição e Scanner (Inalteradas para estabilidade)
+        // CADASTRO E SCANNER
         async function abrirCadastro() {
-            document.getElementById('modal-cadastro').classList.remove('hidden');
-            limparForm();
+            document.getElementById('modal-cadastro').classList.remove('hidden'); limparForm();
             scannerInstancia = new Html5Qrcode("reader");
             scannerInstancia.start({ facingMode: "environment" }, { fps: 25, qrbox: 250, aspectRatio: 1.0 }, (txt) => {
-                document.getElementById('p-ean').value = txt;
-                if (navigator.vibrate) navigator.vibrate(100);
-                scannerInstancia.stop();
+                document.getElementById('p-ean').value = txt; if (navigator.vibrate) navigator.vibrate(100); scannerInstancia.stop();
             }).catch(()=>{});
         }
 
         async function salvarProduto() {
-            const id = document.getElementById('edit-id').value;
-            const dados = { produto: document.getElementById('p-nome').value.toUpperCase(), vencimento: document.getElementById('p-validade').value, ean: document.getElementById('p-ean').value, quantidade: parseInt(document.getElementById('p-qtd').value) || 0 };
+            const id = document.getElementById('edit-id').value, dados = { produto: document.getElementById('p-nome').value.toUpperCase(), vencimento: document.getElementById('p-validade').value, ean: document.getElementById('p-ean').value, quantidade: parseInt(document.getElementById('p-qtd').value) || 0 };
             id ? await db.collection("validades").doc(id).update(dados) : await db.collection("validades").add(dados);
             fecharModalCadastro();
         }
 
+        // UTILITÁRIOS
         function fecharModalCadastro() { scannerInstancia?.stop().catch(()=>{}); document.getElementById('modal-cadastro').classList.add('hidden'); }
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
         function setFiltro(f) { filtroAtual = f; renderizar(); }
         function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; }
-        function prepararEdicao(item) {
-            document.getElementById('modal-cadastro').classList.remove('hidden');
-            document.getElementById('edit-id').value = item.id; document.getElementById('p-nome').value = item.produto; document.getElementById('p-validade').value = item.vencimento; document.getElementById('p-ean').value = item.ean || ''; document.getElementById('p-qtd').value = item.quantidade;
-        }
-        function toggleManutencaoSecreto() {
-            cliquesSegredo++;
-            if (cliquesSegredo >= 5) {
-                manutencaoAtiva = !manutencaoAtiva;
-                localStorage.setItem('manutencaoNewMarket', manutencaoAtiva);
-                window.location.reload();
-            }
-            setTimeout(() => cliquesSegredo = 0, 2000);
-        }
+        function prepararEdicao(item) { document.getElementById('modal-cadastro').classList.remove('hidden'); document.getElementById('edit-id').value = item.id; document.getElementById('p-nome').value = item.produto; document.getElementById('p-validade').value = item.vencimento; document.getElementById('p-ean').value = item.ean || ''; document.getElementById('p-qtd').value = item.quantidade; }
+        function toggleManutencaoSecreto() { cliquesSegredo++; if (cliquesSegredo >= 5) { manutencaoAtiva = !manutencaoAtiva; localStorage.setItem('manutencaoNewMarket', manutencaoAtiva); window.location.reload(); } setTimeout(() => cliquesSegredo = 0, 2000); }
         function irParaLoginDesdeManutencao() { document.getElementById('maintenanceView').classList.add('hidden-app'); document.getElementById('loginView').classList.remove('hidden-app'); renderizarListaUsuarios(); }
     </script>
 </body>
