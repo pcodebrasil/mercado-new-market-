@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.5.2</title>
+    <title>New Market - v1.5.3</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -95,7 +95,8 @@
     </div>
 
     <script>
-        // Função para impedir o menu de contexto e inspecionar elemento
+        // [Eng. Sistemas] Proteção Anti-Inspecionar (v1.5.3)
+        // Função para impedir o menu de contexto e teclas de depuração
         document.addEventListener('contextmenu', event => event.preventDefault()); 
         document.onkeydown = (e) => {
             if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
@@ -103,12 +104,12 @@
             }
         };
 
-        // Configuração e Inicialização do Firebase
+        // [Eng. Sistemas] Configuração do FirebaseFirestore
         const firebaseConfig = { apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4", authDomain: "mercado-c3e95.firebaseapp.com", projectId: "mercado-c3e95", storageBucket: "mercado-c3e95.firebasestorage.app", messagingSenderId: "883539091925", appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Lista de Equipe com Senhas em Base64 para proteção básica
+        // [Eng. Sistemas] Equipe Unificada com Senhas Ofuscadas (Base64)
         const EQUIPE = [ 
             { nome: "ADRIANO", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
             { nome: "ADRIELLE", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
@@ -120,11 +121,11 @@
             { nome: "TAMIRIS", pass: "dGFtaXJpczEyMw==", cargo: "EQUIPE" } 
         ];
 
-        // Variáveis de Estado Global
+        // [Arquiteto] Variáveis de Estado Global
         let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
         let usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos', itensSelecionados = new Set(), segundosTotais = 900, cliquesSegredo = 0;
 
-        // Inicialização do App ao carregar a janela
+        // [Arquiteto] Inicialização do Sistema e Verificação de Sessão/Manutenção
         window.onload = () => {
             renderizarListaUsuarios();
             const salvo = localStorage.getItem('sessaoNewMarket');
@@ -137,7 +138,7 @@
             }
         };
 
-        // Gerenciamento de Visibilidade das Telas
+        // Funções de Gestão de Telas (Views)
         function mostrarLogin() {
             document.getElementById('maintenanceView').classList.add('hidden-app');
             document.getElementById('appView').classList.add('hidden-app');
@@ -154,7 +155,7 @@
 
         function irParaLoginDesdeManutencao() { mostrarLogin(); }
 
-        // Renderiza botões de login ocultando o cargo do desenvolvedor
+        // [Eng. Sistemas] Renderiza os operadores com disfarce visual de cargo
         function renderizarListaUsuarios() {
             const container = document.getElementById('auth-container');
             if(!container) return;
@@ -169,7 +170,7 @@
             container.innerHTML = h;
         }
 
-        // Interface para digitação de senha
+        // Prepara o formulário de senha para o usuário selecionado
         function prepararSenha(n) {
             document.getElementById('login-title').innerText = `SENHA: ${n}`;
             document.getElementById('auth-container').innerHTML = `
@@ -178,7 +179,7 @@
             `;
         }
 
-        // Validação de senha e controle de acesso em manutenção
+        // [Eng. Sistemas] Valida credenciais e permite bypass se for Desenvolvedor
         function confirmarSenha(n) {
             const u = EQUIPE.find(x => x.nome === n);
             const pass = document.getElementById('pass-input').value;
@@ -194,7 +195,7 @@
             } else { alert("Senha incorreta."); }
         }
 
-        // Inicialização dos dados e escuta em tempo real do Firestore
+        // Inicializa a escuta em tempo real do banco de dados
         function entrarNoApp() {
             document.getElementById('maintenanceView').classList.add('hidden-app');
             document.getElementById('loginView').classList.add('hidden-app');
@@ -207,10 +208,10 @@
             });
         }
 
-        // Finaliza sessão do usuário
+        // Limpa a sessão local
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
 
-        // Renderiza a lista de produtos com base nos filtros e busca
+        // [Arquiteto] Renderiza a lista de cards de produtos
         function renderizar() {
             const container = document.getElementById('container-produtos'), busca = document.getElementById('input-busca').value.toUpperCase();
             let cV = 0, cA = 0; container.innerHTML = '';
@@ -240,7 +241,7 @@
             document.getElementById('dash-total').innerText = estoque.length;
         }
 
-        // Abre modal e inicializa scanner de código de barras
+        // Abre modal e ativa câmera para scanner
         async function abrirCadastro() {
             limparForm();
             document.getElementById('modal-cadastro').classList.remove('hidden');
@@ -256,7 +257,7 @@
             });
         }
 
-        // Carrega dados de um produto existente para edição
+        // Preenche formulário para edição de produto
         function prepararEdicao(item) {
             limparForm();
             document.getElementById('modal-cadastro').classList.remove('hidden');
@@ -269,7 +270,7 @@
             if(item.ean) gerarGraficoBarras(item.ean);
         }
 
-        // Gera a representação visual do código de barras
+        // Gera imagem do código de barras usando JsBarcode
         function gerarGraficoBarras(valor) {
             const area = document.getElementById('barcode-area');
             if (!valor || valor.length < 5) { area.classList.add('hidden'); return; }
@@ -279,33 +280,44 @@
             } catch (e) { area.classList.add('hidden'); }
         }
 
-        // Salva ou Atualiza produto no banco de dados
+        // Salva ou atualiza documento no Firestore
         async function salvarProduto() {
             const id = document.getElementById('edit-id').value, d = { produto: document.getElementById('p-nome').value.toUpperCase(), vencimento: document.getElementById('p-validade').value, ean: document.getElementById('p-ean').value, quantidade: parseInt(document.getElementById('p-qtd').value) || 0 };
             id ? await db.collection("validades").doc(id).update(d) : await db.collection("validades").add(d);
             fecharModalCadastro();
         }
 
-        // Remove produto do banco de dados
+        // Deleta documento do Firestore
         function excluirProduto(id, nome) { if (confirm(`EXCLUIR:\n"${nome}"?`)) { db.collection("validades").doc(id).delete(); } }
         
-        // Fecha modal e limpa instância do scanner
+        // Fecha modal e encerra câmera
         function fecharModalCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if(scannerInstancia) scannerInstancia.stop().catch(() => {}); }
 
         /**
          * FUNÇÃO: enviarRelatorioWhatsApp
-         * DESCRIÇÃO: Gera o relatório formatado e envia via API do WhatsApp.
-         * ALTERAÇÃO v1.5.2: Inclusão do link do sistema no final da mensagem.
+         * DESCRIÇÃO: Gera o relatório formatado.
+         * ATUALIZAÇÃO v1.5.3: Lógica inteligente de filtragem. 
+         * Se houver itens selecionados, envia APENAS eles. 
+         * Se não houver seleção, envia automaticamente vencidos e urgentes.
          */
         function enviarRelatorioWhatsApp() {
             const agora = new Date();
             const hoje = new Date(); hoje.setHours(0,0,0,0);
-            const urlSistema = window.location.href; // Captura o link atual do sistema
+            const urlSistema = window.location.href; 
             
-            let lista = estoque.filter(item => {
-                const dV = new Date(item.vencimento + 'T00:00:00'), diff = Math.floor((dV - hoje) / 86400000);
-                return itensSelecionados.has(item.id) || diff <= 7;
-            });
+            let lista = [];
+
+            // [Eng. Sistemas] Verificação de prioridade: Seleção Manual vs Alerta Automático
+            if (itensSelecionados.size > 0) {
+                // Filtra apenas o que o usuário marcou manualmente
+                lista = estoque.filter(item => itensSelecionados.has(item.id));
+            } else {
+                // Filtra automaticamente produtos vencidos ou com validade < 7 dias
+                lista = estoque.filter(item => {
+                    const dV = new Date(item.vencimento + 'T00:00:00'), diff = Math.floor((dV - hoje) / 86400000);
+                    return diff <= 7;
+                });
+            }
             
             if (lista.length === 0) return alert("Nada para relatar!");
             lista.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
@@ -319,12 +331,11 @@
                 msg += `${icone}%0A*PROD:* *${i.produto}*%0A*VAL:* *${i.vencimento.split('-').reverse().join('/')}*%0A*QTD:* *${i.quantidade}*%0A----------------------------%0A`;
             });
             
-            // Rodapé com assinatura e link do sistema
-            msg += `%0A_Enviado via New Market v1.5.2_%0A🔗 *Acessar Sistema:* ${urlSistema}`;
+            msg += `%0A_Enviado via New Market v1.5.3_%0A🔗 *Acessar Sistema:* ${urlSistema}`;
             window.open(`https://wa.me/?text=${msg}`);
         }
 
-        // Função secreta para ativar/desativar manutenção
+        // Função secreta para manutenção
         function toggleManutencaoSecreto() {
             cliquesSegredo++;
             if (cliquesSegredo >= 5) {
@@ -335,7 +346,7 @@
             setTimeout(() => cliquesSegredo = 0, 3000);
         }
 
-        // Filtros e Utilidades
+        // [Arquiteto] Funções Auxiliares de UI
         function setFiltro(f) { filtroAtual = f; renderizar(); }
         function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; document.getElementById('barcode-area').classList.add('hidden'); }
         function iniciarTimerManutencao() { setInterval(() => { if (segundosTotais <= 0) segundosTotais = 900; let m = Math.floor(segundosTotais / 60), s = segundosTotais % 60; document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; segundosTotais--; }, 1000); }
