@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v1.2.4 - Master Edition</title>
+    <title>New Market v1.2.6 - Master Edition</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -31,7 +31,6 @@
             <h2 class="text-2xl font-black text-yellow-500 uppercase italic leading-tight">Sistema em<br>Atualização</h2>
             <p class="text-slate-400 text-[10px] mt-4 font-bold uppercase tracking-widest text-center">Estamos preparando novidades para o New Market. Voltamos em breve!</p>
             <button onclick="irParaLoginDesdeManutencao()" class="mt-8 w-full py-4 bg-yellow-500 text-slate-900 rounded-2xl font-black uppercase text-[11px]">Acesso Administrativo</button>
-            <p class="mt-6 text-[9px] text-slate-600 font-black uppercase italic">Status: Syncing v1.2.4</p>
         </div>
     </div>
 
@@ -39,10 +38,10 @@
         <div class="bg-slate-900 w-full max-w-sm rounded-[3rem] p-8 shadow-2xl border border-slate-800 flex flex-col min-h-[550px]">
             <div id="login-content" class="flex-grow">
                 <div class="w-16 h-16 bg-[#003366] rounded-2xl flex items-center justify-center mx-auto mb-6 text-[#FFD700] text-2xl font-black italic shadow-xl">NM</div>
-                <h2 id="login-title" class="text-xl font-black uppercase italic mb-8 text-slate-100 italic">Equipe New Market</h2>
+                <h2 id="login-title" class="text-xl font-black uppercase italic mb-8 text-slate-100">Equipe New Market</h2>
                 <div id="auth-container"></div>
             </div>
-            <p onclick="toggleManutencaoSecreto()" class="cursor-pointer text-[10px] font-black text-slate-500 uppercase tracking-widest mt-6 italic">v1.2.4 Stable</p>
+            <p onclick="toggleManutencaoSecreto()" class="cursor-pointer text-[10px] font-black text-slate-500 uppercase tracking-widest mt-6 italic">v1.2.6 Stable</p>
         </div>
     </div>
 
@@ -50,7 +49,7 @@
         <header class="bg-[#001e3c] p-6 sticky top-0 z-30 shadow-2xl rounded-b-[2.5rem] border-b-2 border-[#FFD700]">
             <div class="flex justify-between items-center mb-6">
                 <div class="flex items-center gap-3">
-                    <div id="status-ball" class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
                     <div>
                         <h1 class="font-black text-2xl italic text-[#FFD700] uppercase leading-none">New Market</h1>
                         <p id="user-display" class="text-[9px] font-black uppercase text-slate-400 mt-1"></p>
@@ -77,28 +76,29 @@
                 </div>
             </div>
 
-            <button onclick="enviarRelatorioWhatsApp()" class="w-full mb-8 py-3 bg-green-600/20 text-green-400 rounded-xl border border-green-600/30 font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
-                <span>📊</span> GERAR RELATÓRIO WHATSAPP
-            </button>
-
             <div id="container-produtos" class="space-y-4"></div>
         </main>
 
-        <div class="fixed bottom-8 left-0 right-0 flex flex-col gap-3 px-10 z-40">
+        <div class="fixed bottom-8 left-0 right-0 px-10 z-40">
             <button onclick="abrirCadastro()" class="w-full bg-[#FFD700] text-slate-950 py-5 rounded-2xl shadow-xl font-black text-xs uppercase active:scale-95 transition-all">+ CADASTRAR / SCANNER</button>
         </div>
     </div>
 
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-[#020617] z-[800] overflow-y-auto">
         <div class="max-w-lg mx-auto p-8">
-            <div class="flex justify-between items-center mb-8"><h2 class="text-lg font-black uppercase italic text-[#FFD700]">Registro</h2><button onclick="fecharModalCadastro()" class="text-3xl text-slate-600">&times;</button></div>
-            <div id="reader-container" class="relative w-full aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden mb-8 border border-slate-800 shadow-2xl"><div id="reader"></div></div>
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-lg font-black uppercase italic text-[#FFD700]">Registro</h2>
+                <button onclick="fecharModalCadastro()" class="text-4xl text-slate-500 font-light">&times;</button>
+            </div>
+            <div id="reader-container" class="relative w-full aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden mb-8 border border-slate-800">
+                <div id="reader"></div>
+            </div>
             <div class="space-y-5">
                 <input type="text" id="p-ean" placeholder="EAN (SCANNER)" class="w-full p-5 bg-slate-900 rounded-2xl font-mono text-slate-300 border border-slate-800 outline-none">
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-5 bg-slate-900 rounded-2xl font-black uppercase text-slate-100 border border-slate-800 outline-none">
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-[9px] font-black text-slate-500 mb-2 block uppercase px-2">📅 Validade</label><input type="date" id="p-validade" class="w-full p-4 bg-slate-900 rounded-xl text-white border border-slate-800"></div>
-                    <div><label class="text-[9px] font-black text-slate-500 mb-2 block uppercase px-2 text-center">📦 Qtd</label><input type="tel" id="p-qtd" placeholder="0" class="w-full p-4 bg-slate-900 rounded-2xl font-black text-center text-2xl text-[#FFD700] border border-slate-800 outline-none"></div>
+                    <div><label class="text-[9px] font-black text-slate-500 mb-2 block uppercase">📅 Validade</label><input type="date" id="p-validade" class="w-full p-4 bg-slate-900 rounded-xl text-white border border-slate-800"></div>
+                    <div><label class="text-[9px] font-black text-slate-500 mb-2 block uppercase text-center">📦 Qtd</label><input type="tel" id="p-qtd" placeholder="0" class="w-full p-4 bg-slate-900 rounded-2xl font-black text-center text-2xl text-[#FFD700] border border-slate-800 outline-none"></div>
                 </div>
                 <input type="hidden" id="edit-id">
                 <button onclick="salvarProduto()" class="w-full py-6 bg-[#003366] text-white rounded-2xl font-black uppercase shadow-xl mt-4">Salvar no Banco</button>
@@ -128,13 +128,11 @@
             { nome: "TAMIRIS", cargo: "EQUIPE", pass: "tamiris123" }
         ];
 
-        // VARIÁVEIS DE ESTADO
         let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
         let cliquesSegredo = 0, usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos';
-        const TEMPO_CICLO = 900; // 15 minutos em segundos
+        const TEMPO_CICLO = 900; 
         let segundosTotais = TEMPO_CICLO;
 
-        // INICIALIZAÇÃO DO SISTEMA
         window.onload = () => {
             const salvo = localStorage.getItem('sessaoNewMarket');
             if (manutencaoAtiva && salvo !== 'PAULO') {
@@ -150,7 +148,6 @@
             }
         };
 
-        // LÓGICA DO CRONÔMETRO DE MANUTENÇÃO (Loop Infinito)
         function iniciarTimerManutencao() {
             const display = document.getElementById('timer-display');
             setInterval(() => {
@@ -161,10 +158,9 @@
             }, 1000);
         }
 
-        // LÓGICA DE LOGIN
+        // --- SISTEMA DE LOGIN ---
         function renderizarListaUsuarios() {
             const container = document.getElementById('auth-container');
-            document.getElementById('login-title').innerText = 'Equipe New Market';
             let html = '<div class="space-y-2 max-h-[350px] overflow-y-auto pr-2">';
             EQUIPE.forEach(u => {
                 html += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-800 rounded-2xl font-black uppercase text-[10px] flex justify-between items-center mb-2 text-slate-300"><span>${u.nome}</span><span class="opacity-30 italic">${u.cargo}</span></button>`;
@@ -175,7 +171,7 @@
         function prepararSenha(nome) {
             const container = document.getElementById('auth-container');
             document.getElementById('login-title').innerText = `SENHA: ${nome}`;
-            container.innerHTML = `<div class="animate-in fade-in zoom-in duration-300 space-y-4"><input type="password" id="pass-input" placeholder="••••" class="input-dark" autofocus onkeypress="if(event.key==='Enter') confirmarSenha('${nome}')"><button onclick="confirmarSenha('${nome}')" class="w-full py-5 bg-[#FFD700] text-slate-900 rounded-2xl font-black uppercase shadow-lg">Entrar</button><button onclick="renderizarListaUsuarios()" class="w-full text-[10px] text-slate-500 uppercase font-black py-2">← Voltar</button></div>`;
+            container.innerHTML = `<div class="space-y-4"><input type="password" id="pass-input" placeholder="••••" class="input-dark" autofocus onkeypress="if(event.key==='Enter') confirmarSenha('${nome}')"><button onclick="confirmarSenha('${nome}')" class="w-full py-5 bg-[#FFD700] text-slate-900 rounded-2xl font-black uppercase shadow-lg">Entrar</button><button onclick="renderizarListaUsuarios()" class="w-full text-[10px] text-slate-500 uppercase font-black py-2">← Voltar</button></div>`;
             setTimeout(() => document.getElementById('pass-input').focus(), 100);
         }
 
@@ -183,34 +179,10 @@
             const u = EQUIPE.find(x => x.nome === nome);
             const input = document.getElementById('pass-input');
             if (input.value === u.pass) {
-                if (manutencaoAtiva && nome !== 'PAULO') { alert("⚠️ SISTEMA EM MANUTENÇÃO!"); return; }
                 usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome); entrarNoApp();
             } else { alert("❌ SENHA INCORRETA!"); input.value = ''; input.focus(); }
         }
 
-        // FUNÇÃO DE RELATÓRIO WHATSAPP (v1.2.0)
-        function enviarRelatorioWhatsApp() {
-            if (estoque.length === 0) { alert("Sem dados."); return; }
-            const hoje = new Date(), dt = hoje.toLocaleDateString('pt-BR') + " às " + hoje.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
-            const vencidos = estoque.filter(i => Math.ceil((new Date(i.vencimento) - hoje) / 86400000) < 0);
-            const urgentes = estoque.filter(i => { const d = Math.ceil((new Date(i.vencimento) - hoje) / 86400000); return d >= 0 && d <= 7; });
-
-            let msg = `📋 *RELATÓRIO NEW MARKET*%0A👤 Operador: ${usuarioSessao.nome}%0A📅 Data: ${dt}%0A%0A`;
-            if (vencidos.length > 0) {
-                msg += `🚨 *VENCIDOS (${vencidos.length})*%0A`;
-                vencidos.forEach(v => msg += `• ${v.produto} (${v.vencimento.split('-').reverse().join('/')})%0A`);
-                msg += `%0A`;
-            }
-            if (urgentes.length > 0) {
-                msg += `⚠️ *URGENTE (${urgentes.length})*%0A`;
-                urgentes.forEach(u => msg += `• ${u.produto} (${u.vencimento.split('-').reverse().join('/')})%0A`);
-                msg += `%0A`;
-            }
-            msg += `*Total: ${estoque.length} itens*%0A_v1.2.4 Stable_`;
-            window.open(`https://wa.me/?text=${msg}`, '_blank');
-        }
-
-        // NÚCLEO DO APLICATIVO
         function entrarNoApp() {
             document.getElementById('loginView').classList.add('hidden-app');
             document.getElementById('maintenanceView').classList.add('hidden-app');
@@ -231,18 +203,39 @@
                 return filtroAtual === 'vencidos' ? (matches && d < 0) : filtroAtual === 'urgente' ? (matches && d >= 0 && d <= 7) : matches;
             }).forEach(item => {
                 const d = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000), cor = d < 0 ? 'text-red-500' : (d <= 7 ? 'text-yellow-400' : 'text-slate-400');
-                container.innerHTML += `<div class="card-produto p-5 flex flex-col mb-4"><div class="flex justify-between items-start mb-3"><div><h3 class="font-black text-slate-100 text-sm uppercase">${item.produto}</h3><p class="text-[10px] font-bold ${cor}">Val: ${item.vencimento.split('-').reverse().join('/')}</p></div><div class="text-2xl font-black text-[#FFD700]">${item.quantidade}</div></div><div class="flex justify-between items-center mt-2 border-t border-slate-800 pt-3"><span class="text-[8px] font-black uppercase text-slate-500">COD: ${item.ean || '---'}</span><button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[10px] font-black text-blue-400 uppercase">Ajustar</button></div></div>`;
+                container.innerHTML += `<div class="card-produto p-5 mb-4 flex flex-col"><div class="flex justify-between items-start mb-3"><div><h3 class="font-black text-slate-100 text-sm uppercase">${item.produto}</h3><p class="text-[10px] font-bold ${cor}">Val: ${item.vencimento.split('-').reverse().join('/')}</p></div><div class="text-2xl font-black text-[#FFD700]">${item.quantidade}</div></div><div class="flex justify-between items-center mt-2 border-t border-slate-800 pt-3"><span class="text-[8px] font-black text-slate-500 uppercase">COD: ${item.ean || '---'}</span><button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[10px] font-black text-blue-400 uppercase">Ajustar</button></div></div>`;
             });
             document.getElementById('dash-vencidos').innerText = cV; document.getElementById('dash-alerta').innerText = cA; document.getElementById('dash-total').innerText = estoque.length;
         }
 
-        // CADASTRO E SCANNER
+        // --- LÓGICA DE REGISTRO E SCANNER CORRIGIDA ---
         async function abrirCadastro() {
-            document.getElementById('modal-cadastro').classList.remove('hidden'); limparForm();
-            scannerInstancia = new Html5Qrcode("reader");
-            scannerInstancia.start({ facingMode: "environment" }, { fps: 25, qrbox: 250, aspectRatio: 1.0 }, (txt) => {
-                document.getElementById('p-ean').value = txt; if (navigator.vibrate) navigator.vibrate(100); scannerInstancia.stop();
-            }).catch(()=>{});
+            document.getElementById('modal-cadastro').classList.remove('hidden'); 
+            limparForm();
+            try {
+                scannerInstancia = new Html5Qrcode("reader");
+                await scannerInstancia.start(
+                    { facingMode: "environment" }, 
+                    { fps: 25, qrbox: 250, aspectRatio: 1.0 }, 
+                    (txt) => {
+                        document.getElementById('p-ean').value = txt; 
+                        if (navigator.vibrate) navigator.vibrate(100); 
+                        fecharModalCadastro(); 
+                    }
+                );
+            } catch (err) { console.error("Scanner Error:", err); }
+        }
+
+        async function fecharModalCadastro() { 
+            // Fecha visualmente primeiro para resposta imediata ao comando
+            document.getElementById('modal-cadastro').classList.add('hidden'); 
+            if (scannerInstancia) {
+                try {
+                    await scannerInstancia.stop();
+                    document.getElementById('reader').innerHTML = "";
+                } catch (err) { console.warn("Scanner já parado."); }
+                finally { scannerInstancia = null; }
+            }
         }
 
         async function salvarProduto() {
@@ -251,14 +244,13 @@
             fecharModalCadastro();
         }
 
-        // UTILITÁRIOS
-        function fecharModalCadastro() { scannerInstancia?.stop().catch(()=>{}); document.getElementById('modal-cadastro').classList.add('hidden'); }
+        // --- UTILITÁRIOS ---
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
         function setFiltro(f) { filtroAtual = f; renderizar(); }
         function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; }
         function prepararEdicao(item) { document.getElementById('modal-cadastro').classList.remove('hidden'); document.getElementById('edit-id').value = item.id; document.getElementById('p-nome').value = item.produto; document.getElementById('p-validade').value = item.vencimento; document.getElementById('p-ean').value = item.ean || ''; document.getElementById('p-qtd').value = item.quantidade; }
         function toggleManutencaoSecreto() { cliquesSegredo++; if (cliquesSegredo >= 5) { manutencaoAtiva = !manutencaoAtiva; localStorage.setItem('manutencaoNewMarket', manutencaoAtiva); window.location.reload(); } setTimeout(() => cliquesSegredo = 0, 2000); }
-        function irParaLoginDesdeManutencao() { document.getElementById('maintenanceView').classList.add('hidden-app'); document.getElementById('loginView').classList.remove('hidden-app'); renderizarListaUsuarios(); }
+        function irParaLoginDesdeManutencao() { document.getElementById('maintenanceView').classList.add('hidden-app'); document.getElementById('loginView').classList.remove('hidden-app'); }
     </script>
 </body>
 </html>
