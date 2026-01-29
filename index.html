@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market v1.3.2 - Final Fix & Report</title>
+    <title>New Market - Developed by Paulo Pkacci</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -17,19 +17,26 @@
         .input-dark { background: #1e293b; border: 2px solid #334155; color: white; padding: 1rem; border-radius: 1rem; text-align: center; font-size: 1.5rem; outline: none; width: 100%; }
         .bg-maintenance { background: repeating-linear-gradient(45deg, #020617, #020617 10px, #0f172a 10px, #0f172a 20px); }
         .card-produto { background: #0f172a; border: 1px solid #1e293b; border-radius: 1.5rem; transition: all 0.2s; }
-        .filtro-ativo { border: 2px solid #FFD700 !important; transform: scale(1.05); }
-        .check-in-input { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #334155; appearance: none; -webkit-appearance: none; outline: none; cursor: pointer; transition: 0.2s; background: #020617; }
+        
+        .status-pulse { position: relative; width: 10px; height: 10px; background-color: #22c55e; border-radius: 50%; }
+        .status-pulse::after {
+            content: ''; position: absolute; width: 100%; height: 100%; background-color: #22c55e;
+            border-radius: 50%; z-index: -1; animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-ring { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(3); opacity: 0; } }
+
+        .check-in-input { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #334155; appearance: none; -webkit-appearance: none; outline: none; background: #020617; }
         .check-in-input:checked { background: #FFD700; border-color: #FFD700; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-size: contain; }
     </style>
 </head>
 <body>
 
     <div id="maintenanceView" class="hidden-app fixed inset-0 bg-maintenance z-[200] flex items-center justify-center p-6 text-center">
-        <div class="bg-slate-900 border-2 border-yellow-500 p-8 rounded-[3rem] max-w-sm shadow-[0_0_50px_rgba(234,179,8,0.2)]">
+        <div class="bg-slate-900 border-2 border-yellow-500 p-8 rounded-[3rem] max-w-sm">
             <div class="text-5xl mb-4">⚙️</div>
             <div id="timer-display" class="text-4xl font-mono font-black text-yellow-500 mb-2">15:00</div>
-            <h2 class="text-2xl font-black text-yellow-500 uppercase italic">Sistema em Atualização</h2>
-            <button onclick="irParaLoginDesdeManutencao()" class="mt-8 w-full py-4 bg-yellow-500 text-slate-900 rounded-2xl font-black uppercase text-[11px]">Acesso Administrativo</button>
+            <h2 class="text-2xl font-black text-yellow-500 uppercase italic">System Update</h2>
+            <button onclick="irParaLoginDesdeManutencao()" class="mt-8 w-full py-4 bg-yellow-500 text-slate-900 rounded-2xl font-black uppercase text-[11px]">Admin Access</button>
         </div>
     </div>
 
@@ -37,10 +44,12 @@
         <div class="bg-slate-900 w-full max-w-sm rounded-[3rem] p-8 border border-slate-800 flex flex-col min-h-[550px]">
             <div id="login-content" class="flex-grow">
                 <div class="w-16 h-16 bg-[#003366] rounded-2xl flex items-center justify-center mx-auto mb-6 text-[#FFD700] text-2xl font-black italic">NM</div>
-                <h2 id="login-title" class="text-xl font-black uppercase italic mb-8 text-slate-100">Equipe New Market</h2>
+                <h2 id="login-title" class="text-xl font-black uppercase italic mb-8 text-slate-100">New Market Team</h2>
                 <div id="auth-container"></div>
             </div>
-            <p onclick="toggleManutencaoSecreto()" class="cursor-pointer text-[10px] font-black text-slate-500 uppercase mt-6">v1.3.2 Stable Fix</p>
+            <p onclick="toggleManutencaoSecreto()" class="cursor-pointer text-[9px] font-black text-slate-600 uppercase mt-6 tracking-[0.2em]">
+                Developed by Paulo Pkacci • 2026
+            </p>
         </div>
     </div>
 
@@ -48,74 +57,70 @@
         <header class="bg-[#001e3c] p-6 sticky top-0 z-30 shadow-2xl rounded-b-[2.5rem] border-b-2 border-[#FFD700]">
             <div class="flex justify-between items-center mb-6">
                 <div class="flex items-center gap-3">
-                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <div class="status-pulse"></div>
                     <div>
                         <h1 class="font-black text-2xl italic text-[#FFD700] uppercase leading-none">New Market</h1>
-                        <p id="user-display" class="text-[9px] font-black uppercase text-slate-400 mt-1"></p>
+                        <div class="flex gap-2 items-center mt-1">
+                            <p id="user-display" class="text-[9px] font-black uppercase text-slate-400"></p>
+                            <span class="text-[7px] font-bold text-slate-600 border-l border-slate-700 pl-2 uppercase italic">by Pkacci</span>
+                        </div>
                     </div>
                 </div>
                 <button onclick="logout()" class="bg-slate-800/50 p-3 rounded-xl text-xl">🚪</button>
             </div>
             
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO..." class="w-full bg-slate-900 p-4 rounded-xl text-xs font-black uppercase outline-none border border-slate-700 text-slate-200 mb-4">
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="SEARCH PRODUCT..." class="w-full bg-slate-900 p-4 rounded-xl text-xs font-black uppercase outline-none border border-slate-700 text-slate-200 mb-4">
             
             <div class="flex gap-2">
-                <button onclick="enviarRelatorioWhatsApp()" class="flex-grow bg-green-600 text-white py-3 rounded-xl font-black text-[9px] uppercase shadow-lg">Relatório WhatsApp</button>
-                <button onclick="checkInTodos(true)" class="bg-slate-800 text-slate-300 px-4 py-3 rounded-xl font-black text-[9px] uppercase">Check Total</button>
-                <button onclick="checkInTodos(false)" class="bg-slate-800 text-slate-500 px-3 py-3 rounded-xl font-black text-[9px] uppercase">Limpar</button>
+                <button onclick="enviarRelatorioWhatsApp()" class="flex-grow bg-green-600 text-white py-3 rounded-xl font-black text-[9px] uppercase shadow-lg italic">WhatsApp Report</button>
+                <button onclick="checkInTodos(true)" class="bg-slate-800 text-slate-300 px-4 py-3 rounded-xl font-black text-[9px] uppercase">Select All</button>
             </div>
         </header>
 
         <main class="max-w-lg mx-auto p-5 pb-44">
             <div class="grid grid-cols-3 gap-2 mb-4 text-center">
-                <div id="btn-vencidos" onclick="setFiltro('vencidos')" class="bg-red-900/40 p-3 rounded-2xl text-red-400 border-2 border-transparent"><p class="text-[7px] font-black uppercase">Vencidos</p><p id="dash-vencidos" class="text-xl font-black">0</p></div>
-                <div id="btn-urgente" onclick="setFiltro('urgente')" class="bg-yellow-900/40 p-3 rounded-2xl text-yellow-400 border-2 border-transparent"><p class="text-[7px] font-black uppercase">Urgente</p><p id="dash-alerta" class="text-xl font-black">0</p></div>
-                <div id="btn-todos" onclick="setFiltro('todos')" class="bg-slate-800 p-3 rounded-2xl text-slate-100 border-2 border-transparent filtro-ativo"><p class="text-[7px] font-black uppercase opacity-40">Total</p><p id="dash-total" class="text-xl font-black">0</p></div>
+                <div onclick="setFiltro('vencidos')" class="bg-red-900/40 p-3 rounded-2xl text-red-400 border-2 border-transparent"><p id="dash-vencidos" class="text-xl font-black">0</p></div>
+                <div onclick="setFiltro('urgente')" class="bg-yellow-900/40 p-3 rounded-2xl text-yellow-400 border-2 border-transparent"><p id="dash-alerta" class="text-xl font-black">0</p></div>
+                <div onclick="setFiltro('todos')" class="bg-slate-800 p-3 rounded-2xl text-slate-100 border-2 border-transparent"><p id="dash-total" class="text-xl font-black">0</p></div>
             </div>
             <div id="container-produtos" class="space-y-4"></div>
         </main>
 
         <div class="fixed bottom-8 left-0 right-0 px-10 z-40">
-            <button onclick="abrirCadastro()" class="w-full bg-[#FFD700] text-slate-950 py-5 rounded-2xl shadow-xl font-black text-xs uppercase">+ CADASTRAR / SCANNER</button>
+            <button onclick="abrirCadastro()" class="w-full bg-[#FFD700] text-slate-950 py-5 rounded-2xl shadow-xl font-black text-xs uppercase">+ NEW RECORD / SCANNER</button>
         </div>
     </div>
 
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-[#020617] z-[800] overflow-y-auto">
         <div class="max-w-lg mx-auto p-8">
-            <div class="flex justify-between items-center mb-8"><h2 class="text-lg font-black uppercase italic text-[#FFD700]">Registro</h2><button onclick="fecharModalCadastro()" class="text-4xl text-slate-500">&times;</button></div>
+            <div class="flex justify-between items-center mb-8"><h2 class="text-lg font-black uppercase text-[#FFD700]">Product Entry</h2><button onclick="fecharModalCadastro()" class="text-4xl text-slate-500">&times;</button></div>
             <div id="reader-container" class="relative w-full aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden mb-8 border border-slate-800"><div id="reader"></div></div>
             <div class="space-y-5">
-                <input type="text" id="p-ean" placeholder="EAN (SCANNER)" class="w-full p-5 bg-slate-900 rounded-2xl font-mono text-slate-300 border border-slate-800 outline-none">
-                <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-5 bg-slate-900 rounded-2xl font-black uppercase text-slate-100 border border-slate-800 outline-none">
+                <input type="text" id="p-ean" placeholder="EAN CODE" class="w-full p-5 bg-slate-900 rounded-2xl font-mono text-slate-300 border border-slate-800 outline-none">
+                <input type="text" id="p-nome" placeholder="PRODUCT NAME" class="w-full p-5 bg-slate-900 rounded-2xl font-black uppercase text-slate-100 border border-slate-800 outline-none">
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-[9px] font-black text-slate-500 mb-2 block uppercase px-2">📅 Validade</label><input type="date" id="p-validade" class="w-full p-4 bg-slate-900 rounded-xl text-white border border-slate-800"></div>
-                    <div><label class="text-[9px] font-black text-slate-500 mb-2 block uppercase px-2 text-center">📦 Qtd</label><input type="tel" id="p-qtd" placeholder="0" class="w-full p-4 bg-slate-900 rounded-2xl font-black text-center text-2xl text-[#FFD700] border border-slate-800 outline-none"></div>
+                    <input type="date" id="p-validade" class="w-full p-4 bg-slate-900 rounded-xl text-white border border-slate-800">
+                    <input type="tel" id="p-qtd" placeholder="QTY" class="w-full p-4 bg-slate-900 rounded-2xl font-black text-center text-[#FFD700] border border-slate-800 outline-none">
                 </div>
                 <input type="hidden" id="edit-id">
-                <button onclick="salvarProduto()" class="w-full py-6 bg-[#003366] text-white rounded-2xl font-black uppercase shadow-xl mt-4">Salvar no Banco</button>
+                <button onclick="salvarProduto()" class="w-full py-6 bg-[#003366] text-white rounded-2xl font-black uppercase">SAVE TO CLOUD</button>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO FIREBASE (DATABASE)
         const firebaseConfig = { apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4", authDomain: "mercado-c3e95.firebaseapp.com", projectId: "mercado-c3e95", storageBucket: "mercado-c3e95.firebasestorage.app", messagingSenderId: "883539091925", appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // LISTA DE EQUIPE E CARGOS
         const EQUIPE = [ { nome: "ADRIANO", pass: "admin123", cargo: "GERENTE" }, { nome: "ADRIELLE", pass: "admin123", cargo: "GERENTE" }, { nome: "PAULO", pass: "paulo123", cargo: "DESENVOLVEDOR" }, { nome: "PEDRO", pass: "pedro123", cargo: "EQUIPE" }, { nome: "LEANDRO", pass: "leandro123", cargo: "EQUIPE" }, { nome: "EDMAR", pass: "edmar123", cargo: "EQUIPE" }, { nome: "JOÃO", pass: "joao123", cargo: "EQUIPE" }, { nome: "TAMIRIS", pass: "tamiris123", cargo: "EQUIPE" } ];
 
-        // ESTADOS GLOBAIS
         let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
-        let permitindoLoginNaManutencao = false; // Flag v1.3.2 para destravar login
-        let usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos', itensSelecionados = new Set(), intervaloManutencao = null, segundosTotais = 900, cliquesSegredo = 0;
+        let permitindoLoginNaManutencao = false, usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos', itensSelecionados = new Set(), intervaloManutencao = null, segundosTotais = 900, cliquesSegredo = 0;
 
-        // INICIALIZAÇÃO DO SISTEMA (Boot Logic)
         window.onload = () => {
             const salvo = localStorage.getItem('sessaoNewMarket');
             if (manutencaoAtiva) {
-                // Se manutenção ativa, só entra se já estiver salvo como PAULO
                 if (salvo === 'PAULO') { usuarioSessao = EQUIPE.find(x => x.nome === 'PAULO'); entrarNoApp(); } 
                 else { mostrarManutencao(); }
             } else if (salvo) { 
@@ -124,74 +129,25 @@
             } else { mostrarLogin(); }
         };
 
-        // EXIBE TELA DE MANUTENÇÃO
-        function mostrarManutencao() {
-            document.getElementById('loginView').classList.add('hidden-app');
-            document.getElementById('appView').classList.add('hidden-app');
-            document.getElementById('maintenanceView').classList.remove('hidden-app');
-            iniciarTimerManutencao();
-        }
+        function mostrarManutencao() { document.getElementById('maintenanceView').classList.remove('hidden-app'); iniciarTimerManutencao(); }
+        function irParaLoginDesdeManutencao() { permitindoLoginNaManutencao = true; mostrarLogin(); }
+        function mostrarLogin() { document.getElementById('maintenanceView').classList.add('hidden-app'); document.getElementById('loginView').classList.remove('hidden-app'); renderizarListaUsuarios(); }
 
-        // DESTRAVA LOGIN DURANTE MANUTENÇÃO (v1.3.2 Fix)
-        function irParaLoginDesdeManutencao() {
-            if (intervaloManutencao) { clearInterval(intervaloManutencao); intervaloManutencao = null; }
-            permitindoLoginNaManutencao = true; // Libera bypass visual
-            mostrarLogin();
-        }
-
-        // EXIBE TELA DE LOGIN
-        function mostrarLogin() {
-            document.getElementById('maintenanceView').classList.add('hidden-app');
-            document.getElementById('appView').classList.add('hidden-app');
-            document.getElementById('loginView').classList.remove('hidden-app');
-            renderizarListaUsuarios();
-        }
-
-        // GESTÃO DE CHECK-IN (v1.3.1)
-        function toggleCheckIn(id) {
-            itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id);
-        }
-
-        function checkInTodos(marcar) {
-            estoque.forEach(item => {
-                const d = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
-                const matches = filtroAtual === 'vencidos' ? d < 0 : filtroAtual === 'urgente' ? (d >= 0 && d <= 7) : true;
-                if(matches) marcar ? itensSelecionados.add(item.id) : itensSelecionados.delete(item.id);
-            });
-            renderizar();
-        }
-
-        // ENVIO DE RELATÓRIO PARA WHATSAPP
         function enviarRelatorioWhatsApp() {
             let lista = estoque.filter(item => {
                 const d = Math.ceil((new Date(item.vencimento) - new Date()) / 86400000);
-                return itensSelecionados.has(item.id) || d <= 7; // Selecionados ou Críticos
+                return itensSelecionados.has(item.id) || d <= 7;
             });
-            if (lista.length === 0) return alert("Nada selecionado ou em alerta!");
-            const agora = new Date().toLocaleString('pt-BR');
-            let msg = `*RELATÓRIO NEW MARKET v1.3.2*%0A_Gerado: ${agora}_%0A%0A`;
+            if (lista.length === 0) return alert("Nothing to report!");
+            let msg = `*NEW MARKET v1.3.5*%0A*Developed by Paulo Pkacci*%0A%0A`;
             lista.forEach(i => {
                 const d = Math.ceil((new Date(i.vencimento) - new Date()) / 86400000);
-                let icone = d < 0 ? "🚨 *VENCIDO*" : (d <= 7 ? "⚠️ *URGENTE*" : "✅ *CHECK*");
-                msg += `${icone}%0A*PROD:* ${i.produto}%0A*VAL:* ${i.vencimento.split('-').reverse().join('/')}%0A*EAN:* ${i.ean || '---'}%0A*QTD:* ${i.quantidade}%0A----------------------------%0A`;
+                let icone = d < 0 ? "🚨 *EXPIRED*" : (d <= 7 ? "⚠️ *URGENT*" : "✅ *CHECK*");
+                msg += `${icone}%0A*PROD:* ${i.produto}%0A*VAL:* ${i.vencimento.split('-').reverse().join('/')}%0A*EAN:* ${i.ean || '---'}%0A*QTY:* ${i.quantidade}%0A----------------------------%0A`;
             });
             window.open(`https://wa.me/?text=${msg}`);
         }
 
-        // ENTRADA NO APP (Lockdown Logic)
-        function entrarNoApp() {
-            // Se estiver em manutenção e não for o Paulo, expulsa
-            if (manutencaoAtiva && usuarioSessao.nome !== 'PAULO') { window.location.reload(); return; }
-            document.getElementById('loginView').classList.add('hidden-app');
-            document.getElementById('maintenanceView').classList.add('hidden-app');
-            document.getElementById('appView').classList.remove('hidden-app');
-            document.getElementById('user-display').innerText = `OPERADOR: ${usuarioSessao.nome}`;
-            db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
-                estoque = []; snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()})); renderizar();
-            });
-        }
-
-        // RENDERIZAÇÃO DA LISTA DE PRODUTOS
         function renderizar() {
             const container = document.getElementById('container-produtos'), busca = document.getElementById('input-busca').value.toUpperCase();
             let cV = 0, cA = 0; container.innerHTML = '';
@@ -201,46 +157,23 @@
                 const matches = (item.produto || "").includes(busca) || (item.ean || "").includes(busca);
                 const filtrar = filtroAtual === 'vencidos' ? d < 0 : filtroAtual === 'urgente' ? (d >= 0 && d <= 7) : true;
                 if (matches && filtrar) {
-                    const cor = d < 0 ? 'text-red-500' : (d <= 7 ? 'text-yellow-400' : 'text-slate-400');
                     const isChecked = itensSelecionados.has(item.id) ? 'checked' : '';
-                    container.innerHTML += `
-                    <div class="card-produto p-5 flex items-center gap-4 mb-4">
-                        <input type="checkbox" ${isChecked} onchange="toggleCheckIn('${item.id}')" class="check-in-input">
-                        <div class="flex-grow">
-                            <div class="flex justify-between items-start">
-                                <div><h3 class="font-black text-slate-100 text-[11px] uppercase">${item.produto}</h3><p class="text-[9px] font-bold ${cor}">${d < 0 ? '🚨' : (d <= 7 ? '⚠️' : '📅')} ${item.vencimento.split('-').reverse().join('/')}</p></div>
-                                <div class="text-xl font-black text-[#FFD700]">${item.quantidade}</div>
-                            </div>
-                            <div class="flex justify-between items-center mt-2 border-t border-slate-800 pt-2"><span class="text-[7px] text-slate-500">EAN: ${item.ean || '---'}</span><button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[9px] text-blue-400 uppercase font-black">Editar</button></div>
-                        </div>
-                    </div>`;
+                    container.innerHTML += `<div class="card-produto p-5 flex items-center gap-4 mb-4"><input type="checkbox" ${isChecked} onchange="toggleCheckIn('${item.id}')" class="check-in-input"><div class="flex-grow"><div class="flex justify-between"><div><h3 class="font-black text-[11px] uppercase">${item.produto}</h3><p class="text-[9px] font-bold">${item.vencimento.split('-').reverse().join('/')}</p></div><div class="text-xl font-black text-[#FFD700]">${item.quantidade}</div></div><div class="mt-2 pt-2 border-t border-slate-800 flex justify-between"><span class="text-[7px]">EAN: ${item.ean || '---'}</span><button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[9px] text-blue-400 font-black">EDIT</button></div></div></div>`;
                 }
             });
             document.getElementById('dash-vencidos').innerText = cV; document.getElementById('dash-alerta').innerText = cA; document.getElementById('dash-total').innerText = estoque.length;
         }
 
-        // AUTH FUNCTIONS (Corrigidas v1.3.2)
-        function renderizarListaUsuarios() {
-            let h = '<div class="space-y-2 max-h-[350px] overflow-y-auto pr-2">';
-            EQUIPE.forEach(u => h += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-800 rounded-2xl font-black text-[10px] flex justify-between items-center text-slate-300"><span>${u.nome}</span><span class="opacity-30 italic">${u.cargo}</span></button>`);
-            document.getElementById('auth-container').innerHTML = h + '</div>';
-        }
-        function prepararSenha(nome) {
-            document.getElementById('login-title').innerText = `SENHA: ${nome}`;
-            document.getElementById('auth-container').innerHTML = `<div class="space-y-4"><input type="password" id="pass-input" class="input-dark" autofocus><button onclick="confirmarSenha('${nome}')" class="w-full py-5 bg-[#FFD700] text-slate-900 rounded-2xl font-black uppercase">Entrar</button><button onclick="mostrarLogin()" class="w-full text-[10px] text-slate-500 font-black py-2">← Voltar</button></div>`;
-        }
-        function confirmarSenha(nome) {
-            const u = EQUIPE.find(x => x.nome === nome);
-            if (document.getElementById('pass-input').value === u.pass) {
-                if (!manutencaoAtiva || u.nome === 'PAULO') { usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome); entrarNoApp(); } 
-                else { alert("Acesso negado: Manutenção ativa."); window.location.reload(); }
-            } else { alert("Senha Incorreta!"); }
-        }
-
-        // SUPPORT FUNCTIONS
-        async function abrirCadastro() { document.getElementById('modal-cadastro').classList.remove('hidden'); limparForm(); scannerInstancia = new Html5Qrcode("reader"); await scannerInstancia.start({ facingMode: "environment" }, { fps: 25, qrbox: 250, aspectRatio: 1.0 }, (txt) => { document.getElementById('p-ean').value = txt; scannerInstancia.stop(); }); }
-        function fecharModalCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if(scannerInstancia) scannerInstancia.stop(); }
+        function toggleCheckIn(id) { itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id); }
+        function checkInTodos(marcar) { estoque.forEach(i => marcar ? itensSelecionados.add(i.id) : itensSelecionados.delete(i.id)); renderizar(); }
+        function entrarNoApp() { if (manutencaoAtiva && usuarioSessao.nome !== 'PAULO') return window.location.reload(); document.getElementById('loginView').classList.add('hidden-app'); document.getElementById('appView').classList.remove('hidden-app'); document.getElementById('user-display').innerText = `OPERADOR: ${usuarioSessao.nome}`; db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => { estoque = []; snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()})); renderizar(); }); }
+        function renderizarListaUsuarios() { let h = ''; EQUIPE.forEach(u => h += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-800 rounded-2xl font-black text-[10px] flex justify-between items-center text-slate-300 mb-2"><span>${u.nome}</span><span class="opacity-30">${u.cargo}</span></button>`); document.getElementById('auth-container').innerHTML = h; }
+        function prepararSenha(n) { document.getElementById('login-title').innerText = `PASSWORD: ${n}`; document.getElementById('auth-container').innerHTML = `<input type="password" id="pass-input" class="input-dark mb-4" autofocus><button onclick="confirmarSenha('${n}')" class="w-full py-5 bg-[#FFD700] text-slate-900 rounded-2xl font-black">SIGN IN</button>`; }
+        function confirmarSenha(n) { const u = EQUIPE.find(x => x.nome === n); if (document.getElementById('pass-input').value === u.pass) { if (!manutencaoAtiva || u.nome === 'PAULO') { usuarioSessao = u; localStorage.setItem('sessaoNewMarket', u.nome); entrarNoApp(); } else { alert("Maintenance active."); window.location.reload(); } } else { alert("Wrong Password!"); } }
+        
         async function salvarProduto() { const id = document.getElementById('edit-id').value, d = { produto: document.getElementById('p-nome').value.toUpperCase(), vencimento: document.getElementById('p-validade').value, ean: document.getElementById('p-ean').value, quantidade: parseInt(document.getElementById('p-qtd').value) || 0 }; id ? await db.collection("validades").doc(id).update(d) : await db.collection("validades").add(d); fecharModalCadastro(); }
+        async function abrirCadastro() { document.getElementById('modal-cadastro').classList.remove('hidden'); limparForm(); scannerInstancia = new Html5Qrcode("reader"); await scannerInstancia.start({ facingMode: "environment" }, { fps: 25, qrbox: 250 }, (txt) => { document.getElementById('p-ean').value = txt; scannerInstancia.stop(); }); }
+        function fecharModalCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if(scannerInstancia) scannerInstancia.stop(); }
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
         function setFiltro(f) { filtroAtual = f; renderizar(); }
         function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; }
