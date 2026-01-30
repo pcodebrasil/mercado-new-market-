@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.5.4</title>
+    <title>New Market - v1.5.5</title>
     
     <meta property="og:title" content="New Market - Gestão de Validades">
     <meta property="og:description" content="Sistema inteligente para controle de estoque e alertas de vencimento.">
     <meta property="og:type" content="website">
-    <meta property="og:image" content="https://raw.githubusercontent.com/paulopkacci/assets/main/newmarket-preview.png">
     <meta name="theme-color" content="#001e3c">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -24,12 +23,13 @@
         .hidden-app { display: none !important; }
         .input-dark { background: #1e293b; border: 2px solid #334155; color: white; padding: 1rem; border-radius: 1rem; text-align: center; font-size: 1.5rem; outline: none; width: 100%; user-select: text; }
         .bg-maintenance { background: repeating-linear-gradient(45deg, #020617, #020617 10px, #0f172a 10px, #0f172a 20px); }
-        .card-produto { background: #0f172a; border: 1px solid #1e293b; border-radius: 1.5rem; transition: all 0.2s; }
+        .card-produto { background: #0f172a; border: 1px solid #1e293b; border-radius: 1.5rem; transition: all 0.2s; position: relative; }
         .status-pulse { position: relative; width: 10px; height: 10px; background-color: #22c55e; border-radius: 50%; }
         .status-pulse::after { content: ''; position: absolute; width: 100%; height: 100%; background-color: #22c55e; border-radius: 50%; z-index: -1; animation: pulse-ring 2s infinite; }
         @keyframes pulse-ring { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(3); opacity: 0; } }
-        .check-in-input { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #334155; appearance: none; -webkit-appearance: none; outline: none; background: #020617; }
+        .check-in-input { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #334155; appearance: none; -webkit-appearance: none; outline: none; background: #020617; flex-shrink: 0; }
         .check-in-input:checked { background: #FFD700; border-color: #FFD700; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-size: contain; }
+        .btn-touch { min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -59,9 +59,9 @@
             <div class="flex justify-between items-center mb-6">
                 <div class="flex items-center gap-3"><div class="status-pulse"></div>
                 <div><h1 class="font-black text-2xl italic text-[#FFD700] uppercase leading-none">New Market</h1><p id="user-display" class="text-[9px] font-black uppercase text-slate-400 mt-1"></p></div></div>
-                <button onclick="logout()" class="bg-slate-800/50 p-3 rounded-xl text-xl">🚪</button>
+                <button onclick="logout()" class="bg-slate-800/50 p-3 rounded-xl text-xl btn-touch">🚪</button>
             </div>
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR..." class="w-full bg-slate-900 p-4 rounded-xl text-xs font-black uppercase border border-slate-700 text-slate-200 mb-4 outline-none">
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="PESQUISAR PRODUTO OU COD..." class="w-full bg-slate-900 p-4 rounded-xl text-xs font-black uppercase border border-slate-700 text-slate-200 mb-4 outline-none">
             
             <div class="flex gap-2">
                 <button onclick="enviarRelatorioWhatsApp()" class="flex-grow bg-green-600 text-white py-3 rounded-xl font-black text-[9px] uppercase italic">Relatório WhatsApp</button>
@@ -75,9 +75,18 @@
             </div>
 
             <div class="grid grid-cols-3 gap-2 mb-4 text-center">
-                <div onclick="setFiltro('vencidos')" class="bg-red-900/40 p-3 rounded-2xl text-red-400"><p id="dash-vencidos" class="text-xl font-black">0</p></div>
-                <div onclick="setFiltro('urgente')" class="bg-yellow-900/40 p-3 rounded-2xl text-yellow-400"><p id="dash-alerta" class="text-xl font-black">0</p></div>
-                <div onclick="setFiltro('todos')" class="bg-slate-800 p-3 rounded-2xl text-slate-100"><p id="dash-total" class="text-xl font-black">0</p></div>
+                <div onclick="setFiltro('vencidos')" class="bg-red-900/40 p-3 rounded-2xl text-red-400">
+                    <p class="text-[8px] font-black uppercase mb-1">Vencidos</p>
+                    <p id="dash-vencidos" class="text-xl font-black leading-none">0</p>
+                </div>
+                <div onclick="setFiltro('urgente')" class="bg-yellow-900/40 p-3 rounded-2xl text-yellow-400">
+                    <p class="text-[8px] font-black uppercase mb-1">Alerta</p>
+                    <p id="dash-alerta" class="text-xl font-black leading-none">0</p>
+                </div>
+                <div onclick="setFiltro('todos')" class="bg-slate-800 p-3 rounded-2xl text-slate-100">
+                    <p class="text-[8px] font-black uppercase mb-1">Total</p>
+                    <p id="dash-total" class="text-xl font-black leading-none">0</p>
+                </div>
             </div>
 
             <div class="bg-[#0f172a] border border-slate-800 rounded-3xl p-5 mb-6">
@@ -101,7 +110,7 @@
 
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-[#020617] z-[800] overflow-y-auto">
         <div class="max-w-lg mx-auto p-8">
-            <div class="flex justify-between items-center mb-8"><h2 class="text-lg font-black uppercase text-[#FFD700]">Dados do Produto</h2><button onclick="fecharModalCadastro()" class="text-4xl text-slate-500">&times;</button></div>
+            <div class="flex justify-between items-center mb-8"><h2 class="text-lg font-black uppercase text-[#FFD700]">Dados do Produto</h2><button onclick="fecharModalCadastro()" class="text-4xl text-slate-500 btn-touch">&times;</button></div>
             <div id="reader-container" class="hidden relative w-full aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden mb-8 border border-slate-800"><div id="reader"></div></div>
             <div id="barcode-area" class="hidden bg-white p-4 rounded-2xl mb-8 flex flex-col items-center justify-center"><svg id="barcode-canvas"></svg></div>
             <div class="space-y-5">
@@ -129,10 +138,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        db.enablePersistence().catch((err) => {
-            if (err.code == 'failed-precondition') { console.log("Abas abertas."); }
-        });
-
         const EQUIPE = [ 
             { nome: "ADRIANO", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
             { nome: "ADRIELLE", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
@@ -151,19 +156,11 @@
             renderizarListaUsuarios();
             const salvo = localStorage.getItem('sessaoNewMarket');
             if (manutencaoAtiva) {
-                if (salvo === 'PAULO') { 
-                    usuarioSessao = EQUIPE.find(x => x.nome === 'PAULO'); 
-                    entrarNoApp(); 
-                } else { 
-                    mostrarManutencao(); 
-                }
+                if (salvo === 'PAULO') { usuarioSessao = EQUIPE.find(x => x.nome === 'PAULO'); entrarNoApp(); } 
+                else { mostrarManutencao(); }
             } else {
-                if (salvo) { 
-                    usuarioSessao = EQUIPE.find(x => x.nome === salvo); 
-                    usuarioSessao ? entrarNoApp() : mostrarLogin(); 
-                } else { 
-                    mostrarLogin(); 
-                }
+                if (salvo) { usuarioSessao = EQUIPE.find(x => x.nome === salvo); usuarioSessao ? entrarNoApp() : mostrarLogin(); } 
+                else { mostrarLogin(); }
             }
         };
 
@@ -213,11 +210,7 @@
             const u = EQUIPE.find(x => x.nome === n);
             const pass = document.getElementById('pass-input').value;
             if (btoa(pass) === u.pass) {
-                if (manutencaoAtiva && u.cargo !== 'DESENVOLVEDOR') {
-                    alert("SISTEMA EM MANUTENÇÃO. ACESSO NEGADO.");
-                    mostrarManutencao();
-                    return;
-                }
+                if (manutencaoAtiva && u.cargo !== 'DESENVOLVEDOR') { alert("SISTEMA EM MANUTENÇÃO."); mostrarManutencao(); return; }
                 usuarioSessao = u;
                 localStorage.setItem('sessaoNewMarket', u.nome);
                 entrarNoApp();
@@ -264,17 +257,22 @@
                     container.innerHTML += `<div class="card-produto p-5 flex items-center gap-4 mb-4">
                         <input type="checkbox" ${isChecked} onchange="toggleCheckIn('${item.id}')" class="check-in-input">
                         <div class="flex-grow">
-                            <div class="flex justify-between items-start mb-3">
-                                <div class="max-w-[60%]"><h3 class="text-[10px] font-black uppercase text-slate-500">Produto</h3><p class="font-black text-sm uppercase text-slate-100">${item.produto}</p></div>
-                                <div class="text-right"><h3 class="text-[10px] font-black uppercase text-[#FFD700]">Validade</h3><p class="text-lg font-black text-white">${item.vencimento.split('-').reverse().join('/')}</p></div>
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="max-w-[70%]"><h3 class="text-[9px] font-black uppercase text-slate-500 mb-1">Produto</h3><p class="font-black text-sm uppercase text-white leading-tight">${item.produto}</p></div>
+                                <div class="text-right"><h3 class="text-[9px] font-black uppercase text-[#FFD700] mb-1">Validade</h3><p class="text-lg font-black text-white">${item.vencimento.split('-').reverse().join('/')}</p></div>
                             </div>
                             <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center">
-                                <div class="flex flex-col"><span class="text-[9px] font-black text-slate-500">OP: ${item.operador || '---'}</span><span class="bg-slate-950 text-[#FFD700] px-3 py-1 rounded-lg font-mono text-sm border border-slate-800">${item.ean || '---'}</span></div>
-                                <div class="flex gap-4 items-center"><span class="text-2xl font-black text-[#FFD700]">${item.quantidade}</span>
-                                <div class="flex flex-col gap-2">
-                                    <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-[10px] text-blue-400 font-black uppercase">Editar</button>
-                                    ${podeExcluir ? `<button onclick="excluirProduto('${item.id}', '${item.produto}')" class="text-[10px] text-red-500 font-black uppercase">Excluir</button>` : ''}
-                                </div></div>
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-[9px] font-black text-slate-500 uppercase">OP: ${item.operador || 'S/ IDENTIF.'}</span>
+                                    <span class="bg-slate-950 text-[#FFD700] px-3 py-1 rounded-lg font-mono text-sm border border-slate-800">${item.ean || '---'}</span>
+                                </div>
+                                <div class="flex gap-4 items-center">
+                                    <span class="text-3xl font-black text-[#FFD700]">${item.quantidade}</span>
+                                    <div class="flex flex-col gap-3">
+                                        <button onclick='prepararEdicao(${JSON.stringify(item)})' class="btn-touch text-[10px] text-blue-400 font-black uppercase">EDITAR</button>
+                                        ${podeExcluir ? `<button onclick="excluirProduto('${item.id}', '${item.produto}')" class="btn-touch text-[10px] text-red-500 font-black uppercase">EXCLUIR</button>` : ''}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>`;
@@ -345,12 +343,14 @@
             } catch (e) { area.classList.add('hidden'); }
         }
 
-        function excluirProduto(id, nome) { 
-            if (confirm(`EXCLUIR:\n"${nome}"?`)) { db.collection("validades").doc(id).delete(); } 
-        }
-        
+        function excluirProduto(id, nome) { if (confirm(`EXCLUIR:\n"${nome}"?`)) { db.collection("validades").doc(id).delete(); } }
         function fecharModalCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if(scannerInstancia) scannerInstancia.stop().catch(() => {}); }
-
+        function toggleManutencaoSecreto() { cliquesSegredo++; if (cliquesSegredo >= 5) { localStorage.setItem('manutencaoNewMarket', !manutencaoAtiva); window.location.reload(); } setTimeout(() => cliquesSegredo = 0, 3000); }
+        function setFiltro(f) { filtroAtual = f; renderizar(); }
+        function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; document.getElementById('barcode-area').classList.add('hidden'); }
+        function iniciarTimerManutencao() { setInterval(() => { if (segundosTotais <= 0) segundosTotais = 900; let m = Math.floor(segundosTotais / 60), s = segundosTotais % 60; document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; segundosTotais--; }, 1000); }
+        function checkInTodos() { if (itensSelecionados.size === estoque.length) { itensSelecionados.clear(); } else { estoque.forEach(i => itensSelecionados.add(i.id)); } renderizar(); }
+        function toggleCheckIn(id) { itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id); renderizar(); }
         function enviarRelatorioWhatsApp() {
             const hoje = new Date().setHours(0,0,0,0);
             let lista = itensSelecionados.size > 0 ? estoque.filter(item => itensSelecionados.has(item.id)) : estoque.filter(item => {
@@ -360,26 +360,9 @@
             if (lista.length === 0) return alert("Nada!");
             lista.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
             let msg = `*📦 RELATÓRIO: ${usuarioSessao.nome}*%0A%0A`;
-            lista.forEach(i => {
-                msg += `*PROD:* ${i.produto}%0A*VAL:* ${i.vencimento.split('-').reverse().join('/')}%0A*QTD:* ${i.quantidade}%0A*OP:* ${i.operador || '---'}%0A----------------------------%0A`;
-            });
+            lista.forEach(i => { msg += `*PROD:* ${i.produto}%0A*VAL:* ${i.vencimento.split('-').reverse().join('/')}%0A*QTD:* ${i.quantidade}%0A*OP:* ${i.operador || '---'}%0A----------------------------%0A`; });
             window.open(`https://wa.me/?text=${msg}`);
         }
-
-        function toggleManutencaoSecreto() {
-            cliquesSegredo++;
-            if (cliquesSegredo >= 5) { 
-                localStorage.setItem('manutencaoNewMarket', !manutencaoAtiva); 
-                window.location.reload(); 
-            }
-            setTimeout(() => cliquesSegredo = 0, 3000);
-        }
-
-        function setFiltro(f) { filtroAtual = f; renderizar(); }
-        function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; document.getElementById('barcode-area').classList.add('hidden'); }
-        function iniciarTimerManutencao() { setInterval(() => { if (segundosTotais <= 0) segundosTotais = 900; let m = Math.floor(segundosTotais / 60), s = segundosTotais % 60; document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; segundosTotais--; }, 1000); }
-        function checkInTodos() { if (itensSelecionados.size === estoque.length) { itensSelecionados.clear(); } else { estoque.forEach(i => itensSelecionados.add(i.id)); } renderizar(); }
-        function toggleCheckIn(id) { itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id); renderizar(); }
     </script>
 </body>
 </html>
