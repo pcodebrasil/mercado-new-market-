@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.5.6</title>
+    <title>New Market - v1.5.7</title>
+    
+    <meta property="og:title" content="New Market - Gestão de Validades">
+    <meta property="og:description" content="Sistema inteligente para controle de estoque e alertas de vencimento.">
+    <meta name="theme-color" content="#001e3c">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -12,7 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
     <style>
-        /* Paulo Pkacci © 2026 */
+        /* Developed by: Paulo Pkacci by 2026 */
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; -webkit-font-smoothing: antialiased; user-select: none; }
         body { font-family: sans-serif; background-color: #020617; color: #f8fafc; overflow-x: hidden; margin: 0; }
         .hidden-app { display: none !important; }
@@ -267,20 +271,29 @@
         function checkInTodos() { if (itensSelecionados.size === estoque.length) { itensSelecionados.clear(); } else { estoque.forEach(i => itensSelecionados.add(i.id)); } renderizar(); }
         function toggleCheckIn(id) { itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id); renderizar(); }
 
-        // [PKACCI - RESTAURAÇÃO DA FUNÇÃO WHATSAPP ORIGINAL]
+        // [PKACCI - RELATÓRIO ELITE v1.5.7]
         function enviarRelatorioWhatsApp() {
+            const agora = new Date();
+            const dataFormatada = agora.toLocaleDateString('pt-BR');
+            const horaFormatada = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             const hoje = new Date().setHours(0,0,0,0);
+            
             let lista = itensSelecionados.size > 0 ? estoque.filter(item => itensSelecionados.has(item.id)) : estoque.filter(item => {
                 const dV = new Date(item.vencimento + 'T00:00:00');
                 return Math.floor((dV - hoje) / 86400000) <= 7;
             });
-            if (lista.length === 0) return alert("Nada selecionado ou próximo do vencimento!");
+            if (lista.length === 0) return alert("Nada!");
             lista.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
             
-            let msg = `*📦 RELATÓRIO DE VALIDADES - ${usuarioSessao.nome}*%0A%0A`;
+            let msg = `*📦 RELATÓRIO NEW MARKET*%0A`;
+            msg += `*DATA:* ${dataFormatada} | *HORA:* ${horaFormatada}%0A`;
+            msg += `*OPERADOR:* ${usuarioSessao.nome}%0A`;
+            msg += `----------------------------%0A%0A`;
             lista.forEach(i => {
-                msg += `*PROD:* ${i.produto}%0A*VAL:* ${i.vencimento.split('-').reverse().join('/')}%0A*QTD:* ${i.quantidade}%0A*COD:* ${i.ean || '---'}%0A*OP:* ${i.operador || '---'}%0A----------------------------%0A`;
+                msg += `*PROD:* ${i.produto}%0A*VAL:* ${i.vencimento.split('-').reverse().join('/')}%0A*QTD:* ${i.quantidade}%0A*COD:* ${i.ean || '---'}%0A*OP:* ${i.operador || '---'}%0A%0A`;
             });
+            msg += `----------------------------%0A`;
+            msg += `*Link do Sistema:* https://mercado-c3e95.web.app/`;
             window.open(`https://wa.me/?text=${msg}`);
         }
     </script>
