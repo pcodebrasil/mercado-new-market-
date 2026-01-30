@@ -175,6 +175,19 @@
     </div>
 
     <script>
+        // CAMADA DE BLINDAGEM PKACCI - ANTI-INSPEÇÃO
+        document.addEventListener('keydown', function(e) {
+            if (e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J" || e.key === "C")) || (e.ctrlKey && e.key === "U")) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        (function() {
+            setInterval(function() {
+                debugger;
+            }, 1000);
+        })();
+
         const firebaseConfig = { apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4", authDomain: "mercado-c3e95.firebaseapp.com", projectId: "mercado-c3e95", storageBucket: "mercado-c3e95.firebasestorage.app", messagingSenderId: "883539091925", appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
