@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.6.1-SHADOW</title>
+    <title>New Market - v1.6.2-LASER</title>
     
     <meta property="og:title" content="New Market - Gestão de Validades">
     <meta property="og:description" content="Sistema inteligente para controle de estoque e alertas de vencimento.">
@@ -128,7 +128,7 @@
         <div class="max-w-lg mx-auto p-8">
             <div class="flex justify-between items-center mb-8"><h2 class="text-lg font-black uppercase text-[#FFD700]">Dados do Produto</h2><button onclick="fecharModalCadastro()" class="text-4xl text-slate-500 btn-touch">&times;</button></div>
             <div id="reader-container" class="hidden relative w-full aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden mb-8 border border-slate-800"><div id="reader"></div></div>
-            <div id="barcode-area" class="hidden bg-white p-4 rounded-2xl mb-8 flex flex-col items-center justify-center"><svg id="barcode-canvas"></svg></div>
+            
             <div class="space-y-5">
                 <input type="text" id="p-ean" oninput="gerarGraficoBarras(this.value)" placeholder="CÓDIGO COD" class="w-full p-5 bg-slate-900 rounded-2xl font-mono text-slate-300 border border-slate-800 outline-none">
                 <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="w-full p-5 bg-slate-900 rounded-2xl font-black uppercase text-slate-100 border border-slate-800 outline-none">
@@ -137,6 +137,9 @@
                     <input type="tel" id="p-qtd" placeholder="QTD" class="w-full p-4 bg-slate-900 rounded-2xl font-black text-center text-[#FFD700] border border-slate-800 outline-none">
                 </div>
                 <input type="hidden" id="edit-id">
+                
+                <div id="barcode-area" class="hidden bg-white p-4 rounded-2xl flex flex-col items-center justify-center border-4 border-white"><svg id="barcode-canvas"></svg></div>
+                
                 <button onclick="salvarProduto()" class="w-full py-6 bg-[#003366] text-white rounded-2xl font-black uppercase shadow-lg">SALVAR NA NUVEM</button>
             </div>
         </div>
@@ -237,16 +240,21 @@
             let cV = 0, cA = 0, r15 = 0, r30 = 0, r60 = 0; container.innerHTML = '';
             const podeExcluir = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
             const hoje = new Date().setHours(0,0,0,0);
+            
             estoque.forEach(item => {
                 const dV = new Date(item.vencimento + 'T00:00:00'), d = Math.floor((dV - hoje) / 86400000);
                 if (d >= 0 && d <= 15) r15 += (item.quantidade || 0);
                 if (d >= 0 && d <= 30) r30 += (item.quantidade || 0);
                 if (d >= 0 && d <= 60) r60 += (item.quantidade || 0);
                 if (d < 0) cV++; else if (d <= 7) cA++;
+                
                 const matchesBusca = (item.produto || "").includes(busca) || (item.ean || "").includes(busca);
                 const matchesFiltroValidade = (filtroAtual === 'vencidos' ? d < 0 : filtroAtual === 'urgente' ? (d >= 0 && d <= 7) : true);
+                
                 if (matchesBusca && matchesFiltroValidade) {
                     const isChecked = itensSelecionados.has(item.id) ? 'checked' : '';
+                    const safeEan = (item.ean || "").replace(/[^0-9a-zA-Z]/g, '');
+                    
                     container.innerHTML += `<div class="card-produto p-5 flex items-center gap-4 mb-4">
                         <input type="checkbox" ${isChecked} onchange="toggleCheckIn('${item.id}')" class="check-in-input">
                         <div class="flex-grow">
@@ -254,6 +262,11 @@
                                 <div class="max-w-[70%]"><h3 class="text-[9px] font-black uppercase text-slate-500 mb-1">Produto</h3><p class="font-black text-sm uppercase text-white leading-tight">${item.produto}</p></div>
                                 <div class="text-right"><h3 class="text-[9px] font-black uppercase text-[#FFD700] mb-1">Validade</h3><p class="text-lg font-black text-white">${item.vencimento.split('-').reverse().join('/')}</p></div>
                             </div>
+                            
+                            <div class="my-3 bg-white p-1 rounded-lg flex justify-center border-2 border-slate-700">
+                                <svg id="barcode-list-${item.id}"></svg>
+                            </div>
+
                             <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center">
                                 <div class="flex flex-col gap-1"><span class="text-[9px] font-black text-slate-500 uppercase">OP: ${item.operador || 'S/ IDENTIF.'}</span><span class="bg-slate-950 text-[#FFD700] px-3 py-1 rounded-lg font-mono text-sm border border-slate-800">${item.ean || '---'}</span></div>
                                 <div class="flex gap-4 items-center"><span class="text-3xl font-black text-[#FFD700]">${item.quantidade}</span>
@@ -264,6 +277,18 @@
                             </div>
                         </div>
                     </div>`;
+
+                    // Renderização das listras na lista (Atraso 0 para garantir que o DOM exista)
+                    if(item.ean && item.ean.length >= 5) {
+                        setTimeout(() => {
+                            try {
+                                JsBarcode(`#barcode-list-${item.id}`, item.ean, {
+                                    format: item.ean.length === 13 ? "EAN13" : "CODE128",
+                                    width: 1.2, height: 35, displayValue: false, margin: 5, background: "#ffffff"
+                                });
+                            } catch(e) {}
+                        }, 0);
+                    }
                 }
             });
             document.getElementById('dash-vencidos').innerText = cV; document.getElementById('dash-alerta').innerText = cA; document.getElementById('dash-total').innerText = estoque.length;
@@ -278,9 +303,28 @@
         }
 
         function exportarBackup() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(estoque, null, 2)); const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `backup_newmarket.json`); dl.click(); }
-        async function abrirCadastro() { limparForm(); document.getElementById('modal-cadastro').classList.remove('hidden'); document.getElementById('barcode-area').classList.add('hidden'); const readerCont = document.getElementById('reader-container'); readerCont.classList.remove('hidden'); scannerInstancia = new Html5Qrcode("reader"); await scannerInstancia.start({ facingMode: "environment" }, { fps: 25, qrbox: 250 }, (txt) => { document.getElementById('p-ean').value = txt; scannerInstancia.stop(); readerCont.classList.add('hidden'); gerarGraficoBarras(txt); }); }
+        async function abrirCadastro() { limparForm(); document.getElementById('modal-cadastro').classList.remove('hidden'); const readerCont = document.getElementById('reader-container'); readerCont.classList.remove('hidden'); scannerInstancia = new Html5Qrcode("reader"); await scannerInstancia.start({ facingMode: "environment" }, { fps: 25, qrbox: 250 }, (txt) => { document.getElementById('p-ean').value = txt; scannerInstancia.stop(); readerCont.classList.add('hidden'); gerarGraficoBarras(txt); }); }
         function prepararEdicao(item) { limparForm(); document.getElementById('modal-cadastro').classList.remove('hidden'); document.getElementById('reader-container').classList.add('hidden'); document.getElementById('edit-id').value = item.id; document.getElementById('p-nome').value = item.produto; document.getElementById('p-validade').value = item.vencimento; document.getElementById('p-ean').value = item.ean || ''; document.getElementById('p-qtd').value = item.quantidade; if(item.ean) gerarGraficoBarras(item.ean); }
-        function gerarGraficoBarras(valor) { const area = document.getElementById('barcode-area'); if (!valor || valor.length < 5) { area.classList.add('hidden'); return; } try { area.classList.remove('hidden'); JsBarcode("#barcode-canvas", valor, { format: valor.length === 13 ? "EAN13" : "CODE128", lineColor: "#000", width: 2.5, height: 80, displayValue: true, fontSize: 18, background: "#ffffff" }); } catch (e) { area.classList.add('hidden'); } }
+        
+        // OTIMIZADO: Função para Laser (v1.6.2)
+        function gerarGraficoBarras(valor) {
+            const area = document.getElementById('barcode-area');
+            if (!valor || valor.length < 5) { area.classList.add('hidden'); return; }
+            try {
+                area.classList.remove('hidden');
+                JsBarcode("#barcode-canvas", valor, {
+                    format: valor.length === 13 ? "EAN13" : "CODE128",
+                    lineColor: "#000",
+                    width: 2.5,
+                    height: 90, // Altura otimizada para laser
+                    displayValue: true,
+                    fontSize: 20,
+                    background: "#ffffff",
+                    margin: 15 // Quiet Zone para o laser focar
+                });
+            } catch (e) { area.classList.add('hidden'); }
+        }
+
         function excluirProduto(id, nome) { if (confirm(`EXCLUIR:\n"${nome}"?`)) { db.collection("validades").doc(id).delete(); } }
         function fecharModalCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if(scannerInstancia) scannerInstancia.stop().catch(() => {}); }
         function toggleManutencaoSecreto() { cliquesSegredo++; if (cliquesSegredo >= 5) { localStorage.setItem('manutencaoNewMarket', !manutencaoAtiva); window.location.reload(); } setTimeout(() => cliquesSegredo = 0, 3000); }
@@ -305,7 +349,7 @@
         }
 
         async function registrarAcessoAuditoria(nomeUsuario) {
-            try { await db.collection("logs_acesso").add({ operador: nomeUsuario, data_hora: firebase.firestore.FieldValue.serverTimestamp(), dispositivo: navigator.platform, versao: "1.6.1" }); } catch (e) { console.error("Erro audit:", e); }
+            try { await db.collection("logs_acesso").add({ operador: nomeUsuario, data_hora: firebase.firestore.FieldValue.serverTimestamp(), dispositivo: navigator.platform, versao: "1.6.2" }); } catch (e) { console.error("Erro audit:", e); }
         }
 
         async function abrirModalLogs() {
