@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>New Market - v1.5.4</title>
     
+    <meta property="og:title" content="New Market - Gestão de Validades">
+    <meta property="og:description" content="Sistema inteligente para controle de estoque e alertas de vencimento.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://raw.githubusercontent.com/paulopkacci/assets/main/newmarket-preview.png">
+    <meta name="theme-color" content="#001e3c">
+    
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -95,7 +101,6 @@
     </div>
 
     <script>
-        // Função para impedir o menu de contexto e inspecionar elemento
         document.addEventListener('contextmenu', event => event.preventDefault()); 
         document.onkeydown = (e) => {
             if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
@@ -103,18 +108,15 @@
             }
         };
 
-        // Configuração e Inicialização do Firebase
         const firebaseConfig = { apiKey: "AIzaSyAJaG7s34jBoU61fNNZieeV3N6lh9_3vo4", authDomain: "mercado-c3e95.firebaseapp.com", projectId: "mercado-c3e95", storageBucket: "mercado-c3e95.firebasestorage.app", messagingSenderId: "883539091925", appId: "1:883539091925:web:d8bb6b99548e59beaa5d5c" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // [PKACCI - ATIVAÇÃO OFFLINE]
         db.enablePersistence().catch((err) => {
-            if (err.code == 'failed-precondition') { console.log("Múltiplas abas abertas, persistência desativada."); }
-            else if (err.code == 'unimplemented') { console.log("O navegador não suporta persistência."); }
+            if (err.code == 'failed-precondition') { console.log("Múltiplas abas abertas."); }
+            else if (err.code == 'unimplemented') { console.log("Navegador sem suporte a cache."); }
         });
 
-        // Lista de Equipe com Senhas em Base64
         const EQUIPE = [ 
             { nome: "ADRIANO", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
             { nome: "ADRIELLE", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
@@ -126,11 +128,9 @@
             { nome: "TAMIRIS", pass: "dGFtaXJpczEyMw==", cargo: "EQUIPE" } 
         ];
 
-        // Variáveis de Estado Global
         let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
         let usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos', itensSelecionados = new Set(), segundosTotais = 900, cliquesSegredo = 0;
 
-        // Inicialização do App
         window.onload = () => {
             renderizarListaUsuarios();
             const salvo = localStorage.getItem('sessaoNewMarket');
