@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.5.7</title>
+    <title>New Market - v1.6.0-SHADOW</title>
     
     <meta property="og:title" content="New Market - Gestão de Validades">
     <meta property="og:description" content="Sistema inteligente para controle de estoque e alertas de vencimento.">
@@ -29,6 +29,7 @@
         .check-in-input { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #334155; appearance: none; -webkit-appearance: none; outline: none; background: #020617; }
         .check-in-input:checked { background: #FFD700; border-color: #FFD700; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-size: contain; }
         .btn-touch { min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
+        .modal-shadow { background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(10px); }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -69,8 +70,11 @@
         </header>
 
         <main class="max-w-lg mx-auto p-5 pb-44">
-            <div id="admin-tools" class="hidden mb-4">
+            <div id="admin-tools" class="hidden mb-4 space-y-2">
                 <button onclick="exportarBackup()" class="w-full py-3 bg-slate-800 border border-slate-700 rounded-xl text-[9px] font-black uppercase text-slate-400">📥 Exportar Backup (JSON)</button>
+                <div id="view-paulo-exclusiva" class="hidden">
+                    <button onclick="abrirModalLogs()" class="w-full py-3 bg-indigo-900/40 border border-indigo-800 rounded-xl text-[9px] font-black uppercase text-indigo-400">📊 Histórico de Acessos Equipe</button>
+                </div>
             </div>
 
             <div class="grid grid-cols-3 gap-2 mb-4 text-center">
@@ -104,6 +108,16 @@
 
         <div class="fixed bottom-8 left-0 right-0 px-10 z-40">
             <button onclick="abrirCadastro()" class="w-full bg-[#FFD700] text-slate-950 py-5 rounded-2xl shadow-xl font-black text-xs uppercase">+ NOVO / SCANNER</button>
+        </div>
+    </div>
+
+    <div id="modal-logs" class="hidden fixed inset-0 modal-shadow z-[900] overflow-y-auto p-6">
+        <div class="max-w-lg mx-auto bg-slate-900 rounded-[2.5rem] border border-slate-800 p-8">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-sm font-black uppercase text-indigo-400">Monitoramento Shadow</h2>
+                <button onclick="fecharModalLogs()" class="text-3xl text-slate-500">&times;</button>
+            </div>
+            <div id="lista-logs" class="space-y-3 font-mono text-[10px]"></div>
         </div>
     </div>
 
@@ -141,7 +155,7 @@
             { nome: "LEANDRO", pass: "bGVhbmRybzEyMw==", cargo: "EQUIPE" }, 
             { nome: "EDMAR", pass: "ZWRtYXIxMjM=", cargo: "EQUIPE" }, 
             { nome: "JOÃO", pass: "am9hbzEyMw==", cargo: "EQUIPE" }, 
-            { nome: "TAMIRIS", pass: "dGFtaXJpczEyMw==", cargo: "EQUIPE" } 
+            { nome: "TAMIRIS", pass: "ZGFtaXJpczEyMw==", cargo: "EQUIPE" } 
         ];
 
         let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
@@ -193,6 +207,10 @@
                 if (manutencaoAtiva && u.cargo !== 'DESENVOLVEDOR') { alert("MANUTENÇÃO."); mostrarManutencao(); return; }
                 usuarioSessao = u;
                 localStorage.setItem('sessaoNewMarket', u.nome);
+                
+                // EXCLUSIVO v1.6.0: Registro Universal de Login
+                registrarAcessoAuditoria(u.nome);
+                
                 entrarNoApp();
             } else { alert("Senha incorreta."); }
         }
@@ -204,6 +222,10 @@
             document.getElementById('user-display').innerText = `OPERADOR: ${usuarioSessao.nome}`;
             const isAdmin = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
             if(isAdmin) document.getElementById('admin-tools').classList.remove('hidden');
+            
+            // EXCLUSIVO v1.6.0: Visualização Shadow apenas para PAULO
+            if(usuarioSessao.nome === "PAULO") document.getElementById('view-paulo-exclusiva').classList.remove('hidden');
+
             db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
                 estoque = [];
                 snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
@@ -271,7 +293,6 @@
         function checkInTodos() { if (itensSelecionados.size === estoque.length) { itensSelecionados.clear(); } else { estoque.forEach(i => itensSelecionados.add(i.id)); } renderizar(); }
         function toggleCheckIn(id) { itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id); renderizar(); }
 
-        // [PKACCI - RELATÓRIO ELITE v1.5.7]
         function enviarRelatorioWhatsApp() {
             const agora = new Date();
             const dataFormatada = agora.toLocaleDateString('pt-BR');
@@ -296,6 +317,39 @@
             msg += `*Link do Sistema:* https://mercado-c3e95.web.app/`;
             window.open(`https://wa.me/?text=${msg}`);
         }
+
+        // --- SISTEMA DE AUDITORIA v1.6.0 ---
+        async function registrarAcessoAuditoria(nomeUsuario) {
+            try {
+                await db.collection("logs_acesso").add({
+                    operador: nomeUsuario,
+                    data_hora: firebase.firestore.FieldValue.serverTimestamp(),
+                    dispositivo: navigator.platform,
+                    versao: "1.6.0"
+                });
+            } catch (e) { console.error("Erro audit:", e); }
+        }
+
+        async function abrirModalLogs() {
+            if(usuarioSessao.nome !== "PAULO") return;
+            document.getElementById('modal-logs').classList.remove('hidden');
+            const container = document.getElementById('lista-logs');
+            container.innerHTML = '<p class="animate-pulse text-slate-500">CARREGANDO LOGS...</p>';
+            
+            const snap = await db.collection("logs_acesso").orderBy("data_hora", "desc").limit(40).get();
+            let html = '';
+            snap.forEach(doc => {
+                const d = doc.data();
+                const data = d.data_hora ? d.data_hora.toDate().toLocaleString('pt-BR') : '---';
+                html += `<div class="p-3 border-b border-slate-800 flex justify-between">
+                    <span class="text-white font-black">${d.operador}</span>
+                    <span class="text-slate-500">${data}</span>
+                </div>`;
+            });
+            container.innerHTML = html || '<p>NENHUM ACESSO REGISTRADO.</p>';
+        }
+
+        function fecharModalLogs() { document.getElementById('modal-logs').classList.add('hidden'); }
     </script>
 </body>
 </html>
