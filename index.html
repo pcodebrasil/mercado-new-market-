@@ -38,6 +38,9 @@
         .check-in-input:checked { background: #FFD700; border-color: #FFD700; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-size: contain; }
         .btn-touch { min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
         .modal-shadow { background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(10px); }
+        
+        /* Estilo para o Toggle de Filtro */
+        .toggle-filtro-ativo { background: #FFD700 !important; color: #020617 !important; border-color: #FFD700 !important; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -73,6 +76,9 @@
             
             <div class="flex gap-2">
                 <button onclick="enviarRelatorioWhatsApp()" class="flex-grow bg-green-600 text-white py-3 rounded-xl font-black text-[9px] uppercase italic">Relatório WhatsApp</button>
+                <div id="container-filtro-lideranca" class="hidden flex gap-2">
+                    <button id="btn-meus-itens" onclick="toggleFiltroOperador()" class="bg-slate-800 text-slate-300 px-4 py-3 rounded-xl font-black text-[9px] uppercase border border-slate-700">Meus Itens</button>
+                </div>
                 <button onclick="checkInTodos()" class="bg-slate-800 text-slate-300 px-4 py-3 rounded-xl font-black text-[9px] uppercase">Selecionar Tudo</button>
             </div>
         </header>
@@ -164,6 +170,7 @@
 
         let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
         let usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos', itensSelecionados = new Set(), segundosTotais = 900, cliquesSegredo = 0;
+        let apenasMeusItens = false;
 
         window.onload = () => {
             renderizarListaUsuarios();
@@ -225,14 +232,26 @@
             document.getElementById('loginView').classList.add('hidden-app');
             document.getElementById('appView').classList.remove('hidden-app');
             document.getElementById('user-display').innerText = obterSaudacao();
+            
             const isAdmin = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
-            if(isAdmin) document.getElementById('admin-tools').classList.remove('hidden');
+            if(isAdmin) {
+                document.getElementById('admin-tools').classList.remove('hidden');
+                document.getElementById('container-filtro-lideranca').classList.remove('hidden');
+            }
             if(usuarioSessao.nome === "PAULO") document.getElementById('view-paulo-exclusiva').classList.remove('hidden');
+            
             db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
                 estoque = [];
                 snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
                 renderizar();
             });
+        }
+
+        function toggleFiltroOperador() {
+            apenasMeusItens = !apenasMeusItens;
+            const btn = document.getElementById('btn-meus-itens');
+            apenasMeusItens ? btn.classList.add('toggle-filtro-ativo') : btn.classList.remove('toggle-filtro-ativo');
+            renderizar();
         }
 
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
@@ -245,6 +264,7 @@
             const podeExcluir = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
             const hoje = new Date().setHours(0,0,0,0);
 
+            // Gestão de botões de filtro
             const btnVencidos = document.querySelector('[onclick="setFiltro(\'vencidos\')"]');
             const btnUrgente = document.querySelector('[onclick="setFiltro(\'urgente\')"]');
             const btnTodos = document.querySelector('[onclick="setFiltro(\'todos\')"]');
@@ -257,6 +277,8 @@
             
             estoque.forEach(item => {
                 const dV = new Date(item.vencimento + 'T00:00:00'), d = Math.floor((dV - hoje) / 86400000);
+                
+                // Dashboards sempre mostram o total global para a liderança entender o risco geral
                 if (d >= 0 && d <= 15) r15 += (item.quantidade || 0);
                 if (d >= 0 && d <= 30) r30 += (item.quantidade || 0);
                 if (d >= 0 && d <= 60) r60 += (item.quantidade || 0);
@@ -265,7 +287,10 @@
                 const matchesBusca = (item.produto || "").includes(busca) || (item.ean || "").includes(busca);
                 const matchesFiltroValidade = (filtroAtual === 'vencidos' ? d < 0 : filtroAtual === 'urgente' ? (d >= 0 && d <= 7) : true);
                 
-                if (matchesBusca && matchesFiltroValidade) {
+                // NOVO: Filtro por Operador (Liderança)
+                const matchesOperador = apenasMeusItens ? item.operador === usuarioSessao.nome : true;
+                
+                if (matchesBusca && matchesFiltroValidade && matchesOperador) {
                     const isChecked = itensSelecionados.has(item.id) ? 'checked' : '';
                     const classeRelatado = item.relatado ? 'pulse-relatado opacity-60' : '';
                     const textoRelatado = item.relatado ? '<span class="text-[8px] font-black text-green-500 ml-2">✅ ENVIADO</span>' : '';
@@ -319,10 +344,11 @@
         function iniciarTimerManutencao() { setInterval(() => { if (segundosTotais <= 0) segundosTotais = 900; let m = Math.floor(segundosTotais / 60), s = segundosTotais % 60; document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; segundosTotais--; }, 1000); }
         
         function checkInTodos() {
-            const pendentes = estoque.filter(i => !i.relatado);
+            // Se o filtro "Apenas Meus Itens" estiver ativo, selecionar tudo deve respeitar apenas os meus pendentes
+            const pendentes = estoque.filter(i => !i.relatado && (apenasMeusItens ? i.operador === usuarioSessao.nome : true));
             const todosPendentesSelecionados = pendentes.length > 0 && pendentes.every(i => itensSelecionados.has(i.id));
             if (todosPendentesSelecionados) {
-                itensSelecionados.clear();
+                pendentes.forEach(i => itensSelecionados.delete(i.id));
             } else {
                 pendentes.forEach(i => itensSelecionados.add(i.id));
             }
