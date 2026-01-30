@@ -151,11 +151,19 @@
             renderizarListaUsuarios();
             const salvo = localStorage.getItem('sessaoNewMarket');
             if (manutencaoAtiva) {
-                if (salvo === 'PAULO') { usuarioSessao = EQUIPE.find(x => x.nome === 'PAULO'); entrarNoApp(); } 
-                else { mostrarManutencao(); }
+                if (salvo === 'PAULO') { 
+                    usuarioSessao = EQUIPE.find(x => x.nome === 'PAULO'); 
+                    entrarNoApp(); 
+                } else { 
+                    mostrarManutencao(); 
+                }
             } else {
-                if (salvo) { usuarioSessao = EQUIPE.find(x => x.nome === salvo); usuarioSessao ? entrarNoApp() : mostrarLogin(); } 
-                else { mostrarLogin(); }
+                if (salvo) { 
+                    usuarioSessao = EQUIPE.find(x => x.nome === salvo); 
+                    usuarioSessao ? entrarNoApp() : mostrarLogin(); 
+                } else { 
+                    mostrarLogin(); 
+                }
             }
         };
 
@@ -171,6 +179,12 @@
             document.getElementById('appView').classList.add('hidden-app');
             document.getElementById('maintenanceView').classList.remove('hidden-app');
             iniciarTimerManutencao();
+        }
+
+        // [PKACCI - CORREÇÃO ACESSO ADMIN]
+        function irParaLoginDesdeManutencao() {
+            document.getElementById('maintenanceView').classList.add('hidden-app');
+            document.getElementById('loginView').classList.remove('hidden-app');
         }
 
         function renderizarListaUsuarios() {
@@ -199,7 +213,12 @@
             const u = EQUIPE.find(x => x.nome === n);
             const pass = document.getElementById('pass-input').value;
             if (btoa(pass) === u.pass) {
-                if (manutencaoAtiva && u.cargo !== 'DESENVOLVEDOR') { mostrarManutencao(); return; }
+                // Se manutenção estiver ativa, só deixa entrar se for o cargo DESENVOLVEDOR
+                if (manutencaoAtiva && u.cargo !== 'DESENVOLVEDOR') {
+                    alert("SISTEMA EM MANUTENÇÃO. ACESSO NEGADO.");
+                    mostrarManutencao();
+                    return;
+                }
                 usuarioSessao = u;
                 localStorage.setItem('sessaoNewMarket', u.nome);
                 entrarNoApp();
@@ -350,7 +369,10 @@
 
         function toggleManutencaoSecreto() {
             cliquesSegredo++;
-            if (cliquesSegredo >= 5) { localStorage.setItem('manutencaoNewMarket', !manutencaoAtiva); window.location.reload(); }
+            if (cliquesSegredo >= 5) { 
+                localStorage.setItem('manutencaoNewMarket', !manutencaoAtiva); 
+                window.location.reload(); 
+            }
             setTimeout(() => cliquesSegredo = 0, 3000);
         }
 
