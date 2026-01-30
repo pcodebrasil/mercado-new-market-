@@ -159,6 +159,7 @@
             { nome: "ADRIANO", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
             { nome: "ADRIELLE", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
             { nome: "PAULO", pass: "cGF1bG8xMjM=", cargo: "DESENVOLVEDOR" }, 
+            { nome: "ANA CLAUDIA", pass: "YW5hY2xhdWRpYTEyMw==", cargo: "EQUIPE" }, 
             { nome: "PEDRO", pass: "cGVkcm8xMjM=", cargo: "EQUIPE" }, 
             { nome: "LEANDRO", pass: "bGVhbmRybzEyMw==", cargo: "EQUIPE" }, 
             { nome: "EDMAR", pass: "ZWRmYXIxMjM=", cargo: "EQUIPE" }, 
@@ -221,7 +222,7 @@
         function obterSaudacao() {
             const hora = new Date().getHours();
             let s = (hora >= 5 && hora < 12) ? "BOM DIA" : (hora >= 12 && hora < 18) ? "BOA TARDE" : "BOA NOITE";
-            const art = ["ADRIELLE", "TAMIRIS"].includes(usuarioSessao.nome) ? "BEM-VINDA" : "BEM-VINDO";
+            const art = ["ADRIELLE", "TAMIRIS", "ANA CLAUDIA"].includes(usuarioSessao.nome) ? "BEM-VINDA" : "BEM-VINDO";
             return `${s}, ${art} ${usuarioSessao.nome}!`;
         }
 
@@ -233,13 +234,12 @@
             
             const isElite = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
             
-            // CONFIGURAÇÃO DE VISIBILIDADE PKACCI
             if(isElite) {
                 document.getElementById('admin-tools').classList.remove('hidden');
                 document.getElementById('container-filtro-lideranca').classList.remove('hidden');
-                apenasMeusItens = false; // Elite começa vendo tudo
+                apenasMeusItens = false;
             } else {
-                apenasMeusItens = true; // Operadores começam (e ficam) vendo apenas os seus
+                apenasMeusItens = true;
                 document.getElementById('container-filtro-lideranca').classList.add('hidden');
             }
             
@@ -272,8 +272,6 @@
 
             estoque.forEach(item => {
                 const dV = new Date(item.vencimento + 'T00:00:00'), d = Math.floor((dV - hoje) / 86400000);
-                
-                // Dashboard reflete o que o usuário está vendo (Visão Segmentada)
                 const matchesOperador = apenasMeusItens ? item.operador === usuarioSessao.nome : true;
                 
                 if (matchesOperador) {
