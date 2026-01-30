@@ -79,7 +79,6 @@
 
         <main class="max-w-lg mx-auto p-5 pb-44">
             <div id="admin-tools" class="hidden mb-4 space-y-2">
-                <button onclick="exportarBackup()" class="w-full py-3 bg-slate-800 border border-slate-700 rounded-xl text-[9px] font-black uppercase text-slate-400">📥 Exportar Backup (JSON)</button>
                 <div id="view-paulo-exclusiva" class="hidden">
                     <button onclick="abrirModalLogs()" class="w-full py-3 bg-indigo-900/40 border border-indigo-800 rounded-xl text-[9px] font-black uppercase text-indigo-400">📊 Histórico de Acessos Equipe</button>
                 </div>
@@ -310,7 +309,6 @@
             fecharModalCadastro();
         }
 
-        function exportarBackup() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(estoque, null, 2)); const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `backup_newmarket.json`); dl.click(); }
         async function abrirCadastro() { limparForm(); document.getElementById('modal-cadastro').classList.remove('hidden'); const readerCont = document.getElementById('reader-container'); readerCont.classList.remove('hidden'); scannerInstancia = new Html5Qrcode("reader"); await scannerInstancia.start({ facingMode: "environment" }, { fps: 25, qrbox: 250 }, (txt) => { document.getElementById('p-ean').value = txt; scannerInstancia.stop(); readerCont.classList.add('hidden'); gerarGraficoBarras(txt); }); }
         function prepararEdicao(item) { limparForm(); document.getElementById('modal-cadastro').classList.remove('hidden'); document.getElementById('reader-container').classList.add('hidden'); document.getElementById('edit-id').value = item.id; document.getElementById('p-nome').value = item.produto; document.getElementById('p-validade').value = item.vencimento; document.getElementById('p-ean').value = item.ean || ''; document.getElementById('p-qtd').value = item.quantidade; if(item.ean) gerarGraficoBarras(item.ean); }
         function gerarGraficoBarras(valor) { const area = document.getElementById('barcode-area'); if (!valor || valor.length < 5) { area.classList.add('hidden'); return; } try { area.classList.remove('hidden'); JsBarcode("#barcode-canvas", valor, { format: valor.length === 13 ? "EAN13" : "CODE128", lineColor: "#000", width: 2.5, height: 90, displayValue: true, fontSize: 20, background: "#ffffff", margin: 15 }); } catch (e) { area.classList.add('hidden'); } }
