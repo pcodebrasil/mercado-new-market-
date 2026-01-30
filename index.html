@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.6.4-UI</title>
+    <title>New Market - v1.6.5-DYNAMIC</title>
     
     <meta property="og:title" content="New Market - Gestão de Validades">
     <meta property="og:description" content="Sistema inteligente para controle de estoque e alertas de vencimento.">
@@ -78,15 +78,15 @@
             </div>
 
             <div class="grid grid-cols-3 gap-2 mb-4 text-center">
-                <div onclick="setFiltro('vencidos')" class="bg-red-900/40 p-3 rounded-2xl text-red-400 border border-red-500/50">
+                <div onclick="setFiltro('vencidos')" class="bg-red-900/40 p-3 rounded-2xl text-red-400 border border-red-500/30 transition-all duration-300 transform">
                     <p class="text-[8px] font-black uppercase mb-1">Vencidos</p>
                     <p id="dash-vencidos" class="text-xl font-black leading-none">0</p>
                 </div>
-                <div onclick="setFiltro('urgente')" class="bg-yellow-900/40 p-3 rounded-2xl text-yellow-400 border border-yellow-500/50">
+                <div onclick="setFiltro('urgente')" class="bg-yellow-900/40 p-3 rounded-2xl text-yellow-400 border border-yellow-500/30 transition-all duration-300 transform">
                     <p class="text-[8px] font-black uppercase mb-1">Alerta</p>
                     <p id="dash-alerta" class="text-xl font-black leading-none">0</p>
                 </div>
-                <div onclick="setFiltro('todos')" class="bg-slate-800 p-3 rounded-2xl text-slate-100 border border-slate-700">
+                <div onclick="setFiltro('todos')" class="bg-slate-800 p-3 rounded-2xl text-slate-100 border border-slate-700 transition-all duration-300 transform">
                     <p class="text-[8px] font-black uppercase mb-1">Total</p>
                     <p id="dash-total" class="text-xl font-black leading-none">0</p>
                 </div>
@@ -159,7 +159,7 @@
             { nome: "PAULO", pass: "cGF1bG8xMjM=", cargo: "DESENVOLVEDOR" }, 
             { nome: "PEDRO", pass: "cGVkcm8xMjM=", cargo: "EQUIPE" }, 
             { nome: "LEANDRO", pass: "bGVhbmRybzEyMw==", cargo: "EQUIPE" }, 
-            { nome: "EDMAR", pass: "ZWRtYXIxMjM=", cargo: "EQUIPE" }, 
+            { nome: "EDMAR", pass: "ZWRmYXIxMjM=", cargo: "EQUIPE" }, 
             { nome: "JOÃO", pass: "am9hbzEyMw==", cargo: "EQUIPE" }, 
             { nome: "TAMIRIS", pass: "ZGFtaXJpczEyMw==", cargo: "EQUIPE" } 
         ];
@@ -235,11 +235,25 @@
 
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
 
+        function setFiltro(f) { filtroAtual = f; renderizar(); }
+
         function renderizar() {
             const container = document.getElementById('container-produtos'), busca = document.getElementById('input-busca').value.toUpperCase();
             let cV = 0, cA = 0, r15 = 0, r30 = 0, r60 = 0; container.innerHTML = '';
             const podeExcluir = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
             const hoje = new Date().setHours(0,0,0,0);
+
+            // INJEÇÃO CIRÚRGICA: Atualização visual dinâmica dos botões de filtro
+            const btnVencidos = document.querySelector('[onclick="setFiltro(\'vencidos\')"]');
+            const btnUrgente = document.querySelector('[onclick="setFiltro(\'urgente\')"]');
+            const btnTodos = document.querySelector('[onclick="setFiltro(\'todos\')"]');
+
+            if(btnVencidos && btnUrgente && btnTodos) {
+                [btnVencidos, btnUrgente, btnTodos].forEach(b => b.classList.remove('border-2', 'scale-105', 'shadow-xl'));
+                if (filtroAtual === 'vencidos') btnVencidos.classList.add('border-2', 'border-red-500', 'scale-105');
+                if (filtroAtual === 'urgente') btnUrgente.classList.add('border-2', 'border-yellow-500', 'scale-105');
+                if (filtroAtual === 'todos') btnTodos.classList.add('border-2', 'border-slate-100', 'scale-105');
+            }
             
             estoque.forEach(item => {
                 const dV = new Date(item.vencimento + 'T00:00:00'), d = Math.floor((dV - hoje) / 86400000);
@@ -310,7 +324,6 @@
         function excluirProduto(id, nome) { if (confirm(`EXCLUIR:\n"${nome}"?`)) { db.collection("validades").doc(id).delete(); } }
         function fecharModalCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if(scannerInstancia) scannerInstancia.stop().catch(() => {}); }
         function toggleManutencaoSecreto() { cliquesSegredo++; if (cliquesSegredo >= 5) { localStorage.setItem('manutencaoNewMarket', !manutencaoAtiva); window.location.reload(); } setTimeout(() => cliquesSegredo = 0, 3000); }
-        function setFiltro(f) { filtroAtual = f; renderizar(); }
         function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; document.getElementById('barcode-area').classList.add('hidden'); }
         function iniciarTimerManutencao() { setInterval(() => { if (segundosTotais <= 0) segundosTotais = 900; let m = Math.floor(segundosTotais / 60), s = segundosTotais % 60; document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`; segundosTotais--; }, 1000); }
         function checkInTodos() { if (itensSelecionados.size === estoque.length) { itensSelecionados.clear(); } else { estoque.forEach(i => itensSelecionados.add(i.id)); } renderizar(); }
@@ -331,7 +344,7 @@
         }
 
         async function registrarAcessoAuditoria(nomeUsuario) {
-            try { await db.collection("logs_acesso").add({ operador: nomeUsuario, data_hora: firebase.firestore.FieldValue.serverTimestamp(), dispositivo: navigator.platform, versao: "1.6.4" }); } catch (e) { console.error("Erro audit:", e); }
+            try { await db.collection("logs_acesso").add({ operador: nomeUsuario, data_hora: firebase.firestore.FieldValue.serverTimestamp(), dispositivo: navigator.platform, versao: "1.6.5" }); } catch (e) { console.error("Erro audit:", e); }
         }
 
         async function abrirModalLogs() {
