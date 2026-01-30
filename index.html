@@ -19,7 +19,6 @@
     
     <style>
         /* Desenvolvido por: Paulo Pkacci by 2026 */
-        /* Estilos globais para prevenir zoom acidental e melhorar toque em dispositivos móveis */
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; -webkit-font-smoothing: antialiased; user-select: none; }
         body { font-family: sans-serif; background-color: #020617; color: #f8fafc; overflow-x: hidden; margin: 0; }
         .hidden-app { display: none !important; }
@@ -70,11 +69,36 @@
         </header>
 
         <main class="max-w-lg mx-auto p-5 pb-44">
+            <div id="admin-tools" class="hidden mb-4">
+                <button onclick="exportarBackup()" class="w-full py-3 bg-slate-800 border border-slate-700 rounded-xl text-[9px] font-black uppercase text-slate-400">📥 Exportar Backup de Segurança (JSON)</button>
+            </div>
+
             <div class="grid grid-cols-3 gap-2 mb-4 text-center">
                 <div onclick="setFiltro('vencidos')" class="bg-red-900/40 p-3 rounded-2xl text-red-400"><p id="dash-vencidos" class="text-xl font-black">0</p></div>
                 <div onclick="setFiltro('urgente')" class="bg-yellow-900/40 p-3 rounded-2xl text-yellow-400"><p id="dash-alerta" class="text-xl font-black">0</p></div>
                 <div onclick="setFiltro('todos')" class="bg-slate-800 p-3 rounded-2xl text-slate-100"><p id="dash-total" class="text-xl font-black">0</p></div>
             </div>
+
+            <div class="bg-[#0f172a] border border-slate-800 rounded-3xl p-5 mb-6">
+                <h3 class="text-[10px] font-black uppercase text-slate-500 mb-3 tracking-widest flex items-center gap-2">
+                    <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span> Previsão de Perdas (Itens)
+                </h3>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="text-center">
+                        <p class="text-[9px] font-black text-slate-400 uppercase">15 Dias</p>
+                        <p id="risco-15" class="text-lg font-black text-orange-400">0</p>
+                    </div>
+                    <div class="text-center border-x border-slate-800">
+                        <p class="text-[9px] font-black text-slate-400 uppercase">30 Dias</p>
+                        <p id="risco-30" class="text-lg font-black text-blue-400">0</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[9px] font-black text-slate-400 uppercase">60 Dias</p>
+                        <p id="risco-60" class="text-lg font-black text-slate-100">0</p>
+                    </div>
+                </div>
+            </div>
+
             <div id="container-produtos" class="space-y-4"></div>
         </main>
 
@@ -113,8 +137,8 @@
         const db = firebase.firestore();
 
         db.enablePersistence().catch((err) => {
-            if (err.code == 'failed-precondition') { console.log("Múltiplas abas abertas."); }
-            else if (err.code == 'unimplemented') { console.log("Navegador sem suporte a cache."); }
+            if (err.code == 'failed-precondition') { console.log("Múltiplas abas."); }
+            else if (err.code == 'unimplemented') { console.log("Sem suporte a cache."); }
         });
 
         const EQUIPE = [ 
@@ -201,6 +225,10 @@
             document.getElementById('loginView').classList.add('hidden-app');
             document.getElementById('appView').classList.remove('hidden-app');
             document.getElementById('user-display').innerText = `OPERADOR: ${usuarioSessao.nome}`;
+            
+            const isAdmin = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
+            if(isAdmin) document.getElementById('admin-tools').classList.remove('hidden');
+
             db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
                 estoque = [];
                 snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
@@ -212,12 +240,20 @@
 
         function renderizar() {
             const container = document.getElementById('container-produtos'), busca = document.getElementById('input-busca').value.toUpperCase();
-            let cV = 0, cA = 0; container.innerHTML = '';
+            let cV = 0, cA = 0, r15 = 0, r30 = 0, r60 = 0; container.innerHTML = '';
             const podeExcluir = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
+            const hoje = new Date().setHours(0,0,0,0);
 
             estoque.forEach(item => {
-                const dV = new Date(item.vencimento + 'T00:00:00'), d = Math.floor((dV - new Date().setHours(0,0,0,0)) / 86400000);
+                const dV = new Date(item.vencimento + 'T00:00:00'), d = Math.floor((dV - hoje) / 86400000);
+                
+                // Cálculo de risco
+                if (d >= 0 && d <= 15) r15 += (item.quantidade || 0);
+                if (d >= 0 && d <= 30) r30 += (item.quantidade || 0);
+                if (d >= 0 && d <= 60) r60 += (item.quantidade || 0);
+
                 if (d < 0) cV++; else if (d <= 7) cA++;
+                
                 if (((item.produto || "").includes(busca) || (item.ean || "").includes(busca)) && (filtroAtual === 'vencidos' ? d < 0 : filtroAtual === 'urgente' ? (d >= 0 && d <= 7) : true)) {
                     const isChecked = itensSelecionados.has(item.id) ? 'checked' : '';
                     container.innerHTML += `<div class="card-produto p-5 flex items-center gap-4 mb-4">
@@ -242,6 +278,23 @@
             document.getElementById('dash-vencidos').innerText = cV;
             document.getElementById('dash-alerta').innerText = cA;
             document.getElementById('dash-total').innerText = estoque.length;
+            
+            // Atualiza Dashboard de Risco
+            document.getElementById('risco-15').innerText = r15;
+            document.getElementById('risco-30').innerText = r30;
+            document.getElementById('risco-60').innerText = r60;
+        }
+
+        function exportarBackup() {
+            if (estoque.length === 0) return alert("Nada para exportar!");
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(estoque, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            const dataHora = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", `backup_newmarket_${dataHora}.json`);
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
         }
 
         async function abrirCadastro() {
