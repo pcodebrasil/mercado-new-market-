@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.6.3-FINAL</title>
+    <title>New Market - v1.6.4-UI</title>
     
     <meta property="og:title" content="New Market - Gestão de Validades">
     <meta property="og:description" content="Sistema inteligente para controle de estoque e alertas de vencimento.">
@@ -78,15 +78,15 @@
             </div>
 
             <div class="grid grid-cols-3 gap-2 mb-4 text-center">
-                <div onclick="setFiltro('vencidos')" class="bg-red-900/40 p-3 rounded-2xl text-red-400">
+                <div onclick="setFiltro('vencidos')" class="bg-red-900/40 p-3 rounded-2xl text-red-400 border border-red-500/50">
                     <p class="text-[8px] font-black uppercase mb-1">Vencidos</p>
                     <p id="dash-vencidos" class="text-xl font-black leading-none">0</p>
                 </div>
-                <div onclick="setFiltro('urgente')" class="bg-yellow-900/40 p-3 rounded-2xl text-yellow-400">
+                <div onclick="setFiltro('urgente')" class="bg-yellow-900/40 p-3 rounded-2xl text-yellow-400 border border-yellow-500/50">
                     <p class="text-[8px] font-black uppercase mb-1">Alerta</p>
                     <p id="dash-alerta" class="text-xl font-black leading-none">0</p>
                 </div>
-                <div onclick="setFiltro('todos')" class="bg-slate-800 p-3 rounded-2xl text-slate-100">
+                <div onclick="setFiltro('todos')" class="bg-slate-800 p-3 rounded-2xl text-slate-100 border border-slate-700">
                     <p class="text-[8px] font-black uppercase mb-1">Total</p>
                     <p id="dash-total" class="text-xl font-black leading-none">0</p>
                 </div>
@@ -331,7 +331,7 @@
         }
 
         async function registrarAcessoAuditoria(nomeUsuario) {
-            try { await db.collection("logs_acesso").add({ operador: nomeUsuario, data_hora: firebase.firestore.FieldValue.serverTimestamp(), dispositivo: navigator.platform, versao: "1.6.3" }); } catch (e) { console.error("Erro audit:", e); }
+            try { await db.collection("logs_acesso").add({ operador: nomeUsuario, data_hora: firebase.firestore.FieldValue.serverTimestamp(), dispositivo: navigator.platform, versao: "1.6.4" }); } catch (e) { console.error("Erro audit:", e); }
         }
 
         async function abrirModalLogs() {
