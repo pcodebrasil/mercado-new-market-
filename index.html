@@ -108,6 +108,12 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // [PKACCI - ATIVAÇÃO OFFLINE]
+        db.enablePersistence().catch((err) => {
+            if (err.code == 'failed-precondition') { console.log("Múltiplas abas abertas, persistência desativada."); }
+            else if (err.code == 'unimplemented') { console.log("O navegador não suporta persistência."); }
+        });
+
         // Lista de Equipe com Senhas em Base64
         const EQUIPE = [ 
             { nome: "ADRIANO", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
@@ -204,16 +210,9 @@
 
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
 
-        /**
-         * FUNÇÃO: renderizar
-         * DESCRIÇÃO: Gera a lista visual de produtos.
-         * ATUALIZAÇÃO v1.5.4: Controle de exibição do botão excluir baseado no usuário.
-         */
         function renderizar() {
             const container = document.getElementById('container-produtos'), busca = document.getElementById('input-busca').value.toUpperCase();
             let cV = 0, cA = 0; container.innerHTML = '';
-            
-            // [Eng. Sistemas] Verifica se o usuário atual tem permissão administrativa
             const podeExcluir = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
 
             estoque.forEach(item => {
@@ -287,21 +286,10 @@
             fecharModalCadastro();
         }
 
-        /**
-         * FUNÇÃO: excluirProduto
-         * DESCRIÇÃO: Remove um produto do banco de dados.
-         * ATUALIZAÇÃO v1.5.4: Trava de segurança lógica para usuários não autorizados.
-         */
         function excluirProduto(id, nome) { 
-            // [Eng. Sistemas] Trava de segurança interna
             const podeExcluir = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
-            if (!podeExcluir) {
-                alert("ACESSO NEGADO: Apenas administradores podem excluir produtos.");
-                return;
-            }
-            if (confirm(`EXCLUIR:\n"${nome}"?`)) { 
-                db.collection("validades").doc(id).delete(); 
-            } 
+            if (!podeExcluir) { alert("ACESSO NEGADO."); return; }
+            if (confirm(`EXCLUIR:\n"${nome}"?`)) { db.collection("validades").doc(id).delete(); } 
         }
         
         function fecharModalCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if(scannerInstancia) scannerInstancia.stop().catch(() => {}); }
@@ -310,40 +298,26 @@
             const agora = new Date();
             const hoje = new Date(); hoje.setHours(0,0,0,0);
             const urlSistema = window.location.href; 
-            
-            let lista = [];
-            if (itensSelecionados.size > 0) {
-                lista = estoque.filter(item => itensSelecionados.has(item.id));
-            } else {
-                lista = estoque.filter(item => {
-                    const dV = new Date(item.vencimento + 'T00:00:00'), diff = Math.floor((dV - hoje) / 86400000);
-                    return diff <= 7;
-                });
-            }
-            
+            let lista = itensSelecionados.size > 0 ? estoque.filter(item => itensSelecionados.has(item.id)) : estoque.filter(item => {
+                const dV = new Date(item.vencimento + 'T00:00:00'), diff = Math.floor((dV - hoje) / 86400000);
+                return diff <= 7;
+            });
             if (lista.length === 0) return alert("Nada para relatar!");
             lista.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
-            
             const dF = agora.toLocaleDateString('pt-BR'), hF = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             let msg = `*📦 RELATÓRIO: ${usuarioSessao.nome}*%0A_Data: ${dF} | Hora: ${hF}_%0A%0A`;
-            
             lista.forEach(i => {
                 const dV = new Date(i.vencimento + 'T00:00:00'), diff = Math.floor((dV - hoje) / 86400000);
                 let icone = diff < 0 ? "🚨 *VENCIDO*" : (diff <= 7 ? "⚠️ *URGENTE*" : "✅ *OK*");
                 msg += `${icone}%0A*PROD:* *${i.produto}*%0A*VAL:* *${i.vencimento.split('-').reverse().join('/')}*%0A*QTD:* *${i.quantidade}*%0A----------------------------%0A`;
             });
-            
             msg += `%0A_Enviado via New Market v1.5.4_%0A🔗 *Acessar Sistema:* ${urlSistema}`;
             window.open(`https://wa.me/?text=${msg}`);
         }
 
         function toggleManutencaoSecreto() {
             cliquesSegredo++;
-            if (cliquesSegredo >= 5) {
-                const est = !manutencaoAtiva;
-                localStorage.setItem('manutencaoNewMarket', est);
-                window.location.reload();
-            }
+            if (cliquesSegredo >= 5) { localStorage.setItem('manutencaoNewMarket', !manutencaoAtiva); window.location.reload(); }
             setTimeout(() => cliquesSegredo = 0, 3000);
         }
 
