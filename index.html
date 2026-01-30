@@ -181,7 +181,6 @@
             iniciarTimerManutencao();
         }
 
-        // [PKACCI - CORREÇÃO ACESSO ADMIN]
         function irParaLoginDesdeManutencao() {
             document.getElementById('maintenanceView').classList.add('hidden-app');
             document.getElementById('loginView').classList.remove('hidden-app');
@@ -205,7 +204,8 @@
             document.getElementById('login-title').innerText = `SENHA: ${n}`;
             document.getElementById('auth-container').innerHTML = `
                 <input type="password" id="pass-input" class="input-dark mb-4" autofocus>
-                <button onclick="confirmarSenha('${n}')" class="w-full py-5 bg-[#FFD700] text-slate-900 rounded-2xl font-black">ENTRAR</button>
+                <button onclick="confirmarSenha('${n}')" class="w-full py-5 bg-[#FFD700] text-slate-900 rounded-2xl font-black uppercase mb-4">ENTRAR</button>
+                <button onclick="mostrarLogin()" class="w-full py-3 text-slate-500 font-black text-[10px] uppercase tracking-widest">← VOLTAR AOS USUÁRIOS</button>
             `;
         }
 
@@ -213,7 +213,6 @@
             const u = EQUIPE.find(x => x.nome === n);
             const pass = document.getElementById('pass-input').value;
             if (btoa(pass) === u.pass) {
-                // Se manutenção estiver ativa, só deixa entrar se for o cargo DESENVOLVEDOR
                 if (manutencaoAtiva && u.cargo !== 'DESENVOLVEDOR') {
                     alert("SISTEMA EM MANUTENÇÃO. ACESSO NEGADO.");
                     mostrarManutencao();
