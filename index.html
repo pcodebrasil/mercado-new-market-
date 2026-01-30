@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.6.0-SHADOW</title>
+    <title>New Market - v1.6.1-SHADOW</title>
     
     <meta property="og:title" content="New Market - Gestão de Validades">
     <meta property="og:description" content="Sistema inteligente para controle de estoque e alertas de vencimento.">
@@ -114,7 +114,10 @@
     <div id="modal-logs" class="hidden fixed inset-0 modal-shadow z-[900] overflow-y-auto p-6">
         <div class="max-w-lg mx-auto bg-slate-900 rounded-[2.5rem] border border-slate-800 p-8">
             <div class="flex justify-between items-center mb-8">
-                <h2 class="text-sm font-black uppercase text-indigo-400">Monitoramento Shadow</h2>
+                <div>
+                    <h2 class="text-sm font-black uppercase text-indigo-400 leading-tight">Monitoramento Shadow</h2>
+                    <button onclick="limparHistoricoAcesso()" class="text-[8px] font-black text-red-500 uppercase mt-1 tracking-widest bg-red-950/20 px-2 py-1 rounded border border-red-900/50">🗑️ Apagar Histórico</button>
+                </div>
                 <button onclick="fecharModalLogs()" class="text-3xl text-slate-500">&times;</button>
             </div>
             <div id="lista-logs" class="space-y-3 font-mono text-[10px]"></div>
@@ -207,10 +210,7 @@
                 if (manutencaoAtiva && u.cargo !== 'DESENVOLVEDOR') { alert("MANUTENÇÃO."); mostrarManutencao(); return; }
                 usuarioSessao = u;
                 localStorage.setItem('sessaoNewMarket', u.nome);
-                
-                // EXCLUSIVO v1.6.0: Registro Universal de Login
                 registrarAcessoAuditoria(u.nome);
-                
                 entrarNoApp();
             } else { alert("Senha incorreta."); }
         }
@@ -222,10 +222,7 @@
             document.getElementById('user-display').innerText = `OPERADOR: ${usuarioSessao.nome}`;
             const isAdmin = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
             if(isAdmin) document.getElementById('admin-tools').classList.remove('hidden');
-            
-            // EXCLUSIVO v1.6.0: Visualização Shadow apenas para PAULO
             if(usuarioSessao.nome === "PAULO") document.getElementById('view-paulo-exclusiva').classList.remove('hidden');
-
             db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
                 estoque = [];
                 snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
@@ -298,58 +295,48 @@
             const dataFormatada = agora.toLocaleDateString('pt-BR');
             const horaFormatada = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             const hoje = new Date().setHours(0,0,0,0);
-            
-            let lista = itensSelecionados.size > 0 ? estoque.filter(item => itensSelecionados.has(item.id)) : estoque.filter(item => {
-                const dV = new Date(item.vencimento + 'T00:00:00');
-                return Math.floor((dV - hoje) / 86400000) <= 7;
-            });
+            let lista = itensSelecionados.size > 0 ? estoque.filter(item => itensSelecionados.has(item.id)) : estoque.filter(item => { const dV = new Date(item.vencimento + 'T00:00:00'); return Math.floor((dV - hoje) / 86400000) <= 7; });
             if (lista.length === 0) return alert("Nada!");
             lista.sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
-            
-            let msg = `*📦 RELATÓRIO NEW MARKET*%0A`;
-            msg += `*DATA:* ${dataFormatada} | *HORA:* ${horaFormatada}%0A`;
-            msg += `*OPERADOR:* ${usuarioSessao.nome}%0A`;
-            msg += `----------------------------%0A%0A`;
-            lista.forEach(i => {
-                msg += `*PROD:* ${i.produto}%0A*VAL:* ${i.vencimento.split('-').reverse().join('/')}%0A*QTD:* ${i.quantidade}%0A*COD:* ${i.ean || '---'}%0A*OP:* ${i.operador || '---'}%0A%0A`;
-            });
-            msg += `----------------------------%0A`;
-            msg += `*Link do Sistema:* https://mercado-c3e95.web.app/`;
+            let msg = `*📦 RELATÓRIO NEW MARKET*%0A*DATA:* ${dataFormatada} | *HORA:* ${horaFormatada}%0A*OPERADOR:* ${usuarioSessao.nome}%0A----------------------------%0A%0A`;
+            lista.forEach(i => { msg += `*PROD:* ${i.produto}%0A*VAL:* ${i.vencimento.split('-').reverse().join('/')}%0A*QTD:* ${i.quantidade}%0A*COD:* ${i.ean || '---'}%0A*OP:* ${i.operador || '---'}%0A%0A`; });
+            msg += `----------------------------%0ALink: https://mercado-c3e95.web.app/`;
             window.open(`https://wa.me/?text=${msg}`);
         }
 
-        // --- SISTEMA DE AUDITORIA v1.6.0 ---
         async function registrarAcessoAuditoria(nomeUsuario) {
-            try {
-                await db.collection("logs_acesso").add({
-                    operador: nomeUsuario,
-                    data_hora: firebase.firestore.FieldValue.serverTimestamp(),
-                    dispositivo: navigator.platform,
-                    versao: "1.6.0"
-                });
-            } catch (e) { console.error("Erro audit:", e); }
+            try { await db.collection("logs_acesso").add({ operador: nomeUsuario, data_hora: firebase.firestore.FieldValue.serverTimestamp(), dispositivo: navigator.platform, versao: "1.6.1" }); } catch (e) { console.error("Erro audit:", e); }
         }
 
         async function abrirModalLogs() {
             if(usuarioSessao.nome !== "PAULO") return;
             document.getElementById('modal-logs').classList.remove('hidden');
             const container = document.getElementById('lista-logs');
-            container.innerHTML = '<p class="animate-pulse text-slate-500">CARREGANDO LOGS...</p>';
-            
-            const snap = await db.collection("logs_acesso").orderBy("data_hora", "desc").limit(40).get();
+            container.innerHTML = '<p class="animate-pulse text-slate-500 text-center py-10 italic">CARREGANDO LOGS DE ELITE...</p>';
+            const snap = await db.collection("logs_acesso").orderBy("data_hora", "desc").limit(50).get();
             let html = '';
             snap.forEach(doc => {
                 const d = doc.data();
                 const data = d.data_hora ? d.data_hora.toDate().toLocaleString('pt-BR') : '---';
-                html += `<div class="p-3 border-b border-slate-800 flex justify-between">
-                    <span class="text-white font-black">${d.operador}</span>
-                    <span class="text-slate-500">${data}</span>
-                </div>`;
+                html += `<div class="p-3 border-b border-slate-800 flex justify-between items-center"><span class="text-indigo-200 font-black">${d.operador}</span><span class="text-slate-500 text-[9px]">${data}</span></div>`;
             });
-            container.innerHTML = html || '<p>NENHUM ACESSO REGISTRADO.</p>';
+            container.innerHTML = html || '<p class="text-center py-10 opacity-30">VÁZIO.</p>';
         }
 
         function fecharModalLogs() { document.getElementById('modal-logs').classList.add('hidden'); }
+
+        async function limparHistoricoAcesso() {
+            if (usuarioSessao.nome !== "PAULO") return;
+            if (!confirm("CONFIRMA A DESTRUIÇÃO DE TODO O HISTÓRICO DE AUDITORIA?")) return;
+            try {
+                const snap = await db.collection("logs_acesso").get();
+                const batch = db.batch();
+                snap.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+                alert("HISTÓRICO DESTRUIDO.");
+                fecharModalLogs();
+            } catch (e) { console.error(e); alert("FALHA NA OPERAÇÃO."); }
+        }
     </script>
 </body>
 </html>
