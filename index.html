@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.6.8-FINAL</title>
+    <title>New Market - v1.6.9-STABLE</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -218,8 +218,24 @@
                         const card = `<div class="card-produto p-5 flex items-center gap-4 ${item.relatado ? 'pulse-relatado opacity-60' : ''}">
                             <input type="checkbox" onchange="toggleCheck('${item.id}')" ${itensSelecionados.has(item.id) ? 'checked' : ''} class="check-in-input">
                             <div class="flex-grow">
-                                <div class="flex justify-between mb-2"><div><h3 class="text-[9px] font-black uppercase text-slate-500">Produto</h3><p class="font-black text-white">${item.produto}</p></div><div class="text-right"><h3 class="text-[9px] font-black uppercase text-[#FFD700]">Validade</h3><p class="font-black text-white">${item.vencimento.split('-').reverse().join('/')}</p></div></div>
-                                <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center"><span class="text-[9px] font-black text-slate-500 uppercase">OP: ${item.operador}</span><div class="flex gap-4 items-center"><span class="text-2xl font-black text-[#FFD700]">${item.quantidade}</span><button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-blue-400 font-black text-[10px]">EDITAR</button></div></div>
+                                <div class="flex justify-between mb-2">
+                                    <div>
+                                        <h3 class="text-[9px] font-black uppercase text-slate-500">Produto</h3>
+                                        <p class="font-black text-white leading-tight uppercase">${item.produto}</p>
+                                        <p class="text-[9px] font-mono text-slate-400 mt-1">${item.ean || 'SEM CÓDIGO'}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <h3 class="text-[9px] font-black uppercase text-[#FFD700]">Validade</h3>
+                                        <p class="font-black text-white">${item.vencimento.split('-').reverse().join('/')}</p>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center">
+                                    <span class="text-[9px] font-black text-slate-500 uppercase">OP: ${item.operador}</span>
+                                    <div class="flex gap-4 items-center">
+                                        <span class="text-2xl font-black text-[#FFD700]">${item.quantidade}</span>
+                                        <button onclick='prepararEdicao(${JSON.stringify(item)})' class="text-blue-400 font-black text-[10px]">EDITAR</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>`;
                         item.relatado ? hEnv += card : hPend += card;
@@ -252,18 +268,33 @@
         function fecharModalCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if(scannerInstancia) scannerInstancia.stop(); }
         function toggleCheck(id) { itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id); renderizar(); }
         function checkInTodos() { estoque.forEach(i => !i.relatado && itensSelecionados.add(i.id)); renderizar(); }
-        function toggleManutencaoSecreto() { cliquesSegredo++; if(cliquesSegredo >= 5) { localStorage.setItem('manutencaoNewMarket', !manutencaoAtiva); window.location.reload(); } setTimeout(()=>cliquesSegredo=0, 2000); }
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
         function setFiltro(f) { filtroAtual = f; renderizar(); }
         function toggleFiltroOperador() { apenasMeusItens = !apenasMeusItens; document.getElementById('btn-meus-itens').classList.toggle('toggle-filtro-ativo'); renderizar(); }
         function prepararEdicao(i) { limparForm(); document.getElementById('modal-cadastro').classList.remove('hidden'); document.getElementById('edit-id').value = i.id; document.getElementById('p-nome').value = i.produto; document.getElementById('p-validade').value = i.vencimento; document.getElementById('p-ean').value = i.ean || ''; document.getElementById('p-qtd').value = i.quantidade; if(i.ean) gerarGraficoBarras(i.ean); }
         function limparForm() { document.getElementById('edit-id').value = ''; document.getElementById('p-nome').value = ''; document.getElementById('p-validade').value = ''; document.getElementById('p-ean').value = ''; document.getElementById('p-qtd').value = ''; document.getElementById('barcode-area').classList.add('hidden'); }
+        function toggleManutencaoSecreto() { cliquesSegredo++; if(cliquesSegredo >= 5) { localStorage.setItem('manutencaoNewMarket', !manutencaoAtiva); window.location.reload(); } setTimeout(()=>cliquesSegredo=0, 2000); }
+        
         async function enviarRelatorioWhatsApp() {
             let lista = itensSelecionados.size > 0 ? estoque.filter(i => itensSelecionados.has(i.id)) : estoque.filter(i => { const dV = new Date(i.vencimento + 'T00:00:00'); return Math.floor((dV - new Date().setHours(0,0,0,0))/86400000) <= 7; });
-            if(!lista.length) return alert("Vazio.");
+            if(!lista.length) return alert("Nenhum item selecionado ou próximo ao vencimento.");
+            
             const batch = db.batch(); lista.forEach(i => batch.update(db.collection("validades").doc(i.id), { relatado: true })); await batch.commit();
-            let msg = `*📦 NEW MARKET*\n*OP:* ${usuarioSessao.nome}\n-----------\n`;
-            lista.forEach(i => msg += `*${i.produto}* (${i.vencimento.split('-').reverse().join('/')}) QTD: ${i.quantidade}\n\n`);
+            
+            const agora = new Date().toLocaleString('pt-BR');
+            let msg = `*📦 NEW MARKET - RELATÓRIO*\n`;
+            msg += `*OP:* ${usuarioSessao.nome}\n`;
+            msg += `*DATA/HORA:* ${agora}\n`;
+            msg += `*SITE:* newmarket.pkacci.com.br\n`;
+            msg += `-----------\n\n`;
+            
+            lista.forEach(i => {
+                msg += `*PRODUTO:* ${i.produto.toUpperCase()}\n`;
+                msg += `*EAN:* ${i.ean || 'N/A'}\n`;
+                msg += `*VALIDADE:* ${i.vencimento.split('-').reverse().join('/')}\n`;
+                msg += `*QTD:* ${i.quantidade}\n\n`;
+            });
+            
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
         }
     </script>
