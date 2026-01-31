@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.7.1-STABLE-PREMIUM</title>
+    <title>New Market - v1.7.2-STABLE-PREMIUM</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -15,7 +15,7 @@
         /* Developed by: Pkacci © 2026 */
         :root { --bg-dark: #020617; --card-dark: #0f172a; --accent-gold: #FFD700; }
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; -webkit-font-smoothing: antialiased; user-select: none; }
-        body { font-family: 'Inter', system-ui, sans-serif; background-color: var(--bg-dark); color: #f8fafc; overflow-x: hidden; margin: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: #f8fafc; overflow-x: hidden; margin: 0; }
         .hidden-app { display: none !important; }
 
         /* PREMIUM UI - GLASSMORPHISM */
@@ -23,16 +23,15 @@
         .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .glass-card:active { transform: scale(0.98); background: rgba(30, 41, 59, 0.8); }
 
-        /* REFINED INPUTS */
-        .glass-input { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 1.25rem; outline: none; transition: border 0.3s; }
-        .glass-input:focus { border-color: rgba(255, 215, 0, 0.5); }
-
-        .badge { font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .glass-input { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 1.25rem; outline: none; }
+        .badge { font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; }
         .status-vencido { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
         .status-alerta { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
         .status-ok { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
 
-        .ean-tag { background: #1e293b; color: #94a3b8; padding: 2px 8px; border-radius: 6px; font-family: monospace; font-size: 10px; border: 1px solid rgba(255,255,255,0.05); }
+        .progress-bar { height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 10px; transition: width 1s ease-in-out; }
+
         .signature-shimmer { animation: shimmer-effect 4s ease-in-out infinite; background: linear-gradient(90deg, #334155, #f8fafc, #334155); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; text-transform: uppercase; }
         @keyframes shimmer-effect { 0% { background-position: 0% center; opacity: 0.4; } 50% { background-position: 100% center; opacity: 0.8; } 100% { background-position: 0% center; opacity: 0.4; } }
         
@@ -88,11 +87,26 @@
 
         <main class="max-w-lg mx-auto p-6 pb-48">
             <div id="admin-tools" class="hidden mb-4"><div id="view-paulo-exclusiva" class="hidden"><button onclick="abrirModalLogs()" class="w-full py-3 bg-indigo-900/40 border border-indigo-800 rounded-xl text-[9px] font-black uppercase text-indigo-400">📊 Monitoramento Shadow</button></div></div>
+            
             <div class="grid grid-cols-3 gap-4 mb-8">
                 <div onclick="setFiltro('vencidos')" class="dash-card p-5 bg-red-500/5 border-red-500/10"><p class="text-[9px] font-black uppercase text-red-400 mb-2">Vencidos</p><p id="dash-vencidos" class="text-3xl font-black text-white">0</p></div>
                 <div onclick="setFiltro('urgente')" class="dash-card p-5 bg-yellow-500/5 border-yellow-500/10"><p class="text-[9px] font-black uppercase text-yellow-400 mb-2">Alerta</p><p id="dash-alerta" class="text-3xl font-black text-white">0</p></div>
                 <div onclick="setFiltro('todos')" class="dash-card p-5 bg-blue-500/5 border-blue-500/10"><p class="text-[9px] font-black uppercase text-blue-400 mb-2">Total</p><p id="dash-total" class="text-3xl font-black text-white">0</p></div>
             </div>
+
+            <div class="glass-card p-6 mb-10">
+                <div class="space-y-5">
+                    <div>
+                        <div class="flex justify-between text-[10px] font-black uppercase mb-2"><span class="text-orange-400">Crítico (15d)</span><span id="risco-15-txt" class="text-slate-300">0 un</span></div>
+                        <div class="progress-bar"><div id="bar-15" class="progress-fill bg-gradient-to-r from-orange-600 to-orange-400" style="width: 0%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-[10px] font-black uppercase mb-2"><span class="text-blue-400">Atenção (30d)</span><span id="risco-30-txt" class="text-slate-300">0 un</span></div>
+                        <div class="progress-bar"><div id="bar-30" class="progress-fill bg-gradient-to-r from-blue-600 to-blue-400" style="width: 0%"></div></div>
+                    </div>
+                </div>
+            </div>
+
             <div id="container-produtos" class="space-y-5"></div>
         </main>
         <div class="fixed bottom-10 left-0 right-0 px-8 z-40"><button onclick="abrirCadastro()" class="w-full bg-[#FFD700] text-slate-950 py-6 rounded-[2rem] shadow-[0_20px_40px_rgba(255,215,0,0.2)] font-black text-sm uppercase active:scale-95 transition-transform">+ SCANNER / REGISTRO</button></div>
@@ -155,7 +169,7 @@
 
         function mostrarLogin() { 
             document.getElementById('loginView').classList.remove('hidden-app'); 
-            document.getElementById('auth-container').innerHTML = EQUIPE.map(u => `<button onclick="prepararSenha('${u.nome}')" class="w-full py-5 px-8 bg-slate-800 rounded-[1.5rem] font-black text-[11px] text-slate-300 border border-white/5 active:scale-95 transition-transform uppercase tracking-wider">${u.nome}</button>`).join('');
+            document.getElementById('auth-container').innerHTML = EQUIPE.map(u => `<button onclick="prepararSenha('${u.nome}')" class="w-full py-5 px-8 bg-slate-800 rounded-[1.5rem] font-black text-[11px] text-slate-300 border border-white/5 uppercase tracking-wider">${u.nome}</button>`).join('');
         }
 
         function mostrarManutencao() { document.getElementById('maintenanceView').classList.remove('hidden-app'); iniciarTimerManutencao(); }
@@ -163,7 +177,7 @@
 
         function prepararSenha(n) {
             document.getElementById('login-title').innerText = `IDENTIDADE: ${n}`;
-            document.getElementById('auth-container').innerHTML = `<input type="password" id="pass-input" class="glass-input mb-5 border-2 border-slate-700 text-center text-3xl p-4 w-full" autofocus placeholder="••••"><button onclick="confirmarSenha('${n}')" class="w-full py-6 bg-[#FFD700] text-slate-900 rounded-[1.5rem] font-black uppercase tracking-widest shadow-xl">AUTENTICAR</button>`;
+            document.getElementById('auth-container').innerHTML = `<input type="password" id="pass-input" class="glass-input mb-5 border-2 border-slate-700 text-center text-3xl p-4 w-full" autofocus placeholder="••••"><button onclick="confirmarSenha('${n}')" class="w-full py-6 bg-[#FFD700] text-slate-900 rounded-[1.5rem] font-black uppercase shadow-xl">AUTENTICAR</button>`;
         }
 
         function confirmarSenha(n) {
@@ -179,9 +193,9 @@
             document.getElementById('maintenanceView').classList.add('hidden-app');
             document.getElementById('appView').classList.remove('hidden-app');
             const hora = new Date().getHours();
-            let s = (hora >= 5 && hora < 12) ? "BOM DIA" : (hora >= 12 && hora < 18) ? "BOA TARDE" : "BOA NOITE";
+            let saudacao = (hora >= 5 && hora < 12) ? "BOM DIA" : (hora >= 12 && hora < 18) ? "BOA TARDE" : "BOA NOITE";
             const art = ["ADRIELLE", "TAMIRIS", "ANA CLAUDIA"].includes(usuarioSessao.nome) ? "BEM-VINDA" : "BEM-VINDO";
-            document.getElementById('user-display').innerText = `${s}, ${art} ${usuarioSessao.nome}!`;
+            document.getElementById('user-display').innerText = `${saudacao}, ${art} ${usuarioSessao.nome}!`;
             if(["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome)) {
                 document.getElementById('container-filtro-lideranca').classList.remove('hidden');
                 document.getElementById('admin-tools').classList.remove('hidden');
@@ -194,15 +208,17 @@
 
         function renderizar() {
             const container = document.getElementById('container-produtos'), busca = document.getElementById('input-busca').value.toUpperCase(), hoje = new Date().setHours(0,0,0,0);
-            let cV = 0, cA = 0, total = 0, hPend = '', hEnv = '';
+            let cV = 0, cA = 0, r15 = 0, r30 = 0, totalPecas = 0, hPend = '', hEnv = '';
             const isElite = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
 
             estoque.forEach(item => {
                 const dV = new Date(item.vencimento + 'T00:00:00'), d = Math.floor((dV - hoje) / 86400000);
                 const matchesOp = apenasMeusItens ? item.operador === usuarioSessao.nome : true;
                 if(matchesOp) {
-                    total += (item.quantidade || 0);
+                    totalPecas += (item.quantidade || 0);
                     if(d < 0) cV++; else if(d <= 7) cA++;
+                    if(d >= 0 && d <= 15) r15 += (item.quantidade || 0);
+                    if(d >= 0 && d <= 30) r30 += (item.quantidade || 0);
                 }
                 if(matchesOp && (item.produto.includes(busca) || (item.ean || "").includes(busca))) {
                     const matchF = (filtroAtual === 'vencidos' ? d < 0 : filtroAtual === 'urgente' ? (d >= 0 && d <= 7) : true);
@@ -233,7 +249,9 @@
                 }
             });
             container.innerHTML = hPend + (hEnv ? `<div class="mt-12 border-t border-white/5 pt-10"><h4 class="text-[10px] font-black text-slate-600 uppercase mb-6 text-center tracking-widest">Relatados</h4>${hEnv}</div>` : '');
-            document.getElementById('dash-vencidos').innerText = cV; document.getElementById('dash-alerta').innerText = cA; document.getElementById('dash-total').innerText = total;
+            document.getElementById('dash-vencidos').innerText = cV; document.getElementById('dash-alerta').innerText = cA; document.getElementById('dash-total').innerText = totalPecas;
+            document.getElementById('risco-15-txt').innerText = `${r15} un`; document.getElementById('risco-30-txt').innerText = `${r30} un`;
+            document.getElementById('bar-15').style.width = `${Math.min((r15/(totalPecas||1))*100, 100)}%`; document.getElementById('bar-30').style.width = `${Math.min((r30/(totalPecas||1))*100, 100)}%`;
         }
 
         async function registrarLog(n) { try { await db.collection("logs_acesso").add({ operador: n, data_hora: firebase.firestore.FieldValue.serverTimestamp() }); } catch(e){} }
@@ -255,7 +273,7 @@
         }
         function gerarGraficoBarras(v) { 
             const area = document.getElementById('barcode-area'); 
-            if (!v || v.length < 5) { area.classList.add('hidden'); return; }
+            if (!v || v.trim().length < 5) { area.classList.add('hidden'); return; }
             area.classList.remove('hidden'); 
             JsBarcode("#barcode-canvas", v, { format: "CODE128", width: 2.5, height: 70, displayValue: true, margin: 10 }); 
         }
