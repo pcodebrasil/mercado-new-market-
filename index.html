@@ -12,7 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
     <style>
-        /* Developed by: Paulo Pkacci © 2026 */
+        /* Developed by: Pkacci © 2026 */
         :root { --bg-dark: #020617; --card-dark: #0f172a; --accent-gold: #FFD700; }
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; -webkit-font-smoothing: antialiased; user-select: none; }
         body { font-family: sans-serif; background-color: var(--bg-dark); color: #f8fafc; overflow-x: hidden; margin: 0; }
@@ -49,6 +49,7 @@
             <div id="timer-display" class="text-4xl font-mono font-black text-yellow-500 mb-2">15:00</div>
             <h2 class="text-2xl font-black text-yellow-500 uppercase italic">Atualização</h2>
             <button onclick="irParaLoginDesdeManutencao()" class="mt-8 w-full py-4 bg-yellow-500 text-slate-900 rounded-2xl font-black uppercase text-[11px]">Acesso Admin</button>
+            <p class="signature-shimmer mt-6 text-[10px] tracking-[0.3em]">Pkacci © 2026</p>
         </div>
     </div>
 
@@ -59,7 +60,7 @@
                 <h2 id="login-title" class="text-xl font-black uppercase italic mb-8 text-slate-100">Equipe New Market</h2>
                 <div id="auth-container"></div>
             </div>
-            <p onclick="toggleManutencaoSecreto()" class="signature-shimmer mt-6 text-[10px] tracking-[0.3em]">Paulo Pkacci © 2026</p>
+            <p onclick="toggleManutencaoSecreto()" class="signature-shimmer mt-6 text-[10px] tracking-[0.3em]">Pkacci © 2026</p>
         </div>
     </div>
 
@@ -70,7 +71,7 @@
                     <div class="status-pulse"></div>
                     <div>
                         <h1 class="font-black text-2xl italic text-[#FFD700] uppercase leading-none">New Market</h1>
-                        <p class="signature-shimmer mt-1 text-[8px] tracking-[0.2em]">Paulo Pkacci © 2026</p>
+                        <p class="signature-shimmer mt-1 text-[8px] tracking-[0.2em]">Pkacci © 2026</p>
                     </div>
                 </div>
                 <button onclick="logout()" class="bg-slate-800/50 p-3 rounded-xl text-xl btn-touch">🚪</button>
@@ -135,7 +136,7 @@
 
             <div id="container-produtos" class="space-y-4"></div>
             <footer class="w-full py-16 pb-44 text-center">
-                <p class="signature-shimmer text-[10px] tracking-[0.3em]">Paulo Pkacci © 2026</p>
+                <p class="signature-shimmer text-[10px] tracking-[0.3em]">Pkacci © 2026</p>
             </footer>
         </main>
 
@@ -232,7 +233,7 @@
             const u = EQUIPE.find(x => x.nome === n);
             const pass = document.getElementById('pass-input').value;
             if (btoa(pass) === u.pass) {
-                if (manutencaoAtiva && u.cargo !== 'DESENVOLVEDOR') { alert("MANUTENÇÃO."); mostrarManutencao(); return; }
+                if (manutencaoAtiva && u.cargo !== 'DESENVOLVEDOR') { alert("MANUTENÇÃO EM ANDAMENTO."); mostrarManutencao(); return; }
                 usuarioSessao = u;
                 localStorage.setItem('sessaoNewMarket', u.nome);
                 registrarAcessoAuditoria(u.nome);
@@ -337,15 +338,7 @@
             document.getElementById('modal-cadastro').classList.remove('hidden');
             const readerCont = document.getElementById('reader-container');
             readerCont.classList.remove('hidden');
-            
-            scannerInstancia = new Html5Qrcode("reader", { 
-                formatsToSupport: [ 
-                    Html5QrcodeSupportedFormats.EAN_13, 
-                    Html5QrcodeSupportedFormats.EAN_8, 
-                    Html5QrcodeSupportedFormats.CODE_128 
-                ] 
-            });
-
+            scannerInstancia = new Html5Qrcode("reader", { formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8, Html5QrcodeSupportedFormats.CODE_128 ] });
             await scannerInstancia.start({ facingMode: "environment" }, { fps: 30, qrbox: 250, aspectRatio: 1.0 }, (txt) => {
                 if (navigator.vibrate) navigator.vibrate(100);
                 document.getElementById('p-ean').value = txt;
@@ -386,7 +379,6 @@
         function fecharModalCadastro() { document.getElementById('modal-cadastro').classList.add('hidden'); if(scannerInstancia) scannerInstancia.stop().catch(()=>{}); }
         function toggleCheckIn(id) { itensSelecionados.has(id) ? itensSelecionados.delete(id) : itensSelecionados.add(id); renderizar(); }
         function checkInTodos() { const pendentes = estoque.filter(i => !i.relatado && (apenasMeusItens ? i.operador === usuarioSessao.nome : true)); const todos = pendentes.every(i => itensSelecionados.has(i.id)); pendentes.forEach(i => todos ? itensSelecionados.delete(i.id) : itensSelecionados.add(i.id)); renderizar(); }
-        
         async function registrarAcessoAuditoria(nome) { try { await db.collection("logs_acesso").add({ operador: nome, data_hora: firebase.firestore.FieldValue.serverTimestamp(), dispositivo: navigator.platform, versao: "1.6.8" }); } catch (e) {} }
         
         async function abrirModalLogs() {
