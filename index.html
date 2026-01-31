@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v2.1-DAYLIGHT</title>
+    <title>New Market - v2.2-CONTRAST</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -12,15 +12,15 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
     <style>
-        /* New Market v2.1 - Daylight Professional 
+        /* New Market v2.2 - High Contrast Daylight 
            Developed by: Paulo Pkacci © 2026 
         */
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; -webkit-font-smoothing: antialiased; user-select: none; }
         
         body { 
             font-family: 'Inter', system-ui, -apple-system, sans-serif; 
-            background-color: #f8fafc; /* Slate 50 */
-            color: #1e293b; /* Slate 800 */
+            background-color: #e2e8f0; /* ALTERADO: Slate 200 para Alto Contraste */
+            color: #0f172a; /* Slate 900 */
             overflow-x: hidden; margin: 0; 
         }
 
@@ -37,15 +37,15 @@
 
         /* CARDS */
         .card-produto { 
-            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 1.5rem; 
+            background: #ffffff; border: 1px solid #cbd5e1; border-radius: 1.5rem; 
             transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Sombra levemente reforçada */
         }
         
         /* ASSINATURA */
         .signature-shimmer {
             animation: shimmer-effect 4s ease-in-out infinite;
-            background: linear-gradient(90deg, #94a3b8, #0f172a, #94a3b8);
+            background: linear-gradient(90deg, #64748b, #0f172a, #64748b);
             background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             font-weight: 800; text-transform: uppercase; letter-spacing: 0.2em;
         }
@@ -72,7 +72,7 @@
 </head>
 <body oncontextmenu="return false;">
 
-    <div id="maintenanceView" class="hidden-app fixed inset-0 bg-slate-50 z-[200] flex items-center justify-center p-6 text-center">
+    <div id="maintenanceView" class="hidden-app fixed inset-0 bg-slate-200 z-[200] flex items-center justify-center p-6 text-center">
         <div class="bg-white border border-yellow-400 p-10 rounded-[2.5rem] max-w-sm shadow-xl">
             <div id="timer-display" class="text-5xl font-mono font-black text-yellow-500 mb-4">15:00</div>
             <h2 class="text-xl font-bold text-slate-700 uppercase tracking-widest italic">Atualização</h2>
@@ -80,8 +80,8 @@
         </div>
     </div>
 
-    <div id="loginView" class="hidden-app fixed inset-0 bg-slate-50 z-[100] flex items-center justify-center p-6 text-center">
-        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-xl flex flex-col min-h-[550px]">
+    <div id="loginView" class="hidden-app fixed inset-0 bg-slate-200 z-[100] flex items-center justify-center p-6 text-center">
+        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 border border-slate-300 shadow-xl flex flex-col min-h-[550px]">
             <div id="login-content" class="flex-grow">
                 <div class="w-20 h-20 bg-indigo-600 rounded-[1.5rem] flex items-center justify-center mx-auto mb-8 text-white text-3xl font-black italic shadow-lg shadow-indigo-200">NM</div>
                 <h2 id="login-title" class="text-xs font-bold uppercase tracking-[0.2em] mb-10 text-slate-400">Acesso Equipe</h2>
@@ -92,7 +92,7 @@
     </div>
 
     <div id="appView" class="hidden-app">
-        <header class="bg-white/90 backdrop-blur-md p-6 sticky top-0 z-30 shadow-sm border-b border-slate-200">
+        <header class="bg-white/95 backdrop-blur-md p-6 sticky top-0 z-30 shadow-sm border-b border-slate-200">
             <div class="flex justify-between items-center mb-6">
                 <div class="flex items-center gap-3">
                     <div class="status-pulse"></div>
@@ -114,38 +114,38 @@
             <div class="flex gap-3">
                 <button onclick="enviarRelatorioWhatsApp()" class="flex-grow bg-[#25D366] text-white py-3.5 rounded-xl font-bold text-[11px] uppercase tracking-wide shadow-sm active:scale-95 transition-transform">WhatsApp</button>
                 <div id="container-filtro-lideranca" class="hidden flex gap-2">
-                    <button id="btn-meus-itens" onclick="toggleFiltroOperador()" class="bg-white text-slate-600 px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase border border-slate-200 shadow-sm">Meus Itens</button>
+                    <button id="btn-meus-itens" onclick="toggleFiltroOperador()" class="bg-white text-slate-600 px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase border border-slate-200 shadow-sm hover:bg-slate-50">Meus Itens</button>
                 </div>
-                <button onclick="checkInTodos()" class="bg-white text-slate-600 px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase border border-slate-200 shadow-sm">Tudo</button>
+                <button onclick="checkInTodos()" class="bg-white text-slate-600 px-4 py-3.5 rounded-xl font-bold text-[10px] uppercase border border-slate-200 shadow-sm hover:bg-slate-50">Tudo</button>
             </div>
         </header>
 
         <main class="max-w-lg mx-auto p-5 pb-32">
             <div id="admin-tools" class="hidden mb-6">
                 <div id="view-paulo-exclusiva" class="hidden">
-                    <button onclick="abrirModalLogs()" class="w-full py-3 bg-slate-100 border border-slate-200 rounded-xl text-[10px] font-bold uppercase text-slate-500 tracking-widest hover:bg-slate-200">📊 Logs de Auditoria</button>
+                    <button onclick="abrirModalLogs()" class="w-full py-3 bg-white border border-slate-300 shadow-sm rounded-xl text-[10px] font-bold uppercase text-slate-500 tracking-widest hover:bg-slate-50">📊 Logs de Auditoria</button>
                 </div>
             </div>
 
             <div class="grid grid-cols-3 gap-4 mb-8">
-                <div onclick="setFiltro('vencidos')" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center active:scale-95 transition-all group cursor-pointer">
+                <div onclick="setFiltro('vencidos')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center active:scale-95 transition-all group cursor-pointer hover:border-red-200">
                     <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 mb-2 text-xs">⚠️</div>
                     <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Vencidos</p>
                     <p id="dash-vencidos" class="text-2xl font-black text-slate-800 tabular-nums leading-none mt-1">0</p>
                 </div>
-                <div onclick="setFiltro('urgente')" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center active:scale-95 transition-all group cursor-pointer">
+                <div onclick="setFiltro('urgente')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center active:scale-95 transition-all group cursor-pointer hover:border-orange-200">
                     <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 mb-2 text-xs">⏳</div>
                     <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Alerta</p>
                     <p id="dash-alerta" class="text-2xl font-black text-slate-800 tabular-nums leading-none mt-1">0</p>
                 </div>
-                <div onclick="setFiltro('todos')" class="bg-indigo-600 p-4 rounded-2xl shadow-lg shadow-indigo-200 flex flex-col items-center justify-center active:scale-95 transition-all cursor-pointer">
+                <div onclick="setFiltro('todos')" class="bg-indigo-600 p-4 rounded-2xl shadow-lg shadow-indigo-200 flex flex-col items-center justify-center active:scale-95 transition-all cursor-pointer hover:bg-indigo-700">
                     <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white mb-2 text-xs">📦</div>
                     <p class="text-[9px] font-bold uppercase text-indigo-200 tracking-wider">Total</p>
                     <p id="dash-total" class="text-2xl font-black text-white tabular-nums leading-none mt-1">0</p>
                 </div>
             </div>
 
-            <div class="bg-white border border-slate-100 rounded-3xl p-6 mb-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 mb-8 shadow-sm">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-[10px] font-bold uppercase text-slate-400 tracking-[0.2em] flex items-center gap-2">
                         <span class="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span> Radar
@@ -176,7 +176,7 @@
         </main>
 
         <div class="fixed bottom-8 left-0 right-0 px-6 z-40 max-w-lg mx-auto">
-            <button onclick="abrirCadastro()" class="w-full bg-slate-900 text-white py-5 rounded-2xl shadow-xl shadow-slate-300 font-bold text-xs uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-3"><span>+</span> Novo Produto</button>
+            <button onclick="abrirCadastro()" class="w-full bg-slate-900 text-white py-5 rounded-2xl shadow-xl shadow-slate-400 font-bold text-xs uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-3 hover:bg-slate-800"><span>+</span> Novo Produto</button>
         </div>
     </div>
 
@@ -206,7 +206,7 @@
                 </div>
                 <input type="hidden" id="edit-id">
                 <div id="barcode-area" class="hidden bg-white p-6 rounded-[2rem] flex flex-col items-center justify-center border-4 border-slate-100"><svg id="barcode-canvas"></svg></div>
-                <button onclick="salvarProduto()" class="w-full py-5 mt-4 bg-indigo-600 text-white rounded-[1.5rem] font-bold uppercase text-xs shadow-lg shadow-indigo-200">Salvar Dados</button>
+                <button onclick="salvarProduto()" class="w-full py-5 mt-4 bg-indigo-600 text-white rounded-[1.5rem] font-bold uppercase text-xs shadow-lg shadow-indigo-200 hover:bg-indigo-700">Salvar Dados</button>
             </div>
         </div>
     </div>
@@ -254,7 +254,7 @@
             let h = '';
             EQUIPE.forEach(u => {
                 let cargoVisual = u.cargo === 'DESENVOLVEDOR' ? 'EQUIPE' : u.cargo;
-                h += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-50 rounded-xl font-bold text-[10px] flex justify-between items-center text-slate-600 mb-2 border border-slate-100 hover:bg-slate-100 transition-colors"><span>${u.nome}</span><span class="opacity-40 uppercase">${cargoVisual}</span></button>`;
+                h += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-slate-50 rounded-xl font-bold text-[10px] flex justify-between items-center text-slate-600 mb-2 border border-slate-200 hover:bg-slate-100 transition-colors"><span>${u.nome}</span><span class="opacity-40 uppercase">${cargoVisual}</span></button>`;
             });
             container.innerHTML = h;
         }
@@ -263,7 +263,7 @@
             document.getElementById('login-title').innerText = `SENHA: ${n}`;
             document.getElementById('auth-container').innerHTML = `
                 <input type="password" id="pass-input" class="input-modern mb-4" autofocus>
-                <button onclick="confirmarSenha('${n}')" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-bold uppercase mb-4 shadow-lg shadow-indigo-200">Entrar</button>
+                <button onclick="confirmarSenha('${n}')" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-bold uppercase mb-4 shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-colors">Entrar</button>
                 <button onclick="mostrarLogin()" class="w-full py-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest">← Voltar</button>
             `;
         }
@@ -352,7 +352,7 @@
                                     </div>
                                     <div class="flex flex-col gap-1">
                                         <button onclick='prepararEdicao(${JSON.stringify(item)})' class="bg-slate-50 hover:bg-slate-100 text-indigo-600 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase border border-slate-200">Editar</button>
-                                        ${isElite ? `<button onclick="excluirProduto('${item.id}', '${item.produto}')" class="text-red-500 text-[9px] font-bold uppercase py-1">Excluir</button>` : ''}
+                                        ${isElite ? `<button onclick="excluirProduto('${item.id}', '${item.produto}')" class="text-red-500 text-[9px] font-bold uppercase py-1 hover:text-red-700">Excluir</button>` : ''}
                                     </div>
                                 </div>
                             </div>
@@ -363,7 +363,7 @@
                 }
             });
 
-            container.innerHTML = (pendentesHTML || '<p class="text-center py-20 opacity-30 italic text-slate-400">Nenhum item encontrado.</p>') + (enviadosHTML ? `<div class="mt-16 opacity-50 border-t border-slate-200 pt-10">${enviadosHTML}</div>` : '');
+            container.innerHTML = (pendentesHTML || '<p class="text-center py-20 opacity-40 italic text-slate-500">Nenhum item encontrado.</p>') + (enviadosHTML ? `<div class="mt-16 opacity-50 border-t border-slate-300 pt-10">${enviadosHTML}</div>` : '');
             
             // Dashboard Update
             document.getElementById('dash-vencidos').innerText = cV; 
