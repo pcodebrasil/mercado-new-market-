@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.7.2-STABLE-PREMIUM</title>
+    <title>New Market - v1.7.3-STABLE-PREMIUM</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -15,7 +15,7 @@
         /* Developed by: Pkacci © 2026 */
         :root { --bg-dark: #020617; --card-dark: #0f172a; --accent-gold: #FFD700; }
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; -webkit-font-smoothing: antialiased; user-select: none; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: #f8fafc; overflow-x: hidden; margin: 0; }
+        body { font-family: 'Inter', system-ui, sans-serif; background-color: var(--bg-dark); color: #f8fafc; overflow-x: hidden; margin: 0; }
         .hidden-app { display: none !important; }
 
         /* PREMIUM UI - GLASSMORPHISM */
@@ -23,8 +23,10 @@
         .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .glass-card:active { transform: scale(0.98); background: rgba(30, 41, 59, 0.8); }
 
-        .glass-input { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 1.25rem; outline: none; }
-        .badge { font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; }
+        .glass-input { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 1.25rem; outline: none; transition: border 0.3s; }
+        .glass-input:focus { border-color: rgba(255, 215, 0, 0.5); }
+
+        .badge { font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; }
         .status-vencido { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
         .status-alerta { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
         .status-ok { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
@@ -305,8 +307,4 @@
             const agora = new Date().toLocaleString('pt-BR');
             let msg = `*📦 NEW MARKET - RELATÓRIO*\n*OP:* ${usuarioSessao.nome}\n*HORA:* ${agora}\n*SITE:* newmarket.pkacci.com.br\n-----------\n\n`;
             lista.forEach(i => msg += `*PROD:* ${i.produto.toUpperCase()}\n*EAN:* ${i.ean || 'N/A'}\n*VAL:* ${i.vencimento.split('-').reverse().join('/')}\n*QTD:* ${i.quantidade}\n\n`);
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
-        }
-    </script>
-</body>
-</html>
+            window.open(`https://
