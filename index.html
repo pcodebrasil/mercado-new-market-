@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>New Market - v1.7.0-STABLE-PREMIUM</title>
+    <title>New Market - v1.7.1-STABLE-PREMIUM</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -23,33 +23,28 @@
         .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .glass-card:active { transform: scale(0.98); background: rgba(30, 41, 59, 0.8); }
 
-        /* BADGES */
+        /* REFINED INPUTS */
+        .glass-input { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 1.25rem; outline: none; transition: border 0.3s; }
+        .glass-input:focus { border-color: rgba(255, 215, 0, 0.5); }
+
         .badge { font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; }
         .status-vencido { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
         .status-alerta { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
         .status-ok { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
 
         .ean-tag { background: #1e293b; color: #94a3b8; padding: 2px 8px; border-radius: 6px; font-family: monospace; font-size: 10px; border: 1px solid rgba(255,255,255,0.05); }
-        
-        /* DASHBOARD */
-        .progress-bar { height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; border-radius: 10px; transition: width 1s ease-in-out; }
-
         .signature-shimmer { animation: shimmer-effect 4s ease-in-out infinite; background: linear-gradient(90deg, #334155, #f8fafc, #334155); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; text-transform: uppercase; }
         @keyframes shimmer-effect { 0% { background-position: 0% center; opacity: 0.4; } 50% { background-position: 100% center; opacity: 0.8; } 100% { background-position: 0% center; opacity: 0.4; } }
         
         .pulse-relatado { border: 1px solid #22c55e !important; box-shadow: 0 0 20px rgba(34, 197, 94, 0.1); }
         .btn-gradient { background: linear-gradient(135deg, #003366 0%, #001e3c 100%); border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s; }
-        
         .bg-maintenance { background: repeating-linear-gradient(45deg, #020617, #020617 15px, #0f172a 15px, #0f172a 30px); }
-        .modal-shadow { background: rgba(2, 6, 23, 0.96); backdrop-filter: blur(12px); }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
     <div id="maintenanceView" class="hidden-app fixed inset-0 bg-maintenance z-[200] flex items-center justify-center p-6 text-center">
-        <div class="bg-slate-900 border-2 border-yellow-500 p-10 rounded-[3rem] max-w-sm shadow-2xl">
-            <div class="text-5xl mb-4">⚙️</div>
+        <div class="bg-slate-900 border-2 border-yellow-500 p-10 rounded-[3rem] max-w-sm">
             <div id="timer-display" class="text-4xl font-mono font-black text-yellow-500 mb-2">15:00</div>
             <h2 class="text-2xl font-black text-yellow-500 uppercase italic">Atualização</h2>
             <button onclick="irParaLoginDesdeManutencao()" class="mt-8 w-full py-4 bg-yellow-500 text-slate-900 rounded-2xl font-black uppercase text-[11px]">Acesso Admin</button>
@@ -78,12 +73,10 @@
                         <p class="signature-shimmer mt-1 text-[8px] tracking-[0.2em]">Pkacci © 2026</p>
                     </div>
                 </div>
-                <button onclick="logout()" class="bg-slate-800/40 w-12 h-12 flex items-center justify-center rounded-2xl border border-white/5 text-xl active:scale-90 transition-transform">🚪</button>
+                <button onclick="logout()" class="bg-slate-800/40 w-12 h-12 flex items-center justify-center rounded-2xl border border-white/5 active:scale-90 transition-transform">🚪</button>
             </div>
-            
             <p id="user-display" class="text-[10px] font-black uppercase text-slate-400 mb-5 tracking-[0.15em] opacity-80"></p>
             <input type="text" id="input-busca" oninput="renderizar()" placeholder="PROCURAR PRODUTO OU EAN..." class="w-full bg-slate-950/50 p-5 rounded-2xl text-xs font-black uppercase border border-slate-800 text-slate-200 mb-5 outline-none focus:border-[#FFD700]/50 transition-colors">
-            
             <div class="flex gap-3">
                 <button onclick="enviarRelatorioWhatsApp()" class="flex-grow btn-gradient text-white py-4 rounded-2xl font-black text-[10px] uppercase italic tracking-widest shadow-lg">Enviar Relatório</button>
                 <div id="container-filtro-lideranca" class="hidden flex gap-3">
@@ -94,57 +87,42 @@
         </header>
 
         <main class="max-w-lg mx-auto p-6 pb-48">
-            <div id="admin-tools" class="hidden mb-4 space-y-2">
-                <div id="view-paulo-exclusiva" class="hidden">
-                    <button onclick="abrirModalLogs()" class="w-full py-3 bg-indigo-900/40 border border-indigo-800 rounded-xl text-[9px] font-black uppercase text-indigo-400">📊 Monitoramento Shadow</button>
-                </div>
-            </div>
-
+            <div id="admin-tools" class="hidden mb-4"><div id="view-paulo-exclusiva" class="hidden"><button onclick="abrirModalLogs()" class="w-full py-3 bg-indigo-900/40 border border-indigo-800 rounded-xl text-[9px] font-black uppercase text-indigo-400">📊 Monitoramento Shadow</button></div></div>
             <div class="grid grid-cols-3 gap-4 mb-8">
                 <div onclick="setFiltro('vencidos')" class="dash-card p-5 bg-red-500/5 border-red-500/10"><p class="text-[9px] font-black uppercase text-red-400 mb-2">Vencidos</p><p id="dash-vencidos" class="text-3xl font-black text-white">0</p></div>
                 <div onclick="setFiltro('urgente')" class="dash-card p-5 bg-yellow-500/5 border-yellow-500/10"><p class="text-[9px] font-black uppercase text-yellow-400 mb-2">Alerta</p><p id="dash-alerta" class="text-3xl font-black text-white">0</p></div>
                 <div onclick="setFiltro('todos')" class="dash-card p-5 bg-blue-500/5 border-blue-500/10"><p class="text-[9px] font-black uppercase text-blue-400 mb-2">Total</p><p id="dash-total" class="text-3xl font-black text-white">0</p></div>
             </div>
-
-            <div class="glass-card p-6 mb-10">
-                <div class="space-y-5">
-                    <div><div class="flex justify-between text-[10px] font-black uppercase mb-2"><span class="text-orange-400">Crítico (15d)</span><span id="risco-15-txt" class="text-slate-300">0</span></div><div class="progress-bar"><div id="bar-15" class="progress-fill bg-gradient-to-r from-orange-600 to-orange-400" style="width: 0%"></div></div></div>
-                    <div><div class="flex justify-between text-[10px] font-black uppercase mb-2"><span class="text-blue-400">Atenção (30d)</span><span id="risco-30-txt" class="text-slate-300">0</span></div><div class="progress-bar"><div id="bar-30" class="progress-fill bg-gradient-to-r from-blue-600 to-blue-400" style="width: 0%"></div></div></div>
-                </div>
-            </div>
-
             <div id="container-produtos" class="space-y-5"></div>
         </main>
-
-        <div class="fixed bottom-10 left-0 right-0 px-8 z-40">
-            <button onclick="abrirCadastro()" class="w-full bg-[#FFD700] text-slate-950 py-6 rounded-[2rem] shadow-[0_20px_40px_rgba(255,215,0,0.2)] font-black text-sm uppercase tracking-tighter active:scale-95 transition-transform">+ SCANNER / REGISTRO</button>
-        </div>
-    </div>
-
-    <div id="modal-logs" class="hidden fixed inset-0 modal-shadow z-[900] overflow-y-auto p-6">
-        <div class="max-w-lg mx-auto bg-slate-900 rounded-[2.5rem] border border-slate-800 p-8">
-            <div class="flex justify-between items-center mb-8">
-                <div><h2 class="text-sm font-black uppercase text-indigo-400 leading-tight">Monitoramento</h2><button onclick="limparHistoricoAcesso()" class="text-[8px] font-black text-red-500 uppercase mt-1">🗑️ Apagar Histórico</button></div>
-                <button onclick="fecharModalLogs()" class="text-3xl text-slate-500">&times;</button>
-            </div>
-            <div id="lista-logs" class="space-y-3 font-mono text-[10px]"></div>
-        </div>
+        <div class="fixed bottom-10 left-0 right-0 px-8 z-40"><button onclick="abrirCadastro()" class="w-full bg-[#FFD700] text-slate-950 py-6 rounded-[2rem] shadow-[0_20px_40px_rgba(255,215,0,0.2)] font-black text-sm uppercase active:scale-95 transition-transform">+ SCANNER / REGISTRO</button></div>
     </div>
 
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-[#020617] z-[800] overflow-y-auto">
-        <div class="max-w-lg mx-auto p-10">
+        <div class="max-w-lg mx-auto p-8">
             <div class="flex justify-between items-center mb-10"><h2 class="text-xl font-black uppercase text-[#FFD700] italic">Gerenciamento</h2><button onclick="fecharModalCadastro()" class="text-5xl text-slate-500 leading-none">&times;</button></div>
-            <div id="reader-container" class="hidden relative w-full aspect-square bg-slate-900 rounded-[3rem] overflow-hidden mb-8 border border-slate-800 shadow-2xl"><div id="reader"></div></div>
+            <div id="reader-container" class="hidden relative w-full aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden mb-8 border border-slate-800 shadow-2xl"><div id="reader"></div></div>
             <div class="space-y-6">
-                <input type="text" id="p-ean" oninput="gerarGraficoBarras(this.value)" placeholder="EAN" class="w-full p-5 bg-slate-900 rounded-2xl font-mono text-white border border-slate-800 outline-none">
-                <input type="text" id="p-nome" placeholder="NOME PRODUTO" class="w-full p-5 bg-slate-900 rounded-2xl font-black text-white border border-slate-800 outline-none uppercase">
-                <div class="grid grid-cols-2 gap-5">
-                    <input type="date" id="p-validade" class="w-full p-5 bg-slate-900 rounded-2xl text-white border border-slate-800 outline-none">
-                    <input type="tel" id="p-qtd" placeholder="QTD" class="w-full p-5 bg-slate-900 rounded-2xl font-black text-center text-[#FFD700] border border-slate-800 outline-none">
+                <input type="text" id="p-ean" oninput="gerarGraficoBarras(this.value)" placeholder="EAN" class="glass-input w-full p-5 font-mono">
+                <input type="text" id="p-nome" placeholder="PRODUTO" class="glass-input w-full p-5 font-black uppercase">
+                <div class="flex gap-4">
+                    <input type="date" id="p-validade" class="glass-input flex-grow p-5 text-sm min-w-[160px]">
+                    <input type="tel" id="p-qtd" placeholder="QTD" class="glass-input w-24 p-5 font-black text-center text-[#FFD700]">
                 </div>
-                <input type="hidden" id="edit-id"><div id="barcode-area" class="hidden bg-white p-6 rounded-[2rem] flex flex-col items-center"><svg id="barcode-canvas"></svg></div>
+                <input type="hidden" id="edit-id">
+                <div id="barcode-area" class="hidden bg-white p-6 rounded-[2rem] overflow-hidden flex flex-col items-center shadow-2xl border-4 border-white"><svg id="barcode-canvas"></svg></div>
                 <button onclick="salvarProduto()" class="w-full py-6 btn-gradient text-white rounded-[2rem] font-black uppercase shadow-2xl">SALVAR</button>
             </div>
+        </div>
+    </div>
+
+    <div id="modal-logs" class="hidden fixed inset-0 bg-slate-950/95 z-[900] overflow-y-auto p-6 backdrop-blur-xl">
+        <div class="max-w-lg mx-auto bg-slate-900 rounded-[2.5rem] border border-slate-800 p-8">
+            <div class="flex justify-between items-center mb-8">
+                <div><h2 class="text-sm font-black uppercase text-indigo-400">Monitoramento</h2><button onclick="limparHistoricoAcesso()" class="text-[8px] font-black text-red-500 uppercase mt-1">🗑️ Apagar Logs</button></div>
+                <button onclick="fecharModalLogs()" class="text-3xl text-slate-500">&times;</button>
+            </div>
+            <div id="lista-logs" class="space-y-3 font-mono text-[10px]"></div>
         </div>
     </div>
 
@@ -171,7 +149,7 @@
         window.onload = () => {
             const salvo = localStorage.getItem('sessaoNewMarket');
             if (manutencaoAtiva && salvo !== 'PAULO') mostrarManutencao();
-            else if (salvo) { usuarioSessao = EQUIPE.find(x => x.nome === salvo); usuarioSessao ? entrarNoApp() : mostrarLogin(); }
+            else if (salvo) { usuarioSessao = EQUIPE.find(x => x.nome === salvo); if(usuarioSessao) entrarNoApp(); else mostrarLogin(); }
             else mostrarLogin();
         };
 
@@ -185,7 +163,7 @@
 
         function prepararSenha(n) {
             document.getElementById('login-title').innerText = `IDENTIDADE: ${n}`;
-            document.getElementById('auth-container').innerHTML = `<input type="password" id="pass-input" class="input-dark mb-5 border-2 border-slate-700" autofocus placeholder="••••"><button onclick="confirmarSenha('${n}')" class="w-full py-6 bg-[#FFD700] text-slate-900 rounded-[1.5rem] font-black uppercase tracking-widest shadow-xl">AUTENTICAR</button>`;
+            document.getElementById('auth-container').innerHTML = `<input type="password" id="pass-input" class="glass-input mb-5 border-2 border-slate-700 text-center text-3xl p-4 w-full" autofocus placeholder="••••"><button onclick="confirmarSenha('${n}')" class="w-full py-6 bg-[#FFD700] text-slate-900 rounded-[1.5rem] font-black uppercase tracking-widest shadow-xl">AUTENTICAR</button>`;
         }
 
         function confirmarSenha(n) {
@@ -216,7 +194,7 @@
 
         function renderizar() {
             const container = document.getElementById('container-produtos'), busca = document.getElementById('input-busca').value.toUpperCase(), hoje = new Date().setHours(0,0,0,0);
-            let cV = 0, cA = 0, r15 = 0, r30 = 0, total = 0, hPend = '', hEnv = '';
+            let cV = 0, cA = 0, total = 0, hPend = '', hEnv = '';
             const isElite = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
 
             estoque.forEach(item => {
@@ -225,33 +203,24 @@
                 if(matchesOp) {
                     total += (item.quantidade || 0);
                     if(d < 0) cV++; else if(d <= 7) cA++;
-                    if(d >= 0 && d <= 15) r15 += (item.quantidade || 0);
-                    if(d >= 0 && d <= 30) r30 += (item.quantidade || 0);
                 }
                 if(matchesOp && (item.produto.includes(busca) || (item.ean || "").includes(busca))) {
                     const matchF = (filtroAtual === 'vencidos' ? d < 0 : filtroAtual === 'urgente' ? (d >= 0 && d <= 7) : true);
                     if(matchF) {
-                        const statusClass = d < 0 ? 'status-vencido' : d <= 7 ? 'status-alerta' : 'status-ok';
-                        const statusText = d < 0 ? 'Vencido' : d <= 7 ? `Alerta (${d}d)` : 'Seguro';
-                        const card = `
-                        <div class="glass-card p-6 flex flex-col gap-5 ${item.relatado ? 'pulse-relatado opacity-60' : ''}">
+                        const stCl = d < 0 ? 'status-vencido' : d <= 7 ? 'status-alerta' : 'status-ok';
+                        const stTx = d < 0 ? 'Vencido' : d <= 7 ? `Alerta (${d}d)` : 'Seguro';
+                        const card = `<div class="glass-card p-6 flex flex-col gap-5 ${item.relatado ? 'pulse-relatado opacity-60' : ''}">
                             <div class="flex justify-between items-start">
                                 <div class="flex items-center gap-3">
                                     <input type="checkbox" onchange="toggleCheck('${item.id}')" ${itensSelecionados.has(item.id) ? 'checked' : ''} class="w-6 h-6 rounded-lg border-2 border-slate-700 bg-slate-900 checked:bg-[#FFD700]">
-                                    <div class="max-w-[180px]">
-                                        <h3 class="font-black text-sm text-white uppercase leading-tight mb-1 truncate">${item.produto}</h3>
-                                        <span class="ean-tag">${item.ean || 'SEM CÓDIGO'}</span>
-                                    </div>
+                                    <div class="max-w-[180px]"><h3 class="font-black text-sm text-white uppercase leading-tight mb-1 truncate">${item.produto}</h3><span class="ean-tag">${item.ean || 'SEM CÓDIGO'}</span></div>
                                 </div>
-                                <span class="badge ${statusClass}">${statusText}</span>
+                                <span class="badge ${stCl}">${stTx}</span>
                             </div>
                             <div class="flex justify-between items-end border-t border-white/5 pt-5">
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-[8px] font-black text-slate-500 uppercase">OPERADOR: ${item.operador}</span>
-                                    <span class="text-xl font-black text-white">${item.vencimento.split('-').reverse().join('/')}</span>
-                                </div>
+                                <div class="flex flex-col gap-1"><span class="text-[8px] font-black text-slate-500 uppercase">OPERADOR: ${item.operador}</span><span class="text-xl font-black text-white">${item.vencimento.split('-').reverse().join('/')}</span></div>
                                 <div class="flex items-center gap-4">
-                                    <div class="text-right mr-2"><span class="text-[8px] font-black text-slate-500 uppercase block">QTD</span><span class="text-2xl font-black text-[#FFD700]">${item.quantidade}</span></div>
+                                    <div class="text-right mr-2"><span class="text-2xl font-black text-[#FFD700]">${item.quantidade}</span></div>
                                     <div class="flex flex-col gap-2">
                                         <button onclick='prepararEdicao(${JSON.stringify(item)})' class="p-3 bg-blue-500/10 text-blue-400 rounded-xl text-[9px] font-black uppercase">Editar</button>
                                         ${isElite ? `<button onclick="excluirProduto('${item.id}', '${item.produto}')" class="p-3 bg-red-500/10 text-red-400 rounded-xl text-[9px] font-black uppercase">Excluir</button>` : ''}
@@ -264,9 +233,7 @@
                 }
             });
             container.innerHTML = hPend + (hEnv ? `<div class="mt-12 border-t border-white/5 pt-10"><h4 class="text-[10px] font-black text-slate-600 uppercase mb-6 text-center tracking-widest">Relatados</h4>${hEnv}</div>` : '');
-            document.getElementById('dash-vencidos').innerText = cV; document.getElementById('dash-alerta').innerText = cA; document.getElementById('dash-total').innerText = estoque.length;
-            document.getElementById('risco-15-txt').innerText = `${r15} un`; document.getElementById('risco-30-txt').innerText = `${r30} un`;
-            document.getElementById('bar-15').style.width = `${Math.min((r15/total)*100, 100)}%`; document.getElementById('bar-30').style.width = `${Math.min((r30/total)*100, 100)}%`;
+            document.getElementById('dash-vencidos').innerText = cV; document.getElementById('dash-alerta').innerText = cA; document.getElementById('dash-total').innerText = total;
         }
 
         async function registrarLog(n) { try { await db.collection("logs_acesso").add({ operador: n, data_hora: firebase.firestore.FieldValue.serverTimestamp() }); } catch(e){} }
@@ -286,7 +253,12 @@
                 if (navigator.vibrate) navigator.vibrate(100); document.getElementById('p-ean').value = txt; scannerInstancia.stop(); readerCont.classList.add('hidden'); gerarGraficoBarras(txt);
             });
         }
-        function gerarGraficoBarras(v) { document.getElementById('barcode-area').classList.remove('hidden'); JsBarcode("#barcode-canvas", v, { format: "CODE128", width: 2.5, height: 70, displayValue: true }); }
+        function gerarGraficoBarras(v) { 
+            const area = document.getElementById('barcode-area'); 
+            if (!v || v.length < 5) { area.classList.add('hidden'); return; }
+            area.classList.remove('hidden'); 
+            JsBarcode("#barcode-canvas", v, { format: "CODE128", width: 2.5, height: 70, displayValue: true, margin: 10 }); 
+        }
         async function salvarProduto() {
             const id = document.getElementById('edit-id').value;
             const d = { produto: document.getElementById('p-nome').value.toUpperCase(), vencimento: document.getElementById('p-validade').value, ean: document.getElementById('p-ean').value, quantidade: parseInt(document.getElementById('p-qtd').value) || 0, operador: usuarioSessao.nome, relatado: false };
