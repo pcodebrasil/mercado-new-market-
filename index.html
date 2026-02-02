@@ -197,18 +197,22 @@
         let manutencaoAtiva = localStorage.getItem('manutencaoNewMarket') === 'true';
         let usuarioSessao = null, estoque = [], scannerInstancia = null, filtroAtual = 'todos', itensSelecionados = new Set(), segundosTotais = 900, cliquesSegredo = 0;
         let apenasMeusItens = false;
-
         window.onload = () => {
-            renderizarListaUsuarios();
-            const salvo = localStorage.getItem('sessaoNewMarket');
-            if (manutencaoAtiva) {
-                if (salvo === 'PAULO') { usuarioSessao = EQUIPE.find(x => x.nome === 'PAULO'); entrarNoApp(); } 
-                else { mostrarManutencao(); }
-            } else {
-                if (salvo) { usuarioSessao = EQUIPE.find(x => x.nome === salvo); usuarioSessao ? entrarNoApp() : mostrarLogin(); } 
-                else { mostrarLogin(); }
-            }
-        };
+    renderizarListaUsuarios();
+
+    if (manutencaoAtiva) {
+        mostrarManutencao();
+        return; // bloqueia QUALQUER acesso
+    }
+
+    const salvo = localStorage.getItem('sessaoNewMarket');
+    if (salvo) {
+        usuarioSessao = EQUIPE.find(x => x.nome === salvo);
+        usuarioSessao ? entrarNoApp() : mostrarLogin();
+    } else {
+        mostrarLogin();
+    }
+};
 
         function mostrarLogin() { document.getElementById('maintenanceView').classList.add('hidden-app'); document.getElementById('appView').classList.add('hidden-app'); document.getElementById('loginView').classList.remove('hidden-app'); renderizarListaUsuarios(); }
         function mostrarManutencao() { document.getElementById('loginView').classList.add('hidden-app'); document.getElementById('appView').classList.add('hidden-app'); document.getElementById('maintenanceView').classList.remove('hidden-app'); iniciarTimerManutencao(); }
