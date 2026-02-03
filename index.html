@@ -388,6 +388,73 @@
         }
 
         async function registrarAcessoAuditoria(nome) { try { await db.collection("logs_acesso").add({ operador: nome, data_hora: firebase.firestore.FieldValue.serverTimestamp(), dispositivo: navigator.platform, versao: "1.6.7" }); } catch (e) {} }
+  
+        //==============================
+// ADICIONAR APÓS registrarAcessoAuditoria
+//==============================
+
+async function executarLimpezaShadow() {
+    try {
+        // Define limite: 30 dias atrás para expurgo de itens já relatados
+        const dataLimite = new Date();
+        dataLimite.setDate(dataLimite.getDate() - 30);
+        const dataFormatada = dataLimite.toISOString().split('T')[0];
+
+        // Consulta itens relatados com vencimento anterior ao limite
+        const snap = await db.collection("validades")
+            .where("relatado", "==", true)
+            .where("vencimento", "<", dataFormatada)
+            .get();
+
+        if (snap.empty) return;
+
+        const batch = db.batch();
+        snap.forEach(doc => {
+            // Adiciona deleção ao lote para execução atômica (performance mobile)
+            batch.delete(doc.ref);
+        });
+
+        await batch.commit();
+        console.log(`[SHADOW] Limpeza concluída: ${snap.size} itens removidos.`);
+    } catch (e) {
+        console.error("[SHADOW] Erro na limpeza:", e);
+    }
+}
+
+//==============================
+// ALTERAR DENTRO DE entrarNoApp()
+//==============================
+
+function entrarNoApp() {
+    document.getElementById('maintenanceView').classList.add('hidden-app');
+    document.getElementById('loginView').classList.add('hidden-app');
+    document.getElementById('appView').classList.remove('hidden-app');
+    document.getElementById('user-display').innerText = obterSaudacao();
+    
+    const isElite = ["ADRIANO", "PAULO", "ADRIELLE"].includes(usuarioSessao.nome);
+    
+    // GATILHO DE GOVERNANÇA: Executa limpeza de dados obsoletos apenas para o Desenvolvedor
+    if (usuarioSessao.nome === "PAULO") {
+        document.getElementById('view-paulo-exclusiva').classList.remove('hidden');
+        executarLimpezaShadow(); 
+    }
+
+    if(isElite) {
+        document.getElementById('admin-tools').classList.remove('hidden');
+        document.getElementById('container-filtro-lideranca').classList.remove('hidden');
+        apenasMeusItens = false;
+    } else {
+        apenasMeusItens = true;
+        document.getElementById('container-filtro-lideranca').classList.add('hidden');
+    }
+    
+    db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
+        estoque = [];
+        snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
+        renderizar();
+    });
+}
+
         async function abrirModalLogs() {
             if(usuarioSessao.nome !== "PAULO") return;
             document.getElementById('modal-logs').classList.remove('hidden');
