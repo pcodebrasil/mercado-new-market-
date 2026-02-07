@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEW MARKET ULTRA - v2.0</title>
+    <title>NEW MARKET ULTRA - v2.1</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -142,21 +142,30 @@
 
     <div id="modal-cadastro" class="hidden fixed inset-0 bg-black z-[1000] p-6 overflow-y-auto">
         <div class="flex justify-between items-center mb-8">
-            <h2 class="font-shark font-black text-yellow-400 text-xl uppercase">Cadastro Ultra</h2>
+            <h2 class="font-shark font-black text-yellow-400 text-xl uppercase">Produto Ultra</h2>
             <button onclick="fecharModalCadastro()" class="text-4xl text-gray-500">&times;</button>
         </div>
+        
         <div id="reader-container" class="hidden relative w-full aspect-square bg-[#111] rounded-[2rem] overflow-hidden mb-6 border-2 border-yellow-400/30">
             <div id="reader"></div>
         </div>
+
+        <div id="barcode-display" class="hidden bg-white p-4 rounded-2xl mb-6 flex justify-center items-center shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+            <svg id="barcode-canvas"></svg>
+        </div>
+
         <div class="space-y-4">
-            <input type="text" id="p-ean" placeholder="CÓDIGO EAN" class="input-ultra w-full font-mono text-yellow-400">
+            <input type="text" id="p-ean" oninput="tentarGerarBarcode(this.value)" placeholder="CÓDIGO EAN" class="input-ultra w-full font-mono text-yellow-400">
             <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="input-ultra w-full uppercase font-black">
             <div class="grid grid-cols-2 gap-4">
                 <input type="date" id="p-validade" class="input-ultra w-full">
                 <input type="tel" id="p-qtd" placeholder="QUANTIDADE" class="input-ultra w-full text-center text-yellow-400 font-black">
             </div>
             <input type="hidden" id="edit-id">
-            <button onclick="salvarProduto()" class="w-full py-6 btn-shark-primary rounded-2xl mt-4 font-black">SALVAR NA NUVEM</button>
+            <div class="flex gap-2 mt-4">
+                <button onclick="salvarProduto()" class="flex-grow py-6 btn-shark-primary rounded-2xl font-black">SALVAR</button>
+                <button onclick="excluirProdutoAtual()" id="btn-excluir-modal" class="hidden w-20 bg-red-900/50 border border-red-500 text-red-500 rounded-2xl font-black text-xl">🗑️</button>
+            </div>
         </div>
     </div>
 
@@ -288,6 +297,15 @@
             fecharModalCadastro();
         }
 
+        async function excluirProdutoAtual() {
+            const id = document.getElementById('edit-id').value;
+            const nome = document.getElementById('p-nome').value;
+            if(confirm(`DELETAR ITEM: ${nome}?`)) {
+                await db.collection("validades").doc(id).delete();
+                fecharModalCadastro();
+            }
+        }
+
         function prepararEdicao(item) {
             abrirCadastro(true);
             document.getElementById('edit-id').value = item.id;
@@ -295,24 +313,62 @@
             document.getElementById('p-validade').value = item.vencimento;
             document.getElementById('p-ean').value = item.ean || '';
             document.getElementById('p-qtd').value = item.quantidade;
+            
+            document.getElementById('btn-excluir-modal').classList.remove('hidden');
+            
+            // Gerar visual do código de barras
+            if(item.ean && item.ean.length > 3) {
+                tentarGerarBarcode(item.ean);
+            }
+        }
+
+        function tentarGerarBarcode(valor) {
+            const area = document.getElementById('barcode-display');
+            if(!valor || valor.length < 3) { area.classList.add('hidden'); return; }
+            
+            area.classList.remove('hidden');
+            try {
+                JsBarcode("#barcode-canvas", valor, {
+                    format: valor.length === 13 ? "EAN13" : "CODE128",
+                    lineColor: "#000",
+                    width: 2,
+                    height: 60,
+                    displayValue: true,
+                    background: "#ffffff",
+                    fontSize: 16
+                });
+            } catch(e) {
+                console.log("Erro barcode", e);
+                // Se der erro (ex: EAN inválido), tenta code128 forçado ou esconde
+                try {
+                    JsBarcode("#barcode-canvas", valor, { format: "CODE128", displayValue: true });
+                } catch(e2) { area.classList.add('hidden'); }
+            }
         }
 
         async function abrirCadastro(isEdit = false) {
             document.getElementById('modal-cadastro').classList.remove('hidden');
+            
             if(!isEdit) {
+                // Modo Novo
                 document.getElementById('edit-id').value = '';
                 document.getElementById('p-nome').value = '';
                 document.getElementById('p-validade').value = '';
                 document.getElementById('p-ean').value = '';
                 document.getElementById('p-qtd').value = '';
+                document.getElementById('btn-excluir-modal').classList.add('hidden');
+                document.getElementById('barcode-display').classList.add('hidden');
+                
                 document.getElementById('reader-container').classList.remove('hidden');
                 scannerInstancia = new Html5Qrcode("reader");
                 scannerInstancia.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (txt) => {
                     document.getElementById('p-ean').value = txt;
+                    tentarGerarBarcode(txt); // Gera visual ao escanear
                     scannerInstancia.stop();
                     document.getElementById('reader-container').classList.add('hidden');
                 }).catch(()=>{});
             } else {
+                // Modo Edição
                 document.getElementById('reader-container').classList.add('hidden');
             }
         }
@@ -325,13 +381,37 @@
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
 
         function enviarRelatorioWhatsApp() {
+            // Filtrar apenas itens que vencem nos próximos 7 dias ou já venceram
             const lista = estoque.filter(i => {
                 const d = new Date(i.vencimento + 'T00:00:00');
                 return Math.floor((d - new Date().setHours(0,0,0,0)) / 86400000) <= 7;
             });
-            if(lista.length === 0) return alert("Nenhum item em alerta para relatório.");
-            let msg = `*📦 RELATÓRIO NEW MARKET ULTRA*%0A----------------------------%0A`;
-            lista.forEach(i => { msg += `*PROD:* ${i.produto}%0A*VAL:* ${i.vencimento.split('-').reverse().join('/')}%0A*QTD:* ${i.quantidade}%0A%0A`; });
+
+            if(lista.length === 0) return alert("Tudo certo! Nenhum item vencido ou próximo do vencimento.");
+
+            // Dados de cabeçalho
+            const agora = new Date();
+            const dataStr = agora.toLocaleDateString('pt-BR');
+            const horaStr = agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+            const linkSistema = "https://newmarket.pkacci.com.br"; // Se for localhost, mude aqui
+
+            let msg = `*🚨 RELATÓRIO URGENTE - NEW MARKET*%0A`;
+            msg += `*Data:* ${dataStr} às ${horaStr}%0A`;
+            msg += `*Operador:* ${usuarioSessao.nome}%0A`;
+            msg += `*Acesso:* ${linkSistema}%0A`;
+            msg += `----------------------------%0A`;
+
+            lista.forEach(i => {
+                const dataFormatada = i.vencimento.split('-').reverse().join('/');
+                const cod = i.ean ? i.ean : "S/ CÓDIGO";
+                msg += `*PROD:* ${i.produto}%0A`;
+                msg += `*COD:* ${cod}%0A`;
+                msg += `*VAL:* ${dataFormatada} (Qtd: ${i.quantidade})%0A%0A`;
+            });
+
+            msg += `----------------------------%0A`;
+            msg += `_Gerado via New Market Ultra_`;
+
             window.open(`https://wa.me/?text=${msg}`);
         }
     </script>
