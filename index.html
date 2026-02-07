@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEW MARKET ULTRA - v2.1</title>
+    <title>NEW MARKET ULTRA - v2.2</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -80,15 +80,15 @@
 </head>
 <body oncontextmenu="return false;">
 
-    <div id="loginView" class="fixed inset-0 bg-black z-[2000] flex flex-col p-10 justify-center">
-        <div class="text-center mb-10">
+    <div id="loginView" class="fixed inset-0 bg-black z-[2000] flex flex-col p-10 justify-center overflow-y-auto">
+        <div class="text-center mb-10 mt-10">
             <div class="w-24 h-24 bg-yellow-400 rounded-3xl mx-auto flex items-center justify-center rotate-12 shadow-2xl shadow-yellow-400/20 mb-6">
                 <span class="text-black font-shark font-black text-5xl -rotate-12">N</span>
             </div>
             <h1 class="font-shark font-black text-3xl tracking-tighter text-white">NEW MARKET <span class="text-yellow-400">ULTRA</span></h1>
             <p class="text-gray-500 font-bold text-[10px] mt-2 tracking-[0.5em]">OPERATIONAL SYSTEM</p>
         </div>
-        <div id="auth-container" class="space-y-3">
+        <div id="auth-container" class="space-y-3 pb-10">
             </div>
     </div>
 
@@ -182,14 +182,13 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // LISTA COMPLETA DA EQUIPE
         const EQUIPE = [ 
             { nome: "ADRIANO", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
             { nome: "ADRIELLE", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
             { nome: "PAULO", pass: "cGF1bG8xMjM=", cargo: "DEV" }, 
             { nome: "ANA CLAUDIA", pass: "YW5hY2xhdWRpYTEyMw==", cargo: "EQUIPE" }, 
-            { nome: "PEDRO", pass: "cGVkcm8xMjM=", cargo: "EQUIPE" },
-            { nome: "LEANDRO", pass: "bGVhbmRybzEyMw==", cargo: "EQUIPE" },
-            { nome: "TAMIRIS", pass: "ZGFtaXJpczEyMw==", cargo: "EQUIPE" }
+            { nome: "PEDRO", pass: "cGVkcm8xMjM=", cargo: "EQUIPE" }
         ];
 
         let usuarioSessao = null, estoque = [], scannerInstancia = null;
@@ -316,7 +315,6 @@
             
             document.getElementById('btn-excluir-modal').classList.remove('hidden');
             
-            // Gerar visual do código de barras
             if(item.ean && item.ean.length > 3) {
                 tentarGerarBarcode(item.ean);
             }
@@ -338,8 +336,6 @@
                     fontSize: 16
                 });
             } catch(e) {
-                console.log("Erro barcode", e);
-                // Se der erro (ex: EAN inválido), tenta code128 forçado ou esconde
                 try {
                     JsBarcode("#barcode-canvas", valor, { format: "CODE128", displayValue: true });
                 } catch(e2) { area.classList.add('hidden'); }
@@ -363,7 +359,7 @@
                 scannerInstancia = new Html5Qrcode("reader");
                 scannerInstancia.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (txt) => {
                     document.getElementById('p-ean').value = txt;
-                    tentarGerarBarcode(txt); // Gera visual ao escanear
+                    tentarGerarBarcode(txt);
                     scannerInstancia.stop();
                     document.getElementById('reader-container').classList.add('hidden');
                 }).catch(()=>{});
@@ -381,19 +377,17 @@
         function logout() { localStorage.removeItem('sessaoNewMarket'); window.location.reload(); }
 
         function enviarRelatorioWhatsApp() {
-            // Filtrar apenas itens que vencem nos próximos 7 dias ou já venceram
             const lista = estoque.filter(i => {
                 const d = new Date(i.vencimento + 'T00:00:00');
                 return Math.floor((d - new Date().setHours(0,0,0,0)) / 86400000) <= 7;
             });
 
-            if(lista.length === 0) return alert("Tudo certo! Nenhum item vencido ou próximo do vencimento.");
+            if(lista.length === 0) return alert("Tudo certo! Nenhum item vencido ou próximo.");
 
-            // Dados de cabeçalho
             const agora = new Date();
             const dataStr = agora.toLocaleDateString('pt-BR');
             const horaStr = agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
-            const linkSistema = "https://newmarket.pkacci.com.br"; // Se for localhost, mude aqui
+            const linkSistema = "https://newmarket.pkacci.com.br";
 
             let msg = `*🚨 RELATÓRIO URGENTE - NEW MARKET*%0A`;
             msg += `*Data:* ${dataStr} às ${horaStr}%0A`;
@@ -410,8 +404,6 @@
             });
 
             msg += `----------------------------%0A`;
-            msg += `_Gerado via New Market Ultra_`;
-
             window.open(`https://wa.me/?text=${msg}`);
         }
     </script>
