@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEW MARKET ULTRA - v2.2</title>
+    <title>NEW MARKET PRO - v2.2</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -15,17 +15,19 @@
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@400;700;900&display=swap');
 
         :root {
-            --primary: #FFD700; /* Amarelo Shark */
-            --danger: #FF3131;  /* Vermelho Alerta */
-            --accent: #00D1FF;  /* Azul Elétrico */
-            --bg-dark: #050505;
-            --card-bg: #111111;
+            --primary: #10b981; /* Verde Esmeralda */
+            --secondary: #3b82f6; /* Azul Profissional */
+            --danger: #ef4444;  /* Vermelho Alerta */
+            --accent: #06b6d4;  /* Ciano */
+            --bg-dark: #0a0a0a;
+            --card-bg: #1a1a1a;
+            --bg-gradient: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
         }
 
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; user-select: none; }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg-dark); 
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
             color: #ffffff;
             margin: 0;
             overflow-x: hidden;
@@ -35,27 +37,49 @@
 
         /* Design de Interface */
         .glass-header {
-            background: rgba(17, 17, 17, 0.9);
+            background: rgba(26, 26, 26, 0.95);
             backdrop-filter: blur(20px);
             border-bottom: 3px solid var(--primary);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1);
         }
 
         .card-premium {
             background: var(--card-bg);
-            border-left: 4px solid var(--accent);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: all 0.2s ease;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
         }
-        
-        .card-vencido { border-left-color: var(--danger); }
-        .card-alerta { border-left-color: var(--primary); }
+
+        .card-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(16, 185, 129, 0.2);
+        }
+
+        .card-vencido {
+            border-left-color: var(--danger);
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a1515 100%);
+        }
+        .card-alerta {
+            border-left-color: #f59e0b;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2515 100%);
+        }
 
         .btn-shark-primary {
             background: var(--primary);
-            color: #000;
+            color: #ffffff;
             font-weight: 900;
             text-transform: uppercase;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-shark-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-shark-primary:active {
+            transform: translateY(0);
         }
 
         .status-badge {
@@ -67,25 +91,68 @@
 
         /* Inputs Estilizados */
         .input-ultra {
-            background: #111;
-            border: 1px solid rgba(255,255,255,0.1);
+            background: #1a1a1a;
+            border: 2px solid rgba(255,255,255,0.1);
             color: white;
             border-radius: 1rem;
             padding: 1rem;
             outline: none;
-            transition: border 0.3s;
+            transition: all 0.3s ease;
         }
-        .input-ultra:focus { border-color: var(--primary); }
+        .input-ultra:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        /* Toast de Boas Vindas */
+        .welcome-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 2rem 3rem;
+            border-radius: 2rem;
+            box-shadow: 0 20px 60px rgba(16, 185, 129, 0.4);
+            z-index: 9999;
+            animation: welcomeSlide 0.5s ease;
+            text-align: center;
+        }
+
+        @keyframes welcomeSlide {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        /* Rodapé */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 0.75rem;
+            text-align: center;
+            border-top: 1px solid rgba(16, 185, 129, 0.2);
+            z-index: 10;
+        }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <div id="loginView" class="fixed inset-0 bg-black z-[2000] flex flex-col p-10 justify-center overflow-y-auto">
+    <div id="loginView" class="fixed inset-0 z-[2000] flex flex-col p-10 justify-center overflow-y-auto" style="background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);">
         <div class="text-center mb-10 mt-10">
-            <div class="w-24 h-24 bg-yellow-400 rounded-3xl mx-auto flex items-center justify-center rotate-12 shadow-2xl shadow-yellow-400/20 mb-6">
-                <span class="text-black font-shark font-black text-5xl -rotate-12">N</span>
+            <div class="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-600 rounded-3xl mx-auto flex items-center justify-center shadow-2xl shadow-green-400/30 mb-6">
+                <span class="text-white font-shark font-black text-5xl">N</span>
             </div>
-            <h1 class="font-shark font-black text-3xl tracking-tighter text-white">NEW MARKET <span class="text-yellow-400">ULTRA</span></h1>
+            <h1 class="font-shark font-black text-3xl tracking-tighter text-white">NEW MARKET <span class="text-green-400">PRO</span></h1>
             <p class="text-gray-500 font-bold text-[10px] mt-2 tracking-[0.5em]">OPERATIONAL SYSTEM</p>
         </div>
         <div id="auth-container" class="space-y-3 pb-10">
@@ -96,57 +163,61 @@
         <header class="glass-header sticky top-0 z-50 p-5 rounded-b-[2rem]">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center shadow-lg">
-                        <span class="text-black font-shark font-black text-xl">N</span>
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-600 rounded-lg flex items-center justify-center shadow-lg">
+                        <span class="text-white font-shark font-black text-xl">N</span>
                     </div>
                     <div>
-                        <h1 class="font-shark font-black text-lg tracking-tighter text-yellow-400">NEW MARKET</h1>
+                        <h1 class="font-shark font-black text-lg tracking-tighter text-green-400">NEW MARKET</h1>
                         <p id="user-display" class="text-[8px] font-bold uppercase text-gray-400 tracking-[0.2em]"></p>
                     </div>
                 </div>
-                <button onclick="logout()" class="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center border border-white/10">🚪</button>
+                <button onclick="logout()" class="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center border border-white/10 hover:bg-white/10 transition-all">🚪</button>
             </div>
 
             <div class="grid grid-cols-3 gap-2 mt-6 text-center">
-                <div class="bg-red-600/20 border border-red-600 p-2 rounded-xl">
-                    <p class="text-[7px] font-black uppercase text-red-500">Vencidos</p>
-                    <p id="dash-vencidos" class="text-lg font-shark font-black">0</p>
+                <div class="bg-red-600/20 border border-red-600 p-2 rounded-xl hover:bg-red-600/30 transition-all">
+                    <p class="text-[7px] font-black uppercase text-red-400">Vencidos</p>
+                    <p id="dash-vencidos" class="text-lg font-shark font-black text-red-500">0</p>
                 </div>
-                <div class="bg-blue-600/20 border border-blue-600 p-2 rounded-xl">
-                    <p class="text-[7px] font-black uppercase text-blue-400">7 Dias</p>
-                    <p id="dash-alerta" class="text-lg font-shark font-black">0</p>
+                <div class="bg-orange-600/20 border border-orange-500 p-2 rounded-xl hover:bg-orange-600/30 transition-all">
+                    <p class="text-[7px] font-black uppercase text-orange-400">7 Dias</p>
+                    <p id="dash-alerta" class="text-lg font-shark font-black text-orange-500">0</p>
                 </div>
-                <div class="bg-yellow-600/20 border border-yellow-600 p-2 rounded-xl">
-                    <p class="text-[7px] font-black uppercase text-yellow-500">Total Itens</p>
-                    <p id="dash-total" class="text-lg font-shark font-black">0</p>
+                <div class="bg-green-600/20 border border-green-500 p-2 rounded-xl hover:bg-green-600/30 transition-all">
+                    <p class="text-[7px] font-black uppercase text-green-400">Total Itens</p>
+                    <p id="dash-total" class="text-lg font-shark font-black text-green-500">0</p>
                 </div>
             </div>
         </header>
 
         <main class="p-4 pb-32">
-            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO..." 
-                class="w-full bg-[#111] border-2 border-white/5 p-4 rounded-2xl text-white font-bold mb-6 outline-none focus:border-yellow-400">
-            
+            <input type="text" id="input-busca" oninput="renderizar()" placeholder="BUSCAR PRODUTO..."
+                class="w-full bg-[#1a1a1a] border-2 border-white/10 p-4 rounded-2xl text-white font-bold mb-6 outline-none focus:border-green-400 focus:shadow-lg focus:shadow-green-400/20 transition-all">
+
             <div id="container-produtos" class="space-y-4"></div>
         </main>
 
-        <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] flex gap-2 z-[100]">
+        <footer class="footer">
+            <p class="text-[10px] font-bold text-gray-500">Pkacci Systems © 2026</p>
+        </footer>
+
+        <nav class="fixed bottom-14 left-1/2 -translate-x-1/2 w-[90%] flex gap-2 z-[100]">
             <button onclick="abrirCadastro()" class="flex-[3] btn-shark-primary p-5 rounded-2xl flex items-center justify-center gap-3 font-black text-xs">
                 📸 NOVO / SCANNER
             </button>
-            <button onclick="enviarRelatorioWhatsApp()" class="flex-1 bg-green-500 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-green-500/20">
+            <button onclick="enviarRelatorioWhatsApp()" class="flex-1 bg-blue-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-blue-600/30 hover:bg-blue-700 transition-all">
                 📱
             </button>
         </nav>
     </div>
 
-    <div id="modal-cadastro" class="hidden fixed inset-0 bg-black z-[1000] p-6 overflow-y-auto">
+    <div id="modal-cadastro" class="hidden fixed inset-0 z-[1000] p-6 overflow-y-auto" style="background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);">
         <div class="flex justify-between items-center mb-8">
-            <h2 class="font-shark font-black text-yellow-400 text-xl uppercase">Produto Ultra</h2>
-            <button onclick="fecharModalCadastro()" class="text-4xl text-gray-500">&times;</button>
+            <h2 class="font-shark font-black text-green-400 text-xl uppercase">Produto</h2>
+            <button onclick="fecharModalCadastro()" class="text-4xl text-gray-500 hover:text-white transition-all">&times;</button>
         </div>
         
-        <div id="reader-container" class="hidden relative w-full aspect-square bg-[#111] rounded-[2rem] overflow-hidden mb-6 border-2 border-yellow-400/30">
+        <div id="reader-container" class="hidden relative w-full aspect-square bg-[#1a1a1a] rounded-[2rem] overflow-hidden mb-6 border-2 border-green-400/30">
             <div id="reader"></div>
         </div>
 
@@ -155,16 +226,16 @@
         </div>
 
         <div class="space-y-4">
-            <input type="text" id="p-ean" oninput="tentarGerarBarcode(this.value)" placeholder="CÓDIGO EAN" class="input-ultra w-full font-mono text-yellow-400">
+            <input type="text" id="p-ean" oninput="tentarGerarBarcode(this.value)" placeholder="CÓDIGO EAN" class="input-ultra w-full font-mono text-green-400">
             <input type="text" id="p-nome" placeholder="NOME DO PRODUTO" class="input-ultra w-full uppercase font-black">
             <div class="grid grid-cols-2 gap-4">
                 <input type="date" id="p-validade" class="input-ultra w-full">
-                <input type="tel" id="p-qtd" placeholder="QUANTIDADE" class="input-ultra w-full text-center text-yellow-400 font-black">
+                <input type="tel" id="p-qtd" placeholder="QUANTIDADE" class="input-ultra w-full text-center text-green-400 font-black">
             </div>
             <input type="hidden" id="edit-id">
             <div class="flex gap-2 mt-4">
                 <button onclick="salvarProduto()" class="flex-grow py-6 btn-shark-primary rounded-2xl font-black">SALVAR</button>
-                <button onclick="excluirProdutoAtual()" id="btn-excluir-modal" class="hidden w-20 bg-red-900/50 border border-red-500 text-red-500 rounded-2xl font-black text-xl">🗑️</button>
+                <button onclick="excluirProdutoAtual()" id="btn-excluir-modal" class="hidden w-20 bg-red-900/50 border border-red-500 text-red-500 rounded-2xl font-black text-xl hover:bg-red-900 transition-all">🗑️</button>
             </div>
         </div>
     </div>
@@ -183,11 +254,13 @@
         const db = firebase.firestore();
 
         // LISTA COMPLETA DA EQUIPE
-        const EQUIPE = [ 
-            { nome: "ADRIANO", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
-            { nome: "ADRIELLE", pass: "YWRtaW4xMjM=", cargo: "GERENTE" }, 
-            { nome: "PAULO", pass: "cGF1bG8xMjM=", cargo: "DEV" }, 
-            { nome: "ANA CLAUDIA", pass: "YW5hY2xhdWRpYTEyMw==", cargo: "EQUIPE" }, 
+        const EQUIPE = [
+            { nome: "ADRIANO", pass: "YWRtaW4xMjM=", cargo: "GERENTE" },
+            { nome: "ADRIELLE", pass: "YWRtaW4xMjM=", cargo: "GERENTE" },
+            { nome: "LEANDRO", pass: "bGVhbmRybzEyMw==", cargo: "EQUIPE" },
+            { nome: "EDMAR", pass: "ZWRtYXIxMjM=", cargo: "EQUIPE" },
+            { nome: "PAULO", pass: "cGF1bG8xMjM=", cargo: "DEV" },
+            { nome: "ANA CLAUDIA", pass: "YW5hY2xhdWRpYTEyMw==", cargo: "EQUIPE" },
             { nome: "PEDRO", pass: "cGVkcm8xMjM=", cargo: "EQUIPE" }
         ];
 
@@ -208,8 +281,8 @@
             const container = document.getElementById('auth-container');
             let h = '';
             EQUIPE.forEach(u => {
-                h += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-[#111] border border-white/5 rounded-2xl font-black text-[10px] flex justify-between items-center text-gray-400 mb-2">
-                        <span>${u.nome}</span><span class="text-yellow-400/30 font-shark">${u.cargo}</span>
+                h += `<button onclick="prepararSenha('${u.nome}')" class="w-full py-4 px-6 bg-[#1a1a1a] border border-white/10 rounded-2xl font-black text-[10px] flex justify-between items-center text-gray-300 mb-2 hover:bg-[#222] hover:border-green-400/30 transition-all">
+                        <span>${u.nome}</span><span class="text-green-400/50 font-shark">${u.cargo}</span>
                       </button>`;
             });
             container.innerHTML = h;
@@ -217,9 +290,9 @@
 
         function prepararSenha(n) {
             document.getElementById('auth-container').innerHTML = `
-                <input type="password" id="pass-input" placeholder="SENHA" class="w-full bg-[#111] border-2 border-yellow-400 p-5 rounded-2xl text-white text-center text-2xl mb-4 outline-none">
+                <input type="password" id="pass-input" placeholder="SENHA" class="w-full bg-[#1a1a1a] border-2 border-green-400 p-5 rounded-2xl text-white text-center text-2xl mb-4 outline-none focus:shadow-lg focus:shadow-green-400/20">
                 <button onclick="confirmarSenha('${n}')" class="w-full py-5 btn-shark-primary rounded-2xl font-black mb-4">ENTRAR</button>
-                <button onclick="renderizarListaUsuarios()" class="w-full py-2 text-gray-600 font-bold text-[10px] uppercase">← VOLTAR</button>
+                <button onclick="renderizarListaUsuarios()" class="w-full py-2 text-gray-500 font-bold text-[10px] uppercase hover:text-gray-300 transition-all">← VOLTAR</button>
             `;
         }
 
@@ -234,15 +307,35 @@
         }
 
         function entrarNoApp() {
+            // Mostrar mensagem de boas vindas
+            mostrarBoasVindas();
+
             document.getElementById('loginView').classList.add('hidden');
             document.getElementById('appView').classList.remove('hidden');
             document.getElementById('user-display').innerText = `OPERADOR: ${usuarioSessao.nome}`;
-            
+
             db.collection("validades").orderBy("vencimento", "asc").onSnapshot(snap => {
                 estoque = [];
                 snap.forEach(doc => estoque.push({id: doc.id, ...doc.data()}));
                 renderizar();
             });
+        }
+
+        function mostrarBoasVindas() {
+            const toast = document.createElement('div');
+            toast.className = 'welcome-toast';
+            toast.innerHTML = `
+                <div class="text-2xl mb-2">👋</div>
+                <h3 class="font-shark font-black text-xl text-white mb-1">BEM-VINDO!</h3>
+                <p class="text-sm font-bold text-white/90">${usuarioSessao.nome}</p>
+            `;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translate(-50%, -40%)';
+                setTimeout(() => toast.remove(), 500);
+            }, 2000);
         }
 
         function renderizar() {
@@ -258,7 +351,7 @@
 
                 if (item.produto.includes(busca) || (item.ean || "").includes(busca)) {
                     const tipo = diff < 0 ? 'card-vencido' : diff <= 7 ? 'card-alerta' : '';
-                    const badge = diff < 0 ? '<span class="bg-red-600 status-badge">VENCIDO</span>' : diff <= 7 ? '<span class="bg-yellow-500 status-badge text-black">ALERTA</span>' : '';
+                    const badge = diff < 0 ? '<span class="bg-red-600 status-badge">VENCIDO</span>' : diff <= 7 ? '<span class="bg-orange-500 status-badge text-black">ALERTA</span>' : '';
 
                     h += `
                         <div class="card-premium p-5 rounded-3xl ${tipo}">
@@ -267,10 +360,10 @@
                                 <div class="text-right"><p class="text-xl font-shark font-black ${diff < 0 ? 'text-red-500' : 'text-white'}">${item.vencimento.split('-').reverse().join('/')}</p></div>
                             </div>
                             <div class="mt-4 flex justify-between items-end">
-                                <div><p class="text-[8px] text-gray-500 font-bold uppercase">Código: ${item.ean || '---'}</p><p class="text-[8px] text-blue-400 font-bold uppercase">Op: ${item.operador}</p></div>
+                                <div><p class="text-[8px] text-gray-500 font-bold uppercase">Código: ${item.ean || '---'}</p><p class="text-[8px] text-cyan-400 font-bold uppercase">Op: ${item.operador}</p></div>
                                 <div class="flex items-center gap-4">
-                                    <span class="text-2xl font-black text-yellow-400">${item.quantidade}</span>
-                                    <button onclick='prepararEdicao(${JSON.stringify(item)})' class="bg-white/5 p-2 rounded-lg text-[9px] font-black uppercase">EDITAR</button>
+                                    <span class="text-2xl font-black text-green-400">${item.quantidade}</span>
+                                    <button onclick='prepararEdicao(${JSON.stringify(item)})' class="bg-white/5 p-2 rounded-lg text-[9px] font-black uppercase hover:bg-white/10 transition-all">EDITAR</button>
                                 </div>
                             </div>
                         </div>`;
